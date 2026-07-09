@@ -1,0 +1,6 @@
+Licença do repositório FaithRO ainda a definir.
+
+Observação:
+- O emulador escolhido possui sua própria licença.
+- Customizações próprias do FaithRO devem ter licença explícita.
+- Não incluir materiais proprietários ou sem autorização neste repositório.

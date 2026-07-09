@@ -1,0 +1,34 @@
+.env
+.env.*
+!.env.example
+
+# Secrets
+*.pem
+*.key
+id_rsa
+id_ed25519
+secrets/
+config/credentials.json
+
+# Backups and dumps
+backups/
+*.sql
+*.sql.gz
+*.dump
+*.bak
+
+# Logs
+*.log
+logs/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Build artifacts
+build/
+dist/
+tmp/
+cache/
