@@ -1,4 +1,4 @@
-<#
+﻿<#
     Script: criar-issues-iniciais.ps1
     Objetivo: Criar as 15 issues iniciais do backlog tecnico do FaithRO no GitHub,
     com base no conteudo de scripts/criar-issues-iniciais.md, usando o GitHub CLI (gh).
