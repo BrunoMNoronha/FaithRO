@@ -51,10 +51,13 @@ faithro/
 
 ## Próximos passos
 
-1. Criar repositório privado no GitHub.
-2. Adicionar estes arquivos ao repositório.
-3. Criar fork ou submodule do emulador escolhido.
-4. Preparar ambiente local/dev antes de produção.
-5. Definir rates, episódio-alvo, jobs permitidos, drops e economia.
-6. Configurar VPS com usuário não-root, firewall, fail2ban e backups.
-7. Só depois abrir alpha fechado.
+1. ~~Criar repositório no GitHub.~~ ✅ Concluído.
+2. ~~Adicionar pacote inicial de documentação ao repositório.~~ ✅ Concluído (commit inicial na branch `main`).
+3. Organizar a branch `dev` para desenvolvimento integrado e branches de tarefa específicas.
+4. Estruturar o backlog técnico inicial e abrir as issues correspondentes no GitHub.
+5. Preparar ambiente local/dev antes de produção (fork/submodule do emulador, compilação, banco de teste).
+6. Definir rates, episódio-alvo, jobs permitidos, drops e economia.
+7. Configurar VPS com usuário não-root, firewall, fail2ban e backups.
+8. Só depois abrir alpha fechado.
+
+Ver [docs/06-plano-execucao-inicial.md](docs/06-plano-execucao-inicial.md) para o detalhamento desta fase.
