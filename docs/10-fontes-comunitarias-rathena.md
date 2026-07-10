@@ -50,6 +50,7 @@ registrar as fontes efetivamente consultadas e evitar que recomendações de fó
 - `Comunidade — requer validação`
 - `Histórico/desatualizado`
 - `Não recomendado`
+- `Confirmado na configuração de build auditada`
 
 ## Commit de referência
 
@@ -75,7 +76,7 @@ read-only em 2026-07-10**: `/opt/faithro/rathena` está no mesmo commit
 | Matriz de packet versions da CI | [`.github/workflows/build_servers_packetversions.yml` @ 7f080871c](https://github.com/rathena/rathena/blob/7f080871c8b3bbe7a79027194633201c63422ee1/.github/workflows/build_servers_packetversions.yml) | EN | CI oficial (commit fixado) | rAthena | N/A | commit `7f080871c` | 2026-07-10 | `20211103` compilado em modos `PRE` e `RE` | Confirmado em CI oficial | Cobertura de build, não de gameplay | `20211103` na matriz |
 | Configuração de `PACKETVER` / Configure | [Wiki oficial do rAthena](https://github.com/rathena/rathena/wiki) | EN | Wiki oficial | rAthena | Pendente de validação | Pendente de validação | 2026-07-10 | Mecanismos `--enable-packetver` e `defines_pre.hpp` | Oficial | Wiki vive no `master`; confirmar contra o commit | Aplica-se ao baseline |
 | Macro `PRERE` e macros Renewal dependentes | [`src/config/renewal.hpp` @ 7f080871c](https://github.com/rathena/rathena/blob/7f080871c8b3bbe7a79027194633201c63422ee1/src/config/renewal.hpp) | EN | Código oficial (commit fixado) | rAthena | N/A (arquivo de código) | commit `7f080871c` | 2026-07-10 | `#ifndef PRERE` define `RENEWAL`, `RENEWAL_CAST`, `RENEWAL_DROP`, `RENEWAL_EXP`, `RENEWAL_LVDMG`, `RENEWAL_ASPD`, `RENEWAL_STAT`; `PRERE` desabilita o bloco inteiro | Confirmado no código | Descreve o padrão quando `PRERE` não está definido; não confirma, por si só, o build efetivo (ver auditoria de `config.log` abaixo) | Base da decisão de mecânica em [03-configuracao-alvo.md](03-configuracao-alvo.md) |
-| Evidência de compilação efetiva (`config.log`) | `config.log` do checkout `/opt/faithro/rathena` | N/A (log de build) | Auditoria read-only própria (não é fonte comunitária externa) | Equipe FaithRO | N/A | build instalado, commit `7f080871c` | 2026-07-10 | `./configure --enable-prere=yes`; `CPPFLAGS` efetivas contêm `-DPRERE`; `src/custom/defines_pre.hpp` vazio (sem override manual) | Confirmado por auditoria read-only | Não reexecuta nem inspeciona símbolos do binário; baseia-se no log do próprio processo de build | Resolve a classificação de mecânica em [03-configuracao-alvo.md](03-configuracao-alvo.md) como "Pre-Renewal confirmado no build" |
+| Evidência da configuração de build (`config.log`) | `config.log` do checkout `/opt/faithro/rathena` | N/A (log de build) | Auditoria read-only própria (não é fonte comunitária externa, não versionada) | Equipe FaithRO | N/A | build instalado, commit `7f080871c` | 2026-07-10 | `./configure --enable-prere=yes`; `CPPFLAGS` efetivas contêm `-DPRERE`; `src/custom/defines_pre.hpp` vazio (sem override manual) | Confirmado na configuração de build auditada | Não reexecuta nem inspeciona símbolos do binário; não é evidência independente da proveniência dos binários atuais; não confirma comportamento de gameplay | Resolve a classificação de mecânica em [03-configuracao-alvo.md](03-configuracao-alvo.md) como "Pre-Renewal confirmado na configuração registrada do build" |
 
 ## Fórum rAthena e issues (não validados integralmente)
 
@@ -117,11 +118,13 @@ localização**.
   obfuscação e `PACKETVER_RE` (comportamento do binário, não apenas do
   código-fonte); implantação completa do web server (unidade, porta,
   firewall) — ver [11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md).
-- ~~Verificação da mecânica (`PRERE`/`RENEWAL`) efetivamente compilada na
-  VPS~~ — confirmado em auditoria read-only de 2026-07-10: `config.log`
-  registra `--enable-prere=yes` e `CPPFLAGS` efetivas com `-DPRERE`; ver
-  [03-configuracao-alvo.md](03-configuracao-alvo.md), seção "Estado atual do
-  build".
+- Configuração de build Pre-Renewal: confirmada no `config.log` em auditoria
+  read-only de 2026-07-10 (`--enable-prere=yes`, `CPPFLAGS` efetivas com
+  `-DPRERE`; ver [03-configuracao-alvo.md](03-configuracao-alvo.md), seção
+  "Estado atual do build").
+- Proveniência dos binários atuais em relação ao `config.log`: não atestada
+  nesta auditoria.
+- Comportamento funcional Pre-Renewal: validar em testes de gameplay.
 - Levantamento de fontes lusófonas equivalentes.
 
 ## Referências cruzadas

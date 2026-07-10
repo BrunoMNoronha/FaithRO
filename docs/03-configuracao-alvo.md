@@ -30,9 +30,10 @@ commit upstream de referência `7f080871c8b3bbe7a79027194633201c63422ee1`
 
 - Nome: FaithRO - Laos Deos
 - Estilo: old school/high rate
-- 3ª classes: desabilitadas (política de conteúdo, ver seção
-  [Classes](#classes))
-- Level máximo: 185 (customização, ver seção [Level 185](#level-185))
+- Estado-alvo de 3ª classes: bloqueadas por política; validação operacional
+  na issue #9 (ver seção [Classes](#classes))
+- Level máximo planejado: 185; configuração e balanceamento na issue #8 (ver
+  seção [Level 185](#level-185))
 - Público: comunidade pequena/média
 - Sem fins lucrativos
 
@@ -49,17 +50,17 @@ foi realizada para produzir esta decisão.
 
 ## Conceitos independentes
 
-| Conceito           | Decisão                 |
-| ------------------ | ------------------------ |
-| Protocolo          | `PACKETVER=20211103`    |
-| Cliente            | `2021-11-03_Ragexe`     |
-| Mecânica           | Pre-Renewal             |
-| Conteúdo           | curado                  |
-| Episódio histórico | ainda não fixado        |
-| Classes            | até transclasses        |
-| 3ª classes         | bloqueadas por política |
-| Level máximo       | 185 custom              |
-| Rates              | pendentes                |
+| Conceito           | Decisão / estado-alvo       | Estado operacional                                |
+| ------------------ | ---------------------------- | -------------------------------------------------- |
+| Protocolo          | `PACKETVER=20211103`        | confirmado no código e checkout                    |
+| Cliente            | `2021-11-03_Ragexe`         | requer validação real com cliente                  |
+| Mecânica           | Pre-Renewal                 | configuração de build registrada como Pre-Renewal  |
+| Conteúdo           | curado                       | ainda não auditado/implantado integralmente        |
+| Episódio histórico | ainda não fixado             | não aplicável                                      |
+| Classes            | progressão até transclasses  | bloqueio integral ainda não validado               |
+| 3ª classes         | bloqueadas por política      | pendente da issue #9                               |
+| Level máximo       | 185 custom                   | pendente da issue #8                               |
+| Rates              | high rate a definir           | pendente da issue #7                               |
 
 Nenhuma linha desta tabela decorre automaticamente de outra. Em particular:
 
@@ -84,10 +85,10 @@ Nenhuma linha desta tabela decorre automaticamente de outra. Em particular:
 | Drop por diferença de level               | sem algoritmo Renewal          | algoritmo Renewal                                  |
 | ASPD                                      | clássica                       | Renewal                                            |
 | Dano modificado por base level            | sem `RENEWAL_LVDMG`            | com `RENEWAL_LVDMG`                                |
-| Compatibilidade conceitual com level 185  | custom e de alto risco         | nativa para níveis maiores, mas foge da proposta   |
+| Relação com level 185                     | customização de alto risco; requer revisão extensa das fórmulas clássicas | também requer validação própria; fórmulas usam mecânicas Renewal e modificadores por level, mas isso não garante balanceamento sem 3ª classes |
 | Bloqueio de 3ª classes                    | ainda precisa ser configurado  | ainda precisa ser configurado                      |
 | Conteúdo disponível                       | precisa ser curado             | precisa ser curado                                 |
-| Complexidade de balanceamento             | alta por causa do level 185    | alta por remoção das 3ª classes                    |
+| Complexidade de balanceamento             | alta por extrapolar a progressão clássica até 185 | alta por combinar fórmulas Renewal, level 185 e remoção das classes para as quais parte da progressão foi concebida |
 
 Nenhuma das duas colunas elimina a necessidade de balanceamento próprio: a
 diferença está em **qual** conjunto de fórmulas e ajustes precisa ser
@@ -156,27 +157,45 @@ passada ao `./configure`, que o processo de build propagou efetivamente para
 `CPPFLAGS` (`-DPRERE`) na compilação registrada em `config.log`.
 
 Conforme [src/config/renewal.hpp](https://github.com/rathena/rathena/blob/7f080871c8b3bbe7a79027194633201c63422ee1/src/config/renewal.hpp)
-no commit `7f080871c`, quando `PRERE` está definido, o bloco `#ifndef PRERE`
-que define `RENEWAL`, `RENEWAL_CAST`, `RENEWAL_DROP`, `RENEWAL_EXP`,
-`RENEWAL_LVDMG`, `RENEWAL_ASPD` e `RENEWAL_STAT` **não é executado** — nenhuma
-dessas macros Renewal é definida para esta compilação.
+no commit `7f080871c`, com `PRERE` definido, o bloco `#ifndef PRERE` desse
+arquivo — que define `RENEWAL`, `RENEWAL_CAST`, `RENEWAL_DROP`,
+`RENEWAL_EXP`, `RENEWAL_LVDMG`, `RENEWAL_ASPD` e `RENEWAL_STAT` — não define
+essas macros Renewal gerais listadas naquele arquivo. Esta conclusão está
+limitada ao arquivo e ao mecanismo analisados: pode haver configurações
+específicas em outros arquivos, conteúdo Renewal no banco, comportamentos
+independentes dessas macros ou customizações futuras.
 
-**Classificação final:** `Pre-Renewal confirmado no build`.
+**Classificação final:** `Pre-Renewal confirmado na configuração registrada do build`.
 
 Esta classificação é a mais forte das quatro categorias possíveis
-(`Pre-Renewal confirmado no build` · `Renewal confirmado no build` ·
+(`Pre-Renewal confirmado na configuração registrada do build` ·
+`Renewal confirmado na configuração registrada do build` ·
 `Fonte padrão Renewal, mas build efetivo inconclusivo` ·
 `Pendente de validação`), porque a evidência não vem apenas da leitura de
 `renewal.hpp` (que descreve o padrão quando `PRERE` **não** está definido),
 mas da flag de compilação efetivamente registrada em `config.log` e
-propagada para `CPPFLAGS`.
+propagada para `CPPFLAGS`. `config.log` sozinho, porém, não comprova de forma
+independente a proveniência dos binários atualmente em execução (ver tabela
+abaixo).
+
+| Camada                                       | Estado                                                            |
+| --------------------------------------------- | ------------------------------------------------------------------ |
+| Código-fonte                                  | `PRERE` desabilita o bloco de macros Renewal em `renewal.hpp`      |
+| Configuração registrada                       | `--enable-prere=yes` e `-DPRERE` confirmados em `config.log`       |
+| Binários presentes                            | confirmados em auditoria anterior                                  |
+| Vínculo entre `config.log` e binários atuais  | não atestado por hash, metadata de build ou inspeção equivalente   |
+| Comportamento em gameplay                     | ainda requer testes funcionais                                     |
 
 **Limitações:** esta auditoria não reexecutou os binários nem inspecionou
 símbolos/strings do executável compilado para reconfirmar a macro em tempo de
 execução; a evidência se apoia no log de configuração (`config.log`) do
 próprio processo de build, que é a fonte mais forte disponível sem recompilar
-nada. Não recompile para "confirmar ainda mais" — isso seria uma mudança
-operacional fora do escopo desta tarefa.
+nada. `config.log` não comprova, de forma independente, que os binários
+atualmente em execução foram gerados exatamente por esse build, que não
+foram substituídos depois, ou que não houve cópia de binários de outro
+ambiente. Não recompile para "confirmar ainda mais" — isso seria uma mudança
+operacional fora do escopo desta tarefa; a limitação de proveniência não
+bloqueia a decisão documental registrada nesta tarefa.
 
 ## Conteúdo e episódio
 
@@ -353,15 +372,18 @@ consistência textual e de rastreabilidade, não execução em ambiente real:
 
 | Item               | Estado atual               | Estado-alvo         | Ação futura                                  |
 | ------------------- | --------------------------- | --------------------- | ---------------------------------------------- |
-| Mecânica compilada  | Pre-Renewal confirmado no build (`-DPRERE` em `config.log`) | Pre-Renewal          | nenhuma — já alinhado, sem necessidade de recompilar |
+| Mecânica compilada  | Pre-Renewal confirmado na configuração registrada do build (`-DPRERE` em `config.log`); proveniência dos binários atuais não atestada nesta auditoria | Pre-Renewal          | nenhuma ação de recompilação motivada por esta tarefa; testes funcionais permanecem necessários |
 | 3ª classes          | não validado integralmente  | bloqueadas             | issue #9                                        |
 | Level máximo        | não validado                 | 185                    | issue #8                                        |
 | Rates               | não validadas                | high rate a definir    | issue #7                                        |
-| Conteúdo            | banco atual do rAthena       | curado                 | tarefa futura de curadoria de conteúdo          |
+| Conteúdo            | não auditado nesta tarefa    | curado                 | tarefa futura de curadoria de conteúdo          |
 
-Como o build atual já é Pre-Renewal, esta seção documenta o alinhamento —
-**nenhuma recompilação e nenhum reinício de serviço são necessários ou foram
-executados** em decorrência desta tarefa.
+A configuração registrada em `config.log` está alinhada com a decisão
+Pre-Renewal. Não foi identificada nesta tarefa razão documental para
+recompilar. A proveniência exata dos binários atuais e o comportamento
+funcional deverão ser confirmados em testes futuros, sem que isso impeça a
+aprovação da referência mecânica. Nenhuma recompilação e nenhum reinício de
+serviço foram executados em decorrência desta tarefa.
 
 ## Riscos
 

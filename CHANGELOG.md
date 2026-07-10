@@ -4,6 +4,15 @@ Todas as mudanças relevantes do FaithRO devem ser registradas aqui.
 
 ## [Não lançado]
 
+- Refinamento das evidências da decisão Pre-Renewal (`docs/03-configuracao-alvo.md`,
+  `docs/10-fontes-comunitarias-rathena.md`, `docs/README.md`): tabelas
+  reformuladas para distinguir decisão/estado-alvo de estado operacional;
+  configuração de build Pre-Renewal (`config.log`, `-DPRERE`) tratada como
+  "configuração registrada", sem atestar a proveniência dos binários
+  atualmente em execução; removida a afirmação "Renewal nativa para níveis
+  maiores" da comparação de mecânicas; level 185 mantido como customização
+  pendente das issues #7/#8/#9 em ambos os modos. Nenhuma alteração
+  operacional realizada.
 - `docs/03-configuracao-alvo.md` reorganizado para registrar Pre-Renewal como
   referência mecânica oficial do FaithRO (issue #6), separando modo mecânico,
   conteúdo, episódio histórico, protocolo, classes permitidas e level máximo
