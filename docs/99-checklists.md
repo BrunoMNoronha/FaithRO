@@ -27,7 +27,8 @@
 - [ ] Teste com classe mágica.
 - [ ] Teste com classe suporte.
 - [ ] Teste de up 1-255 (base level).
-- [ ] Teste de atributos até o limite individual 187.
+- [ ] Teste de atributos naturais até o limite individual 185.
+- [ ] Teste de ASPD até o limite 197 (por classe e tipo de arma; tentativa de exceder 197).
 - [ ] Teste de MVP.
 - [ ] Teste de economia/drop.
 - [ ] Teste de PvP/WoE, se habilitado.

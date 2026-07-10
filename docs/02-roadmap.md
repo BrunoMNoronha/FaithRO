@@ -20,7 +20,8 @@
 
 - [ ] Definir rates (calculadas para base level 255).
 - [ ] Configurar base level máximo 255 (decisão registrada; implantação pendente).
-- [ ] Configurar status/atributo máximo individual 187 (decisão registrada; implantação pendente).
+- [ ] Configurar atributo/status natural máximo individual 185 (decisão registrada; implantação pendente).
+- [ ] Configurar ASPD máxima 197 (decisão registrada; implantação e validação pendentes).
 - [ ] Definir job máximo por classe.
 - [ ] Bloquear 3ª classes.
 - [ ] Ajustar EXP table até 255 e curva de pontos de status.
@@ -40,7 +41,7 @@
 ## Fase 4 - Alpha fechado
 
 - [ ] Criar contas de teste.
-- [ ] Testar progressão 1-255 e atributos até 187.
+- [ ] Testar progressão 1-255, atributos naturais até 185 e ASPD máxima 197.
 - [ ] Testar troca de classe.
 - [ ] Testar drops.
 - [ ] Testar MVPs.

@@ -57,18 +57,35 @@ Para cada issue, use o template abaixo e ajuste os campos "Título", "Descriçã
 - [ ] Rates definidos e documentados.
 - [ ] Revisão para evitar desbalanceamento severo.
 
-## 7. [Config] Definir base level 255 e status máximo 187
+## 7. [Config] Definir base level 255, atributos 185 e ASPD 197
 
-> Registro histórico: o escopo original desta issue citava level base máximo
-> 185. Essa decisão foi substituída em 2026-07-10 por base level 255 e status
-> máximo individual 187 (job level a definir por classe). A issue #8 no
-> GitHub foi atualizada com o novo escopo.
+> Registro histórico: o escopo original desta issue citava base level máximo
+> 185. Essa decisão foi substituída em 2026-07-10 por base level máximo 255.
+> Posteriormente, o atributo máximo inicialmente registrado como 187 foi
+> corrigido para 185, e a ASPD máxima planejada foi definida em 197. Não
+> confundir o antigo base level 185 (histórico revogado) com o atributo
+> natural máximo vigente 185. A issue #8 no GitHub foi atualizada com o novo
+> escopo.
 
-**Descrição:** Configurar e validar base level máximo 255 e status/atributo máximo individual 187, incluindo curva de EXP até 255, pontos de status e ajustes de EXP table necessários.
+**Descrição:** Configurar e validar base level máximo 255 (vigente),
+atributo/status natural máximo individual 185 (vigente) e ASPD máxima 197
+(vigente), incluindo curva de EXP até 255, pontos de status, custo dos
+atributos até 185, clamps de atributos e de ASPD e ajustes de EXP table
+necessários. Job level máximo a definir por classe. Valores ainda não
+implantados ou validados.
 
 **Critérios de aceite:**
-- [ ] Configuração documentada.
-- [ ] Plano de ajuste de EXP table descrito.
+- [ ] Base level máximo 255 documentado e curva completa de EXP até 255 definida.
+- [ ] Atributo/status natural máximo individual 185 documentado, com custo e
+      clamp de STR/AGI/VIT/INT/DEX/LUK validados.
+- [ ] Pontos totais de status e curva de concessão definidos.
+- [ ] ASPD máxima 197 documentada e validada por classe e tipo de arma,
+      incluindo tentativas de exceder 197.
+- [ ] AGI e ASPD tratadas como grandezas distintas; ASPD e delays de skills
+      tratados como grandezas distintas.
+- [ ] Job level máximo definido para cada classe permitida.
+- [ ] Alterações priorizadas em `conf/import` e `db/import`.
+- [ ] Plano de rollback documentado.
 
 ## 8. [Config] Bloquear 3ª classes
 

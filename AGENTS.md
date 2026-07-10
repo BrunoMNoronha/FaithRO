@@ -29,9 +29,11 @@ Você atua como arquiteto técnico, desenvolvedor C/C++/SQL/script rAthena, DevO
 
 - Nome: FaithRO - Laos Deos
 - Proposta: old school, high rate, sem 3ª classes
-- Base level máximo planejado: 255 (decisão anterior de 185 substituída em 2026-07-10)
-- Status/atributo máximo individual planejado: 187
+- Base level máximo planejado: 255 (antigo base level máximo 185 substituído em 2026-07-10)
+- Atributo/status natural máximo individual planejado: 185 (corrige a decisão anterior de 187; não confundir com o antigo base level 185)
+- ASPD máxima planejada: 197 (limite de velocidade de ataque; não é AGI nem velocidade de movimento)
 - Job level máximo: a definir por classe
+- Esses valores são estado-alvo e ainda dependem de implantação e validação (issue #8)
 - Infra inicial: Ubuntu 22.04, 1 vCPU, 2 GB RAM, 50 GB
 - Emulador recomendado: rAthena
 - Banco: MariaDB

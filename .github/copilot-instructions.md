@@ -4,7 +4,7 @@ Este repositório documenta e customiza o projeto FaithRO - Laos Deos.
 
 ## Contexto
 
-Servidor Ragnarok-like sem fins lucrativos, old school/high rate, sem 3ª classes, base level máximo planejado 255 e status máximo individual planejado 187 (decisão anterior de level 185 substituída em 2026-07-10), usando rAthena como emulador inicial e MariaDB como banco.
+Servidor Ragnarok-like sem fins lucrativos, old school/high rate, sem 3ª classes, base level máximo planejado 255, atributo/status natural máximo individual planejado 185 e ASPD máxima planejada 197, usando rAthena como emulador inicial e MariaDB como banco. O antigo base level máximo 185 foi substituído em 2026-07-10 por 255; o atributo máximo inicialmente registrado como 187 foi corrigido para 185 (não confundir com o antigo base level 185). Esses valores são estado-alvo, ainda não implantados ou validados (issue #8).
 
 ## Como gerar código
 
