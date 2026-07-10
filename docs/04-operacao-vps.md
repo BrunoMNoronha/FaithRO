@@ -31,7 +31,7 @@ As portas exatas dependem da configuração do emulador. Documente aqui:
 
 | Serviço | Porta | Público? |
 |---|---:|---|
-| SSH | 22022 | restrito |
+| SSH | 22022 | liberado para `Anywhere` no `ufw` (confirmado em auditoria); acesso depende de autenticação por chave, não de restrição de IP |
 | Login server | 6900/tcp (confirmado em auditoria) | restrito ao IP autorizado (`ufw`) |
 | Char server | 6121/tcp (confirmado em auditoria) | restrito ao IP autorizado (`ufw`) |
 | Map server | 5121/tcp (confirmado em auditoria) | restrito ao IP autorizado (`ufw`) |
