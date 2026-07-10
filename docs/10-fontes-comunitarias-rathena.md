@@ -43,9 +43,6 @@ registrar as fontes efetivamente consultadas e evitar que recomendações de fó
 
 ## Tabela de fontes consultadas
 
-| Tema | Fonte | Idioma | Tipo | Data | Confiança | Uso no FaithRO |
-| ---- | ----- | ------ | ---- | ---- | --------- | -------------- |
-
 ### Fontes oficiais
 
 | Tema | Fonte | Idioma | Tipo | Data | Confiança | Uso no FaithRO |
@@ -65,24 +62,17 @@ registrar as fontes efetivamente consultadas e evitar que recomendações de fó
 
 ### Fórum em português
 
-| Tema | Fonte | Idioma | Tipo | Data | Confiança | Uso no FaithRO |
-| ---- | ----- | ------ | ---- | ---- | --------- | -------------- |
-| N/A | Pendente de localização | PT | Fórum | Pendente | Comunidade — requer validação | N/A |
+*(Nenhum tópico referenciado nesta documentação até o momento).*
 
 ### Fórum internacional
 
-| Tema | Fonte | Idioma | Tipo | Data | Confiança | Uso no FaithRO |
-| ---- | ----- | ------ | ---- | ---- | --------- | -------------- |
-| Cliente estável | "Most Stable Client for Renewal now?" | EN | Fórum internacional | Pendente | Comunidade — requer validação | Pendente de validação |
-| Cliente `2021-11-03_Ragexe` | "Renewal Client data & Hexed 2021-11-03_Ragexe compatible with rAthena" | EN | Fórum internacional | Pendente | Comunidade — requer validação | Pendente de validação |
-| Combo estável | "Stable Combo For PACKETVER, packet_db_ver and Client" | EN | Fórum internacional | Pendente | Comunidade — requer validação | Pendente de validação |
-| Web server / emblema | Discussões sobre incompatibilidade de pacotes | EN | Fórum/issue | Pendente | Comunidade — requer validação | Pendente de validação |
+*(Os tópicos discutindo clientes estáveis não sustentam decisões neste momento e foram removidos desta lista por não terem sido integralmente validados).*
 
 ### Outras fontes comunitárias
 
 | Tema | Fonte | Idioma | Tipo | Data | Confiança | Uso no FaithRO |
 | ---- | ----- | ------ | ---- | ---- | --------- | -------------- |
-| Patchers NEMO | Projetos comunitários bifurcados do NEMO | EN | Repo Comunitário | 2026-07-10 | Comunidade — requer validação | Uso externo pendente |
+| Patchers NEMO | Forks em repositórios da comunidade | EN | Repo Comunitário | 2026-07-10 | Comunidade — requer validação | Uso externo pendente |
 
 ### Fontes históricas
 
@@ -98,7 +88,6 @@ registrar as fontes efetivamente consultadas e evitar que recomendações de fó
 
 ### Itens pendentes
 
-- Validação integral dos tópicos de fórum listados e documentação de suas URLs.
 - Identificação de discussões lusófonas atualizadas e confiáveis.
 - Verificação do commit e configuração efetivamente compilados na VPS.
 

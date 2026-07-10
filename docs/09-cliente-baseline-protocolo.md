@@ -33,9 +33,9 @@ cliente-servidor.
 
 | Item | Valor |
 | --- | --- |
-| `PACKETVER` | `20211103` |
 | Cliente de referência | `2021-11-03_Ragexe` |
-| Família do executável | `Ragexe` |
+| Família adotada | `Ragexe` |
+| PACKETVER pretendido | `20211103` |
 | Modo do servidor | decisão independente do cliente |
 | Terceiras classes | desabilitadas por decisão do FaithRO |
 | Level máximo | 185, sujeito a balanceamento próprio |
@@ -45,7 +45,7 @@ referência / baseline conservador** adotado pelo projeto, escolhido por
 alinhamento com o valor padrão do rAthena e com a matriz de CI oficial. Clientes
 posteriores podem ter suporte parcial ou comunitário, mas **não** substituem o
 baseline sem análise de compatibilidade, testes, decisão técnica, documentação e
-plano de rollback.
+plano de rollback. A compatibilidade funcional real depende de teste cliente-servidor.
 
 ## 2. Compatibilidade não é determinada só pelo nome
 
@@ -116,44 +116,20 @@ Como `20211103` está no intervalo `>= 20200902 && <= 20211118`, o rAthena
 
 ## 5. Packet obfuscation
 
-A obfuscação é uma exigência de **alinhamento entre cliente e servidor**.
-Não se deve habilitar ou desabilitar automaticamente, nem registrar chaves reais.
+A obfuscação é uma exigência de alinhamento entre cliente e servidor. Não se deve habilitar ou desabilitar automaticamente, nem registrar chaves reais.
 
-**Comportamento no código oficial upstream do rAthena:** confirmado no código consultado
-(commit `7f080871c`). Em `src/config/packets.hpp`, a macro `PACKET_OBFUSCATION` é
-definida para `PACKETVER >= 20110817`. Porém, em `src/map/clif_obfuscation.hpp`, a atribuição
-de chaves para clientes posteriores a `20180307` é **zero**:
-
-```c
-#elif PACKETVER > 20180307 // Clients after 2018-03-07bRagexeRE do not obfuscate packets anymore
-    packet_keys(0x00000000,0x00000000,0x00000000);
-```
-
-- **Estado do checkout utilizado pelo FaithRO:** pendente de validação.
-- **Estado efetivamente compilado e executado na VPS:** pendente de validação.
-- **Estado no cliente do projeto:** pendente de teste com o cliente de referência.
-
-O alinhamento de packet obfuscation permanece pendente de validação com o cliente
-de referência obtido legalmente pelo responsável pelo projeto.
+- **Comportamento padrão da packet obfuscation:** identificado no código upstream consultado (em `src/config/packets.hpp`, a macro `PACKET_OBFUSCATION` é definida, porém em `src/map/clif_obfuscation.hpp` as chaves são zero para clientes pós-20180307).
+- **Configuração do checkout FaithRO:** pendente de validação.
+- **Configuração do binário executado na VPS:** pendente de validação.
+- **Alinhamento com o cliente de referência:** pendente de teste com cliente obtido legalmente pelo responsável.
 
 ## 6. Web server do rAthena
 
-**Comportamento no código oficial upstream do rAthena:** confirmado no código consultado.
-Em `src/config/packets.hpp` (commit `7f080871c`), existe a macro de compilação:
+- **Suporte, macro e implementação do web server:** identificados no código upstream consultado (em `src/config/packets.hpp`, existe `#define WEB_SERVER_ENABLE PACKETVER > 20200300`).
+- **Estado do checkout FaithRO:** pendente de validação.
+- **Estado de compilação, serviço, porta, tabelas e exposição na VPS:** pendente de validação e implantação em tarefa própria.
 
-```c
-#define WEB_SERVER_ENABLE PACKETVER > 20200300
-```
-
-O web server serve para funcionalidades dependentes como controle de emblemas
-de guilda (via `src/web/emblem_controller.cpp` e tabela `guild_emblems`),
-e pode exigir configuração no cliente para funcionar corretamente.
-
-- **Estado do checkout utilizado pelo FaithRO:** pendente de validação e implantação em tarefa própria.
-- **Estado efetivamente compilado e executado na VPS:** pendente de validação e implantação em tarefa própria.
-
-Não expor o serviço publicamente sem validação de riscos.
-O web server não é um requisito comprovado para login básico.
+Não expor o serviço publicamente sem validação de riscos. O web server não é um requisito confirmado para login básico.
 
 ## 7. XML, Lua e configurações externas
 
@@ -188,13 +164,13 @@ de patches como universalmente correta.
 | Packet obfuscation    | Alinhada               | Pendente         | pendente de validação | Requer teste real e VPS |
 | Arquivo XML/Lua       | Confirmado por teste   | Pendente         | pendente de validação | Requer teste real |
 | Web server            | Confirmado ou pendente | Pendente         | pendente de validação e implantação | Tarefa própria |
-| Login                 | Funcional              | Pendente         | pendente de validação | Requer implantação |
-| Seleção de personagem | Funcional              | Pendente         | pendente de validação | Requer implantação |
-| Entrada no mapa       | Funcional              | Pendente         | pendente de validação | Requer implantação |
-| Movimento             | Funcional              | Pendente         | pendente de validação | Requer implantação |
-| NPCs                  | Funcionais             | Pendente         | pendente de validação | Requer implantação |
-| Inventário            | Funcional              | Pendente         | pendente de validação | Requer implantação |
-| Guilda/emblema        | Funcional ou pendente  | Pendente         | pendente de validação | Requer implantação |
+| Login                 | Funcional              | Pendente         | pendente de validação | Requer teste cliente-servidor |
+| Seleção de personagem | Funcional              | Pendente         | pendente de validação | Requer teste cliente-servidor |
+| Entrada no mapa       | Funcional              | Pendente         | pendente de validação | Requer teste cliente-servidor |
+| Movimento             | Funcional              | Pendente         | pendente de validação | Requer teste cliente-servidor |
+| NPCs                  | Funcionais             | Pendente         | pendente de validação | Requer teste cliente-servidor |
+| Inventário            | Funcional              | Pendente         | pendente de validação | Requer teste cliente-servidor |
+| Guilda/emblema        | Funcional ou pendente  | Pendente         | pendente de validação | Requer teste cliente-servidor |
 
 ## 10. Plano mínimo de testes (planejado)
 
@@ -213,7 +189,6 @@ conexão globalmente. Usar `<IP-CLIENTE>` restrito.
 ### Conexão
 - conexão com `<IP-VPS>:<PORTA>`;
 - tentativa registrada no login-server;
-- ausência de `Unknown packet`;
 - ausência de encerramento por divergência de protocolo;
 - comportamento diante de credenciais inválidas;
 - reconexão.
@@ -236,17 +211,47 @@ conexão globalmente. Usar `<IP-CLIENTE>` restrito.
 ## 11. Riscos
 
 - Indisponibilidade por erro de conexão.
-- Incompatibilidade entre cliente e pacote (Unknown Packet).
+- Uma divergência entre a configuração de packet obfuscation do cliente e do servidor pode causar pacotes inválidos, falhas de interpretação, desconexão ou erros nos logs. A mensagem exata depende do pacote e do ponto da comunicação afetado.
 - Perda de configuração de baseline em recompilações futuras.
-- Divergência de protocolo por não testar obfuscação adequadamente.
 - Manutenção futura dificultada por uso de binários sem suporte.
 
 ## 12. Rollback
 
-O rollback deste documento é o comando Git para restaurá-lo:
-`git restore -- docs/09-cliente-baseline-protocolo.md`
+### Antes do merge
+Fechar o PR sem merge e preservar ou excluir a branch somente após confirmar que nenhum trabalho adicional depende dela.
+Para desfazer o commit na própria feature branch sem reescrever histórico:
+```powershell
+git switch docs/organizar-base-conhecimento-rathena
+git revert <COMMIT>
+git push
+```
 
-Para mudanças de compilação: restaurar binários de backups na VPS, não exigido nesta etapa (documental).
+### Depois de merge tradicional
+Identificar e reverter o merge commit criado na branch de destino:
+```powershell
+git log --oneline --merges dev
+git revert -m 1 <COMMIT-DE-MERGE>
+```
+
+### Depois de squash merge
+Identificar e reverter o commit squash criado em `dev`:
+```powershell
+git log --oneline dev
+git revert <COMMIT-SQUASH>
+```
+
+### Alterações ainda não commitadas
+Somente nesse caso, restaurar os arquivos modificados:
+```powershell
+git restore -- `
+  docs/00-base-conhecimento.md `
+  docs/09-cliente-baseline-protocolo.md `
+  docs/10-fontes-comunitarias-rathena.md
+```
+Para um novo arquivo não rastreado:
+```powershell
+Remove-Item docs\12-configuracao-packetver.md
+```
 
 ## 13. Referências
 

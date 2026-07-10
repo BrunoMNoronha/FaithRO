@@ -7,7 +7,7 @@
 
 ## Objetivo
 
-Fornecer as instruções planejadas para configurar o protocolo (`PACKETVER`), 
+Fornecer as instruções planejadas para configurar o protocolo (`PACKETVER`),
 o alinhamento da packet obfuscation e a ativação do web server, garantindo a
 compatibilidade entre o cliente de referência e o emulador rAthena, mantendo
 a integridade do ambiente.
@@ -15,16 +15,17 @@ a integridade do ambiente.
 ## Contexto e premissas
 
 - Emulador: rAthena.
-- O baseline atual adotado pelo projeto requer `PACKETVER` configurado como `20211103`.
-- A variante de obfuscação para o cliente de referência pressupõe alinhamento (chaves zero, no baseline).
-- O web server requer configuração específica e deve ser testado.
+- O baseline atual adotado pelo projeto pretende `PACKETVER` 20211103.
+- PACKETVER padrão identificado no código upstream consultado: 20211103.
+- PACKETVER do checkout usado pelo FaithRO: pendente de validação.
+- PACKETVER efetivamente compilado no binário da VPS: pendente de validação.
 - **Permissões:** O operador deve possuir acesso seguro à VPS e aos utilitários de compilação.
 - **Limitações:** O alinhamento de packet obfuscation e XML/Lua depende de um cliente
   obtido legalmente pelo responsável pelo FaithRO.
 
 ## Arquivos afetados
 
-- **Diretórios e Arquivos:** 
+- **Diretórios e Arquivos:**
   - `src/custom/defines_pre.hpp`
   - `conf/import/web_conf.txt` (ou outro import adequado)
 - **Serviços systemd:** `<UNIDADE-LOGIN>`, `<UNIDADE-CHAR>`, `<UNIDADE-MAP>`, `<UNIDADE-WEB>`
@@ -46,14 +47,17 @@ a integridade do ambiente.
    ```
 
 2. **Alinhamento de Packet Obfuscation**
-   Confirme se a obfuscação requerida pelo cliente possui patches. Para o baseline `20211103`,
-   as chaves padrão do rAthena são zero e o suporte base é ativado pelas macros de código.
-   Alinhe o patch do cliente ("Disable Packet Encryption") de acordo com o comportamento testado.
+   Confirme se a obfuscação requerida pelo cliente possui patches.
+   Comportamento padrão da packet obfuscation: identificado no código upstream consultado (chaves zeradas no baseline).
+   Configuração do checkout FaithRO: pendente de validação.
+   Configuração do binário executado na VPS: pendente de validação.
+   Alinhamento com o cliente de referência: pendente de teste com cliente obtido legalmente pelo responsável.
 
 3. **Habilitação do Web Server**
-   O código do rAthena ativa o web server automaticamente via `WEB_SERVER_ENABLE` para este `PACKETVER`.
-   Prepare a configuração em `conf/import/web_conf.txt` e não exponha a porta diretamente para a internet 
-   sem a configuração de segurança adequada.
+   Suporte, macro e implementação do web server identificados no código upstream consultado.
+   Estado do checkout FaithRO: pendente de validação.
+   Estado de compilação, serviço, porta, tabelas e exposição na VPS: pendente de validação e implantação em tarefa própria.
+   Prepare a configuração em `conf/import/web_conf.txt` e não exponha a porta diretamente para a internet.
 
 4. **Compilação Limpa**
    Para aplicar o `PACKETVER`, é necessária uma compilação limpa.
@@ -80,26 +84,53 @@ a integridade do ambiente.
    journalctl -u <UNIDADE-LOGIN> -n 50 --no-pager
    journalctl -u <UNIDADE-MAP> -n 50 --no-pager
    ```
-3. Garanta que o console não registre "Unknown Packet Version".
+3. Garanta o funcionamento base do cliente e do emulador.
 4. Verifique a listagem e emblemas da guilda (dependência direta do web server).
 
 ## Riscos
 
 - **Incompatibilidade de protocolo:** Resulta na desconexão imediata ou erros de pacotes se o cliente e o servidor possuírem versões distintas.
+- **Divergência de Obfuscação:** Uma divergência entre a configuração de packet obfuscation do cliente e do servidor pode causar pacotes inválidos, falhas de interpretação, desconexão ou erros nos logs. A mensagem exata depende do pacote e do ponto da comunicação afetado.
 - **Exposição do Web Server:** A porta do web server exposta sem restrições pode gerar riscos de negação de serviço.
 - **Falha de compilação:** Pode ocorrer se overrides conflitantes forem declarados.
 
 ## Rollback
 
-1. **Restauração:** Não dependa de backup inexistente. Antes da modificação (Passo 1), crie uma cópia de segurança do binário anterior:
-   ```bash
-   cp login-server login-server.bak
-   cp char-server char-server.bak
-   cp map-server map-server.bak
-   cp web-server web-server.bak
-   ```
-2. **Reversão:** Reverta `src/custom/defines_pre.hpp` e recompile limpamente (`make clean && make server`), ou simplesmente restaure os binários da extensão `.bak` e reinicie os serviços, caso a falha impeça a execução.
-3. **Verificação final:** Execute os passos da seção de Testes para confirmar que o ambiente voltou ao estado original.
+### Antes do merge
+Fechar o PR sem merge e preservar ou excluir a branch somente após confirmar que nenhum trabalho adicional depende dela.
+Para desfazer o commit na própria feature branch sem reescrever histórico:
+```powershell
+git switch docs/organizar-base-conhecimento-rathena
+git revert <COMMIT>
+git push
+```
+
+### Depois de merge tradicional
+Identificar e reverter o merge commit criado na branch de destino:
+```powershell
+git log --oneline --merges dev
+git revert -m 1 <COMMIT-DE-MERGE>
+```
+
+### Depois de squash merge
+Identificar e reverter o commit squash criado em `dev`:
+```powershell
+git log --oneline dev
+git revert <COMMIT-SQUASH>
+```
+
+### Alterações ainda não commitadas
+Somente nesse caso, restaurar os arquivos modificados:
+```powershell
+git restore -- `
+  docs/00-base-conhecimento.md `
+  docs/09-cliente-baseline-protocolo.md `
+  docs/10-fontes-comunitarias-rathena.md
+```
+Para um novo arquivo não rastreado:
+```powershell
+Remove-Item docs\12-configuracao-packetver.md
+```
 
 ## Referências
 
