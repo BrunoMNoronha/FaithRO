@@ -4,6 +4,29 @@ Todas as mudanças relevantes do FaithRO devem ser registradas aqui.
 
 ## [Não lançado]
 
+- Refinamento das evidências da decisão Pre-Renewal (`docs/03-configuracao-alvo.md`,
+  `docs/10-fontes-comunitarias-rathena.md`, `docs/README.md`): tabelas
+  reformuladas para distinguir decisão/estado-alvo de estado operacional;
+  configuração de build Pre-Renewal (`config.log`, `-DPRERE`) tratada como
+  "configuração registrada", sem atestar a proveniência dos binários
+  atualmente em execução; removida a afirmação "Renewal nativa para níveis
+  maiores" da comparação de mecânicas; level 185 mantido como customização
+  pendente das issues #7/#8/#9 em ambos os modos. Nenhuma alteração
+  operacional realizada.
+- `docs/03-configuracao-alvo.md` reorganizado para registrar Pre-Renewal como
+  referência mecânica oficial do FaithRO (issue #6), separando modo mecânico,
+  conteúdo, episódio histórico, protocolo, classes permitidas e level máximo
+  como conceitos independentes. Decisão apoiada em auditoria read-only do
+  build instalado em `/opt/faithro/rathena`: `config.log` confirma
+  `./configure --enable-prere=yes` com `-DPRERE` efetivamente presente nas
+  `CPPFLAGS` de compilação, classificando o build como "Pre-Renewal
+  confirmado no build". Episódio histórico permanece não fixado; conteúdo
+  segue como curadoria pendente; level 185 e rates permanecem dependentes das
+  issues #8 e #7; bloqueio de 3ª classes permanece dependente da issue #9.
+  Nenhuma mudança operacional foi realizada (nenhum serviço reiniciado,
+  nenhum binário recompilado). `docs/10-fontes-comunitarias-rathena.md`
+  atualizado com a fonte `src/config/renewal.hpp` e a evidência de
+  compilação (`config.log`).
 - Correção do runbook de serviços systemd
   (`docs/11-servicos-systemd-rathena.md`): documentada a propagação de
   `Requires=` em parada/reinício explícitos, diferenciada de falha ou
