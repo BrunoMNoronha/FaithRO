@@ -61,3 +61,11 @@ faithro/
 8. Só depois abrir alpha fechado.
 
 Ver [docs/06-plano-execucao-inicial.md](docs/06-plano-execucao-inicial.md) para o detalhamento desta fase.
+
+## Documentação
+
+O índice central da base de conhecimento está em
+[docs/README.md](docs/README.md). Para cliente e protocolo, ver
+[docs/09-cliente-baseline-protocolo.md](docs/09-cliente-baseline-protocolo.md);
+para a política de fontes, ver
+[docs/10-fontes-comunitarias-rathena.md](docs/10-fontes-comunitarias-rathena.md).

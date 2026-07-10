@@ -32,10 +32,19 @@ As portas exatas dependem da configuração do emulador. Documente aqui:
 | Serviço | Porta | Público? |
 |---|---:|---|
 | SSH | 22022 | restrito |
-| Login server | a definir | sim |
-| Char server | a definir | sim |
-| Map server | a definir | sim |
+| Login server | 6900/tcp (padrão rAthena) | restrito ao IP autorizado durante testes |
+| Char server | 6121/tcp (padrão rAthena) | restrito ao IP autorizado durante testes |
+| Map server | 5121/tcp (padrão rAthena) | restrito ao IP autorizado durante testes |
+| Web server | 8888/tcp (padrão upstream); porta efetiva pendente de validação | não expor publicamente sem decisão documentada |
 | MariaDB | 3306 | não, apenas localhost |
+
+> As portas do jogo acima são os **valores padrão do rAthena** (a confirmar na
+> implantação). Durante os testes elas devem permanecer **restritas ao IP
+> autorizado** e **não** ser abertas para `Anywhere` sem decisão formal e
+> documentada. O web server é **habilitado pelo código** para o baseline
+> (`PACKETVER=20211103`), mas sua **implantação e porta efetiva no FaithRO
+> continuam pendentes**. Detalhes de cliente, protocolo, obfuscação e web server
+> em [09-cliente-baseline-protocolo.md](09-cliente-baseline-protocolo.md).
 
 ## Backups
 
