@@ -87,11 +87,12 @@ Estes conceitos **não** são equivalentes:
 #endif
 ```
 
-Como `20211103` está no intervalo `>= 20200902 && <= 20211118`, o rAthena
-**define `PACKETVER_RE` automaticamente** para o baseline. Consequências:
+No código upstream consultado, o PACKETVER 20211103 está dentro do
+intervalo inclusivo de 20200902 a 20211118 que cria internamente a macro
+PACKETVER_RE. Essa macro é uma classificação interna do rAthena, não
+transforma o executável em RagexeRE e não constitui uma regra aberta
+para todas as versões posteriores a setembro de 2020.
 
-- isso é uma **decisão interna da implementação** do rAthena;
-- **não** transforma o executável em `RagexeRE`;
 - o cliente de referência continua sendo `2021-11-03_Ragexe` (família `Ragexe`);
 - **não** se deve editar nem forçar manualmente `PACKETVER_RE` apenas para "fazer
   o nome parecer consistente".
@@ -118,10 +119,11 @@ Como `20211103` está no intervalo `>= 20200902 && <= 20211118`, o rAthena
 
 A obfuscação é uma exigência de alinhamento entre cliente e servidor. Não se deve habilitar ou desabilitar automaticamente, nem registrar chaves reais.
 
-- **Comportamento padrão da packet obfuscation:** identificado no código upstream consultado (em `src/config/packets.hpp`, a macro `PACKET_OBFUSCATION` é definida, porém em `src/map/clif_obfuscation.hpp` as chaves são zero para clientes pós-20180307).
-- **Configuração do checkout FaithRO:** pendente de validação.
-- **Configuração do binário executado na VPS:** pendente de validação.
-- **Alinhamento com o cliente de referência:** pendente de teste com cliente obtido legalmente pelo responsável.
+- **Comportamento upstream:** suporte e regras identificados no código oficial consultado.
+- **Checkout FaithRO:** pendente de validação.
+- **Binário compilado na VPS:** pendente de validação.
+- **Executável cliente e patches aplicados:** pendentes de validação.
+- **Alinhamento cliente-servidor:** pendente de teste.
 
 ## 6. Web server do rAthena
 

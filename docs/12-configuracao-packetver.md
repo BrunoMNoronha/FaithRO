@@ -48,10 +48,11 @@ a integridade do ambiente.
 
 2. **Alinhamento de Packet Obfuscation**
    Confirme se a obfuscação requerida pelo cliente possui patches.
-   Comportamento padrão da packet obfuscation: identificado no código upstream consultado (chaves zeradas no baseline).
-   Configuração do checkout FaithRO: pendente de validação.
-   Configuração do binário executado na VPS: pendente de validação.
-   Alinhamento com o cliente de referência: pendente de teste com cliente obtido legalmente pelo responsável.
+   Packet obfuscation: o suporte é habilitado por padrão no código upstream
+   consultado para versões compatíveis. As chaves efetivas aplicáveis ao
+   PACKETVER 20211103, eventuais overrides do checkout FaithRO, a
+   configuração do binário executado na VPS e o alinhamento com o cliente de
+   referência permanecem pendentes de validação.
 
 3. **Habilitação do Web Server**
    Suporte, macro e implementação do web server identificados no código upstream consultado.
