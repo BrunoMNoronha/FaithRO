@@ -13,25 +13,31 @@ apenas os organiza por categoria e registra estado e dependências.
 
 ## Estados possíveis
 
-`planejado` · `em elaboração` · `validado` · `pendente de validação` ·
-`desatualizado`
+- **Estado documental** — maturidade do texto: `planejado` · `em elaboração` ·
+  `validado` · `desatualizado`.
+- **Estado de implantação** — o procedimento descrito já foi executado no
+  ambiente real: `não aplicável` (documento conceitual) · `não iniciado` ·
+  `em andamento` · `implantado` · `pendente de validação`.
+
+> Um documento pode ter texto `validado` e implantação `não iniciado`. Não marque
+> o texto como pendente apenas porque o cliente ou serviço ainda não foi testado.
 
 ## Índice por documento
 
-| Documento | Finalidade | Público-alvo | Estado | Dependências | Última revisão |
-| --- | --- | --- | --- | --- | --- |
-| [00-base-conhecimento.md](00-base-conhecimento.md) | Visão geral, definição de old school, level 185 | Todos | validado | — | 2026-07-10 |
-| [01-decisao-tecnica.md](01-decisao-tecnica.md) | Escolha do emulador (rAthena) | Técnico | validado | 00 | 2026-07-10 |
-| [02-roadmap.md](02-roadmap.md) | Fases do projeto | Todos | em elaboração | 00, 01 | 2026-07-10 |
-| [03-configuracao-alvo.md](03-configuracao-alvo.md) | Rates, jobs, NPCs iniciais | Config/gameplay | pendente de validação | 00 | 2026-07-10 |
-| [04-operacao-vps.md](04-operacao-vps.md) | Hardware, hardening, portas, backups | Infra/operação | em elaboração | 08 | 2026-07-10 |
-| [05-governanca.md](05-governanca.md) | Princípios, regras de mudança, ADRs | Todos | validado | — | 2026-07-10 |
-| [06-plano-execucao-inicial.md](06-plano-execucao-inicial.md) | Fluxo de branches e backlog inicial | Técnico | validado | 07 | 2026-07-10 |
-| [07-fluxo-pull-request.md](07-fluxo-pull-request.md) | Processo de PR | Colaboradores | validado | 06 | 2026-07-10 |
-| [08-preparar-vps-ubuntu-2204.md](08-preparar-vps-ubuntu-2204.md) | Preparação da VPS (issue #2) | Infra | planejado | 04 | 2026-07-10 |
-| [09-cliente-baseline-protocolo.md](09-cliente-baseline-protocolo.md) | Cliente, `PACKETVER`, obfuscação, matriz e testes | Cliente/protocolo | pendente de validação | 01, 10 | 2026-07-10 |
-| [10-fontes-comunitarias-rathena.md](10-fontes-comunitarias-rathena.md) | Política e tabela de fontes | Técnico/documental | pendente de validação | — | 2026-07-10 |
-| [99-checklists.md](99-checklists.md) | Checklists de PR, deploy, balanceamento | Todos | validado | — | 2026-07-10 |
+| Documento | Finalidade | Público-alvo | Estado documental | Estado de implantação | Dependências | Última revisão |
+| --- | --- | --- | --- | --- | --- | --- |
+| [00-base-conhecimento.md](00-base-conhecimento.md) | Visão geral, definição de old school, level 185 | Todos | validado | não aplicável | — | 2026-07-10 |
+| [01-decisao-tecnica.md](01-decisao-tecnica.md) | Escolha do emulador (rAthena) | Técnico | validado | não aplicável | 00 | 2026-07-10 |
+| [02-roadmap.md](02-roadmap.md) | Fases do projeto | Todos | em elaboração | não aplicável | 00, 01 | 2026-07-10 |
+| [03-configuracao-alvo.md](03-configuracao-alvo.md) | Rates, jobs, NPCs iniciais | Config/gameplay | em elaboração | não iniciado | 00 | 2026-07-10 |
+| [04-operacao-vps.md](04-operacao-vps.md) | Hardware, hardening, portas, backups | Infra/operação | em elaboração | não iniciado | 08 | 2026-07-10 |
+| [05-governanca.md](05-governanca.md) | Princípios, regras de mudança, ADRs | Todos | validado | não aplicável | — | 2026-07-10 |
+| [06-plano-execucao-inicial.md](06-plano-execucao-inicial.md) | Fluxo de branches e backlog inicial | Técnico | validado | não aplicável | 07 | 2026-07-10 |
+| [07-fluxo-pull-request.md](07-fluxo-pull-request.md) | Processo de PR | Colaboradores | validado | não aplicável | 06 | 2026-07-10 |
+| [08-preparar-vps-ubuntu-2204.md](08-preparar-vps-ubuntu-2204.md) | Preparação da VPS (issue #2) | Infra | validado | não iniciado | 04 | 2026-07-10 |
+| [09-cliente-baseline-protocolo.md](09-cliente-baseline-protocolo.md) | Cliente, `PACKETVER`, obfuscação, web server, matriz e testes | Cliente/protocolo | validado | não iniciado | 01, 10 | 2026-07-10 |
+| [10-fontes-comunitarias-rathena.md](10-fontes-comunitarias-rathena.md) | Política e tabela de fontes | Técnico/documental | validado | não aplicável | — | 2026-07-10 |
+| [99-checklists.md](99-checklists.md) | Checklists de PR, deploy, balanceamento | Todos | validado | não aplicável | — | 2026-07-10 |
 
 ## Índice por categoria
 
