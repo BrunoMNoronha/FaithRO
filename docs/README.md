@@ -37,6 +37,7 @@ apenas os organiza por categoria e registra estado e dependências.
 | [08-preparar-vps-ubuntu-2204.md](08-preparar-vps-ubuntu-2204.md) | Preparação da VPS (issue #2) | Infra | validado | não iniciado | 04 | 2026-07-10 |
 | [09-cliente-baseline-protocolo.md](09-cliente-baseline-protocolo.md) | Cliente, `PACKETVER`, obfuscação, web server, matriz e testes | Cliente/protocolo | validado | não iniciado | 01, 10 | 2026-07-10 |
 | [10-fontes-comunitarias-rathena.md](10-fontes-comunitarias-rathena.md) | Política e tabela de fontes | Técnico/documental | validado | não aplicável | — | 2026-07-10 |
+| [11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md) | Unidades systemd do rAthena, binários, portas e web server | Infra/operação | validado | implantado (login/char/map); web server não implantado | 04, 09 | 2026-07-10 |
 | [99-checklists.md](99-checklists.md) | Checklists de PR, deploy, balanceamento | Todos | validado | não aplicável | — | 2026-07-10 |
 
 ## Índice por categoria
@@ -47,7 +48,8 @@ apenas os organiza por categoria e registra estado e dependências.
   [06](06-plano-execucao-inicial.md), [07](07-fluxo-pull-request.md),
   [99](99-checklists.md).
 - **Infraestrutura e operação:** [04](04-operacao-vps.md),
-  [08-preparar-vps-ubuntu-2204.md](08-preparar-vps-ubuntu-2204.md).
+  [08-preparar-vps-ubuntu-2204.md](08-preparar-vps-ubuntu-2204.md),
+  [11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md).
 - **Gameplay e balanceamento:** [03](03-configuracao-alvo.md) (level 185 e rates,
   ver também [00](00-base-conhecimento.md)).
 - **Cliente e protocolo:** [09](09-cliente-baseline-protocolo.md).

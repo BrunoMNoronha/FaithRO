@@ -32,19 +32,23 @@ As portas exatas dependem da configuração do emulador. Documente aqui:
 | Serviço | Porta | Público? |
 |---|---:|---|
 | SSH | 22022 | restrito |
-| Login server | 6900/tcp (padrão rAthena) | restrito ao IP autorizado durante testes |
-| Char server | 6121/tcp (padrão rAthena) | restrito ao IP autorizado durante testes |
-| Map server | 5121/tcp (padrão rAthena) | restrito ao IP autorizado durante testes |
-| Web server | 8888/tcp (padrão upstream); porta efetiva pendente de validação | não expor publicamente sem decisão documentada |
+| Login server | 6900/tcp (confirmado em auditoria) | restrito ao IP autorizado (`ufw`) |
+| Char server | 6121/tcp (confirmado em auditoria) | restrito ao IP autorizado (`ufw`) |
+| Map server | 5121/tcp (confirmado em auditoria) | restrito ao IP autorizado (`ufw`) |
+| Web server | 8888/tcp (padrão upstream); não implantado — sem unidade, processo ou porta em escuta | não implantado nesta auditoria |
 | MariaDB | 3306 | não, apenas localhost |
 
-> As portas do jogo acima são os **valores padrão do rAthena** (a confirmar na
-> implantação). Durante os testes elas devem permanecer **restritas ao IP
-> autorizado** e **não** ser abertas para `Anywhere` sem decisão formal e
-> documentada. O web server é **habilitado pelo código** para o baseline
-> (`PACKETVER=20211103`), mas sua **implantação e porta efetiva no FaithRO
-> continuam pendentes**. Detalhes de cliente, protocolo, obfuscação e web server
-> em [09-cliente-baseline-protocolo.md](09-cliente-baseline-protocolo.md).
+> As portas de login, char e map foram **confirmadas por auditoria read-only**
+> em 2026-07-10 (ver [11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md)):
+> processos vinculados a todas as interfaces, mas acesso externo restrito pelo
+> `ufw` a um único IP autorizado, com política padrão `deny (incoming)`. O web
+> server é **habilitado pelo código** para o baseline (`PACKETVER=20211103`) e
+> seu binário está compilado na VPS, mas **não há unidade systemd, processo
+> ativo nem porta em escuta** — implantação continua pendente. Detalhes de
+> cliente, protocolo, obfuscação e web server em
+> [09-cliente-baseline-protocolo.md](09-cliente-baseline-protocolo.md).
+> Unidades systemd, binários, dependências e runbook completo em
+> [11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md).
 
 ## Backups
 

@@ -357,16 +357,16 @@ externamente` · `Decisão do projeto` · `Pendente de validação`.
 | Componente | Valor encontrado | Estado | Evidência |
 | --- | --- | --- | --- |
 | Commit upstream de referência | `7f080871c` confirmado no GitHub | Confirmado externamente | commit fixado (seção Contexto) |
-| Commit instalado na VPS | não verificado nesta tarefa | Pendente de validação | requer acesso a `/opt/faithro/rathena` |
-| Configuração compilada na VPS | não verificada nesta tarefa | Pendente de validação | requer verificação local |
+| Commit instalado na VPS | `7f080871c` — idêntico ao commit upstream de referência | Confirmado em auditoria read-only (2026-07-10) | `/opt/faithro/rathena`, ver [11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md) |
+| Configuração compilada na VPS | binários `login-server`, `char-server`, `map-server` e `web-server` presentes; flags de compilação (obfuscação, `PACKETVER_RE`) não re-testadas em binário | Parcialmente confirmado | ver [11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md) |
 | `PACKETVER` | `20211103` | Confirmado no código | `src/config/packets.hpp` @ `7f080871c` |
 | `PACKETVER_RE` | definido automaticamente para `20211103` | Confirmado no código | condição em `src/config/packets.hpp` (seção 3) |
 | Família do cliente | `2021-11-03_Ragexe` | Decisão do projeto, requer teste real | baseline FaithRO (seção 1) |
 | Modo servidor | Pre-Renewal e Renewal ambos suportados; escolha do FaithRO a definir | Confirmado em CI oficial | matriz `mode: ['PRE','RE']` |
 | Packet obfuscation | macro definida, mas chaves zero para versões posteriores a `20180307` | Confirmado no código | `clif_obfuscation.hpp` @ `7f080871c` (seção 6) |
 | `WEB_SERVER_ENABLE` | verdadeiro para `20211103` | Confirmado no código | `src/config/packets.hpp` @ `7f080871c` (seção 7) |
-| Web server implantado | não verificado | Pendente de validação | requer implantação (seção 7.2) |
-| Porta web efetiva | não verificada (padrão upstream `8888/tcp`) | Pendente de validação | requer implantação |
+| Web server implantado | binário compilado, mas sem unidade systemd nem processo ativo | Confirmado em auditoria read-only (2026-07-10) — não implantado | ver [11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md) |
+| Porta web efetiva | nenhuma porta em escuta (não implantado) | Confirmado em auditoria read-only (2026-07-10) | ver [11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md) |
 | Arquivo XML do cliente | requer teste com cliente real | Pendente de validação | requer cliente real |
 | Login | requer teste com cliente real | Pendente de validação | requer implantação |
 | Seleção de personagem | requer teste com cliente real | Pendente de validação | requer implantação |
@@ -425,9 +425,12 @@ abertas para `Anywhere` sem decisão formal documentada. Ver
 
 ### Logs (sem publicar dados reais)
 
-Os nomes efetivos das unidades systemd **ainda não estão formalmente definidos
-neste repositório**. Não presuma nomes de serviço. Primeiro **descubra** as
-unidades no ambiente:
+Os nomes efetivos das unidades systemd foram **confirmados por auditoria
+read-only** em 2026-07-10: `faithro-login.service`, `faithro-char.service` e
+`faithro-map.service` (detalhes, propriedades e runbook completo em
+[11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md)). Mesmo assim,
+antes de operar, **redescubra** as unidades no ambiente — reinstalações
+futuras podem alterar os nomes:
 
 ```bash
 systemctl list-unit-files --type=service |
@@ -457,10 +460,11 @@ Observações importantes:
 - **não** crie uma unidade apenas para fazer a documentação coincidir;
 - registre os nomes efetivos, posteriormente, no documento de implantação
   systemd (a criar);
-- em execuções anteriores da VPS foram observados os nomes `faithro-login`,
-  `faithro-char` e `faithro-map`. Como essas unidades **ainda não estão
-  formalmente documentadas neste repositório**, confirme os nomes no ambiente
-  com `systemctl` antes de executar os comandos.
+- os nomes `faithro-login.service`, `faithro-char.service` e
+  `faithro-map.service` estão formalmente documentados em
+  [11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md); ainda
+  assim, confirme os nomes no ambiente com `systemctl` antes de executar os
+  comandos, pois o ambiente pode mudar em reinstalações futuras.
 
 > Não copiar nomes de contas, IPs reais ou dados de jogadores para a
 > documentação. Usar limites de linhas e de tempo.
@@ -502,10 +506,17 @@ Observações importantes:
   - porta padrão upstream do web server `8888/tcp` (`conf/web_athena.conf`).
 - **Confirmado em CI oficial:** `20211103` na matriz de build, em modos `PRE` e
   `RE`.
-- **Pendente de verificação em implantação/checkout local:** commit efetivamente
-  instalado na VPS; configuração efetivamente compilada; web server implantado e
-  sua porta efetiva; comportamento real do executável do cliente; todos os testes
-  de jogo.
+- **Confirmado por auditoria read-only na VPS em 2026-07-10** (ver
+  [11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md)): commit
+  instalado (`7f080871c`, idêntico ao de referência); working tree limpo;
+  unidades systemd `faithro-login`, `faithro-char`, `faithro-map` (enabled,
+  active); portas `6900`, `6121`, `5121`; binário `web-server` compilado, mas
+  sem unidade/processo/porta.
+- **Pendente de verificação em implantação/checkout local:** flags efetivas de
+  compilação do binário (obfuscação, `PACKETVER_RE`) não re-testadas fora do
+  código-fonte; comportamento real do executável do cliente; todos os testes
+  de jogo; implantação completa do web server (unidade, configuração, porta,
+  firewall, testes de endpoint).
 
 ## Referências
 

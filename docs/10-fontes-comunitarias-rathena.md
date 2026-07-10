@@ -57,8 +57,10 @@ Todas as evidências de código abaixo estão fixadas no commit
 `7f080871c8b3bbe7a79027194633201c63422ee1` (abreviado `7f080871c`). O `master`
 pode aparecer apenas como referência adicional sobre o estado atual do upstream,
 nunca como única evidência de uma decisão vinculada a esse commit. A confirmação
-de que a VPS realmente usa esse commit continua **pendente** até verificação
-local em `/opt/faithro/rathena`.
+de que a VPS realmente usa esse commit foi **verificada por auditoria
+read-only em 2026-07-10**: `/opt/faithro/rathena` está no mesmo commit
+`7f080871c`, working tree limpo (ver
+[11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md)).
 
 ## Tabela de fontes consultadas
 
@@ -105,9 +107,14 @@ localização**.
 ## Itens pendentes
 
 - Validação integral dos tópicos de fórum/issues listados (com URL confirmada).
-- Verificação do commit efetivamente instalado na VPS (`/opt/faithro/rathena`).
-- Verificação da configuração efetivamente compilada na VPS (obfuscação, web
-  server, porta efetiva).
+- ~~Verificação do commit efetivamente instalado na VPS~~ — confirmado em
+  auditoria read-only de 2026-07-10: `7f080871c`, idêntico ao commit upstream
+  de referência (ver
+  [11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md)).
+- Verificação da configuração efetivamente compilada na VPS quanto a
+  obfuscação e `PACKETVER_RE` (comportamento do binário, não apenas do
+  código-fonte); implantação completa do web server (unidade, porta,
+  firewall) — ver [11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md).
 - Levantamento de fontes lusófonas equivalentes.
 
 ## Referências cruzadas

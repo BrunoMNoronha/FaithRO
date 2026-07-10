@@ -4,6 +4,18 @@ Todas as mudanças relevantes do FaithRO devem ser registradas aqui.
 
 ## [Não lançado]
 
+- Documento de serviços systemd do rAthena adicionado
+  (`docs/11-servicos-systemd-rathena.md`), com base em auditoria read-only na
+  VPS em 2026-07-10: unidades `faithro-login.service`, `faithro-char.service`
+  e `faithro-map.service` confirmadas (enabled, active, portas `6900`,
+  `6121`, `5121`); commit instalado (`7f080871c`) confirmado idêntico ao
+  commit upstream de referência; binário `web-server` confirmado compilado,
+  porém sem unidade systemd, processo ou porta implantados. Nenhum serviço
+  foi alterado durante a auditoria.
+- `docs/04-operacao-vps.md`, `docs/09-cliente-baseline-protocolo.md` e
+  `docs/10-fontes-comunitarias-rathena.md` atualizados para refletir os itens
+  confirmados pela auditoria (nomes de unidades, commit instalado, estado do
+  web server), substituindo pendências que já foram verificadas.
 - Índice central da documentação criado (`docs/README.md`).
 - Documento de cliente e protocolo adicionado (`docs/09-cliente-baseline-protocolo.md`):
   baseline `2021-11-03_Ragexe` / `PACKETVER=20211103`, distinção `Ragexe` × `PACKETVER_RE`,
