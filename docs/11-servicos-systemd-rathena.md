@@ -16,7 +16,7 @@ start/stop/restart na ordem correta — sem depender do histórico do chat.
 ## Estado verificado
 
 - **Data da auditoria:** 2026-07-10.
-- **Ambiente:** VPS de produção/testes do FaithRO, Ubuntu 22.04.5 LTS
+- **Ambiente:** VPS atual do projeto FaithRO, Ubuntu 22.04.5 LTS
   (kernel `6.8.0-124-generic`), acessada via `<HOST-VPS>` como
   `<USUARIO-OPERACIONAL>` na porta `<PORTA-SSH>` (SSH já documentado como
   `22022/tcp` em [04-operacao-vps.md](04-operacao-vps.md)).
@@ -47,6 +47,13 @@ start/stop/restart na ordem correta — sem depender do histórico do chat.
   implantada, sem processo em execução e sem porta em escuta**. Configuração
   de override (`conf/import/web_conf.txt`) existe mas está vazia. Ver detalhes
   na seção [Web server](#web-server).
+
+> **Retrato pontual:** `enabled`, `active`, portas em escuta, regras de
+> firewall, estado do working tree e processos listados nesta seção
+> representam um retrato obtido em **2026-07-10**. Eles não garantem que o
+> estado continue igual no futuro — repita os comandos de
+> [Consulta de estado](#consulta-de-estado) antes de qualquer operação para
+> confirmar o estado atual.
 
 ## Arquivos e componentes afetados
 
@@ -89,12 +96,53 @@ inferida:
     duas unidades).
 - **Ordem operacional recomendada, consistente com as dependências
   declaradas:** login → char → map (start); map → char → login (stop).
-- **Comportamento observado:** as três unidades foram iniciadas no mesmo
-  evento de boot, com PIDs sequenciais (806, 811, 812), compatível com a
-  ordem declarada.
 
 Nenhuma relação `Requires=`/`After=` foi inventada; todas as citadas acima
-constam literalmente no `systemctl cat` de cada unidade.
+constam literalmente no `systemctl cat` de cada unidade. PIDs de processo não
+são usados como evidência nesta documentação: são transitórios (mudam a cada
+boot ou restart) e não comprovam ordem operacional — a única evidência válida
+é o conteúdo declarado das unidades (`Requires=`, `After=`) e os estados
+coletados via `systemctl`.
+
+### Semântica de `Requires=` — parada e reinício explícitos
+
+Quando uma unidade **A** contém `Requires=B.service` e `B.service` é
+**explicitamente parada ou reiniciada** por um operador (`systemctl stop`/
+`systemctl restart`), essa ação é **propagada** para `A`. Isso é comportamento
+declarado pelo systemd para uma parada ou reinicialização explícita — não é
+apenas "pode interromper momentaneamente".
+
+No FaithRO:
+
+```text
+faithro-char.service Requires=faithro-login.service
+faithro-map.service  Requires=faithro-char.service
+```
+
+Portanto, para ações **explícitas** de um operador:
+
+- reiniciar `faithro-map.service` afeta apenas `map`;
+- reiniciar `faithro-char.service` reinicia `char` **e propaga a ação para
+  `map`**;
+- reiniciar `faithro-login.service` reinicia `login` **e propaga a ação,
+  transitivamente, para `char` e `map`**;
+- parar `login` propaga a parada para `char` e `map`;
+- parar `char` propaga a parada para `map`.
+
+### `Requires=` não cobre falha ou encerramento espontâneo
+
+`Requires=` sozinho **não garante** que uma unidade dependente será parada
+quando a unidade requerida falhar, encerrar espontaneamente ou entrar em
+estado inativo por conta própria. Esse comportamento mais forte exigiria
+dependências como `BindsTo=` combinadas com ordenação adequada — as unidades
+atuais **não** usam `BindsTo=`.
+
+Como as três unidades usam `Restart=on-failure`, uma falha de `login` ou
+`char` pode fazer o **próprio serviço** reiniciar automaticamente enquanto as
+unidades dependentes permanecem em execução, sem propagação. Por isso, após
+qualquer falha, o operador deve verificar toda a cadeia (`login`, `char`,
+`map`) mesmo que apenas uma unidade apareça como reiniciada — ver
+[Falhas e recuperação da cadeia](#falhas-e-recuperação-da-cadeia).
 
 ## Conteúdo confirmado das unidades
 
@@ -243,11 +291,48 @@ unidades, somente para validação sintática (nenhuma correção foi aplicada):
 - Conclusão: as três unidades do FaithRO passaram na validação sem
   achados próprios.
 
+## Pré-check obrigatório do MariaDB
+
+A unidade `faithro-login.service` declara:
+
+```ini
+After=network-online.target mariadb.service
+```
+
+mas **não** declara `Wants=mariadb.service` nem `Requires=mariadb.service`.
+
+**`After=mariadb.service` não é uma dependência de ativação.** Ele apenas
+ordena as unidades *quando ambas já fazem parte da mesma transação do
+systemd* — não garante que `mariadb.service` seja ativado, nem impede que
+`faithro-login.service` inicie com o banco indisponível.
+
+Por isso, antes de qualquer start ou restart da cadeia, verifique o banco:
+
+```bash
+systemctl is-active mariadb.service
+```
+
+Se o resultado **não** for `active`, o operador deve:
+
+1. não iniciar os servidores do rAthena;
+2. investigar o MariaDB;
+3. consultar os logs do banco;
+4. restaurar o banco de forma controlada;
+5. só depois iniciar a cadeia do jogo.
+
+Esta documentação **não inclui** comando automático para iniciar ou
+reiniciar o MariaDB — isso deve ser tratado em uma tarefa específica de
+banco de dados.
+
 ## Inicialização planejada
 
 Os comandos abaixo **não foram executados nesta auditoria** (as três unidades
 já estavam ativas). Documentados para uso planejado futuro, respeitando a
-ordem de dependência declarada:
+ordem de dependência declarada. Execute sempre o pré-check do MariaDB antes:
+
+```bash
+systemctl is-active mariadb.service
+```
 
 ```bash
 sudo systemctl start faithro-login.service
@@ -255,10 +340,25 @@ sudo systemctl start faithro-char.service
 sudo systemctl start faithro-map.service
 ```
 
+Por causa de `Requires=`, iniciar `faithro-map.service` isoladamente também
+pode puxar suas dependências (`char`, `login`) — mas este runbook mantém a
+sequência explícita **login → char → map** por clareza operacional e para
+permitir validação entre etapas. Após cada `start`, o operador deve
+interromper o procedimento se a unidade não ficar `active`.
+
+Ao final, valide as três unidades:
+
+```bash
+systemctl is-active \
+  faithro-login.service \
+  faithro-char.service \
+  faithro-map.service
+```
+
 ## Parada planejada
 
-Ordem inversa, para respeitar as dependências declaradas (`map` depende de
-`char`, que depende de `login`):
+A ordem explícita abaixo continua sendo o procedimento recomendado para
+manutenção planejada, por oferecer controle e validação entre etapas:
 
 ```bash
 sudo systemctl stop faithro-map.service
@@ -266,21 +366,127 @@ sudo systemctl stop faithro-char.service
 sudo systemctl stop faithro-login.service
 ```
 
-## Reinício planejado
+Vale notar que, por causa de `Requires=`, parar `login` diretamente já
+propaga a parada para `char` e `map`, e parar `char` diretamente já propaga a
+parada para `map` (ver [Semântica de `Requires=`](#semântica-de-requires--parada-e-reinício-explícitos)).
+Apesar dessa propagação, a ordem inversa explícita (`map` → `char` → `login`)
+é preferida em manutenção planejada, pois permite observar e validar cada
+etapa isoladamente.
 
-Evite reiniciar as três unidades simultaneamente sem necessidade — prefira
-reiniciar apenas a unidade afetada, na ordem de dependência quando mais de
-uma precisar ser reiniciada:
+Depois da parada, valide que o estado esperado é `inactive`:
 
 ```bash
-sudo systemctl restart faithro-login.service
-sudo systemctl restart faithro-char.service
+systemctl is-active \
+  faithro-login.service \
+  faithro-char.service \
+  faithro-map.service
+```
+
+## Reinício planejado
+
+**Não execute os três comandos de restart em sequência** — essa prática
+provoca reinicializações redundantes, porque a propagação de `Requires=` já
+reinicia as unidades dependentes:
+
+- reiniciar `login` já propaga o restart para `char` e `map`;
+- reiniciar `char` em seguida reiniciaria `char` e `map` **novamente**;
+- reiniciar `map` depois reiniciaria `map` **mais uma vez**.
+
+Escolha o cenário que corresponde à necessidade real:
+
+### Reiniciar somente `map`
+
+```bash
 sudo systemctl restart faithro-map.service
 ```
 
-Como `char` requer `login` e `map` requer `char`, reiniciar `login` pode
-interromper `char` e `map` momentaneamente por dependência declarada; avalie
-o impacto antes de reiniciar unidades upstream na cadeia de dependência.
+Valide:
+
+```bash
+systemctl is-active faithro-map.service
+sudo journalctl -u faithro-map.service \
+  --since '-5 minutes' --no-pager --lines=50
+```
+
+### Reiniciar `char` e sua dependente `map`
+
+```bash
+sudo systemctl restart faithro-char.service
+```
+
+O restart é propagado para `faithro-map.service` por causa de
+`Requires=faithro-char.service`. Valide ambas:
+
+```bash
+systemctl is-active faithro-char.service faithro-map.service
+```
+
+### Reiniciar toda a cadeia a partir de `login`
+
+```bash
+sudo systemctl restart faithro-login.service
+```
+
+O restart é propagado transitivamente para `faithro-char.service` e
+`faithro-map.service`. Valide:
+
+```bash
+systemctl is-active \
+  faithro-login.service \
+  faithro-char.service \
+  faithro-map.service
+```
+
+> **Nota:** se a intenção for reiniciar toda a cadeia, reinicie somente a
+> unidade upstream `faithro-login.service` e valide as três unidades depois
+> da propagação. Não execute `restart` em `login`, `char` e `map` em
+> sequência.
+
+## Falhas e recuperação da cadeia
+
+- Uma falha espontânea de `login` **não necessariamente** para `char` e
+  `map` — `Requires=` não cobre falha/encerramento espontâneo (ver
+  [`Requires=` não cobre falha ou encerramento espontâneo](#requires-não-cobre-falha-ou-encerramento-espontâneo)).
+- Uma falha espontânea de `char` **não necessariamente** para `map`.
+- `Restart=on-failure` tenta recuperar **somente a própria unidade** que
+  falhou, não a cadeia inteira.
+- Após qualquer falha, sempre verifique as três unidades — não presuma a
+  saúde da cadeia apenas porque um serviço voltou a `active`.
+
+Comandos de diagnóstico, somente leitura:
+
+```bash
+systemctl is-active \
+  mariadb.service \
+  faithro-login.service \
+  faithro-char.service \
+  faithro-map.service
+
+systemctl is-failed \
+  faithro-login.service \
+  faithro-char.service \
+  faithro-map.service
+
+sudo journalctl -u faithro-login.service \
+  --since '-10 minutes' --no-pager --lines=50
+
+sudo journalctl -u faithro-char.service \
+  --since '-10 minutes' --no-pager --lines=50
+
+sudo journalctl -u faithro-map.service \
+  --since '-10 minutes' --no-pager --lines=50
+```
+
+Depois de qualquer diagnóstico, valide também:
+
+- portas em escuta (`sudo ss -lntp` para `6900`, `6121`, `5121`);
+- conexão lógica login → char → map (o cliente consegue autenticar, entrar
+  no personagem e no mapa, nessa ordem);
+- não presuma que a cadeia está saudável apenas porque uma unidade isolada
+  está `active`.
+
+Não inclua logs brutos nem dados de jogadores na documentação, em issues ou
+em PRs — apenas o resultado interpretado dos comandos acima.
 
 ## Web server
 

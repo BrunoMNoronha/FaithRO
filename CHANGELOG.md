@@ -4,6 +4,18 @@ Todas as mudanças relevantes do FaithRO devem ser registradas aqui.
 
 ## [Não lançado]
 
+- Correção do runbook de serviços systemd
+  (`docs/11-servicos-systemd-rathena.md`): documentada a propagação de
+  `Requires=` em parada/reinício explícitos, diferenciada de falha ou
+  encerramento espontâneo (`Restart=on-failure` não propaga); adicionado
+  pré-check obrigatório do MariaDB (`After=mariadb.service` não é dependência
+  de ativação); removida a sequência redundante de restart das três unidades
+  em favor de três cenários separados (map / char+map / cadeia completa via
+  login); removida a evidência baseada em PIDs transitórios; adicionada seção
+  "Falhas e recuperação da cadeia"; reformulada a descrição do ambiente para
+  "VPS atual do projeto FaithRO". Adicionado resumo operacional em
+  `docs/04-operacao-vps.md` ("Operação dos serviços rAthena"), atendendo aos
+  critérios da issue #15.
 - Documento de serviços systemd do rAthena adicionado
   (`docs/11-servicos-systemd-rathena.md`), com base em auditoria read-only na
   VPS em 2026-07-10: unidades `faithro-login.service`, `faithro-char.service`
