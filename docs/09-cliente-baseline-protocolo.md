@@ -21,12 +21,10 @@ cliente-servidor.
   (abreviado `7f080871c`). As afirmações "confirmado no código" deste documento
   foram verificadas **neste commit fixado** no GitHub (acesso em 2026-07-10).
 - Este repositório é de **documentação/planejamento** e **não** contém um
-  checkout do rAthena. Diferencie sempre três estados distintos:
-  - **commit upstream consultado** (`7f080871c`, verificável no GitHub);
-  - **commit efetivamente instalado na VPS** (`/opt/faithro/rathena`) — **não
-    verificado nesta tarefa**;
-  - **configuração efetivamente compilada na VPS** — **não verificada nesta
-    tarefa**.
+  checkout do rAthena. Diferencie sempre os seguintes níveis de evidência:
+  - **Comportamento no código oficial upstream do rAthena:** confirmado no código consultado (`7f080871c`).
+  - **Estado do checkout utilizado pelo FaithRO:** pendente de validação (pois o core não está presente no workspace).
+  - **Estado efetivamente compilado e executado na VPS:** pendente de validação (pois não há acesso ao ambiente Linux nesta missão).
 - Terceiras classes: desabilitadas por decisão de conteúdo do FaithRO.
 - Level máximo: 185, sujeito a balanceamento próprio (ver
   [00-base-conhecimento.md](00-base-conhecimento.md)).
@@ -36,9 +34,9 @@ cliente-servidor.
 | Item | Valor |
 | --- | --- |
 | `PACKETVER` | `20211103` |
-| Cliente-alvo | `2021-11-03_Ragexe` |
+| Cliente de referência | `2021-11-03_Ragexe` |
 | Família do executável | `Ragexe` |
-| Modo de jogo do servidor | decisão independente do cliente (ver seção 4) |
+| Modo do servidor | decisão independente do cliente |
 | Terceiras classes | desabilitadas por decisão do FaithRO |
 | Level máximo | 185, sujeito a balanceamento próprio |
 
@@ -78,7 +76,7 @@ Estes conceitos **não** são equivalentes:
 - **`PACKETVER_RE`** — macro **interna** do código do rAthena, definida
   automaticamente para certas faixas de datas.
 
-Fato confirmado no código do rAthena no commit `7f080871c`
+**Comportamento no código oficial upstream do rAthena:** confirmado no código consultado no commit `7f080871c`
 ([`src/config/packets.hpp`](https://github.com/rathena/rathena/blob/7f080871c8b3bbe7a79027194633201c63422ee1/src/config/packets.hpp)):
 
 ```c
@@ -94,12 +92,12 @@ Como `20211103` está no intervalo `>= 20200902 && <= 20211118`, o rAthena
 
 - isso é uma **decisão interna da implementação** do rAthena;
 - **não** transforma o executável em `RagexeRE`;
-- o cliente-alvo continua sendo `2021-11-03_Ragexe` (família `Ragexe`);
+- o cliente de referência continua sendo `2021-11-03_Ragexe` (família `Ragexe`);
 - **não** se deve editar nem forçar manualmente `PACKETVER_RE` apenas para "fazer
   o nome parecer consistente".
 
-> Não documente o cliente-alvo como `2021-11-03_RagexeRE`. Não há evidência
-> técnica para isso; a variante adotada é `Ragexe`.
+> Não documente o cliente-alvo como `2021-11-03_RagexeRE` sem evidência concreta.
+> Não há evidência técnica para isso; a variante adotada é `Ragexe`.
 
 ## 4. Renewal, Pre-Renewal e classes
 
@@ -116,399 +114,140 @@ Como `20211103` está no intervalo `>= 20200902 && <= 20211118`, o rAthena
 - O level 185 sem terceiras classes é uma customização do FaithRO e exige
   balanceamento próprio.
 
-## 5. Configuração do `PACKETVER` (planejado)
+## 5. Packet obfuscation
 
-Existem dois mecanismos oficiais. **Nenhum é executado nesta tarefa.**
+A obfuscação é uma exigência de **alinhamento entre cliente e servidor**.
+Não se deve habilitar ou desabilitar automaticamente, nem registrar chaves reais.
 
-### 5.1 Pelo processo de compilação
-
-```bash
-./configure --enable-packetver=20211103
-```
-
-### 5.2 Pelo mecanismo de customização
-
-Arquivo esperado: `src/custom/defines_pre.hpp`
-
-```cpp
-#define PACKETVER 20211103
-```
-
-> Não editar diretamente o valor padrão em `src/config/packets.hpp`. Prefira o
-> mecanismo de customização (`src/custom/defines_pre.hpp`) ou o argumento oficial
-> de compilação.
-
-Após qualquer mudança futura no `PACKETVER`: recompilação **limpa** e reinício
-controlado dos serviços de login, char e map (`<UNIDADE-LOGIN>`,
-`<UNIDADE-CHAR>`, `<UNIDADE-MAP>` — confirmar os nomes reais no ambiente com
-`systemctl`, ver [seção de logs](#logs-sem-publicar-dados-reais)).
-
-## 6. Packet obfuscation
-
-Para `PACKETVER=20211103`, o comportamento **não** é simplesmente "obfuscação
-ativa". É preciso distinguir a macro geral da atribuição efetiva de chaves.
-
-**Suporte geral compilado.** Em
-[`src/config/packets.hpp`](https://github.com/rathena/rathena/blob/7f080871c8b3bbe7a79027194633201c63422ee1/src/config/packets.hpp)
-(commit `7f080871c`), a macro `PACKET_OBFUSCATION` é definida para
-`PACKETVER >= 20110817`:
-
-```c
-#if PACKETVER >= 20110817
-	#ifndef PACKET_OBFUSCATION
-		#define PACKET_OBFUSCATION
-```
-
-**Chaves efetivas para o baseline.** Em
-[`src/map/clif_obfuscation.hpp`](https://github.com/rathena/rathena/blob/7f080871c8b3bbe7a79027194633201c63422ee1/src/map/clif_obfuscation.hpp)
-(commit `7f080871c`), a atribuição de chaves para clientes posteriores a
-`20180307` é **zero**:
+**Comportamento no código oficial upstream do rAthena:** confirmado no código consultado
+(commit `7f080871c`). Em `src/config/packets.hpp`, a macro `PACKET_OBFUSCATION` é
+definida para `PACKETVER >= 20110817`. Porém, em `src/map/clif_obfuscation.hpp`, a atribuição
+de chaves para clientes posteriores a `20180307` é **zero**:
 
 ```c
 #elif PACKETVER > 20180307 // Clients after 2018-03-07bRagexeRE do not obfuscate packets anymore
     packet_keys(0x00000000,0x00000000,0x00000000);
 ```
 
-Como `20211103 > 20180307`, para o baseline do FaithRO:
+- **Estado do checkout utilizado pelo FaithRO:** pendente de validação.
+- **Estado efetivamente compilado e executado na VPS:** pendente de validação.
+- **Estado no cliente do projeto:** pendente de teste com o cliente de referência.
 
-- a macro geral `PACKET_OBFUSCATION` permanece **definida** (suporte compilado);
-- as **chaves efetivas são zero**;
-- **não existe obfuscação efetiva** no comportamento padrão do rAthena para esse
-  `PACKETVER`;
-- portanto, **não** se deve afirmar que a criptografia/obfuscação está "ativa por
-  padrão" para o baseline;
-- patches equivalentes a `Disable Packet Encryption` **não** devem ser
-  apresentados como obrigatórios sem verificar o executável real;
-- chaves customizadas só devem ser consideradas se houver customização
-  **explícita e documentada**.
+O alinhamento de packet obfuscation permanece pendente de validação com o cliente
+de referência obtido legalmente pelo responsável pelo projeto.
 
-> **Resumo:** para `PACKETVER=20211103`, o suporte geral à packet obfuscation
-> permanece compilado via macro `PACKET_OBFUSCATION`. Entretanto,
-> `clif_obfuscation.hpp` atribui chaves zero para clientes posteriores a
-> `20180307`, indicando ausência de obfuscação efetiva no comportamento padrão do
-> baseline. O executável real e seus patches ainda devem ser verificados para
-> confirmar que não houve alteração comunitária ou customizada desse
-> comportamento.
+## 6. Web server do rAthena
 
-Itens a verificar na implantação:
-
-- se o executável real do FaithRO mantém o comportamento padrão (chaves zero);
-- se algum patch alterou esse comportamento;
-- se existe qualquer customização explícita de chaves (nunca registrar chaves
-  reais neste repositório);
-- que cliente e servidor permaneçam alinhados após qualquer mudança
-  (recompilação limpa + teste).
-
-## 7. Web server do rAthena
-
-**Habilitado pelo código para o baseline.** Em
-[`src/config/packets.hpp`](https://github.com/rathena/rathena/blob/7f080871c8b3bbe7a79027194633201c63422ee1/src/config/packets.hpp)
-(commit `7f080871c`):
+**Comportamento no código oficial upstream do rAthena:** confirmado no código consultado.
+Em `src/config/packets.hpp` (commit `7f080871c`), existe a macro de compilação:
 
 ```c
 #define WEB_SERVER_ENABLE PACKETVER > 20200300
 ```
 
-Como o baseline é `PACKETVER=20211103` e `20211103 > 20200300`, o resultado é:
+O web server serve para funcionalidades dependentes como controle de emblemas
+de guilda (via `src/web/emblem_controller.cpp` e tabela `guild_emblems`),
+e pode exigir configuração no cliente para funcionar corretamente.
 
-```text
-WEB_SERVER_ENABLE: habilitado pelo código para o baseline.
-```
+- **Estado do checkout utilizado pelo FaithRO:** pendente de validação e implantação em tarefa própria.
+- **Estado efetivamente compilado e executado na VPS:** pendente de validação e implantação em tarefa própria.
 
-### 7.1 Confirmado no código (commit `7f080871c`)
+Não expor o serviço publicamente sem validação de riscos.
+O web server não é um requisito comprovado para login básico.
 
-- `WEB_SERVER_ENABLE` é verdadeiro para `PACKETVER=20211103`.
-- O rAthena possui um componente web dedicado
-  ([`src/web/web.cpp`](https://github.com/rathena/rathena/blob/7f080871c8b3bbe7a79027194633201c63422ee1/src/web/web.cpp)).
-- Há controladores para recursos como emblemas de guilda
-  ([`src/web/emblem_controller.cpp`](https://github.com/rathena/rathena/blob/7f080871c8b3bbe7a79027194633201c63422ee1/src/web/emblem_controller.cpp)),
-  com uso de tabelas como `guild_emblems`.
-- O arquivo de configuração
-  [`conf/web_athena.conf`](https://github.com/rathena/rathena/blob/7f080871c8b3bbe7a79027194633201c63422ee1/conf/web_athena.conf)
-  define `web_port: 8888` como valor **padrão upstream** e mantém `bind_ip`
-  comentado (exemplo `127.0.0.1`).
-- Overrides devem ir para `conf/import/web_conf.txt` (modelo em
-  [`conf/import-tmpl/web_conf.txt`](https://github.com/rathena/rathena/blob/7f080871c8b3bbe7a79027194633201c63422ee1/conf/import-tmpl/web_conf.txt)).
-
-### 7.2 Pendente na implantação do FaithRO
-
-- confirmar se o binário `web-server` foi compilado na VPS;
-- confirmar se existe serviço systemd correspondente (`<UNIDADE-WEB>` —
-  `Pendente de definição durante a implantação do web server`);
-- configurar `conf/import/web_conf.txt`;
-- confirmar a porta efetivamente implantada;
-- definir bind, firewall e exposição;
-- confirmar as tabelas SQL necessárias;
-- testar endpoints e recursos;
-- testar emblemas de guilda;
-- verificar a configuração esperada pelo cliente.
-
-```text
-Porta padrão upstream: 8888/tcp.
-Porta efetivamente implantada no FaithRO: pendente de validação.
-```
-
-> Não afirmar que a porta efetiva do FaithRO já é `8888`. Não recomendar
-> exposição pública automática dessa porta. Não configurar nem expor o web server
-> nesta tarefa. Não tratar o web server como requisito comprovado para o login
-> básico sem teste.
-
-## 8. XML, Lua e configurações externas
+## 7. XML, Lua e configurações externas
 
 Não assumir automaticamente qual arquivo o cliente lê (`clientinfo.xml`,
-`sclientinfo.xml`, caminho em GRF ou Lua específico). Documentar somente o que
+`sclientinfo.xml`, caminho em GRF ou arquivo Lua específico). Documentar somente o que
 for **confirmado no cliente legalmente obtido pelo responsável**.
 
-Verificar e documentar, quando o cliente estiver disponível:
-
-- arquivo realmente lido pelo cliente;
-- codificação;
-- `servicetype`;
-- `servertype`;
-- endereço;
-- porta;
-- `langtype`;
-- configurações externas e dependências Lua.
-
-Não publicar o IP real do servidor. Usar sempre placeholders:
-
-```text
-<IP-VPS>
-<IP-CLIENTE>
-<USUARIO>
-<BANCO>
-<PORTA>
-<ARQUIVO>
-```
-
-## 9. Patches do cliente
+## 8. Patches do cliente
 
 Registrar cada patch por nome e finalidade. **Não** apresentar uma lista genérica
 de patches como universalmente correta.
 
 | Patch | Obrigatório | Motivo | Risco | Resultado do teste |
 | ----- | ----------- | ------ | ----- | ------------------ |
-| _(a preencher com o cliente real)_ | Pendente | Pendente | Pendente | Pendente de validação |
+| Leitura da pasta `data` | Pendente | Pendente | Pendente | Pendente de validação |
+| Leitura de arquivo XML | Pendente | Pendente | Pendente | Pendente de validação |
+| Endereço de conexão | Pendente | Pendente | Pendente | Pendente de validação |
+| Packet encryption | Pendente | Pendente | Pendente | Pendente de validação |
+| Configurações externas e Lua | Pendente | Pendente | Pendente | Pendente de validação |
+| Arquivos ausentes | Pendente | Pendente | Pendente | Pendente de validação |
 
-Atenção especial a patches relacionados a:
+## 9. Matriz de compatibilidade
 
-- leitura de pasta `data`;
-- leitura de arquivos XML;
-- endereço de conexão;
-- packet encryption;
-- execução sem parâmetros oficiais;
-- configurações externas;
-- idioma;
-- proteção contra erro por arquivos ausentes.
+| Componente            | Valor esperado         | Valor encontrado | Estado | Evidência |
+| --------------------- | ---------------------- | ---------------- | ------ | --------- |
+| Commit rAthena        | Estado confirmado      | Pendente         | pendente de validação | Requer acesso à VPS |
+| `PACKETVER`           | `20211103`             | Pendente         | pendente de validação | Requer acesso à VPS |
+| Família               | `Ragexe`               | Pendente         | pendente de validação | Requer teste real |
+| Data do cliente       | `2021-11-03`           | Pendente         | pendente de validação | Requer teste real |
+| Macro interna         | Conforme código        | `PACKETVER_RE`   | confirmado no código upstream | `src/config/packets.hpp` @ 7f080871c |
+| Modo servidor         | Configuração FaithRO   | Pendente         | pendente de validação | Requer acesso à VPS |
+| Packet obfuscation    | Alinhada               | Pendente         | pendente de validação | Requer teste real e VPS |
+| Arquivo XML/Lua       | Confirmado por teste   | Pendente         | pendente de validação | Requer teste real |
+| Web server            | Confirmado ou pendente | Pendente         | pendente de validação e implantação | Tarefa própria |
+| Login                 | Funcional              | Pendente         | pendente de validação | Requer implantação |
+| Seleção de personagem | Funcional              | Pendente         | pendente de validação | Requer implantação |
+| Entrada no mapa       | Funcional              | Pendente         | pendente de validação | Requer implantação |
+| Movimento             | Funcional              | Pendente         | pendente de validação | Requer implantação |
+| NPCs                  | Funcionais             | Pendente         | pendente de validação | Requer implantação |
+| Inventário            | Funcional              | Pendente         | pendente de validação | Requer implantação |
+| Guilda/emblema        | Funcional ou pendente  | Pendente         | pendente de validação | Requer implantação |
 
-Ferramentas comunitárias devem ser obtidas do repositório ou página oficial do
-autor, quando disponível. **Não** armazenar executáveis já modificados.
-
-## 10. Arquivos que podem ser documentados
-
-O projeto **pode** documentar, sobre um cliente que o responsável possua
-legalmente:
-
-- nome esperado do executável;
-- data de compilação;
-- tamanho;
-- metadados;
-- hash SHA-256 do arquivo (para identificação, não para redistribuição);
-- ferramentas abertas utilizadas;
-- patches aplicados;
-- estrutura de diretórios;
-- arquivos próprios do FaithRO e suas configurações;
-- processo de validação.
-
-> Um hash identifica um arquivo já possuído legalmente. Um hash **não** concede
-> licença de redistribuição.
-
-## 11. Arquivos que NÃO podem ser fornecidos nem versionados
-
-- cliente completo;
-- instalador completo;
-- GRF oficial;
-- executável oficial;
-- executável modificado;
-- DLL proprietária;
-- asset oficial (sprite, mapa, música);
-- pacote de tradução com conteúdo não autorizado;
-- arquivo obtido de anexo não confiável.
-
-**Não** incluir links diretos para pacotes completos em Mega, Google Drive,
-MediaFire ou serviços equivalentes. Links do fórum devem apontar para a
-**discussão**, não para anexos.
-
-## 12. Alertas de segurança do cliente
-
-- Não instruir o usuário a ignorar alertas de antivírus.
-- Não tratar falso positivo como fato sem análise.
-- Não executar arquivos comunitários na VPS.
-- Não usar a VPS de produção para modificar o cliente.
-- Não aceitar executáveis prontos como fonte confiável.
-- Registrar origem, hash e resultado da análise de qualquer ferramenta utilizada.
-- Separar ferramentas abertas de binários proprietários.
-
-## 13. Matriz de compatibilidade do cliente
-
-Estados: `Confirmado no código` · `Confirmado em CI oficial` · `Confirmado
-externamente` · `Decisão do projeto` · `Pendente de validação`.
-
-| Componente | Valor encontrado | Estado | Evidência |
-| --- | --- | --- | --- |
-| Commit upstream de referência | `7f080871c` confirmado no GitHub | Confirmado externamente | commit fixado (seção Contexto) |
-| Commit instalado na VPS | não verificado nesta tarefa | Pendente de validação | requer acesso a `/opt/faithro/rathena` |
-| Configuração compilada na VPS | não verificada nesta tarefa | Pendente de validação | requer verificação local |
-| `PACKETVER` | `20211103` | Confirmado no código | `src/config/packets.hpp` @ `7f080871c` |
-| `PACKETVER_RE` | definido automaticamente para `20211103` | Confirmado no código | condição em `src/config/packets.hpp` (seção 3) |
-| Família do cliente | `2021-11-03_Ragexe` | Decisão do projeto, requer teste real | baseline FaithRO (seção 1) |
-| Modo servidor | Pre-Renewal e Renewal ambos suportados; escolha do FaithRO a definir | Confirmado em CI oficial | matriz `mode: ['PRE','RE']` |
-| Packet obfuscation | macro definida, mas chaves zero para versões posteriores a `20180307` | Confirmado no código | `clif_obfuscation.hpp` @ `7f080871c` (seção 6) |
-| `WEB_SERVER_ENABLE` | verdadeiro para `20211103` | Confirmado no código | `src/config/packets.hpp` @ `7f080871c` (seção 7) |
-| Web server implantado | não verificado | Pendente de validação | requer implantação (seção 7.2) |
-| Porta web efetiva | não verificada (padrão upstream `8888/tcp`) | Pendente de validação | requer implantação |
-| Arquivo XML do cliente | requer teste com cliente real | Pendente de validação | requer cliente real |
-| Login | requer teste com cliente real | Pendente de validação | requer implantação |
-| Seleção de personagem | requer teste com cliente real | Pendente de validação | requer implantação |
-| Entrada no mapa | requer teste com cliente real | Pendente de validação | requer implantação |
-| Movimento | requer teste com cliente real | Pendente de validação | requer implantação |
-| NPCs | requer teste com cliente real | Pendente de validação | requer implantação |
-| Inventário | requer teste com cliente real | Pendente de validação | requer implantação |
-| Guilda/emblema | depende do web server implantado | Pendente de validação | seção 7 |
-
-> Não preencher como funcional aquilo que não foi testado.
-
-## 14. Plano mínimo de testes do cliente (planejado)
+## 10. Plano mínimo de testes (planejado)
 
 Portas de referência do projeto (padrão rAthena; confirmar na implantação):
-login `6900/tcp`, char `6121/tcp`, map `5121/tcp`; web server (upstream)
-`8888/tcp`, com porta efetiva **pendente de validação**. Durante testes, as
-portas do jogo devem permanecer **restritas ao IP autorizado** e **não** ser
-abertas para `Anywhere` sem decisão formal documentada. Ver
-[04-operacao-vps.md](04-operacao-vps.md).
+login `<PORTA>`, char `<PORTA>`, map `<PORTA>`; web server `<PORTA>`.
+As portas efetivas estão pendentes de validação. Durante os testes, não abrir a
+conexão globalmente. Usar `<IP-CLIENTE>` restrito.
 
 ### Inicialização
-
-- executável inicia sem erro;
-- ausência de DLL não localizada;
-- ausência de falha imediata;
-- janela e resolução carregam.
+- abertura do executável;
+- DLLs ausentes;
+- encerramento imediato;
+- janela e resolução;
+- mensagens de erro.
 
 ### Conexão
+- conexão com `<IP-VPS>:<PORTA>`;
+- tentativa registrada no login-server;
+- ausência de `Unknown packet`;
+- ausência de encerramento por divergência de protocolo;
+- comportamento diante de credenciais inválidas;
+- reconexão.
 
-- cliente alcança `<IP-VPS>:6900`;
-- login-server registra tentativa válida;
-- não ocorre `Unknown packet`;
-- não ocorre encerramento anormal por divergência de pacotes;
-- comportamento de packet obfuscation do cliente compatível com o servidor
-  (para o baseline, o padrão do rAthena é sem obfuscação efetiva — seção 6).
-
-### Personagem
-
-- lista de personagens abre;
-- personagem pode ser criado, quando permitido;
-- personagem pode ser selecionado;
-- map-server recebe a conexão.
-
-### Mapa
-
-- personagem entra no mapa;
-- movimento funciona;
-- NPCs aparecem e a interação funciona;
-- inventário abre e itens aparecem corretamente;
-- mensagens de chat funcionam.
+### Personagem e mapa
+- lista de personagens;
+- criação, quando permitida;
+- seleção;
+- conexão com char-server;
+- conexão com map-server;
+- entrada no mapa;
+- movimento;
+- NPCs e itens funcionam;
+- inventário abre;
+- chat.
 
 ### Recursos adicionais
+- grupo, guilda, emblema, armazém, comércio, atalhos, interface, tradução, reconexão.
 
-- grupo, guilda, emblema (depende do web server), armazém, comércio, atalhos,
-  interface, tradução, reconexão.
+## 11. Riscos
 
-### Logs (sem publicar dados reais)
+- Indisponibilidade por erro de conexão.
+- Incompatibilidade entre cliente e pacote (Unknown Packet).
+- Perda de configuração de baseline em recompilações futuras.
+- Divergência de protocolo por não testar obfuscação adequadamente.
+- Manutenção futura dificultada por uso de binários sem suporte.
 
-Os nomes efetivos das unidades systemd **ainda não estão formalmente definidos
-neste repositório**. Não presuma nomes de serviço. Primeiro **descubra** as
-unidades no ambiente:
+## 12. Rollback
 
-```bash
-systemctl list-unit-files --type=service |
-  grep -Ei 'faithro|rathena|login|char|map|web'
-# alternativa, incluindo unidades inativas:
-systemctl list-units --type=service --all |
-  grep -Ei 'faithro|rathena|login|char|map|web'
-```
+O rollback deste documento é o comando Git para restaurá-lo:
+`git restore -- docs/09-cliente-baseline-protocolo.md`
 
-Depois de confirmar as unidades corretas, consulte os logs substituindo os
-placeholders pelos nomes reais:
+Para mudanças de compilação: restaurar binários de backups na VPS, não exigido nesta etapa (documental).
 
-```bash
-journalctl -u <UNIDADE-LOGIN> --since "-10min" -n 200
-journalctl -u <UNIDADE-CHAR>  --since "-10min" -n 200
-journalctl -u <UNIDADE-MAP>   --since "-10min" -n 200
-# web server, quando implantado:
-journalctl -u <UNIDADE-WEB>   --since "-10min" -n 200
-```
+## 13. Referências
 
-Observações importantes:
-
-- revise os resultados da descoberta antes de usar qualquer nome;
-- termos genéricos como `login`, `char`, `map` e `web` podem encontrar serviços
-  **não relacionados** ao FaithRO — confirme a unidade correta antes de consultar
-  logs ou reiniciar serviços;
-- **não** crie uma unidade apenas para fazer a documentação coincidir;
-- registre os nomes efetivos, posteriormente, no documento de implantação
-  systemd (a criar);
-- em execuções anteriores da VPS foram observados os nomes `faithro-login`,
-  `faithro-char` e `faithro-map`. Como essas unidades **ainda não estão
-  formalmente documentadas neste repositório**, confirme os nomes no ambiente
-  com `systemctl` antes de executar os comandos.
-
-> Não copiar nomes de contas, IPs reais ou dados de jogadores para a
-> documentação. Usar limites de linhas e de tempo.
-
-## Riscos
-
-- Divergência cliente-servidor por `PACKETVER` incorreto → `Unknown packet` /
-  desconexão.
-- Assumir obfuscação "ativa" quando o padrão do baseline é sem obfuscação efetiva
-  → configuração e diagnóstico errados.
-- Web server habilitado pelo código, mas não implantado/configurado → emblema de
-  guilda indisponível.
-- Documentar como "compatível" ou "funcional" algo não testado → decisão errada
-  de baseline.
-- Assumir arquivo XML/Lua sem confirmar no cliente real → configuração inválida.
-- Confundir commit upstream de referência com o commit efetivamente instalado na
-  VPS.
-
-## Rollback
-
-- Este documento não altera ambiente; o rollback documental é reverter o commit
-  desta branch.
-- Para mudanças futuras de `PACKETVER`/obfuscação/web server (em tarefa própria):
-  manter backup do binário anterior e das configs, recompilar limpo, e reverter
-  para o binário/config anteriores em caso de falha, sempre com backup
-  previamente criado.
-
-## Estado de verificação
-
-- **Confirmado no código do rAthena no commit `7f080871c` (referência externa,
-  acesso em 2026-07-10):**
-  - default `PACKETVER=20211103`;
-  - definição automática de `PACKETVER_RE` para `20211103`;
-  - `PACKET_OBFUSCATION` definida para `PACKETVER >= 20110817`, porém com chaves
-    efetivas **zero** para clientes posteriores a `20180307`
-    (`clif_obfuscation.hpp`);
-  - `WEB_SERVER_ENABLE` verdadeiro para `20211103`
-    (`#define WEB_SERVER_ENABLE PACKETVER > 20200300`);
-  - porta padrão upstream do web server `8888/tcp` (`conf/web_athena.conf`).
-- **Confirmado em CI oficial:** `20211103` na matriz de build, em modos `PRE` e
-  `RE`.
-- **Pendente de verificação em implantação/checkout local:** commit efetivamente
-  instalado na VPS; configuração efetivamente compilada; web server implantado e
-  sua porta efetiva; comportamento real do executável do cliente; todos os testes
-  de jogo.
-
-## Referências
-
-Ver a tabela completa e classificada por confiança em
-[10-fontes-comunitarias-rathena.md](10-fontes-comunitarias-rathena.md).
-</content>
+Ver a classificação detalhada de fontes e documentação comunitária em [10-fontes-comunitarias-rathena.md](10-fontes-comunitarias-rathena.md).
