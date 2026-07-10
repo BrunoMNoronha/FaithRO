@@ -4,6 +4,14 @@ Todas as mudanças relevantes do FaithRO devem ser registradas aqui.
 
 ## [Não lançado]
 
+- Decisão de gameplay refinada: base level máximo planejado 255, atributo/status
+  natural máximo individual 185 e ASPD máxima planejada 197. O antigo base
+  level 185 e o limite de atributo 187 são decisões substituídas. Implantação,
+  testes e balanceamento permanecem pendentes da issue #8. Nenhuma alteração
+  operacional foi realizada. (As menções a "level 185" em entradas anteriores
+  deste changelog são registros históricos do antigo base level máximo,
+  substituído por 255 — não confundir com o atributo natural máximo vigente
+  185; job level máximo segue a definir por classe.)
 - Refinamento das evidências da decisão Pre-Renewal (`docs/03-configuracao-alvo.md`,
   `docs/10-fontes-comunitarias-rathena.md`, `docs/README.md`): tabelas
   reformuladas para distinguir decisão/estado-alvo de estado operacional;

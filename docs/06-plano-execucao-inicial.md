@@ -31,7 +31,9 @@ Fluxo sugerido: tarefa → PR para `dev` → validação → PR de `dev` para `m
 - [Emulador] Clonar e compilar rAthena
 - [Config] Definir episódio/referência mecânica
 - [Config] Definir rates iniciais
-- [Config] Definir level máximo 185
+- [Config] Definir base level 255, atributos 185 e ASPD 197 (escopo original
+  citava base level máximo 185, substituído em 2026-07-10; o atributo máximo
+  187 foi posteriormente corrigido para 185 — ver issue #8)
 - [Config] Bloquear 3ª classes
 - [Segurança] Configurar usuário não-root
 - [Segurança] Configurar firewall

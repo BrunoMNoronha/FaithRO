@@ -32,8 +32,16 @@ commit upstream de referência `7f080871c8b3bbe7a79027194633201c63422ee1`
 - Estilo: old school/high rate
 - Estado-alvo de 3ª classes: bloqueadas por política; validação operacional
   na issue #9 (ver seção [Classes](#classes))
-- Level máximo planejado: 185; configuração e balanceamento na issue #8 (ver
-  seção [Level 185](#level-185))
+- Base level máximo planejado: 255; implantação e balanceamento na issue #8
+  (ver seção [Base level 255, atributos máximos 185 e ASPD 197](#base-level-255-atributos-máximos-185-e-aspd-197))
+- Atributo/status natural máximo individual planejado: 185; implantação e
+  validação na issue #8
+- ASPD máxima planejada: 197; implantação e validação na issue #8
+- Job level máximo: pendente de definição para cada classe permitida
+- Decisão histórica: o antigo base level máximo 185 foi substituído em
+  2026-07-10 por base level máximo 255.
+- Decisão posterior: o atributo máximo inicialmente registrado como 187 foi
+  corrigido para 185, e a ASPD máxima planejada foi definida em 197.
 - Público: comunidade pequena/média
 - Sem fins lucrativos
 
@@ -54,12 +62,15 @@ foi realizada para produzir esta decisão.
 | ------------------ | ---------------------------- | -------------------------------------------------- |
 | Protocolo          | `PACKETVER=20211103`        | confirmado no código e checkout                    |
 | Cliente            | `2021-11-03_Ragexe`         | requer validação real com cliente                  |
-| Mecânica           | Pre-Renewal                 | configuração de build registrada como Pre-Renewal  |
-| Conteúdo           | curado                       | ainda não auditado/implantado integralmente        |
+| Mecânica           | Pre-Renewal                 | configuração registrada do build alinhada          |
+| Conteúdo           | curado                       | não inventariado integralmente                     |
 | Episódio histórico | ainda não fixado             | não aplicável                                      |
-| Classes            | progressão até transclasses  | bloqueio integral ainda não validado               |
+| Classes            | até transclasses             | validação operacional pendente                     |
 | 3ª classes         | bloqueadas por política      | pendente da issue #9                               |
-| Level máximo       | 185 custom                   | pendente da issue #8                               |
+| Base level máximo  | 255                          | ainda não configurado ou validado (issue #8)       |
+| Atributo natural máximo | 185 por atributo        | ainda não configurado ou validado (issue #8)       |
+| ASPD máxima        | 197                          | ainda não configurada ou validada (issue #8)       |
+| Job level          | definir por classe           | pendente das issues #8 e #9                        |
 | Rates              | high rate a definir           | pendente da issue #7                               |
 
 Nenhuma linha desta tabela decorre automaticamente de outra. Em particular:
@@ -69,8 +80,10 @@ Nenhuma linha desta tabela decorre automaticamente de outra. Em particular:
   ver [09-cliente-baseline-protocolo.md](09-cliente-baseline-protocolo.md));
 - Pre-Renewal **não** bloqueia sozinho as 3ª classes — isso é política de
   conteúdo tratada na issue #9 (ver [Classes](#classes));
-- Pre-Renewal **não** define sozinho o level máximo 185 — isso é
-  customização tratada na issue #8 (ver [Level 185](#level-185));
+- Pre-Renewal **não** define sozinho o base level máximo 255, o atributo
+  natural máximo 185 nem a ASPD máxima 197 — isso é customização tratada na
+  issue #8 (ver
+  [Base level 255, atributos máximos 185 e ASPD 197](#base-level-255-atributos-máximos-185-e-aspd-197));
 - Pre-Renewal **não** define sozinho o conteúdo (mapas, quests, itens) — isso
   é curadoria pendente (ver [Conteúdo e episódio](#conteúdo-e-episódio)).
 
@@ -85,10 +98,12 @@ Nenhuma linha desta tabela decorre automaticamente de outra. Em particular:
 | Drop por diferença de level               | sem algoritmo Renewal          | algoritmo Renewal                                  |
 | ASPD                                      | clássica                       | Renewal                                            |
 | Dano modificado por base level            | sem `RENEWAL_LVDMG`            | com `RENEWAL_LVDMG`                                |
-| Relação com level 185                     | customização de alto risco; requer revisão extensa das fórmulas clássicas | também requer validação própria; fórmulas usam mecânicas Renewal e modificadores por level, mas isso não garante balanceamento sem 3ª classes |
+| Base level 255                            | customização extrema; exige revisão das fórmulas clássicas | também exige validação própria; Renewal não garante balanceamento nesse limite sem 3ª classes |
+| Atributos naturais até 185                | exige revisão de fórmulas e custos clássicos | também não possui balanceamento garantido          |
+| ASPD máxima 197                           | exige validação por classe, arma e buffs | também exige validação própria                     |
 | Bloqueio de 3ª classes                    | ainda precisa ser configurado  | ainda precisa ser configurado                      |
 | Conteúdo disponível                       | precisa ser curado             | precisa ser curado                                 |
-| Complexidade de balanceamento             | alta por extrapolar a progressão clássica até 185 | alta por combinar fórmulas Renewal, level 185 e remoção das classes para as quais parte da progressão foi concebida |
+| Complexidade de balanceamento             | alta por combinar base level 255, atributos naturais 185, ASPD 197 e ausência de 3ª classes | alta por combinar fórmulas Renewal, progressão customizada e remoção das 3ª classes |
 
 Nenhuma das duas colunas elimina a necessidade de balanceamento próprio: a
 diferença está em **qual** conjunto de fórmulas e ajustes precisa ser
@@ -267,31 +282,170 @@ Bloquear ou manter indisponíveis até decisão específica de conteúdo e
 balanceamento.
 ```
 
-## Level 185
+## Base level 255, atributos máximos 185 e ASPD 197
 
-Level 185 é tratado como **customização de alto impacto**, independente da
-mecânica-base escolhida. Riscos documentados, a serem endereçados na issue
-#8:
+Decisão oficial atual:
 
-- fórmulas Pre-Renewal não foram originalmente balanceadas para essa
-  progressão;
-- excesso de pontos de atributo;
-- crescimento de HP/SP;
-- precisão e esquiva;
-- ASPD;
-- dano físico e mágico;
-- cast instantâneo;
-- defesa;
-- resistência a status;
-- balanceamento PvP;
-- balanceamento WoE;
-- trivialização de MVPs;
-- progressão de EXP;
-- diferença entre classes;
-- equipamentos pensados para faixas de level menores.
+```text
+Base level máximo planejado: 255.
+Atributo/status natural máximo individual planejado: 185.
+ASPD máxima planejada: 197.
+Job level máximo: pendente de definição por classe.
+```
 
-A issue #8 deverá incluir: tabela de EXP customizada, curva de progressão,
-limite de atributos, pontos de status, HP/SP, testes por faixa de level,
+```text
+Decisão histórica: o antigo base level máximo 185 foi substituído em
+2026-07-10 por base level máximo 255.
+Decisão posterior: o atributo máximo inicialmente registrado como 187 foi
+corrigido para 185, e a ASPD máxima planejada foi definida em 197.
+```
+
+O número 185 tem, portanto, dois significados distintos que nunca devem ser
+tratados como equivalentes: o **antigo base level máximo 185** (histórico
+revogado) e o **atributo natural máximo individual 185** (decisão vigente).
+
+Pre-Renewal não garante balanceamento para base level 255, atributos naturais
+até 185 ou ASPD máxima 197. Os valores 255, 185 e 197 são decisões de
+projeto. Eles ainda não foram implantados ou validados operacionalmente.
+
+### Terminologia
+
+Estes conceitos são independentes e não devem ser confundidos:
+
+- **base level** — nível base do personagem; alvo: máximo 255;
+- **job level** — nível de classe; máximo ainda pendente de definição por
+  classe permitida;
+- **limite natural individual de atributo (atributo/status máximo)** — valor
+  natural máximo que um único atributo (STR, AGI, VIT, DEX, INT, LUK) pode
+  atingir por investimento do jogador; alvo: 185;
+- **pontos totais de status** — soma de pontos distribuíveis acumulados ao
+  longo da progressão; **não** é o mesmo que o limite individual de 185;
+- **pontos concedidos por level** — quantos pontos de status cada base level
+  concede; a curva ainda precisa ser definida;
+- **custo para elevar cada atributo** — pontos necessários para subir um
+  atributo em 1; cresce com o valor do atributo e precisa ser validado até
+  185;
+- **atributos naturais** — valor investido pelo jogador, sujeito ao limite
+  individual;
+- **atributos finais** — valor com equipamentos, cartas, refinos e buffs;
+  podem exceder o valor natural e exigem validação própria;
+- **ASPD máxima** — limite de velocidade de ataque do personagem; alvo: 197;
+- **AGI** — atributo que influencia a ASPD, mas **não** é a ASPD;
+- **velocidade de movimento** — deslocamento do personagem; independente da
+  ASPD;
+- **delay de ataque** — intervalo entre ataques básicos, derivado da ASPD;
+- **delay de skills** — atrasos próprios de cada skill; não são eliminados
+  pela ASPD;
+- **pós-conjuração (after-cast delay)** — atraso após conjurar skills; não é
+  removido automaticamente pela ASPD máxima.
+
+```text
+“Atributo máximo 185” significa limite natural individual de STR, AGI, VIT,
+INT, DEX e LUK, não quantidade total de pontos.
+“ASPD máxima 197” significa limite de velocidade de ataque, não AGI 197,
+velocidade de movimento ou remoção de delays de skills.
+```
+
+“Level 255” refere-se ao base level, **não** ao job level.
+
+### Riscos e itens de validação (issue #8)
+
+Pre-Renewal com base level 255, atributo natural máximo individual 185, ASPD
+máxima 197 e sem 3ª classes é uma **customização de impacto extremo**: as
+fórmulas clássicas não foram concebidas para esses limites. Nenhuma falha é
+declarada sem teste; os itens abaixo são riscos ou itens de validação
+obrigatórios:
+
+- curva de EXP até 255;
+- quantidade total de pontos de status;
+- concessão de pontos por level;
+- custo de atributos até 185;
+- STR e dano físico;
+- AGI e ASPD (incluindo ASPD máxima);
+- VIT, HP, defesa e resistência;
+- INT, SP e dano mágico;
+- DEX, HIT e cast (incluindo instant cast);
+- LUK, crítico e resistências;
+- HIT e FLEE nas faixas altas de level;
+- resistência a status negativos;
+- HP/SP por classe;
+- classes normais e transclasses (diferença de poder entre elas);
+- equipamentos pensados para faixas de level menores;
+- cartas;
+- refinos;
+- buffs acumuláveis;
+- MVPs (trivialização);
+- PvM;
+- PvP;
+- WoE;
+- economia;
+- consumíveis;
+- resetador;
+- job changer;
+- comandos administrativos;
+- scripts que presumam limites menores de level ou atributo;
+- interface do cliente (exibição de level e de atributos em valores altos);
+- tipos numéricos e limites internos do emulador.
+
+### Riscos e itens de validação da ASPD máxima 197
+
+ASPD máxima 197 é uma **customização de alto impacto** sobre o combate
+Pre-Renewal. Não se deve declarar que o servidor já suporta ou limita
+corretamente a ASPD em 197 sem teste. Riscos e itens de validação
+obrigatórios:
+
+- diferença de ASPD alcançável por classe;
+- armas de uma e de duas mãos;
+- escudos;
+- classes corpo a corpo;
+- classes de ataque à distância;
+- arcos;
+- armas de fogo, caso classes expandidas sejam futuramente permitidas;
+- bônus fixos de ASPD;
+- bônus percentuais de ASPD;
+- AGI;
+- DEX, quando aplicável às fórmulas;
+- poções de velocidade;
+- buffs;
+- equipamentos;
+- cartas;
+- refinos;
+- penalidades de ASPD;
+- animação do cliente;
+- sincronização cliente-servidor;
+- ataque automático;
+- consumo de munição;
+- spam de efeitos visuais;
+- carga do map-server;
+- PvM;
+- MVP;
+- PvP;
+- WoE;
+- interação com skills que usam ASPD;
+- interação com delays próprios de skills;
+- verificação de que a ASPD **não** elimina a pós-conjuração;
+- comportamento ao remover equipamentos e buffs;
+- clamp correto em 197;
+- tentativa de exceder 197.
+
+### Relação entre AGI 185 e ASPD 197
+
+```text
+AGI natural 185 não garante, isoladamente, ASPD 197.
+ASPD depende das fórmulas Pre-Renewal, classe, arma, escudo, buffs,
+equipamentos e demais modificadores.
+O balanceamento deverá impedir que ASPD 197 seja trivial para todas as classes
+ou impossível para classes que deveriam alcançá-la.
+```
+
+Não estão fixados nesta tarefa quais classes devem alcançar ASPD 197 nem
+quais equipamentos serão necessários; isso será validado na issue #8 ou em
+issue própria de balanceamento.
+
+A issue #8 deverá incluir: tabela de EXP customizada até 255, curva de
+progressão, limite natural individual de atributos (185), pontos totais de
+status, curva de concessão de pontos, custo de atributos, HP/SP, validação da
+ASPD máxima 197 por classe e tipo de arma, testes por faixa de level,
 benchmarks de classes e plano de rollback. Nenhum desses itens é configurado
 nesta tarefa.
 
@@ -304,10 +458,46 @@ mecânica registrada aqui. Em Pre-Renewal:
 - não devem ser consideradas ativas as fórmulas `RENEWAL_DROP`;
 - rates brutas ainda precisam ser equilibradas;
 - drop de cartas e MVP deve ser tratado separadamente;
-- level 185 altera o tempo total de progressão, afetando o cálculo de rates.
+- base level 255 altera o tempo total de progressão, afetando o cálculo de
+  rates.
+
+```text
+A progressão high rate deverá ser calculada para base level 255, e não para o
+antigo base level máximo 185 (decisão histórica revogada).
+```
+
+A issue #7 deverá avaliar o tempo de progressão nas faixas:
+
+- 1–99;
+- 100–150;
+- 151–200;
+- 201–230;
+- 231–255.
+
+Considerando: rebirth, transclasse, jogo solo, grupos, bônus de EXP, eventos,
+equipamentos de EXP e o tempo para atingir atributos naturais altos (próximos
+do limite individual de 185).
+
+Estado dos itens de progressão:
+
+| Item                    | Estado                     |
+| ----------------------- | -------------------------- |
+| Base level máximo       | 255 — pendente da issue #8 |
+| Atributo natural máximo | 185 — pendente da issue #8 |
+| ASPD máxima             | 197 — pendente da issue #8 |
+| Job level máximo        | a definir por classe       |
+| Base EXP                | proposta pendente          |
+| Job EXP                 | proposta pendente          |
+
+Registros adicionais:
+
+- o atributo natural máximo 185 altera o custo e a quantidade total de pontos
+  de status necessários;
+- a ASPD máxima 197 afeta o balanceamento de equipamentos, buffs e classes;
+- nenhuma rate está automaticamente aprovada.
 
 Os valores abaixo permanecem **propostas pendentes**, não decisão final, até
-o fechamento da issue #7:
+o fechamento da issue #7 — nenhuma rate (incluindo `100x`) está aprovada:
 
 | Item | Valor inicial sugerido | Observação |
 |---|---:|---|
@@ -316,8 +506,10 @@ o fechamento da issue #7:
 | Drop comum | 50x | cuidado com inflação |
 | Drop card normal | 10x | evitar saturação |
 | Drop MVP card | 1x a 3x | recomendado manter baixo |
-| Level máximo | 185 | custom (issue #8) |
-| Job máximo | a definir | depende das classes permitidas (issue #9) |
+| Base level máximo | 255 | custom (issue #8); ainda não implantado |
+| Atributo natural máximo individual | 185 | custom (issue #8); ainda não implantado |
+| ASPD máxima | 197 | custom (issue #8); ainda não implantada |
+| Job máximo | a definir | depende das classes permitidas (issues #8 e #9) |
 | Instant cast | a definir | impacto alto em PvP/MVP |
 
 ## NPCs iniciais
@@ -345,7 +537,7 @@ o fechamento da issue #7:
 | Issue | Escopo | Relação com esta decisão |
 | --- | --- | --- |
 | #7 — Definir rates iniciais | Rates de EXP e drop | Só deve ser fechada após esta decisão de mecânica; fórmulas `RENEWAL_EXP`/`RENEWAL_DROP` não se aplicam em Pre-Renewal |
-| #8 — Definir level máximo 185 | Curva de EXP, atributos, HP/SP, testes por faixa | Deve tratar level 185 como customização de alto risco sobre fórmulas Pre-Renewal |
+| #8 — Definir base level 255, atributos 185 e ASPD 197 | Curva de EXP até 255, pontos de status, atributos naturais até 185, ASPD máxima 197, HP/SP, testes por faixa | Deve tratar base level 255, atributos naturais 185 e ASPD 197 como customização de impacto extremo sobre fórmulas Pre-Renewal |
 | #9 — Bloquear 3ª classes | Job changer, NPCs, comandos, scripts, GM | Deve validar que o bloqueio é efetivo; Pre-Renewal não garante isso sozinho |
 
 ## Testes
@@ -359,8 +551,15 @@ consistência textual e de rastreabilidade, não execução em ambiente real:
 - O cliente de 2021 não foi tratado como obrigação de Renewal.
 - 3ª classes continuam registradas como política independente, pendente de
   validação pela issue #9.
-- Level 185 está marcado como customização de alto risco, pendente da issue
-  #8.
+- Base level 255, atributo natural máximo individual 185 e ASPD máxima 197
+  estão marcados como customização de impacto extremo, pendente da issue #8;
+  o antigo base level máximo 185 está registrado apenas como histórico
+  substituído, e o atributo máximo 187 como decisão corrigida para 185.
+- Base level, job level, limite natural individual de atributo, pontos totais
+  de status, ASPD, AGI, velocidade de movimento e delays de skills estão
+  diferenciados (ver [Terminologia](#terminologia)).
+- AGI 185 e ASPD 197 estão registradas como grandezas distintas (ver
+  [Relação entre AGI 185 e ASPD 197](#relação-entre-agi-185-e-aspd-197)).
 - Rates permanecem pendentes da issue #7.
 - Expanded classes permanecem pendentes.
 - Nenhum conteúdo foi marcado como disponível sem auditoria.
@@ -373,9 +572,12 @@ consistência textual e de rastreabilidade, não execução em ambiente real:
 | Item               | Estado atual               | Estado-alvo         | Ação futura                                  |
 | ------------------- | --------------------------- | --------------------- | ---------------------------------------------- |
 | Mecânica compilada  | Pre-Renewal confirmado na configuração registrada do build (`-DPRERE` em `config.log`); proveniência dos binários atuais não atestada nesta auditoria | Pre-Renewal          | nenhuma ação de recompilação motivada por esta tarefa; testes funcionais permanecem necessários |
-| 3ª classes          | não validado integralmente  | bloqueadas             | issue #9                                        |
-| Level máximo        | não validado                 | 185                    | issue #8                                        |
-| Rates               | não validadas                | high rate a definir    | issue #7                                        |
+| Base level          | não validado nesta tarefa    | 255                    | issue #8                                        |
+| Atributo máximo     | não validado nesta tarefa    | 185 natural            | issue #8                                        |
+| ASPD máxima         | não validada nesta tarefa    | 197                    | issue #8                                        |
+| Job level           | não definido                 | definir por classe     | issues #8 e #9                                  |
+| 3ª classes          | bloqueio não validado integralmente | bloqueadas      | issue #9                                        |
+| Rates               | não validadas                | high rate até 255      | issue #7                                        |
 | Conteúdo            | não auditado nesta tarefa    | curado                 | tarefa futura de curadoria de conteúdo          |
 
 A configuração registrada em `config.log` está alinhada com a decisão
@@ -393,8 +595,26 @@ serviço foram executados em decorrência desta tarefa.
   seção [Classes](#classes) explícita).
 - Fixar episódio sem auditar conteúdo (mitigado: seção
   [Conteúdo e episódio](#conteúdo-e-episódio) deixa o episódio em aberto).
-- Subestimar o impacto do level 185 sobre fórmulas Pre-Renewal (mitigado:
-  seção [Level 185](#level-185) lista riscos e remete à issue #8).
+- Subestimar o impacto do base level 255, dos atributos naturais até 185 e da
+  ASPD máxima 197 sobre fórmulas Pre-Renewal (mitigado: seção
+  [Base level 255, atributos máximos 185 e ASPD 197](#base-level-255-atributos-máximos-185-e-aspd-197)
+  lista riscos e remete à issue #8).
+- Confundir o limite natural individual de atributo (185) com pontos totais
+  de status, ou base level 255 com job level (mitigado: seção
+  [Terminologia](#terminologia)).
+- Confundir o antigo base level máximo 185 (histórico revogado) com o
+  atributo natural máximo vigente 185 (mitigado: registro explícito dos dois
+  significados na seção
+  [Base level 255, atributos máximos 185 e ASPD 197](#base-level-255-atributos-máximos-185-e-aspd-197)).
+- Confundir AGI 185 com ASPD 197, tratar ASPD como velocidade de movimento ou
+  como redução de delay/pós-conjuração de skills (mitigado: seções
+  [Terminologia](#terminologia) e
+  [Relação entre AGI 185 e ASPD 197](#relação-entre-agi-185-e-aspd-197)).
+- Presumir que todas as classes devem alcançar ASPD 197, ou declarar os
+  limites 255/185/197 como já implantados (mitigado: seções de riscos e
+  [Estado atual versus estado-alvo](#estado-atual-versus-estado-alvo)).
+- Subestimar a carga do map-server com ASPD alta (mitigado: item de validação
+  na issue #8).
 - Aplicar rates antes da definição mecânica (mitigado: seção
   [Rates](#rates) mantém valores como propostas pendentes).
 - Confundir `PACKETVER_RE` com modo Renewal (ver
@@ -428,5 +648,5 @@ Esta tarefa é documental e read-only:
 - [09-cliente-baseline-protocolo.md](09-cliente-baseline-protocolo.md) — protocolo, `PACKETVER_RE`, distinção protocolo × mecânica.
 - [10-fontes-comunitarias-rathena.md](10-fontes-comunitarias-rathena.md) — política de fontes e tabela classificada por confiança.
 - [11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md) — auditoria read-only anterior do commit instalado e dos serviços.
-- [00-base-conhecimento.md](00-base-conhecimento.md) — definição de old school e ponto de atenção sobre level 185.
+- [00-base-conhecimento.md](00-base-conhecimento.md) — definição de old school e ponto de atenção sobre base level 255, atributos máximos 185 e ASPD máxima 197.
 - Auditoria read-only desta tarefa: `config.log`, `git status`/`git rev-parse` em `/opt/faithro/rathena`, acesso em 2026-07-10.

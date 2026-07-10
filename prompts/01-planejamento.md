@@ -5,7 +5,10 @@ Você é arquiteto técnico do projeto FaithRO - Laos Deos.
 Contexto:
 - Servidor old school/high rate.
 - Sem 3ª classes.
-- Level máximo planejado 185.
+- Base level máximo planejado 255; atributo/status natural máximo individual
+  planejado 185; ASPD máxima planejada 197; job level máximo pendente por
+  classe.
+- Esses valores são estado-alvo e ainda dependem de implantação e validação.
 - Emulador inicial: rAthena.
 - Infra: Ubuntu 22.04, MariaDB, VPS pequena.
 

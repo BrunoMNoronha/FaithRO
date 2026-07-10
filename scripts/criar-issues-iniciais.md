@@ -57,13 +57,75 @@ Para cada issue, use o template abaixo e ajuste os campos "Título", "Descriçã
 - [ ] Rates definidos e documentados.
 - [ ] Revisão para evitar desbalanceamento severo.
 
-## 7. [Config] Definir level máximo 185
+## 7. [Config] Definir base level 255, atributos 185 e ASPD 197
 
-**Descrição:** Confirmar e documentar a configuração de level base máximo em 185, incluindo ajustes de EXP table necessários.
+> Registro histórico: o escopo original desta issue citava base level máximo
+> 185. Essa decisão foi substituída em 2026-07-10 por base level máximo 255.
+> Posteriormente, o atributo máximo inicialmente registrado como 187 foi
+> corrigido para 185, e a ASPD máxima planejada foi definida em 197. O antigo
+> base level máximo 185 é **histórico revogado**; o atributo/status natural
+> máximo individual 185 é **decisão vigente** — nunca trate os dois como
+> equivalentes. Job level máximo permanece pendente de definição por classe.
+> Nenhum desses valores está implantado ou validado operacionalmente. A
+> issue #8 no GitHub é a fonte canônica deste escopo e critérios; este
+> template deve permanecer alinhado a ela.
+
+**Descrição:** Configurar e validar base level máximo 255, atributo/status
+natural máximo individual 185 e ASPD máxima 197 para o FaithRO em mecânica
+Pre-Renewal, sem 3ª classes, cobrindo:
+
+- curva completa de EXP até 255 e EXP por faixa de level;
+- quantidade total de pontos de status e curva de concessão por level;
+- custo dos atributos até 185 e clamp natural de STR/AGI/VIT/INT/DEX/LUK em
+  185;
+- atributos finais (com equipamentos, cartas, refinos e buffs);
+- ASPD máxima 197, validada por classe e tipo de arma, incluindo bônus
+  fixos e percentuais, poções, buffs, equipamentos, cartas e tentativas de
+  ultrapassar o limite;
+- distinção entre AGI, ASPD, delay de ataque e delays de skills (ASPD não
+  elimina pós-conjuração nem substitui delay próprio de skill);
+- job level máximo por classe permitida;
+- limites de HP/SP por classe;
+- cast, HIT, FLEE e resistência a status nas faixas altas de level;
+- interface do cliente (exibição de level 255, atributos 185 e ASPD 197);
+- resetador, job changer e comandos administrativos;
+- impacto em PvM, MVP, PvP e WoE (ou adiamento formal de PvP/WoE);
+- impacto de ASPD 197 na carga do map-server;
+- plano de rollback;
+- garantia de que nenhuma 3ª classe é liberada pela progressão.
+
+Nenhum desses itens está implantado ou validado nesta tarefa.
 
 **Critérios de aceite:**
-- [ ] Configuração documentada.
-- [ ] Plano de ajuste de EXP table descrito.
+- [ ] Base level máximo 255 documentado.
+- [ ] Atributo/status natural máximo individual 185 documentado.
+- [ ] ASPD máxima 197 documentada.
+- [ ] Job level máximo definido para cada classe permitida.
+- [ ] Arquivos reais de configuração identificados.
+- [ ] Alterações priorizadas em `conf/import` e `db/import`.
+- [ ] Curva completa de EXP até 255 definida.
+- [ ] EXP por faixa de level revisada.
+- [ ] Quantidade total de pontos de status definida.
+- [ ] Curva de concessão de pontos de status definida.
+- [ ] Custo dos atributos até 185 validado.
+- [ ] Clamp natural de STR/AGI/VIT/INT/DEX/LUK em 185 validado.
+- [ ] Atributos finais com equipamentos e buffs validados.
+- [ ] Limites de HP/SP avaliados por classe.
+- [ ] ASPD 197 validada por classe e tipo de arma.
+- [ ] Bônus fixos e percentuais de ASPD testados.
+- [ ] Poções, buffs, equipamentos e cartas de ASPD testados.
+- [ ] Tentativas de ultrapassar ASPD 197 testadas.
+- [ ] AGI e ASPD tratadas como grandezas distintas.
+- [ ] ASPD e delays de skills tratados como grandezas distintas.
+- [ ] Cast, HIT, FLEE e resistência a status avaliados.
+- [ ] Interface do cliente validada para level 255, atributos 185 e ASPD 197.
+- [ ] Resetador e job changer testados.
+- [ ] Comandos administrativos testados.
+- [ ] PvM e MVP testados.
+- [ ] PvP e WoE testados ou formalmente adiados.
+- [ ] Impacto de ASPD 197 no map-server avaliado.
+- [ ] Plano de rollback documentado.
+- [ ] Nenhuma 3ª classe liberada pela progressão.
 
 ## 8. [Config] Bloquear 3ª classes
 

@@ -1,6 +1,6 @@
 # FaithRO - Laos Deos
 
-Servidor sem fins lucrativos inspirado em Ragnarok Online, com proposta **old school**, **high rate**, sem 3ª classes e com progressão customizada até o nível base 185.
+Servidor sem fins lucrativos inspirado em Ragnarok Online, com proposta **old school**, **high rate**, sem 3ª classes e com progressão customizada até o nível base 255 (atributo/status natural máximo individual planejado: 185; ASPD máxima planejada: 197).
 
 > Status: documentação inicial / planejamento técnico.
 > Emulador recomendado para a primeira fase: **rAthena**.
@@ -14,7 +14,10 @@ Criar um servidor estável, simples de manter, com foco em nostalgia, comunidade
 - Mecânica base: old school / pré-renewal como referência.
 - Classes: até transclasses; sem 3ª classes.
 - Rates: high rate, valores finais a definir.
-- Level máximo: 185, sujeito a balanceamento.
+- Base level máximo planejado: 255, sujeito a balanceamento (antigo base level máximo 185 substituído em 2026-07-10).
+- Atributo/status natural máximo individual planejado: 185 (corrige a decisão anterior de 187; não confundir com o antigo base level 185).
+- ASPD máxima planejada: 197.
+- Job level máximo: a definir por classe.
 - Hospedagem inicial: VPS Ubuntu 22.04, 1 vCPU, 2 GB RAM, 50 GB.
 - Banco de dados: MariaDB.
 - Versionamento: GitHub.
