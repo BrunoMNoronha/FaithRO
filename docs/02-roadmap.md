@@ -18,11 +18,12 @@
 
 ## Fase 2 - Configuração de gameplay
 
-- [ ] Definir rates.
-- [ ] Definir level máximo.
-- [ ] Definir job máximo.
+- [ ] Definir rates (calculadas para base level 255).
+- [ ] Configurar base level máximo 255 (decisão registrada; implantação pendente).
+- [ ] Configurar status/atributo máximo individual 187 (decisão registrada; implantação pendente).
+- [ ] Definir job máximo por classe.
 - [ ] Bloquear 3ª classes.
-- [ ] Ajustar EXP table.
+- [ ] Ajustar EXP table até 255 e curva de pontos de status.
 - [ ] Ajustar drops.
 - [ ] Definir NPCs essenciais.
 
@@ -39,7 +40,7 @@
 ## Fase 4 - Alpha fechado
 
 - [ ] Criar contas de teste.
-- [ ] Testar progressão 1-185.
+- [ ] Testar progressão 1-255 e atributos até 187.
 - [ ] Testar troca de classe.
 - [ ] Testar drops.
 - [ ] Testar MVPs.

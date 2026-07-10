@@ -57,9 +57,14 @@ Para cada issue, use o template abaixo e ajuste os campos "Título", "Descriçã
 - [ ] Rates definidos e documentados.
 - [ ] Revisão para evitar desbalanceamento severo.
 
-## 7. [Config] Definir level máximo 185
+## 7. [Config] Definir base level 255 e status máximo 187
 
-**Descrição:** Confirmar e documentar a configuração de level base máximo em 185, incluindo ajustes de EXP table necessários.
+> Registro histórico: o escopo original desta issue citava level base máximo
+> 185. Essa decisão foi substituída em 2026-07-10 por base level 255 e status
+> máximo individual 187 (job level a definir por classe). A issue #8 no
+> GitHub foi atualizada com o novo escopo.
+
+**Descrição:** Configurar e validar base level máximo 255 e status/atributo máximo individual 187, incluindo curva de EXP até 255, pontos de status e ajustes de EXP table necessários.
 
 **Critérios de aceite:**
 - [ ] Configuração documentada.

@@ -4,6 +4,12 @@ Todas as mudanças relevantes do FaithRO devem ser registradas aqui.
 
 ## [Não lançado]
 
+- Decisão de gameplay alterada de base level 185 para base level 255, com
+  status/atributo máximo individual planejado em 187 e job level máximo a
+  definir por classe. Configuração, EXP, pontos de status e balanceamento
+  permanecem pendentes da issue #8. Nenhuma alteração operacional foi
+  realizada. (As menções a "level 185" em entradas anteriores deste changelog
+  são registros históricos da decisão substituída.)
 - Refinamento das evidências da decisão Pre-Renewal (`docs/03-configuracao-alvo.md`,
   `docs/10-fontes-comunitarias-rathena.md`, `docs/README.md`): tabelas
   reformuladas para distinguir decisão/estado-alvo de estado operacional;

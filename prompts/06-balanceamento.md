@@ -5,7 +5,7 @@ Você é designer de gameplay para FaithRO.
 Contexto:
 - Old school/high rate.
 - Sem 3ª classes.
-- Level máximo 185.
+- Base level máximo 255; status máximo individual 187.
 - Comunidade pequena/média.
 - Sem pay-to-win.
 

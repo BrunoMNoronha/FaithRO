@@ -14,12 +14,25 @@ Para este projeto, “old school” significa:
 - MVP com NPCs essenciais, sem excesso de custom.
 - Mecânicas inspiradas em pré-renewal, mesmo que o level máximo seja customizado.
 
-## Ponto de atenção: level 185 sem 3ª classe
+## Ponto de atenção: base level 255 e status máximo 187 sem 3ª classe
 
-Level 185 com ausência de 3ª classe é uma decisão custom. Isso não é “pré-renewal puro”. Exige balanceamento de:
+Decisão vigente:
+
+- Base level máximo planejado: 255.
+- Status/atributo máximo individual planejado: 187.
+- Job level máximo: pendente de definição por classe.
+
+Decisão anterior: base level 185. Substituída em 2026-07-10 por base level
+255 e status máximo individual 187.
+
+Base level 255 e atributos até 187, com ausência de 3ª classe, são
+customizações de **alto impacto**. Isso não é “pré-renewal puro”, e os
+valores ainda não foram implantados ou validados operacionalmente (issue #8).
+Exige balanceamento de:
 
 - HP/SP por classe.
-- Tabelas de EXP.
+- Tabelas de EXP até 255.
+- Pontos totais de status e custo dos atributos até 187.
 - Dano de skills.
 - Cast/ASPD.
 - Equipamentos.

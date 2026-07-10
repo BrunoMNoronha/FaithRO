@@ -28,8 +28,10 @@ cliente-servidor.
   - **configuração efetivamente compilada na VPS** — **não verificada nesta
     tarefa**.
 - Terceiras classes: desabilitadas por decisão de conteúdo do FaithRO.
-- Level máximo: 185, sujeito a balanceamento próprio (ver
-  [00-base-conhecimento.md](00-base-conhecimento.md)).
+- Base level máximo planejado: 255, com status/atributo máximo individual
+  planejado em 187, ambos sujeitos a balanceamento próprio e ainda não
+  implantados (ver [00-base-conhecimento.md](00-base-conhecimento.md);
+  decisão anterior de level 185 substituída em 2026-07-10).
 
 ## 1. Baseline do projeto
 
@@ -40,7 +42,8 @@ cliente-servidor.
 | Família do executável | `Ragexe` |
 | Modo de jogo do servidor | decisão independente do cliente (ver seção 4) |
 | Terceiras classes | desabilitadas por decisão do FaithRO |
-| Level máximo | 185, sujeito a balanceamento próprio |
+| Base level máximo | 255 (planejado), sujeito a balanceamento próprio |
+| Status máximo individual | 187 (planejado), sujeito a balanceamento próprio |
 
 `2021-11-03_Ragexe` **não** é "o cliente mais novo". Ele é o **cliente de
 referência / baseline conservador** adotado pelo projeto, escolhido por
@@ -113,8 +116,10 @@ Como `20211103` está no intervalo `>= 20200902 && <= 20211118`, o rAthena
   balanceamento), não pelo cliente.
 - A presença de sprites, interfaces ou dados de 3ª classe no cliente **não**
   significa que o conteúdo esteja habilitado no servidor.
-- O level 185 sem terceiras classes é uma customização do FaithRO e exige
-  balanceamento próprio.
+- O base level 255 com status máximo 187 e sem terceiras classes é uma
+  customização do FaithRO e exige balanceamento próprio; a exibição de level
+  e atributos nesses valores também precisa ser validada na interface do
+  cliente.
 
 ## 5. Configuração do `PACKETVER` (planejado)
 

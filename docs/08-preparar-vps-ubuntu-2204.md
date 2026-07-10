@@ -34,7 +34,7 @@ Esta issue **não** cobre:
 - Instalação do rAthena.
 - Instalação/configuração do MariaDB.
 - Configuração final de rates.
-- Level máximo 185.
+- Base level máximo 255 e status máximo individual 187 (issue #8).
 - Bloqueio de 3ª classes.
 - Distribuição de cliente, GRF, executáveis ou assets proprietários.
 - Deploy público do servidor.

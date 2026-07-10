@@ -2,7 +2,7 @@
 
 ## Projeto
 
-FaithRO - Laos Deos é um servidor sem fins lucrativos, old school/high rate, sem 3ª classes, com level máximo planejado em 185.
+FaithRO - Laos Deos é um servidor sem fins lucrativos, old school/high rate, sem 3ª classes, com base level máximo planejado em 255 e status/atributo máximo individual planejado em 187 (job level máximo a definir por classe; decisão anterior de level 185 substituída em 2026-07-10).
 
 ## Instruções permanentes
 

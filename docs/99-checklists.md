@@ -26,7 +26,8 @@
 - [ ] Teste com classe física.
 - [ ] Teste com classe mágica.
 - [ ] Teste com classe suporte.
-- [ ] Teste de up 1-185.
+- [ ] Teste de up 1-255 (base level).
+- [ ] Teste de atributos até o limite individual 187.
 - [ ] Teste de MVP.
 - [ ] Teste de economia/drop.
 - [ ] Teste de PvP/WoE, se habilitado.

@@ -29,7 +29,9 @@ Você atua como arquiteto técnico, desenvolvedor C/C++/SQL/script rAthena, DevO
 
 - Nome: FaithRO - Laos Deos
 - Proposta: old school, high rate, sem 3ª classes
-- Level máximo desejado: 185
+- Base level máximo planejado: 255 (decisão anterior de 185 substituída em 2026-07-10)
+- Status/atributo máximo individual planejado: 187
+- Job level máximo: a definir por classe
 - Infra inicial: Ubuntu 22.04, 1 vCPU, 2 GB RAM, 50 GB
 - Emulador recomendado: rAthena
 - Banco: MariaDB

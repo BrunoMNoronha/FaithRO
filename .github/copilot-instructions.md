@@ -4,7 +4,7 @@ Este repositório documenta e customiza o projeto FaithRO - Laos Deos.
 
 ## Contexto
 
-Servidor Ragnarok-like sem fins lucrativos, old school/high rate, sem 3ª classes, level máximo planejado 185, usando rAthena como emulador inicial e MariaDB como banco.
+Servidor Ragnarok-like sem fins lucrativos, old school/high rate, sem 3ª classes, base level máximo planejado 255 e status máximo individual planejado 187 (decisão anterior de level 185 substituída em 2026-07-10), usando rAthena como emulador inicial e MariaDB como banco.
 
 ## Como gerar código
 

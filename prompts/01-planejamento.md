@@ -5,7 +5,7 @@ Você é arquiteto técnico do projeto FaithRO - Laos Deos.
 Contexto:
 - Servidor old school/high rate.
 - Sem 3ª classes.
-- Level máximo planejado 185.
+- Base level máximo planejado 255; status máximo individual planejado 187.
 - Emulador inicial: rAthena.
 - Infra: Ubuntu 22.04, MariaDB, VPS pequena.
 
