@@ -36,9 +36,9 @@ cliente-servidor.
 | Cliente de referência | `2021-11-03_Ragexe` |
 | Família adotada | `Ragexe` |
 | PACKETVER pretendido | `20211103` |
-| Modo do servidor | decisão independente do cliente |
-| Terceiras classes | desabilitadas por decisão do FaithRO |
-| Level máximo | 185, sujeito a balanceamento próprio |
+| Modo Renewal ou Pre-Renewal | decisão independente do cliente e pendente de confirmação documental no FaithRO |
+| Terceiras classes | desabilitadas por decisão do projeto |
+| Level máximo planejado | 185, sujeito a balanceamento e validação próprios |
 
 `2021-11-03_Ragexe` **não** é "o cliente mais novo". Ele é o **cliente de
 referência / baseline conservador** adotado pelo projeto, escolhido por
@@ -161,7 +161,7 @@ de patches como universalmente correta.
 | Data do cliente       | `2021-11-03`           | Pendente         | pendente de validação | Requer teste real |
 | Macro interna         | Conforme código        | `PACKETVER_RE`   | confirmado no código upstream | `src/config/packets.hpp` @ 7f080871c |
 | Modo servidor         | Configuração FaithRO   | Pendente         | pendente de validação | Requer acesso à VPS |
-| Packet obfuscation    | Alinhada               | Pendente         | pendente de validação | Requer teste real e VPS |
+| Packet obfuscation    | Pendente de alinhamento  | Pendente         | pendente de validação | Requer teste real e VPS |
 | Arquivo XML/Lua       | Confirmado por teste   | Pendente         | pendente de validação | Requer teste real |
 | Web server            | Confirmado ou pendente | Pendente         | pendente de validação e implantação | Tarefa própria |
 | Login                 | Funcional              | Pendente         | pendente de validação | Requer teste cliente-servidor |
@@ -222,7 +222,8 @@ Fechar o PR sem merge e preservar ou excluir a branch somente após confirmar qu
 Para desfazer o commit na própria feature branch sem reescrever histórico:
 ```powershell
 git switch docs/organizar-base-conhecimento-rathena
-git revert <COMMIT>
+git revert --no-commit 6ef5602^..fabe0ff
+git commit -m "revert: desfaz organização da base rAthena"
 git push
 ```
 

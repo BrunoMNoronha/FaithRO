@@ -101,7 +101,8 @@ Fechar o PR sem merge e preservar ou excluir a branch somente após confirmar qu
 Para desfazer o commit na própria feature branch sem reescrever histórico:
 ```powershell
 git switch docs/organizar-base-conhecimento-rathena
-git revert <COMMIT>
+git revert --no-commit 6ef5602^..fabe0ff
+git commit -m "revert: desfaz organização da base rAthena"
 git push
 ```
 
