@@ -38,6 +38,7 @@ apenas os organiza por categoria e registra estado e dependências.
 | [09-cliente-baseline-protocolo.md](09-cliente-baseline-protocolo.md) | Cliente, `PACKETVER`, obfuscação, web server, matriz e testes | Cliente/protocolo | validado | não iniciado | 01, 10 | 2026-07-10 |
 | [10-fontes-comunitarias-rathena.md](10-fontes-comunitarias-rathena.md) | Política e tabela de fontes | Técnico/documental | validado | não aplicável | — | 2026-07-10 |
 | [11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md) | Unidades systemd do rAthena, binários, portas e web server | Infra/operação | validado | implantado (login/char/map); web server não implantado | 04, 09 | 2026-07-10 |
+| [12-configuracao-packetver.md](12-configuracao-packetver.md) | Procedimento planejado de configuração de `PACKETVER`, obfuscação e web server | Cliente/protocolo | validado | não iniciado | 09, 10, 11 | 2026-07-10 |
 | [99-checklists.md](99-checklists.md) | Checklists de PR, deploy, balanceamento | Todos | validado | não aplicável | — | 2026-07-10 |
 
 [^1]: No documento 03, "parcialmente implantado" significa apenas que a
@@ -58,7 +59,8 @@ apenas os organiza por categoria e registra estado e dependências.
 - **Gameplay e balanceamento:** [03](03-configuracao-alvo.md) (mecânica
   Pre-Renewal, base level 255, atributos máximos 185, ASPD máxima 197 e
   rates, ver também [00](00-base-conhecimento.md)).
-- **Cliente e protocolo:** [09](09-cliente-baseline-protocolo.md).
+- **Cliente e protocolo:** [09](09-cliente-baseline-protocolo.md),
+  [12](12-configuracao-packetver.md).
 - **Fontes comunitárias:** [10](10-fontes-comunitarias-rathena.md).
 - **Templates:** [templates/ADR.md](templates/ADR.md),
   [templates/PULL_REQUEST_TEMPLATE.md](templates/PULL_REQUEST_TEMPLATE.md).
