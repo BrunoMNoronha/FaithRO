@@ -26,10 +26,10 @@ apenas os organiza por categoria e registra estado e dependências.
 
 | Documento | Finalidade | Público-alvo | Estado documental | Estado de implantação | Dependências | Última revisão |
 | --- | --- | --- | --- | --- | --- | --- |
-| [00-base-conhecimento.md](00-base-conhecimento.md) | Visão geral, definição de old school, level 185 | Todos | validado | não aplicável | — | 2026-07-10 |
+| [00-base-conhecimento.md](00-base-conhecimento.md) | Visão geral, definição de old school, base level 255, atributos máximos 185 e ASPD máxima 197 | Todos | validado | não aplicável | — | 2026-07-10 |
 | [01-decisao-tecnica.md](01-decisao-tecnica.md) | Escolha do emulador (rAthena) | Técnico | validado | não aplicável | 00 | 2026-07-10 |
 | [02-roadmap.md](02-roadmap.md) | Fases do projeto | Todos | em elaboração | não aplicável | 00, 01 | 2026-07-10 |
-| [03-configuracao-alvo.md](03-configuracao-alvo.md) | Rates, jobs, NPCs iniciais | Config/gameplay | em elaboração | não iniciado | 00 | 2026-07-10 |
+| [03-configuracao-alvo.md](03-configuracao-alvo.md) | Referência mecânica Pre-Renewal e planejamento de base level 255, atributos 185, ASPD 197, classes, rates e conteúdo | Config/gameplay | validado | parcialmente implantado[^1] | 00, 09, 10, 11 | 2026-07-10 |
 | [04-operacao-vps.md](04-operacao-vps.md) | Hardware, hardening, portas, backups | Infra/operação | em elaboração | não iniciado | 08 | 2026-07-10 |
 | [05-governanca.md](05-governanca.md) | Princípios, regras de mudança, ADRs | Todos | validado | não aplicável | — | 2026-07-10 |
 | [06-plano-execucao-inicial.md](06-plano-execucao-inicial.md) | Fluxo de branches e backlog inicial | Técnico | validado | não aplicável | 07 | 2026-07-10 |
@@ -37,7 +37,14 @@ apenas os organiza por categoria e registra estado e dependências.
 | [08-preparar-vps-ubuntu-2204.md](08-preparar-vps-ubuntu-2204.md) | Preparação da VPS (issue #2) | Infra | validado | não iniciado | 04 | 2026-07-10 |
 | [09-cliente-baseline-protocolo.md](09-cliente-baseline-protocolo.md) | Cliente, `PACKETVER`, obfuscação, web server, matriz e testes | Cliente/protocolo | validado | não iniciado | 01, 10 | 2026-07-10 |
 | [10-fontes-comunitarias-rathena.md](10-fontes-comunitarias-rathena.md) | Política e tabela de fontes | Técnico/documental | validado | não aplicável | — | 2026-07-10 |
+| [11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md) | Unidades systemd do rAthena, binários, portas e web server | Infra/operação | validado | implantado (login/char/map); web server não implantado | 04, 09 | 2026-07-10 |
+| [12-configuracao-packetver.md](12-configuracao-packetver.md) | Procedimento planejado de configuração de `PACKETVER`, obfuscação e web server | Cliente/protocolo | validado | não iniciado | 09, 10, 11 | 2026-07-10 |
 | [99-checklists.md](99-checklists.md) | Checklists de PR, deploy, balanceamento | Todos | validado | não aplicável | — | 2026-07-10 |
+
+[^1]: No documento 03, "parcialmente implantado" significa apenas que a
+    configuração registrada do build está alinhada com Pre-Renewal. Base
+    level 255, atributos naturais máximos 185, ASPD máxima 197, rates,
+    classes e conteúdo continuam pendentes de implantação e validação.
 
 ## Índice por categoria
 
@@ -47,10 +54,13 @@ apenas os organiza por categoria e registra estado e dependências.
   [06](06-plano-execucao-inicial.md), [07](07-fluxo-pull-request.md),
   [99](99-checklists.md).
 - **Infraestrutura e operação:** [04](04-operacao-vps.md),
-  [08-preparar-vps-ubuntu-2204.md](08-preparar-vps-ubuntu-2204.md).
-- **Gameplay e balanceamento:** [03](03-configuracao-alvo.md) (level 185 e rates,
-  ver também [00](00-base-conhecimento.md)).
-- **Cliente e protocolo:** [09](09-cliente-baseline-protocolo.md).
+  [08-preparar-vps-ubuntu-2204.md](08-preparar-vps-ubuntu-2204.md),
+  [11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md).
+- **Gameplay e balanceamento:** [03](03-configuracao-alvo.md) (mecânica
+  Pre-Renewal, base level 255, atributos máximos 185, ASPD máxima 197 e
+  rates, ver também [00](00-base-conhecimento.md)).
+- **Cliente e protocolo:** [09](09-cliente-baseline-protocolo.md),
+  [12](12-configuracao-packetver.md).
 - **Fontes comunitárias:** [10](10-fontes-comunitarias-rathena.md).
 - **Templates:** [templates/ADR.md](templates/ADR.md),
   [templates/PULL_REQUEST_TEMPLATE.md](templates/PULL_REQUEST_TEMPLATE.md).
