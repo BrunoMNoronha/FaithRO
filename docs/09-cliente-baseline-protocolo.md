@@ -139,7 +139,9 @@ Arquivo esperado: `src/custom/defines_pre.hpp`
 > de compilação.
 
 Após qualquer mudança futura no `PACKETVER`: recompilação **limpa** e reinício
-controlado dos serviços `faithro-login`, `faithro-char` e `faithro-map`.
+controlado dos serviços de login, char e map (`<UNIDADE-LOGIN>`,
+`<UNIDADE-CHAR>`, `<UNIDADE-MAP>` — confirmar os nomes reais no ambiente com
+`systemctl`, ver [seção de logs](#logs-sem-publicar-dados-reais)).
 
 ## 6. Packet obfuscation
 
@@ -231,9 +233,8 @@ WEB_SERVER_ENABLE: habilitado pelo código para o baseline.
 ### 7.2 Pendente na implantação do FaithRO
 
 - confirmar se o binário `web-server` foi compilado na VPS;
-- confirmar se existe serviço systemd correspondente;
-- decidir o nome do serviço, preferencialmente mantendo o padrão do projeto
-  (ex.: `faithro-web`);
+- confirmar se existe serviço systemd correspondente (`<UNIDADE-WEB>` —
+  `Pendente de definição durante a implantação do web server`);
 - configurar `conf/import/web_conf.txt`;
 - confirmar a porta efetivamente implantada;
 - definir bind, firewall e exposição;
@@ -424,11 +425,42 @@ abertas para `Anywhere` sem decisão formal documentada. Ver
 
 ### Logs (sem publicar dados reais)
 
+Os nomes efetivos das unidades systemd **ainda não estão formalmente definidos
+neste repositório**. Não presuma nomes de serviço. Primeiro **descubra** as
+unidades no ambiente:
+
 ```bash
-journalctl -u faithro-login --since "-10min" -n 200
-journalctl -u faithro-char  --since "-10min" -n 200
-journalctl -u faithro-map   --since "-10min" -n 200
+systemctl list-unit-files --type=service |
+  grep -Ei 'faithro|rathena|login|char|map|web'
+# alternativa, incluindo unidades inativas:
+systemctl list-units --type=service --all |
+  grep -Ei 'faithro|rathena|login|char|map|web'
 ```
+
+Depois de confirmar as unidades corretas, consulte os logs substituindo os
+placeholders pelos nomes reais:
+
+```bash
+journalctl -u <UNIDADE-LOGIN> --since "-10min" -n 200
+journalctl -u <UNIDADE-CHAR>  --since "-10min" -n 200
+journalctl -u <UNIDADE-MAP>   --since "-10min" -n 200
+# web server, quando implantado:
+journalctl -u <UNIDADE-WEB>   --since "-10min" -n 200
+```
+
+Observações importantes:
+
+- revise os resultados da descoberta antes de usar qualquer nome;
+- termos genéricos como `login`, `char`, `map` e `web` podem encontrar serviços
+  **não relacionados** ao FaithRO — confirme a unidade correta antes de consultar
+  logs ou reiniciar serviços;
+- **não** crie uma unidade apenas para fazer a documentação coincidir;
+- registre os nomes efetivos, posteriormente, no documento de implantação
+  systemd (a criar);
+- em execuções anteriores da VPS foram observados os nomes `faithro-login`,
+  `faithro-char` e `faithro-map`. Como essas unidades **ainda não estão
+  formalmente documentadas neste repositório**, confirme os nomes no ambiente
+  com `systemctl` antes de executar os comandos.
 
 > Não copiar nomes de contas, IPs reais ou dados de jogadores para a
 > documentação. Usar limites de linhas e de tempo.

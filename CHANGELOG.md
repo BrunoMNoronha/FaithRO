@@ -18,6 +18,10 @@ Todas as mudanças relevantes do FaithRO devem ser registradas aqui.
   baseline); `WEB_SERVER_ENABLE` confirmado como verdadeiro para `20211103`, com
   implantação e porta efetiva do web server ainda pendentes; índice passa a
   separar estado documental de estado de implantação.
+- Comandos de consulta de logs em `docs/09-cliente-baseline-protocolo.md` passam a
+  usar placeholders (`<UNIDADE-LOGIN>`, `<UNIDADE-CHAR>`, `<UNIDADE-MAP>`,
+  `<UNIDADE-WEB>`) com etapa de descoberta via `systemctl`, em vez de presumir
+  nomes de unidades systemd não documentadas no repositório.
 
 ## [0.1.0] - Planejamento inicial
 
