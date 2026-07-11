@@ -4,6 +4,18 @@ Todas as mudanças relevantes do FaithRO devem ser registradas aqui.
 
 ## [Não lançado]
 
+- Documentação do procedimento de **gestão e rotação segura** das credenciais
+  SQL do rAthena (`docs/13-credenciais-sql-rathena.md`, novo). A auditoria
+  confirmou usuário SQL único e dedicado `faithro_app`@`localhost`, com
+  privilégios escopados a `faithro.*`/`faithro_log.*` (sem privilégios globais),
+  senha não versionada (override `conf/import/inter_conf.txt` ignorado pelo Git,
+  `600`) e sem contas padrão/anônimas. A rotação preventiva, executada e validada
+  na VPS em 2026-07-11, alterou apenas a **senha** — usuário, host, bancos e
+  privilégios preservados —, com atualização coordenada das **seis** diretivas
+  `*_pw` do override (`login_server`, `ipban_db`, `char_server`, `map_server`,
+  `web_server`, `log_db`), todas do mesmo usuário. Backup, rollback e validação de
+  estabilidade dos serviços `login/char/map`. Nenhum segredo foi versionado,
+  exibido em documentação ou registrado no Git. Índice de docs atualizado.
 - Decisão de gameplay refinada: base level máximo planejado 255, atributo/status
   natural máximo individual 185 e ASPD máxima planejada 197. O antigo base
   level 185 e o limite de atributo 187 são decisões substituídas. Implantação,
