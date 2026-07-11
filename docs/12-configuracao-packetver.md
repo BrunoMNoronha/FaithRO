@@ -40,7 +40,7 @@ a integridade do ambiente.
    ```cpp
    #define PACKETVER 20211103
    ```
-   
+
    *Alternativa por argumento de compilação:*
    ```bash
    ./configure --enable-packetver=20211103
