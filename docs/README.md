@@ -40,6 +40,7 @@ apenas os organiza por categoria e registra estado e dependências.
 | [11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md) | Unidades systemd do rAthena, binários, portas e web server | Infra/operação | validado | implantado (login/char/map); web server não implantado | 04, 09 | 2026-07-10 |
 | [12-configuracao-packetver.md](12-configuracao-packetver.md) | Procedimento planejado de configuração de `PACKETVER`, obfuscação e web server | Cliente/protocolo | validado | não iniciado | 09, 10, 11 | 2026-07-10 |
 | [13-credenciais-sql-rathena.md](13-credenciais-sql-rathena.md) | Auditoria e rotação segura das credenciais MariaDB do rAthena (usuário único `faithro_app`, seis diretivas `*_pw`) | Infra/operação/segurança | validado | implantado (rotação executada e validada) | 04, 11 | 2026-07-11 |
+| [14-progressao-base-255-overrides.md](14-progressao-base-255-overrides.md) | Overrides versionados de progressão (Base 255, atributos 185, ASPD 197, Curva EXP B, stat points Modelo B); mapeamento para `/opt/faithro/rathena` | Config/gameplay | validado | não iniciado (implementação versionada; não implantado) | 03, 11 | 2026-07-11 |
 | [99-checklists.md](99-checklists.md) | Checklists de PR, deploy, balanceamento | Todos | validado | não aplicável | — | 2026-07-10 |
 
 [^1]: No documento 03, "parcialmente implantado" significa apenas que a
@@ -60,7 +61,9 @@ apenas os organiza por categoria e registra estado e dependências.
   [13-credenciais-sql-rathena.md](13-credenciais-sql-rathena.md).
 - **Gameplay e balanceamento:** [03](03-configuracao-alvo.md) (mecânica
   Pre-Renewal, base level 255, atributos máximos 185, ASPD máxima 197 e
-  rates, ver também [00](00-base-conhecimento.md)).
+  rates, ver também [00](00-base-conhecimento.md)),
+  [14](14-progressao-base-255-overrides.md) (overrides versionados de
+  progressão; ainda não implantados).
 - **Cliente e protocolo:** [09](09-cliente-baseline-protocolo.md),
   [12](12-configuracao-packetver.md).
 - **Fontes comunitárias:** [10](10-fontes-comunitarias-rathena.md).
