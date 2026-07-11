@@ -6,10 +6,28 @@ Organizar o fluxo de desenvolvimento do repositório após o primeiro commit, cr
 
 ## Estado atual do projeto
 
+> Atualizado em 2026-07-11 após auditoria read-only da VPS. A fase de organização
+> de branches/backlog descrita neste documento está concluída; a infraestrutura
+> base foi implantada **na VPS**. A implantação na VPS não substitui o ambiente
+> local/dev (Fase 1), que permanece pendente. Os itens abaixo refletem o estado
+> real confirmado.
+
 - Repositório criado no GitHub: https://github.com/BrunoMNoronha/FaithRO
 - Pacote inicial de documentação já versionado na branch `main` (commit `docs: adiciona base inicial do projeto FaithRO`).
-- Nenhuma instalação de emulador, banco de dados ou VPS foi realizada até o momento.
-- Branch `dev` criada para concentrar o desenvolvimento integrado.
+- Branch `dev` em uso como base de desenvolvimento integrado; branches de tarefa derivam dela.
+- Backlog técnico aberto no GitHub (issues #2–#16).
+- Infraestrutura base **implantada e auditada** na VPS Ubuntu 22.04: usuário
+  não-root, SSH endurecido, `ufw`, fail2ban, MariaDB, usuário SQL dedicado,
+  rAthena compilado (commit `7f080871c`) e serviços systemd `login/char/map`
+  ativos. Backups protegidos existem, mas a rotina automática está pendente.
+- Ambiente **local/dev separado** (clonagem, compilação, MariaDB local, banco de
+  teste isolado e execução local de login/char/map) **ainda não comprovado** — a
+  implantação atual está na VPS (issue #5, critério de ambiente local). Os
+  testes de bloqueio do fail2ban (#12) e de conectividade do firewall (#11)
+  também permanecem sem evidência.
+- Configuração de gameplay (rates, level 255/atributo 185/ASPD 197, bloqueio de
+  3ª classes, drops, EXP) ainda **não** implantada — permanece estado-alvo das
+  issues #7/#8/#9.
 
 ## Fluxo de branches recomendado
 
@@ -25,21 +43,33 @@ Fluxo sugerido: tarefa → PR para `dev` → validação → PR de `dev` para `m
 
 ## Backlog inicial
 
-- [Infra] Preparar VPS Ubuntu 22.04
-- [Infra] Instalar dependências do rAthena
-- [Banco] Instalar e configurar MariaDB
-- [Emulador] Clonar e compilar rAthena
-- [Config] Definir episódio/referência mecânica
-- [Config] Definir rates iniciais
-- [Config] Definir level máximo 185
-- [Config] Bloquear 3ª classes
-- [Segurança] Configurar usuário não-root
-- [Segurança] Configurar firewall
-- [Segurança] Configurar fail2ban
-- [Backup] Definir rotina de backup
-- [Docs] Criar guia de instalação local
-- [Docs] Criar guia de operação da VPS
-- [Governança] Definir regras do alpha fechado
+Status abaixo atualizado em 2026-07-11 pela auditoria. Legenda: ✅ concluído
+(confirmado por evidência) · ⚠️ parcial · ⬜ pendente. As issues **não** foram
+alteradas nem fechadas neste alinhamento; a atualização do backlog no GitHub
+ocorrerá após a revisão e o merge deste PR.
+
+- ✅ [Infra] Preparar VPS Ubuntu 22.04 *(issue #2)*
+- ✅ [Infra] Instalar dependências do rAthena *(issue #3; build compilado)*
+- ✅ [Banco] Instalar e configurar MariaDB *(issue #4; ativo, usuário dedicado)*
+- ⚠️ [Emulador] Clonar e compilar rAthena *(issue #5; compilado e em execução na
+  VPS — commit `7f080871c` —, mas o critério exige ambiente local/dev:
+  clonagem, compilação e subida de login/char/map **localmente** ainda não
+  comprovadas)*
+- ✅ [Config] Definir episódio/referência mecânica *(issue #6 — Pre-Renewal, já fechada)*
+- ⬜ [Config] Definir rates iniciais *(issue #7)*
+- ⬜ [Config] Definir base level 255, atributos 185 e ASPD 197 (escopo original
+  citava base level máximo 185, substituído em 2026-07-10; o atributo máximo
+  187 foi posteriormente corrigido para 185 — issue #8)
+- ⬜ [Config] Bloquear 3ª classes *(issue #9)*
+- ✅ [Segurança] Configurar usuário não-root *(issue #10)*
+- ⚠️ [Segurança] Configurar firewall *(issue #11; `ufw` ativo com regras
+  aplicadas; teste de conectividade/bloqueio ainda não comprovado)*
+- ⚠️ [Segurança] Configurar fail2ban *(issue #12; serviço e jail `sshd` ativos;
+  teste de bloqueio ainda não comprovado)*
+- ⚠️ [Backup] Definir rotina de backup *(issue #13; backups protegidos existem, rotina automática pendente)*
+- ⬜ [Docs] Criar guia de instalação local *(issue #14)*
+- ✅ [Docs] Criar guia de operação da VPS *(issue #15, já fechada)*
+- ⬜ [Governança] Definir regras do alpha fechado *(issue #16)*
 
 ## Critérios de pronto para a fase inicial
 
@@ -63,4 +93,16 @@ Fluxo sugerido: tarefa → PR para `dev` → validação → PR de `dev` para `m
 
 ## Próximo passo recomendado
 
-Criar as issues iniciais no GitHub a partir de [scripts/criar-issues-iniciais.md](../scripts/criar-issues-iniciais.md) e, em seguida, iniciar a fase de preparação de ambiente local (Fase 1 do [roadmap](02-roadmap.md)).
+A infraestrutura principal da VPS está implantada. Permanecem pendentes o
+ambiente local/dev isolado, a automação de backups e os critérios operacionais
+ainda sem evidência completa (teste de bloqueio do fail2ban, teste de
+conectividade/bloqueio do firewall). A configuração de gameplay deve avançar
+somente com esses estados explicitamente separados.
+
+O foco seguinte é a **Fase 2 – Configuração de gameplay** do
+[roadmap](02-roadmap.md): rates (issue #7), base level 255 / atributo 185 /
+ASPD 197 (issue #8) e bloqueio de 3ª classes (issue #9). Em paralelo, tratar o
+ambiente local/dev (issue #5), o backup automático (issue #13), o guia de
+instalação local (issue #14) e as regras do alpha fechado (issue #16). A
+atualização e o fechamento das issues no GitHub devem ocorrer somente após a
+revisão e o merge deste alinhamento documental.
