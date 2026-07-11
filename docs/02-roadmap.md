@@ -1,9 +1,10 @@
 # Roadmap inicial
 
 > Estado atualizado em 2026-07-11 por auditoria read-only da VPS. Itens marcados
-> foram confirmados por evidência (serviços ativos, portas em escuta,
-> configuração efetiva). Itens em gameplay permanecem estado-alvo, pendentes das
-> issues #7/#8/#9.
+> foram confirmados por evidência **na VPS** (serviços ativos, portas em escuta,
+> configuração efetiva). A implantação na VPS **não** satisfaz os critérios de
+> ambiente local/dev (Fase 1), que permanecem pendentes. Itens de gameplay
+> permanecem estado-alvo, pendentes das issues #7/#8/#9.
 
 ## Fase 0 - Preparação
 
@@ -15,11 +16,15 @@
 
 ## Fase 1 - Ambiente de desenvolvimento
 
-- [x] Subir ambiente local/dev. *(implantado diretamente na VPS)*
-- [x] Compilar emulador. *(rAthena, commit `7f080871c`; binários login/char/map/web)*
-- [x] Configurar MariaDB local. *(MariaDB 10.6.23 ativo, apenas `127.0.0.1:3306`)*
-- [x] Criar banco de teste. *(bancos `faithro` e `faithro_log`)*
-- [x] Validar login, char-server e map-server. *(unidades ativas, portas 6900/6121/5121 em escuta)*
+- [ ] Subir ambiente local/dev. *(pendente; a implantação atual está na VPS)*
+- [ ] Compilar o emulador no ambiente local/dev. *(compilação na VPS validada
+  (rAthena `7f080871c`), mas ambiente local ainda não comprovado)*
+- [ ] Configurar MariaDB local. *(MariaDB implantado na VPS; instância local
+  ainda não comprovada)*
+- [ ] Criar banco de teste separado. *(`faithro` e `faithro_log` são bancos
+  operacionais da VPS, não um banco de teste isolado)*
+- [ ] Validar login, char-server e map-server localmente. *(validado na VPS;
+  execução local ainda não comprovada)*
 
 ## Fase 2 - Configuração de gameplay
 
@@ -38,8 +43,12 @@
 - [x] Criar usuário não-root. *(`faithro`, grupo `sudo`)*
 - [x] Configurar SSH por chave. *(porta 22022, `PubkeyAuthentication yes`)*
 - [x] Desabilitar login root por senha. *(efetivo via `sshd_config.d/00-faithro-hardening.conf`: `PermitRootLogin no`, `PasswordAuthentication no`)*
-- [x] Configurar firewall. *(`ufw` ativo, `deny (incoming)`; SSH liberado, portas de jogo restritas a IP autorizado)*
-- [x] Configurar fail2ban. *(ativo/enabled, jail `sshd` entre outras)*
+- [ ] Configurar e validar firewall. ⚠️ *Parcial: `ufw` ativo com `deny
+  (incoming)` e regras aplicadas (SSH liberado, portas de jogo restritas a IP
+  autorizado); teste explícito de conectividade/bloqueio ainda não comprovado
+  (issue #11).*
+- [ ] Configurar e validar fail2ban. ⚠️ *Parcial: serviço e jail `sshd` ativos;
+  teste de bloqueio ainda não comprovado (issue #12).*
 - [ ] Configurar backups. ⚠️ *Parcial: backups manuais existem e estão protegidos (`drwx------`, `config` + `mariadb`); rotina automática ainda pendente (issue #13).*
 - [x] Configurar serviço systemd. *(unidades `faithro-login/char/map`, ativas/enabled)*
 
