@@ -1,0 +1,5 @@
+# Os arquivos de override do rAthena são implantados em host Linux
+# (/opt/faithro/rathena) e DEVEM permanecer com final de linha LF,
+# independentemente do core.autocrlf de quem faz checkout.
+deploy/rathena-overlay/** text eol=lf
+scripts/validate-progression-overrides.py text eol=lf

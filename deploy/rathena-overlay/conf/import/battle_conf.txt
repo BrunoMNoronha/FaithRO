@@ -1,0 +1,20 @@
+// FaithRO - Laos Deos - override versionado (ETAPA 2N-C, issue #8).
+//
+// Fonte versionada. Destino na VPS:
+//   /opt/faithro/rathena/conf/import/battle_conf.txt
+//
+// Preserva os overrides ja existentes na VPS; ao implantar, mesclar estas
+// chaves sem remover configuracoes nao relacionadas e sem duplicar chaves.
+// Nao editar conf/battle/player.conf (upstream).
+
+// Limite natural individual de STR/AGI/VIT/INT/DEX/LUK.
+// O cap 185 aplica-se ao atributo NATURAL (investido pelo jogador); bonus de
+// equipamento, carta, refino, comida e buff podem elevar o valor FINAL acima
+// de 185. Mesmo cap para classes trans (nao ha vantagem de teto para trans).
+max_parameter: 185
+max_trans_parameter: 185
+
+// Teto GLOBAL de ASPD. Nao e garantia por classe: a ASPD efetiva continua
+// dependendo de classe, arma, escudo, AGI/DEX, buffs e consumiveis.
+// Nao alterar max_third_aspd / max_extended_aspd / max_summoner_aspd.
+max_aspd: 197
