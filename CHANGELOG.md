@@ -4,6 +4,12 @@ Todas as mudanças relevantes do FaithRO devem ser registradas aqui.
 
 ## [Não lançado]
 
+- Alinhamento do README, roadmap e plano de execução inicial ao estado auditado
+  do projeto, distinguindo infraestrutura da VPS, ambiente local/dev, itens
+  parciais e pendências. A infraestrutura base da VPS está implantada; o
+  ambiente local/dev separado permanece pendente; os backups têm proteção, mas
+  ainda sem automação (issue #13); e a configuração de gameplay segue pendente.
+  Nenhuma alteração operacional foi realizada.
 - Documentação do procedimento de **gestão e rotação segura** das credenciais
   SQL do rAthena (`docs/13-credenciais-sql-rathena.md`, novo). A auditoria
   confirmou usuário SQL único e dedicado `faithro_app`@`localhost`, com
