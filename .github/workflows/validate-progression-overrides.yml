@@ -1,0 +1,35 @@
+name: Validate progression overrides
+
+# Valida o pacote versionado de progressao (Base 255, atributos 185, ASPD 197,
+# Base EXP 99-255, stat points 201-255) em pull requests que toquem o overlay
+# ou o validador. Nao acessa a VPS, nao inicia servidores e nao usa secrets.
+
+on:
+  pull_request:
+    paths:
+      - scripts/validate-progression-overrides.py
+      - deploy/rathena-overlay/**
+      - .github/workflows/validate-progression-overrides.yml
+      - .gitattributes
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-progression-overrides:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Show Python version
+        run: python --version
+
+      - name: Validate progression overrides
+        run: python scripts/validate-progression-overrides.py
