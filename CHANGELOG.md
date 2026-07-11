@@ -4,6 +4,22 @@ Todas as mudanças relevantes do FaithRO devem ser registradas aqui.
 
 ## [Não lançado]
 
+- Alinhamento da documentação versionada ao **estado real do projeto**, com base
+  em auditoria read-only da VPS em 2026-07-11 (`README.md`,
+  `docs/02-roadmap.md`, `docs/06-plano-execucao-inicial.md`). Confirmados como
+  **concluídos**: VPS Ubuntu 22.04.5 com usuário não-root `faithro`; SSH efetivo
+  endurecido (porta 22022, `PermitRootLogin no`, `PasswordAuthentication no` via
+  drop-in `00-faithro-hardening.conf`); `ufw` ativo com `deny (incoming)`;
+  fail2ban ativo com jail `sshd`; MariaDB 10.6.23 ativo em `127.0.0.1:3306` com
+  usuário dedicado `faithro_app`@`localhost` escopado; rAthena compilado
+  (`7f080871c`) e serviços systemd `login/char/map` ativos (portas 6900/6121/5121).
+  Registrado como **parcial**: os backups existem e estão protegidos, mas a
+  rotina automática permanece pendente (issue #13); web server compilado, porém
+  não implantado. Registrados como **pendentes** os itens de gameplay da Fase 2
+  (issues #7/#8/#9) e a licença própria (`LICENSE_PENDING.txt`). Nenhuma issue
+  foi alterada ou fechada e **nenhuma mudança operacional** foi realizada na VPS
+  — apenas leitura. A atualização do backlog no GitHub ocorrerá após a revisão e
+  o merge deste PR.
 - Documentação do procedimento de **gestão e rotação segura** das credenciais
   SQL do rAthena (`docs/13-credenciais-sql-rathena.md`, novo). A auditoria
   confirmou usuário SQL único e dedicado `faithro_app`@`localhost`, com
