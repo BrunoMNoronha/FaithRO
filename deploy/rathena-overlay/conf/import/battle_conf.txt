@@ -18,3 +18,8 @@ max_trans_parameter: 185
 // dependendo de classe, arma, escudo, AGI/DEX, buffs e consumiveis.
 // Nao alterar max_third_aspd / max_extended_aspd / max_summoner_aspd.
 max_aspd: 197
+
+// Diretivas preexistentes na VPS, preservadas na reconciliacao (ETAPA 2N-D-linha, issue #8).
+feature.mesitemicon: off
+feature.roulette: off
+feature.roulette_bonus_reward: off
