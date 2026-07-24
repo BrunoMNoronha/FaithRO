@@ -32,3 +32,23 @@ build/
 dist/
 tmp/
 cache/
+
+# Cliente / binarios e assets proprietarios (NAO versionar)
+# Bloqueio amplo por extensao para evitar commit acidental de executaveis,
+# GRFs, pacotes de patch e arquivos compactados. Arquivos legitimos com
+# licenca comprovada podem exigir uma EXCECAO revisada em PR separado.
+# Ver docs/16-politica-distribuicao-cliente.md e client/README.md.
+*.exe
+*.dll
+*.grf
+*.gpf
+*.rgz
+*.thor
+*.7z
+*.rar
+*.zip
+# Nomes/prefixos especificos do cliente-base e do executavel-alvo
+RAG_SETUP_*
+Ragexe*
+data.grf
+rdata.grf

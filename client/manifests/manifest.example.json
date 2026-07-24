@@ -1,0 +1,13 @@
+{
+  "version": "0.0.0-example",
+  "publishedAt": "YYYY-MM-DDTHH:mm:ssZ",
+  "baseUrl": "https://<CDN_FAITHRO>/patches/",
+  "notes": "Exemplo de manifesto de atualizacao. Sem URLs reais. O patcher NAO faz parte desta etapa. Apenas arquivos proprios/licenciados podem ser distribuidos.",
+  "files": [
+    {
+      "path": "faithro.grf",
+      "sha256": "<SHA256>",
+      "size": 0
+    }
+  ]
+}

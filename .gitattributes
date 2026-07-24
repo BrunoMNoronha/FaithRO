@@ -3,3 +3,4 @@
 # independentemente do core.autocrlf de quem faz checkout.
 deploy/rathena-overlay/** text eol=lf
 scripts/validate-progression-overrides.py text eol=lf
+scripts/validate-client-assets.py text eol=lf
