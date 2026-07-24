@@ -1,0 +1,7 @@
+{
+  "version": "0.0.0-lab",
+  "required": false,
+  "download_url": "http://127.0.0.1:8000/updates/beam-patcher-lab.txt",
+  "changelog": "Exemplo sintetico de version.json para o self-updater em laboratorio. Sem URLs reais, sem binarios. Apenas 127.0.0.1 (loopback). Substituir por HTTPS em producao.",
+  "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+}

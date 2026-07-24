@@ -52,3 +52,8 @@ RAG_SETUP_*
 Ragexe*
 data.grf
 rdata.grf
+# Patcher/launcher: binarios e pacotes de patch (NAO versionar)
+# Ver docs/17-decisao-patcher-launcher.md e client/patcher/README.md.
+# (*.grf ja bloqueia faithro.grf/faithro-lab.grf acima.)
+*.beam
+*.msi
