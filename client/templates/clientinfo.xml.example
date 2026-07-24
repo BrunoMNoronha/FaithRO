@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  clientinfo.xml.example - EXEMPLO (placeholders). NAO e o arquivo real.
+
+  Configuracao de conexao lida pelo cliente. Copie para o nome real fora do
+  controle de versao e substitua TODOS os placeholders (<...>) pelos valores
+  homologados no momento da distribuicao.
+
+  PENDENTE DE CONFIRMACAO com o cliente real (ver docs/09, secao 8):
+    - Qual arquivo o cliente-alvo realmente le: clientinfo.xml OU
+      sclientinfo.xml. Ambos sao alternativas dependentes do perfil de
+      patches aplicado ao executavel; NAO escolher arbitrariamente.
+    - A codificacao efetiva exigida pelo cliente (ex.: euc-kr vs utf-8).
+    - Os valores de <servicetype>, <servertype> e <langtype> homologados.
+
+  NAO incluir IP real, dominio nao aprovado, porta real nao confirmada,
+  credenciais, chaves ou dados internos neste arquivo versionado.
+-->
+<clientinfo>
+    <!-- Placeholders; confirmar cada valor com o cliente real -->
+    <servicetype>&lt;SERVICETYPE_HOMOLOGADO&gt;</servicetype>
+    <servertype>&lt;SERVERTYPE_HOMOLOGADO&gt;</servertype>
+    <connection>
+        <display>FaithRO - Laos Deos</display>
+        <address>&lt;HOST_PUBLICO_FAITHRO&gt;</address>
+        <port>&lt;PORTA_LOGIN&gt;</port>
+        <version>&lt;VERSAO_CLIENTE&gt;</version>
+        <langtype>&lt;LANGTYPE_HOMOLOGADO&gt;</langtype>
+    </connection>
+</clientinfo>

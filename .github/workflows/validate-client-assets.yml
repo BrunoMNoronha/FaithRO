@@ -1,0 +1,35 @@
+name: Validate client assets
+
+# Valida os arquivos versionados em client/ (templates textuais, manifesto de
+# exemplo e registro de licencas) em pull requests que toquem client/, o
+# validador ou este workflow. Nao acessa a VPS, nao inicia servidores, nao usa
+# secrets e nao redistribui nenhum binario ou asset proprietario.
+
+on:
+  pull_request:
+    paths:
+      - client/**
+      - scripts/validate-client-assets.py
+      - .github/workflows/validate-client-assets.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-client-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Show Python version
+        run: python --version
+
+      - name: Validate client assets
+        run: python scripts/validate-client-assets.py

@@ -79,4 +79,6 @@ Recomendado:
 | [10-fontes-comunitarias-rathena.md](10-fontes-comunitarias-rathena.md) | Registrar e classificar fontes de pesquisa usadas no projeto. | Todos | validado | Nenhuma | 2026-07-10 |
 | [11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md) | Descrever os serviços systemd criados na implantação. | Infra/DevOps | pendente de validação | 08 | 2026-07-10 |
 | [12-configuracao-packetver.md](12-configuracao-packetver.md) | Procedimento técnico (planejado) para alteração de PACKETVER e obfuscação. | Técnicos | validado | 09 | 2026-07-10 |
+| [15-cliente-primeiro-acesso.md](15-cliente-primeiro-acesso.md) | Fluxo planejado de primeiro acesso do jogador ao cliente. | Todos | pendente de validação | 09, 12, 16 | 2026-07-24 |
+| [16-politica-distribuicao-cliente.md](16-politica-distribuicao-cliente.md) | Política de distribuição e auditoria dos downloads do cliente. | Todos | validado | 09, 10 | 2026-07-24 |
 | [99-checklists.md](99-checklists.md) | Listas de verificação para deploy, rollback e manutenção. | Técnicos | pendente de validação | Nenhuma | 2026-07-10 |
