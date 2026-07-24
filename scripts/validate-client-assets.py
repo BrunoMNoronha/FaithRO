@@ -61,6 +61,13 @@ def check_file(path):
     name = os.path.basename(path)
     ext = os.path.splitext(name)[1].lower()
 
+    # Links simbólicos não são permitidos em client/: um symlink poderia
+    # apontar para fora do repositório e ser lido/seguido. Falhar antes de
+    # qualquer getsize/open evita esse escape de forma segura.
+    if os.path.islink(path):
+        fail("%s: link simbólico não permitido em client/" % r)
+        return
+
     if ext in FORBIDDEN_EXTS:
         fail("%s: extensão proibida (%s) — binário/proprietário não pode ser versionado" % (r, ext))
         return
@@ -101,9 +108,18 @@ def main():
         return 0
 
     count = 0
+    # os.walk não segue symlinks de diretório por padrão (followlinks=False),
+    # de modo que um symlink de pasta nunca é percorrido. Ainda assim,
+    # sinalizamos qualquer symlink de diretório explicitamente e o removemos
+    # da travessia, tratando o risco de forma segura.
     for root, dirs, files in os.walk(CLIENT):
-        # Não descer em diretórios de VCS, se houver.
-        dirs[:] = [d for d in dirs if d != ".git"]
+        for d in sorted(dirs):
+            if os.path.islink(os.path.join(root, d)):
+                fail("%s: link simbólico de diretório não permitido em client/"
+                     % rel(os.path.join(root, d)))
+        # Não descer em diretórios de VCS nem em symlinks de diretório.
+        dirs[:] = [d for d in dirs
+                   if d != ".git" and not os.path.islink(os.path.join(root, d))]
         for fn in sorted(files):
             count += 1
             check_file(os.path.join(root, fn))
