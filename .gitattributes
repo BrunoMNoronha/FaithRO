@@ -4,3 +4,4 @@
 deploy/rathena-overlay/** text eol=lf
 scripts/validate-progression-overrides.py text eol=lf
 scripts/validate-client-assets.py text eol=lf
+scripts/validate-patcher-config.py text eol=lf

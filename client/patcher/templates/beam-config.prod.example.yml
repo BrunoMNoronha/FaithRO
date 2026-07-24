@@ -1,0 +1,72 @@
+# =====================================================================
+# beam-config.prod.example.yml — EXEMPLO de PRODUÇÃO (placeholders).
+# NÃO é a configuração real. Baseado no schema do Beam Patcher v1.0.x.
+#
+# Copie para o nome real (ex.: config.yml) FORA do controle de versão e
+# substitua TODOS os placeholders <...> pelos valores homologados.
+#
+# Regras (ver docs/17 e client/patcher/README.md):
+#   - Produção usa HTTPS. NÃO usar http:// aqui (só em fixtures de lab).
+#   - Sem IP real, domínio real, porta real, senha, token ou caminho pessoal.
+#   - SSO desabilitado. Sem salvamento de senha.
+#   - client_exe/setup_exe por NOME; não versionar o executável real.
+# =====================================================================
+
+app:
+  name: "FaithRO - Laos Deos"
+  version: "<VERSAO_CONFIG_PATCHER>"
+  window_title: "FaithRO - Laos Deos"
+  # null = pasta atual do patcher; NÃO fixar caminho pessoal aqui.
+  game_directory: null
+  client_exe: "<NOME_EXECUTAVEL_CLIENTE>"   # ex.: FaithRO.exe (não versionar o real)
+  setup_exe: "<NOME_EXECUTAVEL_SETUP>"      # configurador homologado (ver docs/16)
+  bgm_autoplay: false
+  bgm_file: null
+  server_name: "FaithRO - Laos Deos"
+  video_background_enabled: false
+  video_background_file: null
+  grid_images: null
+  discord_url: null
+  register_url: null
+  social_links: null
+  limited_items: null
+
+patcher:
+  # Todos os mirrors DEVEM ser HTTPS e de infraestrutura própria do FaithRO.
+  mirrors:
+    - name: "Primary"
+      url: "https://<HOST_PATCH_FAITHRO>"
+      priority: 1
+  patch_list_url: "https://<HOST_PATCH_FAITHRO>/patchlist.txt"
+  # GRF-alvo do conteúdo PRÓPRIO do FaithRO (nunca data.grf/rdata.grf oficiais).
+  target_grf: "faithro.grf"
+  allow_manual_patch: false
+  # Verificação de integridade OBRIGATÓRIA.
+  verify_checksums: true
+
+ui:
+  theme: "default"
+  custom_css: null
+  logo: null
+  background: null
+  show_progress: true
+  show_file_list: true
+  news_feed_url: null
+  server_status_url: null
+  status_image_url: null
+  custom_buttons: []
+  layout:
+    width: 800
+    height: 600
+    use_custom_layout: false
+
+# SSO desabilitado por decisão do projeto (ver docs/17 §10).
+sso:
+  enabled: false
+
+updater:
+  enabled: true
+  check_url: "https://<HOST_PATCH_FAITHRO>/version.json"
+  update_url: "https://<HOST_PATCH_FAITHRO>/updates"
+  # Nunca instalar update sem confirmação.
+  auto_update: false

@@ -32,6 +32,8 @@ ALLOWED_SUFFIXES = (
     ".md",
     ".txt",
     ".json",
+    ".yml",       # templates de configuração do patcher (client/patcher/)
+    ".yaml",
     ".example",   # cobre data.ini.example, clientinfo.xml.example, etc.
     ".gitkeep",
     ".gitignore",

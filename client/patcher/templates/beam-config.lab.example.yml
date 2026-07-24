@@ -1,0 +1,60 @@
+# =====================================================================
+# beam-config.lab.example.yml — EXEMPLO de LABORATÓRIO sintético.
+# NÃO é produção. Aponta para 127.0.0.1 (loopback) apenas para testes
+# controlados com arquivos sintéticos, conforme docs/17 e
+# client/patcher/fixtures/README.md.
+#
+# ATENÇÃO: http://127.0.0.1 é permitido SOMENTE em fixtures de laboratório.
+# Em produção use HTTPS (ver beam-config.prod.example.yml). Bind apenas em
+# 127.0.0.1; não expor porta à rede; não abrir firewall.
+# =====================================================================
+
+app:
+  name: "FaithRO - Lab"
+  version: "0.0.0-lab"
+  window_title: "FaithRO - Lab (sintético)"
+  game_directory: null
+  client_exe: "synthetic-client.txt"   # marcador benigno; sem cliente real
+  setup_exe: "synthetic-setup.txt"
+  bgm_autoplay: false
+  bgm_file: null
+  server_name: "FaithRO - Lab"
+  video_background_enabled: false
+  video_background_file: null
+  grid_images: null
+  discord_url: null
+  register_url: null
+  social_links: null
+  limited_items: null
+
+patcher:
+  mirrors:
+    - name: "Lab loopback"
+      url: "http://127.0.0.1:8000"
+      priority: 1
+  patch_list_url: "http://127.0.0.1:8000/patchlist.txt"
+  target_grf: "faithro-lab.grf"
+  allow_manual_patch: true
+  verify_checksums: true
+
+ui:
+  theme: "default"
+  custom_css: null
+  logo: null
+  background: null
+  show_progress: true
+  show_file_list: true
+  news_feed_url: null
+  server_status_url: null
+  status_image_url: null
+  custom_buttons: []
+  layout:
+    width: 800
+    height: 600
+    use_custom_layout: false
+
+sso:
+  enabled: false
+
+updater:
+  enabled: false

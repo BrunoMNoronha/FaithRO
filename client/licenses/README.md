@@ -64,3 +64,29 @@ Registro do configurador atualmente considerado para o fluxo de primeiro acesso:
 
 > Este registro é um exemplo de preenchimento e a base da decisão registrada na
 > política. Novas dependências devem seguir o mesmo formato.
+
+## Patcher/launcher avaliados (auditoria de 2026-07-24)
+
+Registro das alternativas de patcher/launcher avaliadas na decisão
+[`docs/17-decisao-patcher-launcher.md`](../../docs/17-decisao-patcher-launcher.md).
+Nenhum binário é versionado; este é apenas o registro textual.
+
+| Ferramenta | Versão | Autor | Licença | Origem oficial | Modificação | Redistribuição | Proíbe mirror? | Decisão do FaithRO |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **Beam Patcher** | v1.0.1 / commit `feed978870` | Beam Patcher Team | MIT OR Apache-2.0 | `github.com/beamguides/beam-patcher` | Sim | Sim (com atribuição da licença) | Não | **Principal — self-host permitido** |
+| **RPatchur** | v0.3.0 / commit `21a5482771` | L1nkZ | MIT OR Apache-2.0 | `github.com/L1nkZ/rpatchur` | Sim | Sim (com atribuição da licença) | Não | **Reserva — self-host permitido; upstream estagnado** |
+| **Elurair** | v2.21.4.614 | Ai4rei/AN | CC BY-NC 4.0 (fechado) | `elurair.com` | Não (binário fechado) | Não-comercial, mas mirror proibido | **Sim** | Não recomendado — apenas link, sem hospedar/modificar |
+| **RO Patcher Lite** | v4.11.0.1395 | Ai4rei/AN | CC BY-NC-ND 4.0 (fechado) | `nn.ai4rei.net/dev/rsu/` | **Não (NoDerivatives)** | Não; mirror proibido | **Sim** | Bloqueado por licença — apenas link |
+| **Thor Patcher** | v3.0 alpha 2 | Aeomin | Não declarada claramente | `sourceforge.net/projects/patcherproj` | Indefinido | Indefinido | Indefinido | Bloqueado por manutenção (dormente desde 2016) |
+
+Atribuição exigida (quando aplicável):
+
+- **Beam Patcher:** manter avisos das licenças MIT e Apache-2.0 (arquivos
+  `LICENSE-MIT`, `LICENSE-APACHE`) em qualquer redistribuição/fork.
+- **RPatchur:** idem (MIT/Apache-2.0).
+- **Elurair / RO Patcher Lite:** atribuição a Ai4rei/AN conforme CC BY-NC(-ND);
+  o FaithRO **não** redistribui nem hospeda estas ferramentas.
+
+> Componentes classificados como bloqueados ou não recomendados **não** entram em
+> nenhum pacote distribuído pelo FaithRO. A confirmação de licença do Thor Patcher
+> permanece **pendente** caso se queira reavaliá-lo no futuro.
