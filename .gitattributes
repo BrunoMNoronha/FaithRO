@@ -12,11 +12,13 @@ scripts/validate-beam-build-plan.py text eol=lf
 scripts/validate-beam-security-overlay.py text eol=lf
 
 # O overlay de segurança do Beam é gerado contra o upstream (CRLF) e DEVE ser
-# aplicado byte a byte com git apply. -text impede o Git de reescrever os finais
-# de linha; -diff evita que o CR seja tratado como "trailing whitespace" e trata
-# o patch como blob opaco (revisão pelo próprio arquivo). Ver
-# client/patcher/beam-audit/overlays/.
-client/patcher/beam-audit/overlays/*.patch -text -diff
+# aplicado byte a byte com git apply. Atributos:
+#   -text       impede o Git de reescrever os finais de linha (CRLF preservado);
+#   diff        trata como TEXTO no diff (auditável no Git e no GitHub);
+#   -whitespace não classifica os CR preservados como "trailing whitespace"
+#               apenas neste arquivo (evita falso positivo em git diff --check).
+# Ver client/patcher/beam-audit/overlays/.
+client/patcher/beam-audit/overlays/beam-lab-security.patch -text diff -whitespace
 
 # Fixtures sintéticas do laboratório do patcher DEVEM permanecer com LF: o
 # validador anti-drift compara byte a byte com a saída determinística (LF) do
