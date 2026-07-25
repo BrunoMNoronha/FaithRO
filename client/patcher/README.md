@@ -49,6 +49,9 @@ client/patcher/
 │   ├── security-findings.example.json
 │   ├── build-plan.example.json
 │   ├── first-build-plan.example.json # plano do primeiro build controlado (D1-B8)
+│   ├── first-build-runbook.example.json        # runbook operacional do primeiro build (D1-B10)
+│   ├── first-build-authorization.example.json  # modelo de autorização humana, não concedido (D1-B10)
+│   ├── first-build-execution-evidence.example.json # template de evidência futura, não executado (D1-B10)
 │   ├── evidence/                     # evidências de compatibilidade/seleção/instalação
 │   ├── overlays/                     # overlay de segurança de laboratório (.patch textual)
 │   └── schemas/                      # schemas do manifesto e dos planos
@@ -85,6 +88,8 @@ Nas ETAPAS 2O-D1-B4 e 2O-D1-B5, o plano técnico de coexistência da Rust 1.85.0
 Na ETAPA 2O-D1-B6, a instalação isolada da toolchain nomeada `1.85.0-x86_64-pc-windows-msvc` (perfil `minimal`) foi **EXECUTADA E VALIDADA** empiricamente (mantendo a Rust 1.77.2 como default ativa). Ver evidência em [`beam-audit/evidence/toolchain-installation.json`](beam-audit/evidence/toolchain-installation.json) e documentação em [`docs/22-instalacao-isolada-toolchain-rust-beam.md`](../../docs/22-instalacao-isolada-toolchain-rust-beam.md).
 
 Na ETAPA 2O-D1-B8, o **plano do primeiro build controlado** foi modelado como artefato versionado e validável ([`beam-audit/first-build-plan.example.json`](beam-audit/first-build-plan.example.json)) e documentado em [`docs/23-planejamento-primeiro-build-controlado-beam.md`](../../docs/23-planejamento-primeiro-build-controlado-beam.md). O plano registra a **autorização de execução como BLOQUEADA** (`build_authorized=false`, `next_human_authorization_required=true`) e exige autorização humana explícita em etapa posterior.
+
+Na ETAPA 2O-D1-B10, o plano foi transformado em **runbook operacional** com **checkpoint de autorização humana**, **go/no-go** e **modelo de evidência**, em três artefatos separados por responsabilidade ([`beam-audit/first-build-runbook.example.json`](beam-audit/first-build-runbook.example.json), [`beam-audit/first-build-authorization.example.json`](beam-audit/first-build-authorization.example.json), [`beam-audit/first-build-execution-evidence.example.json`](beam-audit/first-build-execution-evidence.example.json)) e documentado em [`docs/24-runbook-primeiro-build-controlado-beam.md`](../../docs/24-runbook-primeiro-build-controlado-beam.md). A **autorização humana continua NÃO concedida** (`authorization_granted=false`, `execution_permitted=false`).
 
 **Build permanece NÃO autorizado. Nenhum binário foi compilado ou executado.**
 

@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:beam-audit/first-build-execution-evidence",
+  "title": "Beam Patcher first controlled build execution evidence (template, not executed)",
+  "description": "Template de evidencia da execucao futura do primeiro build controlado do Beam Patcher (ETAPA 2O-D1-B10). Nenhuma execucao ocorreu.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "stage",
+    "artifact_kind",
+    "title",
+    "runbook_reference",
+    "authorization_reference",
+    "evidence_state",
+    "note",
+    "process_flags",
+    "identity",
+    "baseline",
+    "execution",
+    "final_state"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "stage": { "type": "string", "const": "2O-D1-B10" },
+    "artifact_kind": { "type": "string", "const": "execution-evidence" },
+    "title": { "type": "string", "minLength": 1 },
+    "document_reference": { "type": "string", "minLength": 1 },
+    "runbook_reference": { "type": "string", "const": "client/patcher/beam-audit/first-build-runbook.example.json" },
+    "authorization_reference": { "type": "string", "const": "client/patcher/beam-audit/first-build-authorization.example.json" },
+    "evidence_state": { "type": "string", "const": "template-not-executed" },
+    "note": { "type": "string", "minLength": 1 },
+    "process_flags": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_started",
+        "build_started",
+        "build_completed",
+        "binary_produced",
+        "binary_executed",
+        "deploy_performed",
+        "vps_accessed"
+      ],
+      "properties": {
+        "execution_started": { "type": "boolean", "const": false },
+        "build_started": { "type": "boolean", "const": false },
+        "build_completed": { "type": "boolean", "const": false },
+        "binary_produced": { "type": "boolean", "const": false },
+        "binary_executed": { "type": "boolean", "const": false },
+        "deploy_performed": { "type": "boolean", "const": false },
+        "vps_accessed": { "type": "boolean", "const": false }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runbook_version",
+        "runbook_sha",
+        "authorization_id",
+        "faithro_commit",
+        "beam_commit",
+        "beam_tree_digest",
+        "overlay_sha256",
+        "host_label",
+        "started_utc",
+        "ended_utc"
+      ],
+      "properties": {
+        "runbook_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "runbook_sha": { "type": "string", "const": "<PENDENTE>" },
+        "authorization_id": { "type": "string", "const": "<PENDENTE>" },
+        "faithro_commit": { "type": "string", "const": "<PENDENTE>" },
+        "beam_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "beam_tree_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "overlay_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "host_label": { "type": "string", "const": "<PENDENTE>" },
+        "started_utc": { "type": "string", "const": "<PENDENTE>" },
+        "ended_utc": { "type": "string", "const": "<PENDENTE>" }
+      }
+    },
+    "baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rust_default_toolchain",
+        "rust_active_toolchain",
+        "toolchains",
+        "overrides",
+        "components",
+        "targets",
+        "toolchain_selector_files",
+        "permanent_path",
+        "repository_status",
+        "initial_inventory",
+        "windows_defender_state",
+        "vps_absent_confirmed"
+      ],
+      "properties": {
+        "rust_default_toolchain": { "type": "string", "minLength": 1 },
+        "rust_active_toolchain": { "type": "string", "minLength": 1 },
+        "toolchains": { "type": "string", "minLength": 1 },
+        "overrides": { "type": "string", "minLength": 1 },
+        "components": { "type": "string", "minLength": 1 },
+        "targets": { "type": "string", "minLength": 1 },
+        "toolchain_selector_files": { "type": "string", "minLength": 1 },
+        "permanent_path": { "type": "string", "minLength": 1 },
+        "repository_status": { "type": "string", "minLength": 1 },
+        "initial_inventory": { "type": "string", "minLength": 1 },
+        "windows_defender_state": { "type": "string", "minLength": 1 },
+        "vps_absent_confirmed": { "type": "boolean", "const": true }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "steps",
+        "executed_commands",
+        "downloaded_files",
+        "produced_artifacts",
+        "interrupted",
+        "interruption_reason"
+      ],
+      "properties": {
+        "steps": { "type": "array", "maxItems": 0 },
+        "executed_commands": { "type": "array", "maxItems": 0 },
+        "downloaded_files": { "type": "array", "maxItems": 0 },
+        "produced_artifacts": { "type": "array", "maxItems": 0 },
+        "interrupted": { "type": "boolean", "const": false },
+        "interruption_reason": { "type": ["string", "null"] }
+      }
+    },
+    "final_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rust_default_toolchain",
+        "rust_active_toolchain",
+        "overrides",
+        "components",
+        "targets",
+        "permanent_path",
+        "repository_status",
+        "final_inventory",
+        "files_outside_workspace",
+        "binary_produced",
+        "binary_executed",
+        "deploy_performed",
+        "vps_accessed",
+        "windows_defender_state",
+        "cleanup_done",
+        "divergences"
+      ],
+      "properties": {
+        "rust_default_toolchain": { "type": "string", "minLength": 1 },
+        "rust_active_toolchain": { "type": "string", "minLength": 1 },
+        "overrides": { "type": "string", "minLength": 1 },
+        "components": { "type": "string", "minLength": 1 },
+        "targets": { "type": "string", "minLength": 1 },
+        "permanent_path": { "type": "string", "minLength": 1 },
+        "repository_status": { "type": "string", "minLength": 1 },
+        "final_inventory": { "type": "string", "minLength": 1 },
+        "files_outside_workspace": { "type": "array", "maxItems": 0 },
+        "binary_produced": { "type": "boolean", "const": false },
+        "binary_executed": { "type": "boolean", "const": false },
+        "deploy_performed": { "type": "boolean", "const": false },
+        "vps_accessed": { "type": "boolean", "const": false },
+        "windows_defender_state": { "type": "string", "minLength": 1 },
+        "cleanup_done": { "type": "boolean", "const": false },
+        "divergences": { "type": "array", "maxItems": 0 }
+      }
+    }
+  }
+}

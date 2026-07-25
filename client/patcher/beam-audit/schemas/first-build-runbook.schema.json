@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:beam-audit/first-build-runbook",
+  "title": "Beam Patcher first controlled build runbook (operational sequence, execution blocked)",
+  "description": "Runbook operacional do primeiro build controlado do Beam Patcher (ETAPA 2O-D1-B10). Documenta a sequencia; NAO autoriza e NAO executa o build.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "stage",
+    "artifact_kind",
+    "title",
+    "plan_reference",
+    "authorization_reference",
+    "evidence_reference",
+    "project",
+    "source_branch",
+    "governance_commit",
+    "runbook_version",
+    "created_utc",
+    "executes_build",
+    "process_state",
+    "source",
+    "toolchain",
+    "workspace",
+    "command_classes",
+    "network_allowed_phases",
+    "steps",
+    "go_no_go",
+    "interruption_procedure",
+    "cleanup_procedure",
+    "rollback_procedure",
+    "proprietary_assets_included",
+    "deploy",
+    "access_vps"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "stage": { "type": "string", "const": "2O-D1-B10" },
+    "artifact_kind": { "type": "string", "const": "runbook" },
+    "title": { "type": "string", "minLength": 1 },
+    "document_reference": { "type": "string", "minLength": 1 },
+    "plan_reference": { "type": "string", "const": "client/patcher/beam-audit/first-build-plan.example.json" },
+    "authorization_reference": { "type": "string", "const": "client/patcher/beam-audit/first-build-authorization.example.json" },
+    "evidence_reference": { "type": "string", "const": "client/patcher/beam-audit/first-build-execution-evidence.example.json" },
+    "project": { "type": "string", "minLength": 1 },
+    "source_branch": { "type": "string", "const": "dev" },
+    "governance_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "runbook_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "created_utc": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
+    "executes_build": { "type": "boolean", "const": false },
+    "process_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "planning_completed",
+        "static_validation_completed",
+        "human_authorization_required",
+        "human_authorization_granted",
+        "execution_authorized",
+        "execution_started",
+        "build_started",
+        "build_completed",
+        "binary_produced",
+        "binary_executed",
+        "deploy_performed",
+        "vps_accessed"
+      ],
+      "properties": {
+        "planning_completed": { "type": "boolean" },
+        "static_validation_completed": { "type": "boolean" },
+        "human_authorization_required": { "type": "boolean", "const": true },
+        "human_authorization_granted": { "type": "boolean", "const": false },
+        "execution_authorized": { "type": "boolean", "const": false },
+        "execution_started": { "type": "boolean", "const": false },
+        "build_started": { "type": "boolean", "const": false },
+        "build_completed": { "type": "boolean", "const": false },
+        "binary_produced": { "type": "boolean", "const": false },
+        "binary_executed": { "type": "boolean", "const": false },
+        "deploy_performed": { "type": "boolean", "const": false },
+        "vps_accessed": { "type": "boolean", "const": false }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "official_source",
+        "commit",
+        "version_reference",
+        "license_expression",
+        "checkout_mode",
+        "tree_digest_algorithm",
+        "tree_digest"
+      ],
+      "properties": {
+        "repository": { "type": "string", "const": "beamguides/beam-patcher" },
+        "official_source": { "type": "string", "const": "https://github.com/beamguides/beam-patcher" },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "version_reference": { "type": "string", "minLength": 1 },
+        "license_expression": { "type": "string", "minLength": 1 },
+        "checkout_mode": { "type": "string", "const": "detached" },
+        "tree_digest_algorithm": { "type": "string", "const": "sha256" },
+        "tree_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "toolchain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required_toolchain", "preserved_default_toolchain", "target"],
+      "properties": {
+        "required_toolchain": { "type": "string", "const": "1.85.0-x86_64-pc-windows-msvc" },
+        "preserved_default_toolchain": { "type": "string", "const": "1.77.2-x86_64-pc-windows-msvc" },
+        "target": { "type": "string", "const": "x86_64-pc-windows-msvc" }
+      }
+    },
+    "workspace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["temp_dir_prefix", "location", "inside_faithro_repo_forbidden"],
+      "properties": {
+        "temp_dir_prefix": { "type": "string", "minLength": 1 },
+        "location": { "type": "string", "minLength": 1 },
+        "inside_faithro_repo_forbidden": { "type": "boolean", "const": true }
+      }
+    },
+    "command_classes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["note", "allowed_read_only", "blocked_pending_authorization", "forbidden"],
+      "properties": {
+        "note": { "type": "string", "minLength": 1 },
+        "allowed_read_only": { "type": "string", "minLength": 1 },
+        "blocked_pending_authorization": { "type": "string", "minLength": 1 },
+        "forbidden": { "type": "string", "minLength": 1 }
+      }
+    },
+    "network_allowed_phases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "order",
+          "phase",
+          "objective",
+          "preconditions",
+          "command",
+          "working_dir",
+          "execution",
+          "network",
+          "expected_input",
+          "expected_output",
+          "evidence",
+          "success_criterion",
+          "failure_criterion",
+          "on_failure",
+          "repeatable",
+          "owner",
+          "depends_on",
+          "risks",
+          "local_rollback"
+        ],
+        "properties": {
+          "id": { "type": "string", "pattern": "^RB-[0-9]{2}$" },
+          "order": { "type": "integer" },
+          "phase": { "type": "string", "minLength": 1 },
+          "objective": { "type": "string", "minLength": 1 },
+          "preconditions": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "command": { "type": "string", "minLength": 1 },
+          "working_dir": { "type": "string", "minLength": 1 },
+          "execution": { "type": "string", "enum": ["allowed_read_only", "blocked_pending_authorization"] },
+          "network": { "type": "boolean" },
+          "expected_input": { "type": "string", "minLength": 1 },
+          "expected_output": { "type": "string", "minLength": 1 },
+          "evidence": { "type": "string", "minLength": 1 },
+          "success_criterion": { "type": "string", "minLength": 1 },
+          "failure_criterion": { "type": "string", "minLength": 1 },
+          "on_failure": { "type": "string", "minLength": 1 },
+          "repeatable": { "type": "boolean" },
+          "owner": { "type": "string", "minLength": 1 },
+          "depends_on": { "type": "array", "items": { "type": "string", "pattern": "^RB-[0-9]{2}$" } },
+          "risks": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+          "local_rollback": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "go_no_go": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "default_decision",
+        "proceed_with_reservations_allowed",
+        "ambiguous_result_is",
+        "go_conditions",
+        "no_go_conditions"
+      ],
+      "properties": {
+        "default_decision": { "type": "string", "const": "NO-GO" },
+        "proceed_with_reservations_allowed": { "type": "boolean", "const": false },
+        "ambiguous_result_is": { "type": "string", "const": "NO-GO" },
+        "go_conditions": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "no_go_conditions": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "interruption_procedure": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "cleanup_procedure": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "rollback_procedure": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "proprietary_assets_included": { "type": "boolean", "const": false },
+    "deploy": { "type": "boolean", "const": false },
+    "access_vps": { "type": "boolean", "const": false }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "stage": "2O-D1-B10",
+  "artifact_kind": "execution-evidence",
+  "title": "Template de evidencia da execucao futura do primeiro build controlado do Beam Patcher",
+  "document_reference": "docs/24-runbook-primeiro-build-controlado-beam.md",
+  "runbook_reference": "client/patcher/beam-audit/first-build-runbook.example.json",
+  "authorization_reference": "client/patcher/beam-audit/first-build-authorization.example.json",
+  "evidence_state": "template-not-executed",
+  "note": "TEMPLATE. Nenhuma execucao ocorreu. Os campos <PENDENTE> serao preenchidos apenas apos uma execucao real e autorizada. Nao registrar nome de usuario, caminho pessoal, token, senha, chave, IP publico, nome de maquina sensivel, ambiente integral ou dados de jogador.",
+  "process_flags": {
+    "execution_started": false,
+    "build_started": false,
+    "build_completed": false,
+    "binary_produced": false,
+    "binary_executed": false,
+    "deploy_performed": false,
+    "vps_accessed": false
+  },
+  "identity": {
+    "runbook_version": "1.0.0",
+    "runbook_sha": "<PENDENTE>",
+    "authorization_id": "<PENDENTE>",
+    "faithro_commit": "<PENDENTE>",
+    "beam_commit": "feed97887090d121f796bc1b941390e28b7a2da5",
+    "beam_tree_digest": "4f405c9ecfb2f505d99b00bc77468961e3aa98c72f9ec30faa3939849465b9d5",
+    "overlay_sha256": "945dbd2f354f9738f77fced4dd3a70923227ede042bbd3819dcadb44ca5c37fe",
+    "host_label": "<PENDENTE>",
+    "started_utc": "<PENDENTE>",
+    "ended_utc": "<PENDENTE>"
+  },
+  "baseline": {
+    "rust_default_toolchain": "<PENDENTE>",
+    "rust_active_toolchain": "<PENDENTE>",
+    "toolchains": "<PENDENTE>",
+    "overrides": "<PENDENTE>",
+    "components": "<PENDENTE>",
+    "targets": "<PENDENTE>",
+    "toolchain_selector_files": "<PENDENTE>",
+    "permanent_path": "<PENDENTE>",
+    "repository_status": "<PENDENTE>",
+    "initial_inventory": "<PENDENTE>",
+    "windows_defender_state": "<PENDENTE>",
+    "vps_absent_confirmed": true
+  },
+  "execution": {
+    "steps": [],
+    "executed_commands": [],
+    "downloaded_files": [],
+    "produced_artifacts": [],
+    "interrupted": false,
+    "interruption_reason": null
+  },
+  "final_state": {
+    "rust_default_toolchain": "<PENDENTE>",
+    "rust_active_toolchain": "<PENDENTE>",
+    "overrides": "<PENDENTE>",
+    "components": "<PENDENTE>",
+    "targets": "<PENDENTE>",
+    "permanent_path": "<PENDENTE>",
+    "repository_status": "<PENDENTE>",
+    "final_inventory": "<PENDENTE>",
+    "files_outside_workspace": [],
+    "binary_produced": false,
+    "binary_executed": false,
+    "deploy_performed": false,
+    "vps_accessed": false,
+    "windows_defender_state": "<PENDENTE>",
+    "cleanup_done": false,
+    "divergences": []
+  }
+}

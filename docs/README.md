@@ -42,6 +42,7 @@ apenas os organiza por categoria e registra estado e dependências.
 | [13-credenciais-sql-rathena.md](13-credenciais-sql-rathena.md) | Auditoria e rotação segura das credenciais MariaDB do rAthena (usuário único `faithro_app`, seis diretivas `*_pw`) | Infra/operação/segurança | validado | implantado (rotação executada e validada) | 04, 11 | 2026-07-11 |
 | [14-progressao-base-255-overrides.md](14-progressao-base-255-overrides.md) | Overrides versionados de progressão (Base 255, atributos 185, ASPD 197, Curva EXP B, stat points Modelo B); mapeamento para `/opt/faithro/rathena` | Config/gameplay | validado | não iniciado (implementação versionada; não implantado) | 03, 11 | 2026-07-11 |
 | [23-planejamento-primeiro-build-controlado-beam.md](23-planejamento-primeiro-build-controlado-beam.md) | Plano do primeiro build controlado do Beam Patcher (Rust 1.85.0 nomeada; build bloqueado, exige autorização humana) | Cliente/build/segurança | validado | não iniciado (build não autorizado) | 19, 20, 21, 22 | 2026-07-25 |
+| [24-runbook-primeiro-build-controlado-beam.md](24-runbook-primeiro-build-controlado-beam.md) | Runbook operacional, modelo de autorização humana e template de evidência do primeiro build (build bloqueado; autorização não concedida) | Cliente/build/segurança | validado | não iniciado (autorização não concedida) | 19, 20, 21, 22, 23 | 2026-07-25 |
 | [99-checklists.md](99-checklists.md) | Checklists de PR, deploy, balanceamento | Todos | validado | não aplicável | — | 2026-07-10 |
 
 [^1]: No documento 03, "parcialmente implantado" significa apenas que a
@@ -69,7 +70,9 @@ apenas os organiza por categoria e registra estado e dependências.
   [12](12-configuracao-packetver.md).
 - **Patcher e build auditável do Beam:**
   [23](23-planejamento-primeiro-build-controlado-beam.md) (planejamento do
-  primeiro build controlado; build ainda não autorizado).
+  primeiro build controlado; build ainda não autorizado),
+  [24](24-runbook-primeiro-build-controlado-beam.md) (runbook operacional,
+  autorização humana e evidência; autorização não concedida).
 - **Fontes comunitárias:** [10](10-fontes-comunitarias-rathena.md).
 - **Templates:** [templates/ADR.md](templates/ADR.md),
   [templates/PULL_REQUEST_TEMPLATE.md](templates/PULL_REQUEST_TEMPLATE.md).
