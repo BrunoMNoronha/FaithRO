@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "stage": "2O-D1-B6",
+  "timestamp_utc": "2026-07-25T22:01:37Z",
+  "faithro_commit": "d1b8a1ea7c30205ef8603081bfe412bd40625236",
+  "branch": "build/install-rust-185-beam",
+  "installed_toolchain": {
+    "version": "1.85.0",
+    "cargo_version": "1.85.0",
+    "host_triple": "x86_64-pc-windows-msvc",
+    "profile": "minimal",
+    "components": [
+      "rustc",
+      "cargo",
+      "rust-std"
+    ],
+    "targets": [
+      "x86_64-pc-windows-msvc"
+    ]
+  },
+  "preserved_toolchain": {
+    "version": "1.77.2",
+    "cargo_version": "1.77.2",
+    "host_triple": "x86_64-pc-windows-msvc",
+    "status": "active-default-preserved"
+  },
+  "installation_execution": {
+    "start_timestamp_utc": "2026-07-25T22:00:52Z",
+    "end_timestamp_utc": "2026-07-25T22:01:37Z",
+    "command": "rustup toolchain install 1.85.0-x86_64-pc-windows-msvc --profile minimal",
+    "exit_code": 0,
+    "disk_free_before_gb": 116.17,
+    "disk_free_after_gb": 115.76
+  },
+  "coexistence_status": {
+    "default_toolchain_before": "1.77.2-x86_64-pc-windows-msvc",
+    "default_toolchain_after": "1.77.2-x86_64-pc-windows-msvc",
+    "active_toolchain_before": "1.77.2-x86_64-pc-windows-msvc",
+    "active_toolchain_after": "1.77.2-x86_64-pc-windows-msvc",
+    "overrides_before": 0,
+    "overrides_after": 0
+  },
+  "security_flags": {
+    "installation_authorized": true,
+    "installation_executed": true,
+    "installation_validated": true,
+    "toolchain_added": true,
+    "default_toolchain_changed": false,
+    "persistent_override_created": false,
+    "permanent_path_changed": false,
+    "build_authorized": false,
+    "build_started": false,
+    "binary_produced": false,
+    "binary_executed": false,
+    "dependencies_modified": false,
+    "cargo_lock_created": false,
+    "deploy_performed": false,
+    "vps_accessed": false,
+    "windows_defender_disabled": false,
+    "next_authorization_required": true
+  },
+  "governance_exception": {
+    "direct_dev_commit": "d1b8a1ea7c30205ef8603081bfe412bd40625236",
+    "reason": "Minor formatting fix (trailing whitespace removal in doc 21)"
+  }
+}

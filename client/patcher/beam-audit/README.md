@@ -22,7 +22,8 @@ beam-audit/
 ├── toolchain-installation-plan.example.json # plano de instalação isolada da Rust 1.85.0 (D1-B4)
 ├── evidence/
 │   ├── toolchain-compatibility.json # evidência de incompatibilidade da Rust 1.77.2 (D1-B1)
-│   └── toolchain-selection.json     # evidência de seleção da candidata Rust 1.85.0 (D1-B2)
+│   ├── toolchain-selection.json     # evidência de seleção da candidata Rust 1.85.0 (D1-B2)
+│   └── toolchain-installation.json    # evidência de instalação isolada da Rust 1.85.0 (D1-B6)
 ├── overlays/
 │   ├── README.md
 │   └── beam-lab-security.patch       # overlay de segurança do laboratório (textual)
@@ -31,7 +32,8 @@ beam-audit/
     ├── build-plan.schema.json
     ├── toolchain-compatibility.schema.json
     ├── toolchain-selection.schema.json
-    └── toolchain-installation-plan.schema.json
+    ├── toolchain-installation-plan.schema.json
+    └── toolchain-installation.schema.json
 ```
 
 O fonte do Beam foi clonado apenas em pasta **temporária fora do repositório**,
@@ -64,8 +66,9 @@ python scripts/audit-beam-rust-msrv.py \
 python scripts/validate-beam-toolchain-compatibility.py
 python scripts/validate-beam-toolchain-selection.py
 
-# 6) Validar o plano de instalação isolada da toolchain Rust 1.85.0
+# 6) Validar o plano e a evidência de instalação isolada da toolchain Rust 1.85.0
 python scripts/validate-beam-toolchain-installation-plan.py
+python scripts/validate-beam-toolchain-installation.py
 
 # 7) Validar o overlay de segurança contra o clone temporário
 python scripts/validate-beam-security-overlay.py \
