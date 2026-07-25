@@ -1,0 +1,296 @@
+{
+  "schema_version": 1,
+  "stage": "2O-D1-B8",
+  "title": "Plano do primeiro build controlado do Beam Patcher (autorizacao de execucao)",
+  "document_reference": "docs/23-planejamento-primeiro-build-controlado-beam.md",
+  "project": "FaithRO - Laos Deos",
+  "source_branch": "dev",
+  "governance_commit": "58dfbe9b527cb31d8214e960fb27d52be10d07aa",
+  "created_utc": "2026-07-25T23:30:00Z",
+  "authorization_owner": "autorizacao-humana-pendente",
+  "plan_state": "planned-pending-human-authorization",
+  "executes_build": false,
+  "execution_state": {
+    "planning_completed": true,
+    "static_validation_completed": true,
+    "build_authorized": false,
+    "build_started": false,
+    "binary_produced": false,
+    "binary_executed": false,
+    "deploy_authorized": false,
+    "deploy_performed": false,
+    "vps_access_authorized": false,
+    "vps_accessed": false,
+    "next_human_authorization_required": true
+  },
+  "source": {
+    "repository": "beamguides/beam-patcher",
+    "official_source": "https://github.com/beamguides/beam-patcher",
+    "commit": "feed97887090d121f796bc1b941390e28b7a2da5",
+    "commit_short": "feed978870",
+    "version_reference": "v1.0.1",
+    "license_expression": "MIT OR Apache-2.0",
+    "checkout_mode": "detached",
+    "floating_branch_forbidden": true,
+    "integrity": {
+      "manifest_reference": "client/patcher/beam-audit/upstream-manifest.example.json",
+      "tree_digest_algorithm": "sha256",
+      "tree_digest": "4f405c9ecfb2f505d99b00bc77468961e3aa98c72f9ec30faa3939849465b9d5",
+      "critical_files_recheck_required": true
+    },
+    "workspace": {
+      "temp_dir_prefix": "faithro-beam-build-",
+      "location": "diretorio temporario do sistema, fora do repositorio FaithRO",
+      "inside_faithro_repo_forbidden": true,
+      "cleanup_method": "remover recursivamente o diretorio temporario ao final da etapa de build"
+    }
+  },
+  "toolchain": {
+    "required_toolchain": "1.85.0-x86_64-pc-windows-msvc",
+    "rust_version": "1.85.0",
+    "preserved_default_toolchain": "1.77.2-x86_64-pc-windows-msvc",
+    "named_invocation_required": true,
+    "override_forbidden": true,
+    "permanent_path_change_forbidden": true,
+    "host_triple": "x86_64-pc-windows-msvc",
+    "target": "x86_64-pc-windows-msvc",
+    "profile": "minimal",
+    "components": [
+      "rustc",
+      "cargo",
+      "rust-std"
+    ],
+    "targets": [
+      "x86_64-pc-windows-msvc"
+    ],
+    "implicit_installation_forbidden": true
+  },
+  "planned_commands": {
+    "note": "DADOS NAO EXECUTAVEIS. Nenhum comando abaixo esta autorizado nesta etapa. Copiar comandos isolados nao constitui autorizacao. Placeholders: <TEMP> e o workspace temporario fora do repositorio; <PATCH> e o overlay versionado.",
+    "executable_now": false,
+    "sequence": [
+      {
+        "phase": "verify_before",
+        "purpose": "Registrar estado da toolchain e do repositorio antes de qualquer acao",
+        "command": "rustup show active-toolchain; rustup toolchain list; rustup override list",
+        "network": false,
+        "authorized_now": false
+      },
+      {
+        "phase": "prepare_source_clone",
+        "purpose": "Clonar a origem oficial em workspace temporario externo (sem checkout)",
+        "command": "git clone --filter=blob:none --no-checkout https://github.com/beamguides/beam-patcher.git <TEMP>",
+        "network": true,
+        "authorized_now": false
+      },
+      {
+        "phase": "prepare_source_checkout",
+        "purpose": "Fixar o commit auditado em checkout destacado (proibida branch flutuante)",
+        "command": "git -C <TEMP> checkout --detach feed97887090d121f796bc1b941390e28b7a2da5",
+        "network": false,
+        "authorized_now": false
+      },
+      {
+        "phase": "verify_integrity",
+        "purpose": "Reconferir a integridade da arvore contra o manifesto versionado",
+        "command": "python scripts/audit-beam-upstream.py --source <TEMP> --output <TEMP>/beam-audit.json",
+        "network": false,
+        "authorized_now": false
+      },
+      {
+        "phase": "apply_overlay",
+        "purpose": "Aplicar o overlay de seguranca do laboratorio antes do build",
+        "command": "git -C <TEMP> apply --check <PATCH>; git -C <TEMP> apply <PATCH>",
+        "network": false,
+        "authorized_now": false
+      },
+      {
+        "phase": "validate_overlay",
+        "purpose": "Confirmar que o overlay foi aplicado integralmente",
+        "command": "python scripts/validate-beam-security-overlay.py --source <TEMP> --patch <PATCH>",
+        "network": false,
+        "authorized_now": false
+      },
+      {
+        "phase": "generate_lockfile",
+        "purpose": "Gerar Cargo.lock no clone temporario, rotulado como GERADO pelo FaithRO",
+        "command": "rustup run 1.85.0-x86_64-pc-windows-msvc cargo generate-lockfile",
+        "network": true,
+        "authorized_now": false
+      },
+      {
+        "phase": "resolve_metadata",
+        "purpose": "Resolver o grafo com lock fixo, sem alterar dependencias",
+        "command": "rustup run 1.85.0-x86_64-pc-windows-msvc cargo metadata --locked --format-version 1",
+        "network": false,
+        "authorized_now": false
+      },
+      {
+        "phase": "fetch_dependencies",
+        "purpose": "Fase explicita de download das dependencias (rede permitida somente aqui)",
+        "command": "rustup run 1.85.0-x86_64-pc-windows-msvc cargo fetch --locked",
+        "network": true,
+        "authorized_now": false
+      },
+      {
+        "phase": "inventory_dependencies",
+        "purpose": "Inventariar o cache de dependencias antes do build",
+        "command": "rustup run 1.85.0-x86_64-pc-windows-msvc cargo tree --locked --edges normal",
+        "network": false,
+        "authorized_now": false
+      },
+      {
+        "phase": "primary_build",
+        "purpose": "Primeiro build controlado, com toolchain nomeada, lock fixo e offline",
+        "command": "rustup run 1.85.0-x86_64-pc-windows-msvc cargo build --release --locked --offline",
+        "network": false,
+        "authorized_now": false
+      },
+      {
+        "phase": "inventory_artifacts",
+        "purpose": "Inventariar os arquivos produzidos no diretorio de saida temporario",
+        "command": "Get-ChildItem -Recurse <TEMP>/target/release",
+        "network": false,
+        "authorized_now": false
+      },
+      {
+        "phase": "hash_artifacts",
+        "purpose": "Registrar SHA-256 dos artefatos sem executar o binario",
+        "command": "Get-FileHash -Algorithm SHA256 <TEMP>/target/release/*",
+        "network": false,
+        "authorized_now": false
+      },
+      {
+        "phase": "second_offline_build",
+        "purpose": "Segundo build offline para comparacao (sem prometer bit-for-bit)",
+        "command": "rustup run 1.85.0-x86_64-pc-windows-msvc cargo build --release --locked --offline",
+        "network": false,
+        "authorized_now": false
+      },
+      {
+        "phase": "verify_after",
+        "purpose": "Confirmar toolchain padrao preservada e ausencia de override",
+        "command": "rustup show active-toolchain; rustup show; rustup override list",
+        "network": false,
+        "authorized_now": false
+      },
+      {
+        "phase": "cleanup",
+        "purpose": "Remover integralmente o workspace temporario",
+        "command": "Remove-Item -Recurse -Force <TEMP>",
+        "network": false,
+        "authorized_now": false
+      }
+    ],
+    "primary_build_command": "rustup run 1.85.0-x86_64-pc-windows-msvc cargo build --release --locked --offline",
+    "cleanup_command": "Remove-Item -Recurse -Force <TEMP>"
+  },
+  "network_policy": {
+    "network_allowed_phases": [
+      "prepare_source_clone",
+      "generate_lockfile",
+      "fetch_dependencies"
+    ],
+    "expected_hosts": [
+      "github.com",
+      "static.rust-lang.org",
+      "crates.io"
+    ],
+    "expected_hosts_source": "docs/21-plano-instalacao-toolchain-rust-beam.md (gate 8) e client/patcher/beam-audit/build-plan.example.json",
+    "unexpected_download_aborts": true,
+    "credentials_required": false,
+    "dependencies_pinned": true,
+    "lockfile_change_aborts": true,
+    "offline_build_after_fetch": true
+  },
+  "security": {
+    "overlay_required": true,
+    "overlay_path": "client/patcher/beam-audit/overlays/beam-lab-security.patch",
+    "overlay_applied_before_build": true,
+    "overlay_fully_applied_required": true,
+    "antivirus_disable_forbidden": true,
+    "automatic_binary_execution_forbidden": true,
+    "static_artifact_inspection_required": true,
+    "binary_sha256_required": true,
+    "produced_files_inventory_required": true,
+    "output_isolated_in_temp": true,
+    "files_outside_workspace_abort": true,
+    "real_certificate_signing_forbidden": true,
+    "proprietary_client_packaging_forbidden": true
+  },
+  "success_criteria": [
+    "codigo-fonte corresponde ao commit fixado feed97887090d121f796bc1b941390e28b7a2da5",
+    "integridade da arvore validada contra o manifesto versionado",
+    "toolchain nomeada 1.85.0-x86_64-pc-windows-msvc confirmada na invocacao",
+    "toolchain padrao 1.77.2-x86_64-pc-windows-msvc preservada antes e depois",
+    "overlay de seguranca aplicado integralmente",
+    "build termina com codigo de saida zero",
+    "artefatos esperados produzidos apenas no workspace temporario",
+    "nenhum artefato inesperado produzido",
+    "nenhum binario executado",
+    "SHA-256 dos artefatos registrado",
+    "workspace temporario removido ao final",
+    "repositorio FaithRO permanece limpo",
+    "nenhuma conexao com a VPS ocorre"
+  ],
+  "failure_criteria": [
+    "toolchain divergente de 1.85.0-x86_64-pc-windows-msvc",
+    "mudanca da toolchain padrao 1.77.2",
+    "override de toolchain detectado",
+    "arquivo rust-toolchain ou rust-toolchain.toml inesperado",
+    "componente ou target nao autorizado",
+    "versao upstream divergente do commit fixado",
+    "falha de integridade da arvore",
+    "overlay que nao aplica integralmente",
+    "download de origem nao prevista",
+    "modificacao de dependencia",
+    "criacao ou alteracao inesperada de Cargo.lock apos fixacao",
+    "pedido de privilegios administrativos",
+    "pedido para desabilitar protecao de seguranca",
+    "criacao de arquivos fora do workspace temporario",
+    "tentativa de execucao do binario",
+    "acesso a VPS",
+    "alteracao no repositorio FaithRO",
+    "resultado de build nao deterministico ou nao explicado"
+  ],
+  "required_future_evidence": [
+    "timestamps de inicio e fim",
+    "host e sistema operacional sem dados sensiveis",
+    "SHA do repositorio FaithRO",
+    "origem e SHA do Beam",
+    "hashes dos arquivos baixados",
+    "versoes de rustup, rustc e cargo",
+    "toolchain default antes e depois",
+    "toolchain ativa antes e depois",
+    "overrides antes e depois",
+    "componentes instalados antes e depois",
+    "targets instalados antes e depois",
+    "comandos executados",
+    "codigos de saida",
+    "arquivos produzidos",
+    "hashes dos artefatos",
+    "inventario do workspace",
+    "confirmacao de que o binario nao foi executado",
+    "confirmacao de que nao houve deploy",
+    "confirmacao de que a VPS nao foi acessada",
+    "confirmacao de que o Windows Defender permaneceu ativo"
+  ],
+  "proprietary_assets_included": false,
+  "deploy": false,
+  "access_vps": false,
+  "human_authorization": {
+    "required_before_execution": true,
+    "granted": false,
+    "authorizer": "autorizacao-humana-pendente",
+    "note": "A execucao do build so podera ocorrer apos revisao e integracao deste plano e autorizacao humana explicita registrada em etapa posterior."
+  },
+  "rollback": {
+    "faithro_files": "abandonar a branch antes do merge ou reverter o commit do PR via git revert em novo commit; nunca reescrever o historico de dev",
+    "temp_environment": "nesta etapa nao existe workspace de build; na etapa futura, remover apenas o diretorio temporario",
+    "no_binary_rollback_needed": true
+  },
+  "cleanup": {
+    "temp_workspace_removed": true,
+    "faithro_repo_untouched_by_build": true
+  }
+}
