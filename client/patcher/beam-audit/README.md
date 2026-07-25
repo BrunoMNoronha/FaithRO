@@ -52,12 +52,22 @@ python scripts/validate-beam-build-plan.py \
   --manifest client/patcher/beam-audit/upstream-manifest.example.json \
   --plan client/patcher/beam-audit/build-plan.example.json
 
-# 4) Validar o overlay de segurança contra o clone temporário
+# 4) Auditar MSRVs e edições do grafo (não constrói, não executa)
+# Em clone isolado após `cargo generate-lockfile`:
+python scripts/audit-beam-rust-msrv.py \
+  --lockfile /tmp/beam/Cargo.lock \
+  --output /tmp/toolchain-selection.json
+
+# 5) Validar a evidência de seleção de toolchain e compatibilidade
+python scripts/validate-beam-toolchain-compatibility.py
+python scripts/validate-beam-toolchain-selection.py
+
+# 6) Validar o overlay de segurança contra o clone temporário
 python scripts/validate-beam-security-overlay.py \
   --source /tmp/beam \
   --patch client/patcher/beam-audit/overlays/beam-lab-security.patch
 
-# 5) Remover a pasta temporária
+# 7) Remover a pasta temporária
 rm -rf /tmp/beam
 ```
 
