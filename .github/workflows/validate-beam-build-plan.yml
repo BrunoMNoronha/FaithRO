@@ -100,7 +100,8 @@ jobs:
           fi
 
       - name: Documentação presente
-        run: test -f docs/19-preparacao-build-auditavel-beam.md && echo 'OK: docs/19 presente'
+        run: |
+          test -f docs/19-preparacao-build-auditavel-beam.md && echo 'OK docs/19 presente'
 
       - name: Independência de CWD (executar de diretório externo)
         run: |
