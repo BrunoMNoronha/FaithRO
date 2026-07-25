@@ -1,7 +1,8 @@
 {
   "schema_version": 1,
   "title": "Plano controlado de instalação e build auditável do Beam Patcher",
-  "stage": "2O-D1-B (planejado; NÃO executado nesta etapa)",
+  "stage": "2O-D1-B1 (BLOQUEADO — Toolchain 1.77.2 incompatível com zeroize 1.9.0 edition 2024)",
+  "stage_status": "blocked-before-build",
   "upstream": {
     "repository": "beamguides/beam-patcher",
     "official_source": "https://github.com/beamguides/beam-patcher",
@@ -15,13 +16,18 @@
     "host_triple": "x86_64-pc-windows-msvc",
     "target": "x86_64-pc-windows-msvc",
     "architecture": "x64",
+    "compatibility_status": "rejected",
+    "tested": true,
+    "minimum_observed_compatible_rust": "1.85.0",
+    "replacement_authorized": false,
+    "next_decision_required": true,
     "components": [
       "rustc",
       "cargo",
       "rust-std"
     ],
     "rustup_installer_source": "https://win.rustup.rs/x86_64",
-    "note": "Versao exata PROPOSTA (Rust 1.75+ e compativel com Tauri 1.5). Confirmar e registrar host triple e componentes efetivos na D1-B, apos instalar sob as regras abaixo."
+    "note": "Rust 1.77.2 empiricamente REJEITADA na ETAPA 2O-D1-B1 devido a zeroize 1.9.0 declarar edition 2024 (MSRV 1.85). Substituição de toolchain exige nova autorização (ETAPA 2O-D1-B2)."
   },
   "prerequisites": [
     {
@@ -34,8 +40,17 @@
       "elevation_required": true,
       "workloads": [
         "Microsoft.VisualStudio.Workload.VCTools",
-        "Microsoft.VisualStudio.Component.Windows11SDK"
+        "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+        "Microsoft.VisualStudio.Component.Windows11SDK.26100"
       ],
+      "sdk_reconciliation": {
+        "previous_generic_id": "Microsoft.VisualStudio.Component.Windows11SDK",
+        "confirmed_versioned_id": "Microsoft.VisualStudio.Component.Windows11SDK.26100",
+        "catalog_name": "Windows 11 SDK (10.0.26100.3916)",
+        "catalog_source": "learn.microsoft.com/visualstudio/install/workload-component-id-vs-build-tools",
+        "reconciled_stage": "2O-D1-B",
+        "justification": "ID generico substituido por ID versionado confirmado no catalogo oficial do VS Build Tools 2022"
+      },
       "install_path": "Program Files (x86)/Microsoft Visual Studio/2022/BuildTools (na unidade de sistema)",
       "rollback": "desinstalar via Visual Studio Installer (Modify/Remove)",
       "gate": "cl.exe e link.exe disponiveis; vswhere confirma workload VCTools"
@@ -43,9 +58,9 @@
     {
       "name": "Windows SDK",
       "source": "https://aka.ms/vs/17/release/vs_BuildTools.exe",
-      "version": "componente do Windows 11 SDK (registrar versao efetiva)",
+      "version": "Microsoft.VisualStudio.Component.Windows11SDK.26100 (Windows 11 SDK 10.0.26100.3916; registrar versao efetiva)",
       "architecture": "x64",
-      "verification": "vswhere confirma o componente Windows11SDK",
+      "verification": "vswhere confirma o componente Microsoft.VisualStudio.Component.Windows11SDK.26100",
       "system_impact": "cabecalhos e libs de sistema (persistente)",
       "elevation_required": true,
       "install_path": "Program Files (x86)/Windows Kits/10 (na unidade de sistema)",

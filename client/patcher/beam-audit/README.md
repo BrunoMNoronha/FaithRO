@@ -19,12 +19,15 @@ beam-audit/
 ├── upstream-manifest.example.json   # manifesto determinístico da origem (hashes, digest)
 ├── security-findings.example.json   # achados da auditoria (Tauri/rede/processos)
 ├── build-plan.example.json          # plano controlado de instalação e build (D1-B)
+├── evidence/
+│   └── toolchain-compatibility.json # evidência de incompatibilidade da Rust 1.77.2 (D1-B1)
 ├── overlays/
 │   ├── README.md
 │   └── beam-lab-security.patch       # overlay de segurança do laboratório (textual)
 └── schemas/
     ├── upstream-manifest.schema.json
-    └── build-plan.schema.json
+    ├── build-plan.schema.json
+    └── toolchain-compatibility.schema.json
 ```
 
 O fonte do Beam foi clonado apenas em pasta **temporária fora do repositório**,
