@@ -1,0 +1,110 @@
+name: Validate beam build plan
+
+# Valida os artefatos VERSIONADOS da preparação de build auditável do Beam
+# Patcher (ETAPA 2O-D1): manifesto da origem, plano de build, schemas e overlay
+# de segurança. NÃO clona o Beam, NÃO acessa o upstream, NÃO instala toolchain,
+# NÃO usa Cargo, NÃO usa secrets, NÃO faz upload de artifacts e NÃO faz deploy.
+# Apenas Python da biblioteca padrão. O workflow valida artefatos versionados;
+# não refaz a auditoria externa (que ocorre fora do CI, em pasta temporária).
+
+on:
+  pull_request:
+    paths:
+      - client/patcher/beam-audit/**
+      - scripts/audit-beam-upstream.py
+      - scripts/validate-beam-build-plan.py
+      - scripts/validate-beam-security-overlay.py
+      - docs/19-preparacao-build-auditavel-beam.md
+      - .github/workflows/validate-beam-build-plan.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-beam-build-plan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: CLI --help (sanidade)
+        run: |
+          python scripts/audit-beam-upstream.py --help
+          python scripts/validate-beam-build-plan.py --help
+          python scripts/validate-beam-security-overlay.py --help
+
+      - name: JSON válido (manifesto, achados, plano, schemas)
+        run: |
+          for f in \
+            client/patcher/beam-audit/upstream-manifest.example.json \
+            client/patcher/beam-audit/security-findings.example.json \
+            client/patcher/beam-audit/build-plan.example.json \
+            client/patcher/beam-audit/schemas/upstream-manifest.schema.json \
+            client/patcher/beam-audit/schemas/build-plan.schema.json; do
+            python -c "import json,sys; json.load(open(sys.argv[1],encoding='utf-8'))" "$f"
+            echo "OK: $f"
+          done
+
+      - name: Validar manifesto e plano (contra schemas e regras)
+        run: |
+          python scripts/validate-beam-build-plan.py \
+            --manifest client/patcher/beam-audit/upstream-manifest.example.json \
+            --plan client/patcher/beam-audit/build-plan.example.json
+
+      - name: Validar overlay (estático, sem clone do upstream)
+        run: |
+          python scripts/validate-beam-security-overlay.py --static-only \
+            --patch client/patcher/beam-audit/overlays/beam-lab-security.patch
+
+      - name: Overlay é textual (sem bloco binário)
+        run: |
+          if grep -q "GIT binary patch" client/patcher/beam-audit/overlays/beam-lab-security.patch; then
+            echo 'ERRO: overlay contém bloco binário'; exit 1
+          else
+            echo 'OK: overlay textual'
+          fi
+
+      - name: Validadores de conteúdo textual do client/
+        run: |
+          python scripts/validate-client-assets.py
+          python scripts/validate-patcher-config.py
+
+      - name: Nenhum binário ou pacote rastreado
+        run: |
+          if git ls-files | grep -Ei '\.(exe|dll|grf|gpf|thor|rgz|zip|rar|7z|beam|msi|bin|pak)$'; then
+            echo 'ERRO: binário ou pacote rastreado'; exit 1
+          else
+            echo 'OK: nenhum binário ou pacote rastreado'
+          fi
+
+      - name: Nenhum fonte upstream copiado
+        run: |
+          if git ls-files | grep -Ei '(^|/)(beam-core|beam-formats|beam-patcher|beam-ui)/.*\.(rs|toml)$'; then
+            echo 'ERRO: fonte upstream copiado'; exit 1
+          else
+            echo 'OK: fonte upstream não versionado'
+          fi
+
+      - name: Ausência de caminhos pessoais nos artefatos
+        run: |
+          if git grep -nEi '([a-z]:\\Users\\|/home/[a-z]|/Users/[a-z])' -- client/patcher/beam-audit; then
+            echo 'ERRO: possível caminho pessoal'; exit 1
+          else
+            echo 'OK: sem caminhos pessoais'
+          fi
+
+      - name: Documentação presente
+        run: test -f docs/19-preparacao-build-auditavel-beam.md && echo 'OK: docs/19 presente'
+
+      - name: Independência de CWD (executar de diretório externo)
+        run: |
+          REPO="$(pwd)"
+          ( cd /tmp && python "$REPO/scripts/validate-beam-build-plan.py" \
+              --manifest "$REPO/client/patcher/beam-audit/upstream-manifest.example.json" \
+              --plan "$REPO/client/patcher/beam-audit/build-plan.example.json" )

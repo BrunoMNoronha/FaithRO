@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "title": "Plano controlado de instalação e build auditável do Beam Patcher",
+  "stage": "2O-D1-B (planejado; NÃO executado nesta etapa)",
+  "upstream": {
+    "repository": "beamguides/beam-patcher",
+    "official_source": "https://github.com/beamguides/beam-patcher",
+    "commit": "feed97887090d121f796bc1b941390e28b7a2da5",
+    "version_reference": "v1.0.1",
+    "checkout_mode": "detached"
+  },
+  "toolchain": {
+    "rust_version": "1.77.2",
+    "channel_policy": "versao-exata-fixada (nao usar canal mutavel 'stable' sozinho)",
+    "host_triple": "x86_64-pc-windows-msvc",
+    "target": "x86_64-pc-windows-msvc",
+    "architecture": "x64",
+    "components": [
+      "rustc",
+      "cargo",
+      "rust-std"
+    ],
+    "rustup_installer_source": "https://win.rustup.rs/x86_64",
+    "note": "Versao exata PROPOSTA (Rust 1.75+ e compativel com Tauri 1.5). Confirmar e registrar host triple e componentes efetivos na D1-B, apos instalar sob as regras abaixo."
+  },
+  "prerequisites": [
+    {
+      "name": "Visual Studio Build Tools 2022",
+      "source": "https://aka.ms/vs/17/release/vs_BuildTools.exe",
+      "version": "2022 (17.x; registrar versao efetiva instalada)",
+      "architecture": "x64",
+      "verification": "conferir versao via vswhere.exe apos instalar; nao usar 'latest' sem registrar a versao real",
+      "system_impact": "instala compilador MSVC e Windows SDK (persistente)",
+      "elevation_required": true,
+      "workloads": [
+        "Microsoft.VisualStudio.Workload.VCTools",
+        "Microsoft.VisualStudio.Component.Windows11SDK"
+      ],
+      "install_path": "Program Files (x86)/Microsoft Visual Studio/2022/BuildTools (na unidade de sistema)",
+      "rollback": "desinstalar via Visual Studio Installer (Modify/Remove)",
+      "gate": "cl.exe e link.exe disponiveis; vswhere confirma workload VCTools"
+    },
+    {
+      "name": "Windows SDK",
+      "source": "https://aka.ms/vs/17/release/vs_BuildTools.exe",
+      "version": "componente do Windows 11 SDK (registrar versao efetiva)",
+      "architecture": "x64",
+      "verification": "vswhere confirma o componente Windows11SDK",
+      "system_impact": "cabecalhos e libs de sistema (persistente)",
+      "elevation_required": true,
+      "install_path": "Program Files (x86)/Windows Kits/10 (na unidade de sistema)",
+      "rollback": "remover o componente via Visual Studio Installer",
+      "gate": "SDK listado pelo vswhere"
+    },
+    {
+      "name": "WebView2 Runtime (Evergreen)",
+      "source": "https://developer.microsoft.com/microsoft-edge/webview2/",
+      "version": "150.0.4078.83 (JA PRESENTE neste host; nao reinstalar)",
+      "architecture": "x64",
+      "verification": "chave EdgeUpdate Clients {F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}",
+      "system_impact": "runtime de renderizacao do Tauri (ja instalado)",
+      "elevation_required": false,
+      "install_path": "gerenciado pelo Edge Update",
+      "rollback": "nenhum (pre-existente; nao instalado por esta preparacao)",
+      "gate": "pv presente na chave de registro"
+    },
+    {
+      "name": "rustup + toolchain MSVC",
+      "source": "https://win.rustup.rs/x86_64",
+      "version": "rustup mais recente que instala a toolchain 1.77.2 fixada",
+      "architecture": "x64",
+      "verification": "rustc --version confirma 1.77.2; rustup show confirma host e target MSVC",
+      "system_impact": "instala ~/.rustup e ~/.cargo do usuario (sem elevacao)",
+      "elevation_required": false,
+      "install_path": "%USERPROFILE%/.rustup e %USERPROFILE%/.cargo",
+      "rollback": "rustup self uninstall (remove toolchain e caches do usuario)",
+      "gate": "rustc/cargo respondem com a versao exata fixada"
+    }
+  ],
+  "install_rules": {
+    "no_pipe_to_shell": true,
+    "no_irm_iex": true,
+    "no_third_party_installer": true,
+    "no_community_package_manager": true,
+    "no_latest_without_recording_effective_version": true,
+    "no_manual_global_path_change_without_need": true,
+    "no_extra_visual_studio_components": true,
+    "no_full_ide_when_build_tools_suffice": true,
+    "run_as_administrator": false,
+    "modify_global_path": false
+  },
+  "lockfile_strategy": {
+    "cargo_lock_present_upstream": false,
+    "action": "gerar Cargo.lock em clone temporario na D1-B, rotulado como GERADO pelo FaithRO (nao como arquivo original do upstream)",
+    "steps": [
+      "instalar a toolchain fixada",
+      "gerar Cargo.lock no clone temporario",
+      "registrar todos os pacotes resolvidos",
+      "revisar o diff do lock",
+      "armazenar o lock apenas como evidencia de build do FaithRO, claramente rotulado",
+      "cargo metadata --locked",
+      "builds posteriores com --locked"
+    ]
+  },
+  "build": {
+    "workspace_is_temporary": true,
+    "temp_dir_prefix": "faithro-beam-build-",
+    "steps": [
+      "clone novo e limpo do repositorio oficial",
+      "checkout destacado no commit fixado",
+      "inventario pre-build (audit-beam-upstream.py)",
+      "aplicar overlay de seguranca do laboratorio",
+      "validar overlay (validate-beam-security-overlay.py)",
+      "gerar e revisar Cargo.lock (se ausente)",
+      "cargo metadata --locked",
+      "fase explicita de download das dependencias (rede permitida so aqui)",
+      "inventario do cache de dependencias",
+      "segundo build com rede bloqueada"
+    ],
+    "primary_build_command": "cargo build --release --locked --offline",
+    "locked": true,
+    "offline_second_build": true,
+    "bundle": false,
+    "installer": false,
+    "targets": [],
+    "sha256_required": true,
+    "authenticode_signature": "ausente (registrar claramente que o binario nao esta assinado)",
+    "execute_binary": false,
+    "compare_two_builds": true,
+    "reproducibility_claim": "NAO prometer bit-for-bit antes de testar na D1-B",
+    "destroy_temp_environment": true
+  },
+  "dependency_audit_plan": {
+    "tools_planned_not_installed": [
+      "cargo metadata",
+      "cargo tree",
+      "cargo audit"
+    ],
+    "cargo_deny": "somente se aprovado posteriormente (registrar origem, versao, licenca, hash, impacto, rollback)",
+    "checks": [
+      "crates descontinuados",
+      "licencas transitivas",
+      "dependencias com build script",
+      "dependencias nativas",
+      "conexoes de rede durante o build"
+    ]
+  },
+  "overlay": {
+    "required": true,
+    "path": "client/patcher/beam-audit/overlays/beam-lab-security.patch",
+    "applied_before_first_build": true
+  },
+  "network_policy": {
+    "first_execution_allows_only": [
+      "127.0.0.1",
+      "localhost"
+    ],
+    "external_dns_during_first_run": false,
+    "broad_network_release": false
+  },
+  "deploy": false,
+  "access_vps": false,
+  "binary_audit_plan": {
+    "sha256_of_executable": true,
+    "capture_written_files": true,
+    "monitor_processes_and_network_during_dynamic_stage": true,
+    "no_execution_during_build_stage": true
+  },
+  "rollback": {
+    "faithro_files": "reverter o commit do PR via git revert em novo commit na propria branch",
+    "temp_environment": "remover apenas o diretorio temporario de build",
+    "toolchain": "rustup self uninstall; remover Build Tools via Visual Studio Installer",
+    "system": "nenhuma alteracao global de PATH; componentes registrados para remocao"
+  }
+}

@@ -42,7 +42,9 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PATCHER = os.path.join(REPO, "client", "patcher")
 
 ALLOWED_SUFFIXES = (
-    ".md", ".txt", ".json", ".yml", ".yaml", ".example", ".gitkeep", ".gitignore",
+    ".md", ".txt", ".json", ".yml", ".yaml", ".example",
+    ".patch",  # overlay de segurança de laboratório (client/patcher/beam-audit/overlays/)
+    ".gitkeep", ".gitignore",
 )
 FORBIDDEN_EXTS = (
     ".exe", ".dll", ".grf", ".gpf", ".rgz", ".thor",
@@ -76,7 +78,9 @@ def rel(path):
 
 def is_lab_file(path):
     p = rel(path).lower()
-    return ("fixtures/" in p) or ("lab" in os.path.basename(p))
+    # beam-audit/ descreve um laboratório loopback-only (manifesto/plano/overlay
+    # e schemas da auditoria pré-build do Beam); loopback é esperado ali.
+    return ("fixtures/" in p) or ("beam-audit/" in p) or ("lab" in os.path.basename(p))
 
 
 def _value_is_placeholder(val):

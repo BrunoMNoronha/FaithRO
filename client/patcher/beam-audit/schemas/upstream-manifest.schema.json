@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:beam-audit/upstream-manifest",
+  "title": "Beam Patcher upstream manifest",
+  "description": "Manifesto determinístico da origem upstream do Beam Patcher para auditoria estática pré-build (ETAPA 2O-D1). Não contém fonte de terceiros nem segredos.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "project",
+    "repository",
+    "version_reference",
+    "commit",
+    "license_expression",
+    "source_acquired",
+    "source_executed",
+    "source_built",
+    "binary_created",
+    "audit_scope",
+    "cargo_lock_present_upstream",
+    "rust_toolchain_file_present",
+    "workspace_members",
+    "tree_digest_algorithm",
+    "tree_digest",
+    "critical_files"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "project": { "type": "string", "const": "Beam Patcher" },
+    "repository": { "type": "string", "pattern": "^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$" },
+    "official_source": { "type": "string", "pattern": "^https://" },
+    "version_reference": { "type": "string", "minLength": 1 },
+    "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "commit_short": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+    "license_expression": { "type": "string", "minLength": 1 },
+    "source_acquired": { "type": "boolean" },
+    "source_executed": { "type": "boolean", "const": false },
+    "source_built": { "type": "boolean", "const": false },
+    "binary_created": { "type": "boolean", "const": false },
+    "audit_scope": { "type": "string", "const": "static-pre-build" },
+    "cargo_lock_present_upstream": { "type": "boolean" },
+    "rust_toolchain_file_present": { "type": "boolean" },
+    "workspace_members": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "tree_digest_algorithm": { "type": "string", "const": "sha256" },
+    "tree_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "critical_files": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256", "size"],
+        "additionalProperties": false,
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "size": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

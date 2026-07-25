@@ -43,6 +43,13 @@ client/patcher/
 ├── templates/
 │   ├── beam-config.prod.example.yml  # config de PRODUÇÃO (HTTPS, placeholders)
 │   └── beam-config.lab.example.yml   # config de LABORATÓRIO (127.0.0.1)
+├── beam-audit/                       # auditoria estática pré-build (ETAPA 2O-D1)
+│   ├── README.md
+│   ├── upstream-manifest.example.json
+│   ├── security-findings.example.json
+│   ├── build-plan.example.json
+│   ├── overlays/                     # overlay de segurança de laboratório (.patch textual)
+│   └── schemas/                      # schemas do manifesto e do plano
 └── fixtures/
     ├── README.md                     # estrutura do lab + plano de testes G1–G15
     ├── patchlist.example.txt         # patchlist sintético (nomes + SHA-256)
@@ -53,6 +60,15 @@ client/patcher/
         ├── expected/                 # manifesto + estados determinísticos (SHA-256)
         └── scenarios/                # cenários G1–G15 (valid, hash-mismatch, …)
 ```
+
+## Auditoria de build (ETAPA 2O-D1)
+
+A preparação para uma futura construção auditável do Beam (auditoria estática do
+commit fixado `feed978870`, manifesto da origem, overlay de segurança de
+laboratório, plano controlado de instalação/build e validadores/CI) está em
+[`beam-audit/`](beam-audit/) e documentada em
+[`docs/19-preparacao-build-auditavel-beam.md`](../../docs/19-preparacao-build-auditavel-beam.md).
+**Nada foi instalado, construído, executado ou implantado.**
 
 ## Homologação sintética do fluxo (ETAPA 2O-D)
 
