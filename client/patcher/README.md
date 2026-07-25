@@ -38,14 +38,43 @@ O binário do patcher **nunca** entra no Git (bloqueado por
 ```text
 client/patcher/
 ├── README.md                         # este arquivo
+├── lab/
+│   └── README.md                     # como executar o lab sintético (fora do repo)
 ├── templates/
 │   ├── beam-config.prod.example.yml  # config de PRODUÇÃO (HTTPS, placeholders)
 │   └── beam-config.lab.example.yml   # config de LABORATÓRIO (127.0.0.1)
 └── fixtures/
     ├── README.md                     # estrutura do lab + plano de testes G1–G15
     ├── patchlist.example.txt         # patchlist sintético (nomes + SHA-256)
-    └── version.example.json          # version.json sintético do self-updater
+    ├── version.example.json          # version.json sintético do self-updater
+    └── synthetic/                    # homologação sintética executável (ETAPA 2O-D)
+        ├── README.md
+        ├── source/                   # conteúdo-fonte que o patch entrega
+        ├── expected/                 # manifesto + estados determinísticos (SHA-256)
+        └── scenarios/                # cenários G1–G15 (valid, hash-mismatch, …)
 ```
+
+## Homologação sintética do fluxo (ETAPA 2O-D)
+
+O **fluxo conceitual** do Beam (manifesto → loopback → download → integridade →
+aplicação → estado final) é homologado de forma 100% sintética. Ver
+[`docs/18-homologacao-patch-sintetico-beam.md`](../../docs/18-homologacao-patch-sintetico-beam.md)
+e [`fixtures/synthetic/README.md`](fixtures/synthetic/README.md).
+
+```bash
+python scripts/generate-synthetic-patch-lab.py --output <DIR_TEMPORARIO>/lab
+python scripts/validate-synthetic-patch-lab.py --root <DIR_TEMPORARIO>/lab
+python scripts/validate-synthetic-patch-lab.py --self-test
+```
+
+- O patch sintético é um **manifesto conceitual**
+  (`FORMATO CONCEITUAL — NÃO CONSUMÍVEL PELO BEAM`), **não** um pacote
+  `.beam`/`.thor` real; o formato binário do Beam não foi confirmado sem a
+  toolchain Rust.
+- A aplicação usa o **simulador do laboratório**, nunca o Beam. A execução
+  dinâmica do Beam está `BLOQUEADO — TOOLCHAIN DO BEAM NÃO DISPONÍVEL`.
+- **Status da homologação:** `APROVADO COM RESTRIÇÕES` (lab e validações próprias
+  passam; Beam não executado por ausência de toolchain).
 
 ## Arquivos permitidos e proibidos
 

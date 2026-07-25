@@ -1,0 +1,34 @@
+{
+  "actions": [
+    {
+      "op": "create",
+      "path": "data/welcome.txt",
+      "sha256": "97d94b2ad253496d379b13bb4640b53274e8f2ea88b23acb520a6e6958f0189d",
+      "size": 49
+    },
+    {
+      "op": "remove",
+      "path": "data/obsolete.txt"
+    },
+    {
+      "op": "update",
+      "path": "config/faithro-settings.json",
+      "sha256": "f602117d8f525727dac3015782478d7024b0bcc38676cc7f4ee97df1365fed43",
+      "size": 96
+    },
+    {
+      "op": "update",
+      "path": "data/version.txt",
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "size": 2
+    }
+  ],
+  "auto_update": false,
+  "format": "FORMATO CONCEITUAL — NÃO CONSUMÍVEL PELO BEAM",
+  "hash_algorithm": "sha256",
+  "lab": "faithro-synthetic-patch-lab",
+  "loopback_only": true,
+  "post_patch_command": null,
+  "schema_version": 1,
+  "sso_enabled": false
+}
