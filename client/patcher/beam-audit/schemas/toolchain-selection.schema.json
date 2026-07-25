@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:beam-audit/toolchain-selection",
+  "title": "Beam Toolchain Selection Evidence",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "stage",
+    "timestamp_utc",
+    "faithro_commit",
+    "upstream",
+    "lockfile_resolution",
+    "toolchain",
+    "graph_analysis",
+    "security_flags"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "stage": { "type": "string", "const": "2O-D1-B2" },
+    "timestamp_utc": { "type": "string" },
+    "faithro_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "upstream": {
+      "type": "object",
+      "required": ["repository", "commit", "official_lockfile_found"],
+      "additionalProperties": false,
+      "properties": {
+        "repository": { "type": "string" },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "official_lockfile_found": { "type": "boolean", "const": false }
+      }
+    },
+    "lockfile_resolution": {
+      "type": "object",
+      "required": [
+        "generated_lockfile_sha256",
+        "previous_evidence_sha256",
+        "graph_drift_detected",
+        "drift_explanation",
+        "total_packages",
+        "git_dependencies",
+        "alternate_registries"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "generated_lockfile_sha256": { "type": "string", "pattern": "^[0-9a-fA-F]{64}$" },
+        "previous_evidence_sha256": { "type": "string", "pattern": "^[0-9a-fA-F]{64}$" },
+        "graph_drift_detected": { "type": "boolean" },
+        "drift_explanation": { "type": "string" },
+        "total_packages": { "type": "integer", "minimum": 1 },
+        "git_dependencies": { "type": "integer", "const": 0 },
+        "alternate_registries": { "type": "integer", "const": 0 }
+      }
+    },
+    "toolchain": {
+      "type": "object",
+      "required": [
+        "installed_rust_version",
+        "minimum_observed_rust_version",
+        "candidate_rust_version",
+        "candidate_cargo_version",
+        "candidate_host_triple",
+        "candidate_status",
+        "selection_confidence"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "installed_rust_version": { "type": "string", "const": "1.77.2" },
+        "minimum_observed_rust_version": { "type": "string", "const": "1.85.0" },
+        "candidate_rust_version": { "type": "string", "const": "1.85.0" },
+        "candidate_cargo_version": { "type": "string", "const": "1.85.0" },
+        "candidate_host_triple": { "type": "string", "const": "x86_64-pc-windows-msvc" },
+        "candidate_status": {
+          "type": "string",
+          "enum": [
+            "approved-for-future-installation",
+            "rejected",
+            "blocked-insufficient-evidence",
+            "blocked-unverifiable-dependency",
+            "blocked-dependency-graph-drift"
+          ]
+        },
+        "selection_confidence": { "type": "string" }
+      }
+    },
+    "graph_analysis": {
+      "type": "object",
+      "required": [
+        "editions_observed",
+        "highest_declared_msrv",
+        "packages_with_declared_msrv",
+        "packages_without_declared_msrv",
+        "unverifiable_packages"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "editions_observed": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "highest_declared_msrv": {
+          "type": "object",
+          "required": ["crate", "version", "required_rust", "edition"],
+          "additionalProperties": false,
+          "properties": {
+            "crate": { "type": "string" },
+            "version": { "type": "string" },
+            "required_rust": { "type": "string" },
+            "edition": { "type": "string" }
+          }
+        },
+        "packages_with_declared_msrv": { "type": "integer" },
+        "packages_without_declared_msrv": { "type": "integer" },
+        "unverifiable_packages": { "type": "integer", "const": 0 }
+      }
+    },
+    "security_flags": {
+      "type": "object",
+      "required": [
+        "installation_authorized",
+        "build_authorized",
+        "build_started",
+        "binary_produced",
+        "binary_executed",
+        "dependencies_modified",
+        "toolchain_elevated",
+        "deploy_performed",
+        "vps_accessed",
+        "next_authorization_required"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "installation_authorized": { "type": "boolean", "const": false },
+        "build_authorized": { "type": "boolean", "const": false },
+        "build_started": { "type": "boolean", "const": false },
+        "binary_produced": { "type": "boolean", "const": false },
+        "binary_executed": { "type": "boolean", "const": false },
+        "dependencies_modified": { "type": "boolean", "const": false },
+        "toolchain_elevated": { "type": "boolean", "const": false },
+        "deploy_performed": { "type": "boolean", "const": false },
+        "vps_accessed": { "type": "boolean", "const": false },
+        "next_authorization_required": { "type": "boolean", "const": true }
+      }
+    }
+  }
+}

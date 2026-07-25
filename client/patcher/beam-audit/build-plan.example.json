@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "title": "Plano controlado de instalação e build auditável do Beam Patcher",
-  "stage": "2O-D1-B1 (BLOQUEADO — Toolchain 1.77.2 incompatível com zeroize 1.9.0 edition 2024)",
-  "stage_status": "blocked-before-build",
+  "stage": "2O-D1-B2 (Candidata Rust 1.85.0 selecionada estaticamente para futura instalação)",
+  "stage_status": "candidate-selected-installation-pending",
   "upstream": {
     "repository": "beamguides/beam-patcher",
     "official_source": "https://github.com/beamguides/beam-patcher",
@@ -19,6 +19,10 @@
     "compatibility_status": "rejected",
     "tested": true,
     "minimum_observed_compatible_rust": "1.85.0",
+    "candidate_rust_version": "1.85.0",
+    "candidate_status": "approved-for-future-installation",
+    "installation_authorized": false,
+    "build_authorized": false,
     "replacement_authorized": false,
     "next_decision_required": true,
     "components": [
@@ -27,7 +31,7 @@
       "rust-std"
     ],
     "rustup_installer_source": "https://win.rustup.rs/x86_64",
-    "note": "Rust 1.77.2 empiricamente REJEITADA na ETAPA 2O-D1-B1 devido a zeroize 1.9.0 declarar edition 2024 (MSRV 1.85). Substituição de toolchain exige nova autorização (ETAPA 2O-D1-B2)."
+    "note": "Rust 1.77.2 REJEITADA na 2O-D1-B1. Rust 1.85.0 selecionada estaticamente na 2O-D1-B2 como candidata mínima aprovada para futura instalação controlada. Instalação e build permanecem NÃO autorizados."
   },
   "prerequisites": [
     {
