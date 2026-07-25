@@ -61,14 +61,21 @@ client/patcher/
         └── scenarios/                # cenários G1–G15 (valid, hash-mismatch, …)
 ```
 
-## Auditoria de build (ETAPA 2O-D1)
+## Auditoria de build e compatibilidade de toolchain (ETAPAS 2O-D1 e 2O-D1-B1)
 
 A preparação para uma futura construção auditável do Beam (auditoria estática do
 commit fixado `feed978870`, manifesto da origem, overlay de segurança de
 laboratório, plano controlado de instalação/build e validadores/CI) está em
 [`beam-audit/`](beam-audit/) e documentada em
 [`docs/19-preparacao-build-auditavel-beam.md`](../../docs/19-preparacao-build-auditavel-beam.md).
-**Nada foi instalado, construído, executado ou implantado.**
+
+Na ETAPA 2O-D1-B1, a toolchain Rust 1.77.2 foi empiricamente testada e **REJEITADA**:
+a dependência `zeroize 1.9.0` exige `edition = "2024"` e `rust-version = "1.85"`,
+impedindo qualquer compilação com a Rust 1.77.2. Ver evidência em
+[`beam-audit/evidence/toolchain-compatibility.json`](beam-audit/evidence/toolchain-compatibility.json)
+e documentação completa em
+[`docs/20-primeiro-build-controlado-beam.md`](../../docs/20-primeiro-build-controlado-beam.md).
+**Nenhum build foi iniciado, nenhum binário foi produzido ou executado e as dependências não foram alteradas.**
 
 ## Homologação sintética do fluxo (ETAPA 2O-D)
 
