@@ -19,6 +19,7 @@ beam-audit/
 ├── upstream-manifest.example.json   # manifesto determinístico da origem (hashes, digest)
 ├── security-findings.example.json   # achados da auditoria (Tauri/rede/processos)
 ├── build-plan.example.json          # plano controlled de instalação e build (D1-B2)
+├── first-build-plan.example.json    # plano do primeiro build controlado / autorização de execução (D1-B8)
 ├── toolchain-installation-plan.example.json # plano de instalação isolada da Rust 1.85.0 (D1-B4)
 ├── evidence/
 │   ├── toolchain-compatibility.json # evidência de incompatibilidade da Rust 1.77.2 (D1-B1)
@@ -30,6 +31,7 @@ beam-audit/
 └── schemas/
     ├── upstream-manifest.schema.json
     ├── build-plan.schema.json
+    ├── first-build-plan.schema.json
     ├── toolchain-compatibility.schema.json
     ├── toolchain-selection.schema.json
     ├── toolchain-installation-plan.schema.json
@@ -105,3 +107,17 @@ Detalhes completos e evidências em
   Nunca deve conter bloco binário nem tocar licenças.
 - Nada aqui autoriza build, execução, empacotamento, assinatura ou deploy do
   Beam. Esses passos pertencem à ETAPA 2O-D1-B, sob as mesmas restrições.
+
+## Plano do primeiro build controlado (ETAPA 2O-D1-B8)
+
+`first-build-plan.example.json` (schema em `schemas/first-build-plan.schema.json`)
+representa, de forma versionada e validável, o **plano do primeiro build
+controlado** e a **autorização de execução** — que permanece **bloqueada**
+(`build_authorized=false`, `next_human_authorization_required=true`). Documentação
+completa em
+[`docs/23-planejamento-primeiro-build-controlado-beam.md`](../../../docs/23-planejamento-primeiro-build-controlado-beam.md).
+Validação estática offline (não clona, não instala, não constrói):
+
+```bash
+python scripts/validate-beam-first-build-plan.py
+```

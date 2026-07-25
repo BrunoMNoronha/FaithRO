@@ -48,8 +48,10 @@ client/patcher/
 │   ├── upstream-manifest.example.json
 │   ├── security-findings.example.json
 │   ├── build-plan.example.json
+│   ├── first-build-plan.example.json # plano do primeiro build controlado (D1-B8)
+│   ├── evidence/                     # evidências de compatibilidade/seleção/instalação
 │   ├── overlays/                     # overlay de segurança de laboratório (.patch textual)
-│   └── schemas/                      # schemas do manifesto e do plano
+│   └── schemas/                      # schemas do manifesto e dos planos
 └── fixtures/
     ├── README.md                     # estrutura do lab + plano de testes G1–G15
     ├── patchlist.example.txt         # patchlist sintético (nomes + SHA-256)
@@ -81,6 +83,8 @@ e documentação em [`docs/20-primeiro-build-controlado-beam.md`](../../docs/20-
 Nas ETAPAS 2O-D1-B4 e 2O-D1-B5, o plano técnico de coexistência da Rust 1.85.0 foi documentado e integrado em [`docs/21-plano-instalacao-toolchain-rust-beam.md`](../../docs/21-plano-instalacao-toolchain-rust-beam.md).
 
 Na ETAPA 2O-D1-B6, a instalação isolada da toolchain nomeada `1.85.0-x86_64-pc-windows-msvc` (perfil `minimal`) foi **EXECUTADA E VALIDADA** empiricamente (mantendo a Rust 1.77.2 como default ativa). Ver evidência em [`beam-audit/evidence/toolchain-installation.json`](beam-audit/evidence/toolchain-installation.json) e documentação em [`docs/22-instalacao-isolada-toolchain-rust-beam.md`](../../docs/22-instalacao-isolada-toolchain-rust-beam.md).
+
+Na ETAPA 2O-D1-B8, o **plano do primeiro build controlado** foi modelado como artefato versionado e validável ([`beam-audit/first-build-plan.example.json`](beam-audit/first-build-plan.example.json)) e documentado em [`docs/23-planejamento-primeiro-build-controlado-beam.md`](../../docs/23-planejamento-primeiro-build-controlado-beam.md). O plano registra a **autorização de execução como BLOQUEADA** (`build_authorized=false`, `next_human_authorization_required=true`) e exige autorização humana explícita em etapa posterior.
 
 **Build permanece NÃO autorizado. Nenhum binário foi compilado ou executado.**
 
