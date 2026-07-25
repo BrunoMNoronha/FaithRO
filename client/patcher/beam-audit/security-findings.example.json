@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "project": "Beam Patcher",
+  "commit": "feed97887090d121f796bc1b941390e28b7a2da5",
+  "audit_scope": "static-pre-build",
+  "note": "Achados da auditoria estatica do commit fixado. O curinga http do escopo Tauri e escrito como 'hxxp://**' (defang) para nao violar o validador de configuracao do patcher; no upstream o valor real usa o esquema http.",
+  "tauri_capabilities": [
+    { "capability": "allowlist.all", "value": "false", "classification": "MANTER" },
+    { "capability": "http.all", "value": "true; scope=['https://goatmmo.com/**','https://**','hxxp://**']", "classification": "RESTRINGIR" },
+    { "capability": "shell.open", "value": "true", "classification": "DESABILITAR NO LABORATORIO" },
+    { "capability": "dialog.open/save", "value": "true/true", "classification": "RESTRINGIR" },
+    { "capability": "fs.readFile", "value": "true; scope=$RESOURCE", "classification": "MANTER" },
+    { "capability": "protocol.asset", "value": "true; scope=$RESOURCE", "classification": "MANTER" },
+    { "capability": "updater.active", "value": "true; endpoint patch.example.com", "classification": "DESABILITAR NO LABORATORIO" },
+    { "capability": "security.csp", "value": "null", "classification": "BLOQUEAR" },
+    { "capability": "bundle.active/targets", "value": "true / all", "classification": "DESABILITAR NO LABORATORIO" }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "CRITICO",
+      "category": "rede",
+      "evidence": "beam-ui/tauri.conf.json: http.all=true; http.scope inclui 'https://**' e o curinga http (hxxp://**) e o dominio externo 'https://goatmmo.com/**'.",
+      "risk": "Superficie HTTP ampla a partir do WebView permitiria requisicoes a qualquer host externo.",
+      "mitigation": "Overlay restringe http.scope a loopback e remove os curingas e o dominio externo; remove feature http-all.",
+      "state": "MITIGADO PELO OVERLAY"
+    },
+    {
+      "id": "F2",
+      "severity": "ALTO",
+      "category": "csp",
+      "evidence": "beam-ui/tauri.conf.json: security.csp=null.",
+      "risk": "Sem CSP, conteudo carregado no WebView nao tem restricao de origem de scripts/conexoes.",
+      "mitigation": "Overlay define CSP minima (default-src 'self'; connect-src loopback).",
+      "state": "MITIGADO PELO OVERLAY"
+    },
+    {
+      "id": "F3",
+      "severity": "ALTO",
+      "category": "updater",
+      "evidence": "beam-ui/tauri.conf.json: updater.active=true; endpoints=['https://patch.example.com/updates/{{target}}/{{current_version}}']; pubkey placeholder.",
+      "risk": "Auto-update do Tauri buscaria releases de endpoint externo; pubkey placeholder nao valida assinatura real.",
+      "mitigation": "Overlay define updater.active=false, esvazia endpoints e remove feature updater. beam_core Updater fica desabilitado por config de laboratorio.",
+      "state": "MITIGADO PELO OVERLAY"
+    },
+    {
+      "id": "F4",
+      "severity": "MEDIO",
+      "category": "shell",
+      "evidence": "beam-ui/tauri.conf.json: shell.open=true (feature shell-open).",
+      "risk": "shell.open permitiria abrir URLs/arquivos externos a partir do WebView.",
+      "mitigation": "Overlay define shell.open=false e remove feature shell-open.",
+      "state": "MITIGADO PELO OVERLAY"
+    },
+    {
+      "id": "F5",
+      "severity": "MEDIO",
+      "category": "processos",
+      "evidence": "beam-ui/src/commands.rs:195 Command::new(&client_exe).spawn(); commands.rs:431 Command::new(&setup_exe_path).spawn(); beam-core/src/sso.rs:83 std::process::Command::new(executable).spawn(). Sem shell/interpolacao (sem sh -c / cmd /c).",
+      "risk": "Lancamento de executavel externo (cliente/setup/SSO) a partir de valores de configuracao.",
+      "mitigation": "Overlay bloqueia os tres pontos de lancamento no build de laboratorio (retorno de erro explicito); config sintetica nao aponta executavel real; SSO desabilitado.",
+      "state": "MITIGADO PELO OVERLAY"
+    },
+    {
+      "id": "F6",
+      "severity": "MEDIO",
+      "category": "reprodutibilidade",
+      "evidence": "Nao ha Cargo.lock rastreado no commit fixado.",
+      "risk": "Resolucao das dependencias pode variar entre builds.",
+      "mitigation": "D1-B gera Cargo.lock em ambiente controlado, revisa e usa --locked; segundo build --offline.",
+      "state": "ACEITO PARA LABORATORIO"
+    },
+    {
+      "id": "F7",
+      "severity": "BAIXO",
+      "category": "reprodutibilidade",
+      "evidence": "Nao ha rust-toolchain nem rust-toolchain.toml no commit fixado.",
+      "risk": "Versao do compilador nao fixada pelo upstream (canal mutavel).",
+      "mitigation": "Plano de build fixa versao exata proposta (Rust 1.77.2) e registra host triple/componentes na D1-B.",
+      "state": "ACEITO PARA LABORATORIO"
+    },
+    {
+      "id": "F8",
+      "severity": "BAIXO",
+      "category": "dialogos",
+      "evidence": "beam-ui/tauri.conf.json: dialog.open=true, dialog.save=true. Uso real em beam-ui/src/commands.rs:276,447 (FileDialogBuilder blocking).",
+      "risk": "Superficie de dialogo de abrir/salvar exposta ao WebView.",
+      "mitigation": "Overlay restringe o allowlist de dialogo (superficie JS); o seletor de pasta em Rust permanece, pois nao lanca processo externo.",
+      "state": "MITIGADO PELO OVERLAY"
+    },
+    {
+      "id": "F9",
+      "severity": "INFORMATIVO",
+      "category": "binarios-upstream",
+      "evidence": "12 binarios rastreados no upstream (icones .ico, imagens .png/.jpg, bgm.mp3, trailer.mp4). Permanecem apenas no clone temporario.",
+      "risk": "Nenhum para o FaithRO: nao sao copiados nem versionados no repositorio.",
+      "mitigation": "Gate FASE W garante que nenhum binario/fonte upstream entra no FaithRO.",
+      "state": "ACEITO PARA LABORATORIO"
+    }
+  ]
+}

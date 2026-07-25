@@ -35,6 +35,7 @@ ALLOWED_SUFFIXES = (
     ".yml",       # templates de configuração do patcher (client/patcher/)
     ".yaml",
     ".example",   # cobre data.ini.example, clientinfo.xml.example, etc.
+    ".patch",     # overlay de segurança de laboratório (client/patcher/beam-audit/overlays/)
     ".gitkeep",
     ".gitignore",
 )

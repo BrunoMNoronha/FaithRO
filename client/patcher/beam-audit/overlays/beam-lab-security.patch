@@ -1,0 +1,138 @@
+diff --git a/beam-core/src/sso.rs b/beam-core/src/sso.rs
+index 4daa561..5a43dad 100644
+--- a/beam-core/src/sso.rs
++++ b/beam-core/src/sso.rs
+@@ -80,10 +80,10 @@ impl SsoClient {
+ 
+         // Tokens passed via argv are visible to any local user via Task Manager
+         // / `ps`. Use an environment variable that the client can read on startup.
+-        std::process::Command::new(executable)
+-            .env("BEAM_SSO_TOKEN", token)
+-            .spawn()?;
+-
+-        Ok(())
++        // FaithRO lab overlay: lancamento de jogo via SSO desabilitado no laboratorio.
++        let _ = (executable, token);
++        return Err(Error::AuthFailed(
++            "FaithRO lab: SSO game launch disabled by security overlay".to_string(),
++        ));
+     }
+ }
+diff --git a/beam-ui/Cargo.toml b/beam-ui/Cargo.toml
+index e27fe2a..e5f1c8e 100644
+--- a/beam-ui/Cargo.toml
++++ b/beam-ui/Cargo.toml
+@@ -18,10 +18,7 @@ tauri = { version = "1.5", features = [
+     "dialog-open",
+     "dialog-save",
+     "fs-read-file",
+-    "http-all",
+     "protocol-asset",
+-    "shell-open", 
+-    "updater",
+     "window-close",
+     "window-hide",
+     "window-minimize",
+diff --git a/beam-ui/src/commands.rs b/beam-ui/src/commands.rs
+index 18efbdc..f6bd6ef 100644
+--- a/beam-ui/src/commands.rs
++++ b/beam-ui/src/commands.rs
+@@ -191,11 +191,9 @@ pub async fn launch_game(
+     
+     #[cfg(target_os = "windows")]
+     {
+-        use std::process::Command;
+-        Command::new(&client_exe)
+-            .current_dir(&working_dir)
+-            .spawn()
+-            .map_err(|e| format!("Failed to launch game: {}", e))?;
++        // FaithRO lab overlay: lancamento de cliente desabilitado no laboratorio.
++        let _ = (&client_exe, &working_dir);
++        return Err("FaithRO lab: client launch disabled by security overlay".to_string());
+     }
+     
+     #[cfg(not(target_os = "windows"))]
+@@ -427,11 +425,9 @@ pub async fn open_setup(state: State<'_, AppState>) -> Result<(), String> {
+     
+     #[cfg(target_os = "windows")]
+     {
+-        use std::process::Command;
+-        Command::new(&setup_exe_path)
+-            .current_dir(&working_dir)
+-            .spawn()
+-            .map_err(|e| format!("Failed to launch setup: {}", e))?;
++        // FaithRO lab overlay: lancamento de setup desabilitado no laboratorio.
++        let _ = (&setup_exe_path, &working_dir);
++        return Err("FaithRO lab: setup launch disabled by security overlay".to_string());
+     }
+     
+     #[cfg(not(target_os = "windows"))]
+diff --git a/beam-ui/tauri.conf.json b/beam-ui/tauri.conf.json
+index 1ba258c..b87440a 100644
+--- a/beam-ui/tauri.conf.json
++++ b/beam-ui/tauri.conf.json
+@@ -14,9 +14,9 @@
+     "allowlist": {
+       "all": false,
+       "http": {
+-        "all": true,
++        "all": false,
+         "request": true,
+-        "scope": ["https://goatmmo.com/**", "https://**", "http://**"]
++        "scope": ["http://127.0.0.1/**", "http://localhost/**"]
+       },
+       "fs": {
+         "all": false,
+@@ -30,12 +30,12 @@
+       },
+       "shell": {
+         "all": false,
+-        "open": true
++        "open": false
+       },
+       "dialog": {
+         "all": false,
+-        "open": true,
+-        "save": true
++        "open": false,
++        "save": false
+       },
+       "window": {
+         "all": false,
+@@ -48,7 +48,7 @@
+       }
+     },
+     "bundle": {
+-      "active": true,
++      "active": false,
+       "icon": [
+         "icons/32x32.png",
+         "icons/128x128.png",
+@@ -57,21 +57,19 @@
+         "icons/icon.ico"
+       ],
+       "identifier": "com.beampatcher.app",
+-      "targets": "all",
++      "targets": [],
+       "resources": [
+         "public/assets/*"
+       ]
+     },
+     "security": {
+-      "csp": null
++      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost data:; media-src 'self' asset: https://asset.localhost; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' http://127.0.0.1 http://localhost"
+     },
+     "updater": {
+-      "active": true,
+-      "endpoints": [
+-        "https://patch.example.com/updates/{{target}}/{{current_version}}"
+-      ],
+-      "dialog": true,
+-      "pubkey": "YOUR_UPDATER_PUBLIC_KEY_HERE"
++      "active": false,
++      "endpoints": [],
++      "dialog": false,
++      "pubkey": ""
+     },
+     "windows": [
+       {
