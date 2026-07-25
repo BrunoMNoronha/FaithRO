@@ -82,4 +82,5 @@ Recomendado:
 | [15-cliente-primeiro-acesso.md](15-cliente-primeiro-acesso.md) | Fluxo planejado de primeiro acesso do jogador ao cliente. | Todos | pendente de validação | 09, 12, 16 | 2026-07-24 |
 | [16-politica-distribuicao-cliente.md](16-politica-distribuicao-cliente.md) | Política de distribuição e auditoria dos downloads do cliente. | Todos | validado | 09, 10 | 2026-07-24 |
 | [17-decisao-patcher-launcher.md](17-decisao-patcher-launcher.md) | Seleção do patcher/launcher (Beam Patcher principal, RPatchur reserva); protótipo local, sem produção. | Técnicos | validado | 15, 16, 10 | 2026-07-24 |
+| [18-homologacao-patch-sintetico-beam.md](18-homologacao-patch-sintetico-beam.md) | Homologação sintética do fluxo do Beam (gerador determinístico, loopback, SHA-256, testes negativos); APROVADO COM RESTRIÇÕES. | Técnicos | validado | 17, 16 | 2026-07-25 |
 | [99-checklists.md](99-checklists.md) | Listas de verificação para deploy, rollback e manutenção. | Técnicos | pendente de validação | Nenhuma | 2026-07-10 |

@@ -5,3 +5,10 @@ deploy/rathena-overlay/** text eol=lf
 scripts/validate-progression-overrides.py text eol=lf
 scripts/validate-client-assets.py text eol=lf
 scripts/validate-patcher-config.py text eol=lf
+scripts/generate-synthetic-patch-lab.py text eol=lf
+scripts/validate-synthetic-patch-lab.py text eol=lf
+
+# Fixtures sintéticas do laboratório do patcher DEVEM permanecer com LF: o
+# validador anti-drift compara byte a byte com a saída determinística (LF) do
+# gerador. Ver docs/18-homologacao-patch-sintetico-beam.md.
+client/patcher/fixtures/synthetic/** text eol=lf

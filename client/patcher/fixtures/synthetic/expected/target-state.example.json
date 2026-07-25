@@ -1,0 +1,31 @@
+{
+  "format": "FORMATO CONCEITUAL — NÃO CONSUMÍVEL PELO BEAM",
+  "target_after": {
+    "config/faithro-settings.json": {
+      "sha256": "f602117d8f525727dac3015782478d7024b0bcc38676cc7f4ee97df1365fed43",
+      "size": 96
+    },
+    "data/version.txt": {
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "size": 2
+    },
+    "data/welcome.txt": {
+      "sha256": "97d94b2ad253496d379b13bb4640b53274e8f2ea88b23acb520a6e6958f0189d",
+      "size": 49
+    }
+  },
+  "target_before": {
+    "config/faithro-settings.json": {
+      "sha256": "a92e43405352e50446a2d63ad38070d9d181ae833e5b13487331c8e96aa206ce",
+      "size": 97
+    },
+    "data/obsolete.txt": {
+      "sha256": "54c8ba5565162d5c48c2cf850036c2de750fa8cd66f9075aae53af8366e52625",
+      "size": 74
+    },
+    "data/version.txt": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "size": 2
+    }
+  }
+}

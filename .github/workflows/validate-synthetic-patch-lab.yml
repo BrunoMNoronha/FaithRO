@@ -1,0 +1,85 @@
+name: Validate synthetic patch lab
+
+# Homologa o laboratório sintético do patcher (ETAPA 2O-D): gera o lab em pasta
+# temporária, valida integridade/invariantes, roda os testes negativos, confirma
+# determinismo e independência de CWD e garante que nenhum binário foi gerado ou
+# rastreado. Não acessa a VPS, não inicia servidor persistente, não usa secrets,
+# não faz upload de artifacts e não faz deploy.
+
+on:
+  pull_request:
+    paths:
+      - client/patcher/**
+      - scripts/generate-synthetic-patch-lab.py
+      - scripts/validate-synthetic-patch-lab.py
+      - .github/workflows/validate-synthetic-patch-lab.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-synthetic-patch-lab:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Show Python version
+        run: python --version
+
+      - name: CLI --help (sanidade)
+        run: |
+          python scripts/generate-synthetic-patch-lab.py --help
+          python scripts/validate-synthetic-patch-lab.py --help
+
+      - name: Gerar laboratório sintético (pasta temporária)
+        run: |
+          LAB="$(mktemp -d)/lab"
+          echo "LAB=$LAB" >> "$GITHUB_ENV"
+          python scripts/generate-synthetic-patch-lab.py --output "$LAB"
+
+      - name: Validar laboratório (--root)
+        run: python scripts/validate-synthetic-patch-lab.py --root "$LAB"
+
+      - name: Testes negativos de segurança (--self-test)
+        run: python scripts/validate-synthetic-patch-lab.py --self-test
+
+      - name: Determinismo (duas gerações idênticas)
+        run: |
+          A="$(mktemp -d)/a"; B="$(mktemp -d)/b"
+          python scripts/generate-synthetic-patch-lab.py --output "$A"
+          python scripts/generate-synthetic-patch-lab.py --output "$B"
+          HA="$(cd "$A" && find . -type f -exec sha256sum {} \; | sort | sha256sum)"
+          HB="$(cd "$B" && find . -type f -exec sha256sum {} \; | sort | sha256sum)"
+          echo "A=$HA"; echo "B=$HB"
+          test "$HA" = "$HB" || { echo 'ERRO: geração não determinística'; exit 1; }
+
+      - name: Independência de CWD
+        run: |
+          REPO="$(pwd)"
+          ( cd /tmp && python "$REPO/scripts/validate-synthetic-patch-lab.py" --root "$LAB" )
+
+      - name: Anti-drift (exemplos versionados == geração fresca)
+        run: |
+          F="client/patcher/fixtures/synthetic"
+          diff "$F/expected/manifest.example.json" "$LAB/server/manifest.json"
+          diff "$F/expected/target-state.example.json" "$LAB/expected-state.json"
+
+      - name: Nenhum binário ou pacote rastreado
+        run: |
+          if git ls-files | grep -Ei '\.(exe|dll|grf|gpf|thor|rgz|zip|rar|7z|beam|msi)$'; then
+            echo 'ERRO: binário ou pacote rastreado'; exit 1
+          else
+            echo 'OK: nenhum binário ou pacote rastreado'
+          fi
+
+      - name: Validadores de conteúdo textual
+        run: |
+          python scripts/validate-client-assets.py
+          python scripts/validate-patcher-config.py

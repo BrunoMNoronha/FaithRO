@@ -5,6 +5,27 @@
 > asset da Gravity. Nenhum binário é versionado aqui. Ver
 > [`docs/17-decisao-patcher-launcher.md`](../../../docs/17-decisao-patcher-launcher.md).
 
+## Homologação sintética executável (ETAPA 2O-D)
+
+A homologação do **fluxo conceitual** do Beam (gerador determinístico, servidor
+loopback, integridade SHA-256, simulador de aplicação e testes negativos) está em
+[`synthetic/`](synthetic/README.md) e documentada em
+[`docs/18-homologacao-patch-sintetico-beam.md`](../../../docs/18-homologacao-patch-sintetico-beam.md).
+
+```bash
+python scripts/generate-synthetic-patch-lab.py --output <DIR_TEMPORARIO>/lab
+python scripts/validate-synthetic-patch-lab.py --root <DIR_TEMPORARIO>/lab
+python scripts/validate-synthetic-patch-lab.py --self-test
+```
+
+Distinção obrigatória: o patch de `synthetic/` é um **manifesto conceitual**
+(`FORMATO CONCEITUAL — NÃO CONSUMÍVEL PELO BEAM`) e é aplicado pelo **simulador do
+laboratório**, nunca pelo Beam. A execução dinâmica do Beam está
+`BLOQUEADO — TOOLCHAIN DO BEAM NÃO DISPONÍVEL`.
+
+O plano G1–G15 abaixo é o roteiro histórico com o binário do patcher; a matriz
+efetivamente executada nesta etapa está em docs/18.
+
 ## Estado dos testes dinâmicos
 
 Os testes G1–G15 abaixo **ainda não foram executados**. Motivo registrado
