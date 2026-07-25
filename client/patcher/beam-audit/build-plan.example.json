@@ -34,8 +34,17 @@
       "elevation_required": true,
       "workloads": [
         "Microsoft.VisualStudio.Workload.VCTools",
-        "Microsoft.VisualStudio.Component.Windows11SDK"
+        "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+        "Microsoft.VisualStudio.Component.Windows11SDK.26100"
       ],
+      "sdk_reconciliation": {
+        "previous_generic_id": "Microsoft.VisualStudio.Component.Windows11SDK",
+        "confirmed_versioned_id": "Microsoft.VisualStudio.Component.Windows11SDK.26100",
+        "catalog_name": "Windows 11 SDK (10.0.26100.3916)",
+        "catalog_source": "learn.microsoft.com/visualstudio/install/workload-component-id-vs-build-tools",
+        "reconciled_stage": "2O-D1-B",
+        "justification": "ID generico substituido por ID versionado confirmado no catalogo oficial do VS Build Tools 2022"
+      },
       "install_path": "Program Files (x86)/Microsoft Visual Studio/2022/BuildTools (na unidade de sistema)",
       "rollback": "desinstalar via Visual Studio Installer (Modify/Remove)",
       "gate": "cl.exe e link.exe disponiveis; vswhere confirma workload VCTools"
@@ -43,9 +52,9 @@
     {
       "name": "Windows SDK",
       "source": "https://aka.ms/vs/17/release/vs_BuildTools.exe",
-      "version": "componente do Windows 11 SDK (registrar versao efetiva)",
+      "version": "Microsoft.VisualStudio.Component.Windows11SDK.26100 (Windows 11 SDK 10.0.26100.3916; registrar versao efetiva)",
       "architecture": "x64",
-      "verification": "vswhere confirma o componente Windows11SDK",
+      "verification": "vswhere confirma o componente Microsoft.VisualStudio.Component.Windows11SDK.26100",
       "system_impact": "cabecalhos e libs de sistema (persistente)",
       "elevation_required": true,
       "install_path": "Program Files (x86)/Windows Kits/10 (na unidade de sistema)",
