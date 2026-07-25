@@ -1,10 +1,10 @@
 # `docs/21-plano-instalacao-toolchain-rust-beam.md` — Plano de Instalação Isolada da Toolchain Rust 1.85.0
 
-> **Status:** PLANEJADO / DOCUMENTADO (ETAPA 2O-D1-B4)  
-> **Data:** 2026-07-25  
-> **Toolchain Ativa Conservada:** `1.77.2-x86_64-pc-windows-msvc`  
-> **Toolchain Candidata Planejada:** `1.85.0-x86_64-pc-windows-msvc`  
-> **Instalação Autorizada:** `NÃO` (exige autorização humana prévia para etapa posterior)  
+> **Status:** PLANEJADO / DOCUMENTADO (ETAPA 2O-D1-B4)
+> **Data:** 2026-07-25
+> **Toolchain Ativa Conservada:** `1.77.2-x86_64-pc-windows-msvc`
+> **Toolchain Candidata Planejada:** `1.85.0-x86_64-pc-windows-msvc`
+> **Instalação Autorizada:** `NÃO` (exige autorização humana prévia para etapa posterior)
 > **Build Autorizado:** `NÃO`
 
 ---
