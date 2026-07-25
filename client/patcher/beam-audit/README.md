@@ -20,6 +20,9 @@ beam-audit/
 ├── security-findings.example.json   # achados da auditoria (Tauri/rede/processos)
 ├── build-plan.example.json          # plano controlled de instalação e build (D1-B2)
 ├── first-build-plan.example.json    # plano do primeiro build controlado / autorização de execução (D1-B8)
+├── first-build-runbook.example.json # runbook operacional do primeiro build (D1-B10)
+├── first-build-authorization.example.json    # modelo de autorização humana (template, não concedido) (D1-B10)
+├── first-build-execution-evidence.example.json # template de evidência da execução futura (não executado) (D1-B10)
 ├── toolchain-installation-plan.example.json # plano de instalação isolada da Rust 1.85.0 (D1-B4)
 ├── evidence/
 │   ├── toolchain-compatibility.json # evidência de incompatibilidade da Rust 1.77.2 (D1-B1)
@@ -32,6 +35,9 @@ beam-audit/
     ├── upstream-manifest.schema.json
     ├── build-plan.schema.json
     ├── first-build-plan.schema.json
+    ├── first-build-runbook.schema.json
+    ├── first-build-authorization.schema.json
+    ├── first-build-execution-evidence.schema.json
     ├── toolchain-compatibility.schema.json
     ├── toolchain-selection.schema.json
     ├── toolchain-installation-plan.schema.json
@@ -120,4 +126,27 @@ Validação estática offline (não clona, não instala, não constrói):
 
 ```bash
 python scripts/validate-beam-first-build-plan.py
+```
+
+## Runbook, autorização e evidência (ETAPA 2O-D1-B10)
+
+Três artefatos separados por responsabilidade, todos versionados e validáveis,
+que **não** autorizam e **não** executam o build:
+
+- `first-build-runbook.example.json` — **runbook** operacional (25 passos com IDs
+  estáveis, go/no-go, interrupção, limpeza e rollback).
+- `first-build-authorization.example.json` — **modelo de autorização humana**,
+  propositalmente **não concedido** (`authorization_granted=false`,
+  `execution_permitted=false`), vinculado a SHAs, digest, hash do overlay,
+  toolchain e a uma janela com expiração; de uso único e revogável.
+- `first-build-execution-evidence.example.json` — **template de evidência** da
+  execução futura, com execução **não iniciada** e listas vazias.
+
+Documentação completa em
+[`docs/24-runbook-primeiro-build-controlado-beam.md`](../../../docs/24-runbook-primeiro-build-controlado-beam.md).
+Validação estática offline (não clona, não instala, não constrói, não executa;
+confirma que a autorização continua não concedida):
+
+```bash
+python scripts/validate-beam-first-build-runbook.py
 ```

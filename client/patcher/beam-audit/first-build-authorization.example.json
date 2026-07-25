@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "stage": "2O-D1-B10",
+  "artifact_kind": "authorization",
+  "title": "Modelo de autorizacao humana do primeiro build controlado do Beam Patcher",
+  "document_reference": "docs/24-runbook-primeiro-build-controlado-beam.md",
+  "runbook_reference": "client/patcher/beam-audit/first-build-runbook.example.json",
+  "evidence_reference": "client/patcher/beam-audit/first-build-execution-evidence.example.json",
+  "authorization_id": "<PREENCHER-ID-DA-AUTORIZACAO>",
+  "authorization_state": "template-not-granted",
+  "authorization_granted": false,
+  "execution_permitted": false,
+  "authorization_used": false,
+  "authorization_revoked": false,
+  "single_use": true,
+  "required_before_execution": true,
+  "note": "TEMPLATE. Este arquivo NAO concede autorizacao. Os campos <PREENCHER-...> representam a decisao humana futura e nao equivalem a aprovacao. A autorizacao real sera registrada em etapa posterior, vinculada a SHAs exatos e a uma janela com expiracao, e sera consumida ou revogada apos uso unico.",
+  "binding": {
+    "repository": "BrunoMNoronha/FaithRO",
+    "branch": "dev",
+    "faithro_commit": "<PREENCHER-SHA-DO-FAITHRO-NA-AUTORIZACAO>",
+    "runbook_version": "1.0.0",
+    "runbook_sha": "<PREENCHER-SHA-DO-RUNBOOK-NA-AUTORIZACAO>",
+    "upstream_repository": "beamguides/beam-patcher",
+    "upstream_commit": "feed97887090d121f796bc1b941390e28b7a2da5",
+    "upstream_tree_digest_algorithm": "sha256",
+    "upstream_tree_digest": "4f405c9ecfb2f505d99b00bc77468961e3aa98c72f9ec30faa3939849465b9d5",
+    "overlay_path": "client/patcher/beam-audit/overlays/beam-lab-security.patch",
+    "overlay_sha256": "945dbd2f354f9738f77fced4dd3a70923227ede042bbd3819dcadb44ca5c37fe",
+    "toolchain": "1.85.0-x86_64-pc-windows-msvc",
+    "preserved_default_toolchain": "1.77.2-x86_64-pc-windows-msvc",
+    "target": "x86_64-pc-windows-msvc",
+    "authorized_host_label": "<PREENCHER-ROTULO-NAO-SENSIVEL-DO-HOST>"
+  },
+  "validity_window": {
+    "not_before_utc": "<PREENCHER-INICIO-UTC>",
+    "not_after_utc": "<PREENCHER-EXPIRACAO-UTC>",
+    "max_duration_hours": 4,
+    "unlimited_window_forbidden": true
+  },
+  "allowed_scope": [
+    "clonar a origem oficial em workspace temporario externo",
+    "fixar o commit auditado em checkout destacado",
+    "aplicar e validar o overlay de seguranca",
+    "gerar e fixar o Cargo.lock no clone temporario",
+    "baixar dependencias apenas de hosts esperados",
+    "executar um build offline com a toolchain nomeada",
+    "inventariar e registrar hashes dos artefatos",
+    "remover o workspace temporario"
+  ],
+  "forbidden_actions": [
+    "executar o binario produzido",
+    "empacotar, assinar ou distribuir o cliente",
+    "incorporar asset proprietario",
+    "alterar a toolchain default",
+    "criar override ou seletor persistente",
+    "instalar componente ou target",
+    "alterar PATH permanente",
+    "desabilitar o Windows Defender",
+    "solicitar privilegio administrativo",
+    "acessar a VPS",
+    "realizar deploy",
+    "alterar o repositorio FaithRO fora do fluxo Git de revisao"
+  ],
+  "authorizer": "<PREENCHER-RESPONSAVEL-HUMANO>",
+  "authorization_timestamp_utc": "<PREENCHER-TIMESTAMP-DA-DECISAO-UTC>",
+  "justification": "<PREENCHER-JUSTIFICATIVA-DA-AUTORIZACAO>",
+  "read_risks_confirmed": false,
+  "go_no_go_confirmed": false,
+  "revocation": {
+    "revocable": true,
+    "revoked": false,
+    "revoked_reason": null,
+    "revoked_timestamp_utc": null
+  },
+  "evidence_binding": {
+    "requires_evidence": true,
+    "evidence_reference": "client/patcher/beam-audit/first-build-execution-evidence.example.json",
+    "evidence_completed": false
+  }
+}
