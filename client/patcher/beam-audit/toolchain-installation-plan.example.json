@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "stage": "2O-D1-B4",
+  "timestamp_utc": "2026-07-25T21:45:00Z",
+  "target_toolchain": {
+    "version": "1.85.0",
+    "host_triple": "x86_64-pc-windows-msvc",
+    "profile": "minimal",
+    "components": [
+      "rustc",
+      "cargo",
+      "rust-std"
+    ],
+    "targets": [
+      "x86_64-pc-windows-msvc"
+    ]
+  },
+  "existing_toolchain": {
+    "version": "1.77.2",
+    "host_triple": "x86_64-pc-windows-msvc",
+    "status": "active-default-preserved"
+  },
+  "coexistence_strategy": {
+    "named_toolchain_only": true,
+    "default_toolchain_modified": false,
+    "persistent_override_created": false
+  },
+  "installation_command": {
+    "command": "rustup toolchain install 1.85.0-x86_64-pc-windows-msvc --profile minimal",
+    "permissible_in_future_stage": true
+  },
+  "verification_commands": [
+    "rustup toolchain list",
+    "rustup run 1.85.0-x86_64-pc-windows-msvc rustc --version --verbose",
+    "rustup run 1.85.0-x86_64-pc-windows-msvc cargo --version --verbose",
+    "rustup run 1.77.2-x86_64-pc-windows-msvc rustc --version --verbose",
+    "rustup run 1.77.2-x86_64-pc-windows-msvc cargo --version --verbose"
+  ],
+  "rollback_command": {
+    "command": "rustup toolchain uninstall 1.85.0-x86_64-pc-windows-msvc",
+    "preserves_existing_toolchain": true
+  },
+  "security_flags": {
+    "installation_authorized": false,
+    "build_authorized": false,
+    "toolchain_changed": false,
+    "default_toolchain_change_allowed": false,
+    "persistent_override_allowed": false,
+    "permanent_path_change_allowed": false,
+    "elevated_shell_allowed": false,
+    "vps_access_allowed": false,
+    "deploy_allowed": false,
+    "next_authorization_required": true
+  }
+}
