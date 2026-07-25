@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 """
-Valida o plano controlado de instalação isolada da toolchain Rust 1.85.0 (ETAPA 2O-D1-B4).
+Valida o plano controlado de instalação isolada da toolchain Rust 1.85.0 (ETAPA 2O-D1-B4 e 2O-D1-B5).
 
 Garante estaticamente que:
   - A toolchain candidata é estritamente 1.85.0-x86_64-pc-windows-msvc;
   - A toolchain ativa 1.77.2-x86_64-pc-windows-msvc é totalmente preservada;
   - A estratégia de coexistência usa toolchain nomeada sem alterar default nem criar override;
-  - Todas as flags de segurança permanecem desabilitadas (False);
+  - Todas as 10 flags de segurança permanecem desabilitadas (False);
   - Autorização explícita é exigida para etapas futuras (next_authorization_required: True);
   - Não existem vazamentos de caminhos pessoais ou segredos.
 """
 
+import argparse
 import json
 import os
 import sys
@@ -18,10 +19,23 @@ from pathlib import Path
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Validador estático do plano de instalação isolada da toolchain Rust 1.85.0."
+    )
+    parser.add_argument(
+        "--plan",
+        help="Caminho explícito para o JSON do plano (padrão: client/patcher/beam-audit/toolchain-installation-plan.example.json)"
+    )
+    args = parser.parse_args()
+
     script_dir = Path(__file__).resolve().parent
     repo_root = script_dir.parent
 
-    plan_path = repo_root / "client" / "patcher" / "beam-audit" / "toolchain-installation-plan.example.json"
+    if args.plan:
+        plan_path = Path(args.plan).resolve()
+    else:
+        plan_path = repo_root / "client" / "patcher" / "beam-audit" / "toolchain-installation-plan.example.json"
+
     schema_path = repo_root / "client" / "patcher" / "beam-audit" / "schemas" / "toolchain-installation-plan.schema.json"
 
     if not plan_path.is_file():
@@ -84,6 +98,16 @@ def main():
         print("ERRO: profile de instalação deve ser 'minimal'")
         sys.exit(1)
 
+    components = target.get("components", [])
+    if sorted(components) != ["cargo", "rust-std", "rustc"]:
+        print("ERRO: componentes do target_toolchain devem ser exatamente ['rustc', 'cargo', 'rust-std']")
+        sys.exit(1)
+
+    targets = target.get("targets", [])
+    if targets != ["x86_64-pc-windows-msvc"]:
+        print("ERRO: targets do target_toolchain deve ser ['x86_64-pc-windows-msvc']")
+        sys.exit(1)
+
     existing = data.get("existing_toolchain", {})
     if existing.get("version") != "1.77.2":
         print("ERRO: existing_toolchain version deve ser '1.77.2'")
@@ -107,8 +131,8 @@ def main():
         sys.exit(1)
 
     inst_cmd = data.get("installation_command", {}).get("command", "")
-    if "rustup update" in inst_cmd or "rustup default" in inst_cmd:
-        print("ERRO: comando de instalação não pode usar 'rustup update' nem 'rustup default'")
+    if "rustup update" in inst_cmd or "rustup default" in inst_cmd or "rustup override" in inst_cmd:
+        print("ERRO: comando de instalação não pode usar 'rustup update', 'rustup default' nem 'rustup override'")
         sys.exit(1)
 
     if inst_cmd != "rustup toolchain install 1.85.0-x86_64-pc-windows-msvc --profile minimal":
@@ -118,6 +142,12 @@ def main():
     verif_cmds = data.get("verification_commands", [])
     if not verif_cmds or len(verif_cmds) < 4:
         print("ERRO: verification_commands deve conter ao menos os comandos de verificação de toolchains")
+        sys.exit(1)
+
+    has_185_check = any("1.85.0" in cmd for cmd in verif_cmds)
+    has_177_check = any("1.77.2" in cmd for cmd in verif_cmds)
+    if not (has_185_check and has_177_check):
+        print("ERRO: verification_commands deve verificar explicitamente 1.85.0 e a preservação da 1.77.2")
         sys.exit(1)
 
     rollback = data.get("rollback_command", {})

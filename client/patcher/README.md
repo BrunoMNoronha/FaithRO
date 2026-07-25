@@ -61,7 +61,7 @@ client/patcher/
         └── scenarios/                # cenários G1–G15 (valid, hash-mismatch, …)
 ```
 
-## Auditoria de build e seleção de toolchain (ETAPAS 2O-D1, 2O-D1-B1 e 2O-D1-B2)
+## Auditoria de build, seleção de toolchain e plano de instalação (ETAPAS 2O-D1, 2O-D1-B1 a 2O-D1-B4)
 
 A preparação para uma futura construção auditável do Beam (auditoria estática do
 commit fixado `feed978870`, manifesto da origem, overlay de segurança de
@@ -73,11 +73,13 @@ Na ETAPA 2O-D1-B1, a toolchain Rust 1.77.2 foi empiricamente testada e **REJEITA
 a dependência `zeroize 1.9.0` exige `edition = "2024"` e `rust-version = "1.85"`,
 impedindo qualquer compilação com a Rust 1.77.2 (ver [`beam-audit/evidence/toolchain-compatibility.json`](beam-audit/evidence/toolchain-compatibility.json)).
 
-Na ETAPA 2O-D1-B2, a toolchain Rust **`1.85.0`** foi selecionada por auditoria estática
-como a menor versão mínima compatível com o grafo de dependências do Beam (510 pacotes,
-editions 2018/2021/2024, MSRV máximo 1.85). Ver evidência em
+Nas ETAPAS 2O-D1-B2 e 2O-D1-B3, a toolchain Rust **`1.85.0`** foi selecionada e reconciliada por auditoria estática
+como a menor versão mínima compatível com o grafo de dependências do Beam. Ver evidência em
 [`beam-audit/evidence/toolchain-selection.json`](beam-audit/evidence/toolchain-selection.json)
 e documentação em [`docs/20-primeiro-build-controlado-beam.md`](../../docs/20-primeiro-build-controlado-beam.md).
+
+Na ETAPA 2O-D1-B4, o plano técnico de coexistência e futura instalação isolada da Rust 1.85.0 (sem alterar default nem criar override) foi documentado em [`docs/21-plano-instalacao-toolchain-rust-beam.md`](../../docs/21-plano-instalacao-toolchain-rust-beam.md) e [`beam-audit/toolchain-installation-plan.example.json`](beam-audit/toolchain-installation-plan.example.json).
+
 **Instalação e build permanecem NÃO autorizados. Nenhuma ferramenta foi instalada ou executada.**
 
 ## Homologação sintética do fluxo (ETAPA 2O-D)
