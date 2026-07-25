@@ -55,6 +55,7 @@ OFFICIAL_HOSTS = ALLOWED_BUILD_HOSTS + (
 )
 
 URL_RE = re.compile(r"(?i)\bhttps?://([a-z0-9._-]+)")
+FILE_URL = re.compile(r"(?i)\bfile://")
 PERSONAL_PATH = re.compile(r"(?i)([a-z]:\\users\\[^\\/\"']+|/home/[^/\"']+|/users/[^/\"']+)")
 CRED_KEY = re.compile(
     r"(?i)(password|passwd|senha|secret|client_secret|token|api[_-]?key|bearer)$")
@@ -170,6 +171,8 @@ def check_no_forbidden(node, label):
             fail("%s%s: comando pipe-to-shell proibido: %s" % (label, keypath, s[:80]))
         if PERSONAL_PATH.search(s):
             fail("%s%s: possível caminho pessoal: %s" % (label, keypath, s[:80]))
+        if FILE_URL.search(s):
+            fail("%s%s: link file:// proibido: %s" % (label, keypath, s[:80]))
         for m in URL_RE.finditer(s):
             host = m.group(1)
             if not any(host == h or host.endswith("." + h) for h in OFFICIAL_HOSTS):
