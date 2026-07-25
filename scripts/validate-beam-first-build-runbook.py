@@ -101,12 +101,23 @@ FORBIDDEN_CMD = [
     (re.compile(r"(?i)\bcargo\s+install\b"), "instala binário via cargo install"),
     (re.compile(r"(?i)cargo\s+update(\s|$)"), "altera dependências via cargo update"),
     (re.compile(r"(?i)target[\\/]release[\\/][^\s;]*\.exe"), "executa binário de target/release"),
-    (re.compile(r"(?i)\bssh\b|faithro-vps|\bscp\b"), "acessa a VPS"),
+    (re.compile(r"(?i)\bssh\b|faithro-vps|\bscp\b|\bsftp\b"), "acessa a VPS"),
     (re.compile(r"(?i)runas|-Verb\s+RunAs"), "solicita privilégio administrativo"),
     (re.compile(r"(?i)Set-MpPreference|Add-MpPreference|DisableRealtimeMonitoring|Windows\s*Defender"),
      "altera o Windows Defender"),
     (re.compile(r"(?i)checkout\s+-b\b"), "usa branch flutuante no checkout"),
     (re.compile(r"(?i)clone[^\n]*(--branch|\s-b\s)"), "clona branch flutuante"),
+    # Hardening adversarial (B11): impedir travessia de diretório, wrappers de
+    # shell que ofuscam o comando real, operador de chamada/concatenação e
+    # verbos de download fora das fases de rede declaradas.
+    (re.compile(r"\.\.[\\/]"), "usa travessia de diretório (..) para fora do workspace"),
+    (re.compile(r"(?i)\bcmd(\.exe)?\s+/c\b"), "usa wrapper cmd /c"),
+    (re.compile(r"(?i)\b(powershell|pwsh)(\.exe)?\b[^\n]*\s-(c|command|enc|encodedcommand)\b"),
+     "usa wrapper powershell -Command/-EncodedCommand"),
+    (re.compile(r"(?i)\b(invoke-expression|iex)\b"), "usa Invoke-Expression (execução indireta)"),
+    (re.compile(r"(?i)\b(invoke-webrequest|iwr|curl|wget|start-bitstransfer)\b"),
+     "usa verbo de download não declarado"),
+    (re.compile(r"&"), "usa operador de chamada/concatenação &"),
 ]
 
 
