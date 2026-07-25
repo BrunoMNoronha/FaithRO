@@ -132,19 +132,46 @@ Nenhum caminho pessoal, segredo ou token foi incluído nos arquivos versionados.
 
 ## 10. Próxima Etapa
 
-**ETAPA 2O-D1-B2 — Auditar e aprovar uma nova toolchain mínima compatível, começando no mínimo observado Rust 1.85.0, sem instalar ou construir.**
+**ETAPA 2O-D1-B3 — Revisar e integrar a auditoria da toolchain Rust candidata (Rust 1.85.0).**
 
 ---
 
-## 11. Declarações Obrigatórias
+## 11. Auditoria e Seleção da Toolchain Rust Candidata (ETAPA 2O-D1-B2)
 
-- Nenhum merge realizado.
-- Nenhum build iniciado.
-- Beam Patcher não executado.
-- Nenhum binário versionado ou distribuído.
-- Nenhuma dependência alterada.
-- Toolchain Rust não foi elevada.
-- Build Tools e Rust 1.77.2 permanecem instalados.
-- Nenhum deploy realizado.
-- VPS não acessada.
+> **CLASSIFICAÇÃO TÉCNICA: CONCLUÍDO — TOOLCHAIN CANDIDATA APROVADA SOMENTE PARA FUTURA INSTALAÇÃO CONTROLADA**
+>
+> A toolchain Rust **`1.85.0`** (e Cargo **`1.85.0`**) foi selecionada por auditoria 100% estática como a menor versão mínima compatível com todo o grafo de dependências atualmente resolvido do Beam Patcher.
+>
+> **A INSTALAÇÃO E O BUILD PERMANECEM NÃO AUTORIZADOS (`installation_authorized = false`, `build_authorized = false`). A SELEÇÃO APENAS PROPÕE A VERSÃO PARA UMA ETAPA FUTURA DE INSTALAÇÃO CONTROLADA.**
+
+### 11.1 Resumo da Auditoria Estática do Grafo
+- **Total de Pacotes Analisados**: 510 pacotes no lockfile temporário reproduzido (`cargo generate-lockfile` em clone isolado).
+- **Deriva Temporal do Grafo Registrada**: O hash do lockfile atualizou para `fc277856dd6bc9b935fe82261fc45e1b26daa05a712a6f41fd758b95656fd448` (comparado ao hash anterior `fe0bb3a8f6f1d95084eb96b7a80bb6c17a2fd87b2b5d2f2bc4392c332df39101`, com 498 pacotes). Ambas as resoluções exigem `zeroize 1.9.0` (`edition = "2024"`, MSRV `1.85`).
+- **Editions Observadas**: `2018`, `2021`, `2024`.
+- **Maior MSRV Declarado**: `zeroize 1.9.0` (`rust-version = "1.85"`).
+- **Outros MSRVs Elevados Confirmados**: `zerovec 0.11.6` (1.83), `potential_utf 0.1.5` (1.82), `windows-strings 0.5.1` (1.82), `writeable 0.6.3` (1.82), `zerotrie 0.2.4` (1.82), `hyper 1.6.0` (1.79), `reqwest 0.12.15` (1.79).
+- **Pacotes com MSRV Declarado**: 308 pacotes.
+- **Pacotes sem MSRV Declarado**: 202 pacotes (MSRV não especificado no manifesto publicado).
+- **Pacotes não verificáveis**: `0` pacotes.
+- **Dependências Git**: `0` dependências.
+
+### 11.2 Evidências e Validadores Versionados
+- **Manifesto de Seleção**: [`client/patcher/beam-audit/evidence/toolchain-selection.json`](../client/patcher/beam-audit/evidence/toolchain-selection.json)
+- **JSON Schema**: [`client/patcher/beam-audit/schemas/toolchain-selection.schema.json`](../client/patcher/beam-audit/schemas/toolchain-selection.schema.json)
+- **Validador em Python**: [`scripts/validate-beam-toolchain-selection.py`](../scripts/validate-beam-toolchain-selection.py)
+- **Workflow de CI**: [`.github/workflows/validate-beam-toolchain-selection.yml`](../.github/workflows/validate-beam-toolchain-selection.yml)
+
+---
+
+## 12. Declarações Obrigatórias
+
+- Nenhuma ferramenta foi instalada.
+- Nenhuma toolchain foi alterada (Rust 1.77.2 permanece ativa).
+- Nenhum build foi iniciado.
+- Nenhum binário foi produzido ou executado.
+- Nenhuma dependência foi modificada.
+- Nenhum `Cargo.lock` foi versionado no repositório.
+- Nenhum deploy foi realizado.
+- VPS não foi acessada.
 - Windows Defender não foi desabilitado.
+- O PR permanece em rascunho (draft).

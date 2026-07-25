@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "stage": "2O-D1-B2",
+  "timestamp_utc": "2026-07-25T21:22:45Z",
+  "faithro_commit": "783bd42e4faea7b89cb68798596a74c7e83fad57",
+  "upstream": {
+    "repository": "beamguides/beam-patcher",
+    "commit": "feed97887090d121f796bc1b941390e28b7a2da5",
+    "official_lockfile_found": false
+  },
+  "lockfile_resolution": {
+    "generated_lockfile_sha256": "fc277856dd6bc9b935fe82261fc45e1b26daa05a712a6f41fd758b95656fd448",
+    "previous_evidence_sha256": "fe0bb3a8f6f1d95084eb96b7a80bb6c17a2fd87b2b5d2f2bc4392c332df39101",
+    "graph_drift_detected": true,
+    "drift_explanation": "Upstream lacks official Cargo.lock. Temporal resolution on crates.io updated lockfile from 498 to 510 packages. Both resolutions require zeroize 1.9.0 (edition 2024 / MSRV 1.85).",
+    "total_packages": 510,
+    "git_dependencies": 0,
+    "alternate_registries": 0
+  },
+  "toolchain": {
+    "installed_rust_version": "1.77.2",
+    "minimum_observed_rust_version": "1.85.0",
+    "candidate_rust_version": "1.85.0",
+    "candidate_cargo_version": "1.85.0",
+    "candidate_host_triple": "x86_64-pc-windows-msvc",
+    "candidate_status": "approved-for-future-installation",
+    "selection_confidence": "high-static-analysis-complete"
+  },
+  "graph_analysis": {
+    "editions_observed": [
+      "2018",
+      "2021",
+      "2024"
+    ],
+    "highest_declared_msrv": {
+      "crate": "zeroize",
+      "version": "1.9.0",
+      "required_rust": "1.85",
+      "edition": "2024"
+    },
+    "packages_with_declared_msrv": 308,
+    "packages_without_declared_msrv": 202,
+    "unverifiable_packages": 0
+  },
+  "security_flags": {
+    "installation_authorized": false,
+    "build_authorized": false,
+    "build_started": false,
+    "binary_produced": false,
+    "binary_executed": false,
+    "dependencies_modified": false,
+    "toolchain_elevated": false,
+    "deploy_performed": false,
+    "vps_accessed": false,
+    "next_authorization_required": true
+  }
+}

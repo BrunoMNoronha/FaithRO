@@ -18,16 +18,18 @@ beam-audit/
 ├── README.md                        # este arquivo
 ├── upstream-manifest.example.json   # manifesto determinístico da origem (hashes, digest)
 ├── security-findings.example.json   # achados da auditoria (Tauri/rede/processos)
-├── build-plan.example.json          # plano controlado de instalação e build (D1-B)
+├── build-plan.example.json          # plano controlado de instalação e build (D1-B2)
 ├── evidence/
-│   └── toolchain-compatibility.json # evidência de incompatibilidade da Rust 1.77.2 (D1-B1)
+│   ├── toolchain-compatibility.json # evidência de incompatibilidade da Rust 1.77.2 (D1-B1)
+│   └── toolchain-selection.json     # evidência de seleção da candidata Rust 1.85.0 (D1-B2)
 ├── overlays/
 │   ├── README.md
 │   └── beam-lab-security.patch       # overlay de segurança do laboratório (textual)
 └── schemas/
     ├── upstream-manifest.schema.json
     ├── build-plan.schema.json
-    └── toolchain-compatibility.schema.json
+    ├── toolchain-compatibility.schema.json
+    └── toolchain-selection.schema.json
 ```
 
 O fonte do Beam foi clonado apenas em pasta **temporária fora do repositório**,
@@ -50,12 +52,22 @@ python scripts/validate-beam-build-plan.py \
   --manifest client/patcher/beam-audit/upstream-manifest.example.json \
   --plan client/patcher/beam-audit/build-plan.example.json
 
-# 4) Validar o overlay de segurança contra o clone temporário
+# 4) Auditar MSRVs e edições do grafo (não constrói, não executa)
+# Em clone isolado após `cargo generate-lockfile`:
+python scripts/audit-beam-rust-msrv.py \
+  --lockfile /tmp/beam/Cargo.lock \
+  --output /tmp/toolchain-selection.json
+
+# 5) Validar a evidência de seleção de toolchain e compatibilidade
+python scripts/validate-beam-toolchain-compatibility.py
+python scripts/validate-beam-toolchain-selection.py
+
+# 6) Validar o overlay de segurança contra o clone temporário
 python scripts/validate-beam-security-overlay.py \
   --source /tmp/beam \
   --patch client/patcher/beam-audit/overlays/beam-lab-security.patch
 
-# 5) Remover a pasta temporária
+# 7) Remover a pasta temporária
 rm -rf /tmp/beam
 ```
 

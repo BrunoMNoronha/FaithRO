@@ -61,7 +61,7 @@ client/patcher/
         └── scenarios/                # cenários G1–G15 (valid, hash-mismatch, …)
 ```
 
-## Auditoria de build e compatibilidade de toolchain (ETAPAS 2O-D1 e 2O-D1-B1)
+## Auditoria de build e seleção de toolchain (ETAPAS 2O-D1, 2O-D1-B1 e 2O-D1-B2)
 
 A preparação para uma futura construção auditável do Beam (auditoria estática do
 commit fixado `feed978870`, manifesto da origem, overlay de segurança de
@@ -71,11 +71,14 @@ laboratório, plano controlado de instalação/build e validadores/CI) está em
 
 Na ETAPA 2O-D1-B1, a toolchain Rust 1.77.2 foi empiricamente testada e **REJEITADA**:
 a dependência `zeroize 1.9.0` exige `edition = "2024"` e `rust-version = "1.85"`,
-impedindo qualquer compilação com a Rust 1.77.2. Ver evidência em
-[`beam-audit/evidence/toolchain-compatibility.json`](beam-audit/evidence/toolchain-compatibility.json)
-e documentação completa em
-[`docs/20-primeiro-build-controlado-beam.md`](../../docs/20-primeiro-build-controlado-beam.md).
-**Nenhum build foi iniciado, nenhum binário foi produzido ou executado e as dependências não foram alteradas.**
+impedindo qualquer compilação com a Rust 1.77.2 (ver [`beam-audit/evidence/toolchain-compatibility.json`](beam-audit/evidence/toolchain-compatibility.json)).
+
+Na ETAPA 2O-D1-B2, a toolchain Rust **`1.85.0`** foi selecionada por auditoria estática
+como a menor versão mínima compatível com o grafo de dependências do Beam (510 pacotes,
+editions 2018/2021/2024, MSRV máximo 1.85). Ver evidência em
+[`beam-audit/evidence/toolchain-selection.json`](beam-audit/evidence/toolchain-selection.json)
+e documentação em [`docs/20-primeiro-build-controlado-beam.md`](../../docs/20-primeiro-build-controlado-beam.md).
+**Instalação e build permanecem NÃO autorizados. Nenhuma ferramenta foi instalada ou executada.**
 
 ## Homologação sintética do fluxo (ETAPA 2O-D)
 
