@@ -61,7 +61,7 @@ client/patcher/
         └── scenarios/                # cenários G1–G15 (valid, hash-mismatch, …)
 ```
 
-## Auditoria de build, seleção de toolchain e plano de instalação (ETAPAS 2O-D1, 2O-D1-B1 a 2O-D1-B4)
+## Auditoria de build, seleção de toolchain, plano e instalação isolada (ETAPAS 2O-D1, 2O-D1-B1 a 2O-D1-B6)
 
 A preparação para uma futura construção auditável do Beam (auditoria estática do
 commit fixado `feed978870`, manifesto da origem, overlay de segurança de
@@ -78,9 +78,11 @@ como a menor versão mínima compatível com o grafo de dependências do Beam. V
 [`beam-audit/evidence/toolchain-selection.json`](beam-audit/evidence/toolchain-selection.json)
 e documentação em [`docs/20-primeiro-build-controlado-beam.md`](../../docs/20-primeiro-build-controlado-beam.md).
 
-Na ETAPA 2O-D1-B4, o plano técnico de coexistência e futura instalação isolada da Rust 1.85.0 (sem alterar default nem criar override) foi documentado em [`docs/21-plano-instalacao-toolchain-rust-beam.md`](../../docs/21-plano-instalacao-toolchain-rust-beam.md) e [`beam-audit/toolchain-installation-plan.example.json`](beam-audit/toolchain-installation-plan.example.json).
+Nas ETAPAS 2O-D1-B4 e 2O-D1-B5, o plano técnico de coexistência da Rust 1.85.0 foi documentado e integrado em [`docs/21-plano-instalacao-toolchain-rust-beam.md`](../../docs/21-plano-instalacao-toolchain-rust-beam.md).
 
-**Instalação e build permanecem NÃO autorizados. Nenhuma ferramenta foi instalada ou executada.**
+Na ETAPA 2O-D1-B6, a instalação isolada da toolchain nomeada `1.85.0-x86_64-pc-windows-msvc` (perfil `minimal`) foi **EXECUTADA E VALIDADA** empiricamente (mantendo a Rust 1.77.2 como default ativa). Ver evidência em [`beam-audit/evidence/toolchain-installation.json`](beam-audit/evidence/toolchain-installation.json) e documentação em [`docs/22-instalacao-isolada-toolchain-rust-beam.md`](../../docs/22-instalacao-isolada-toolchain-rust-beam.md).
+
+**Build permanece NÃO autorizado. Nenhum binário foi compilado ou executado.**
 
 ## Homologação sintética do fluxo (ETAPA 2O-D)
 
