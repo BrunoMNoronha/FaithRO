@@ -1,0 +1,48 @@
+name: Validate beam first build human decision package
+
+on:
+  push:
+    branches: [ main, dev ]
+    paths:
+      - 'client/patcher/beam-audit/first-build-human-decision-package.example.json'
+      - 'client/patcher/beam-audit/first-build-human-decision-record.example.json'
+      - 'client/patcher/beam-audit/first-build-authorization-request.example.json'
+      - 'client/patcher/beam-audit/first-build-runbook.example.json'
+      - 'client/patcher/beam-audit/first-build-authorization.example.json'
+      - 'client/patcher/beam-audit/first-build-plan.example.json'
+      - 'client/patcher/beam-audit/schemas/first-build-human-decision-package.schema.json'
+      - 'client/patcher/beam-audit/schemas/first-build-human-decision-record.schema.json'
+      - 'scripts/validate-beam-first-build-human-decision.py'
+      - '.github/workflows/validate-beam-first-build-human-decision.yml'
+  pull_request:
+    branches: [ main, dev ]
+    paths:
+      - 'client/patcher/beam-audit/first-build-human-decision-package.example.json'
+      - 'client/patcher/beam-audit/first-build-human-decision-record.example.json'
+      - 'client/patcher/beam-audit/first-build-authorization-request.example.json'
+      - 'client/patcher/beam-audit/first-build-runbook.example.json'
+      - 'client/patcher/beam-audit/first-build-authorization.example.json'
+      - 'client/patcher/beam-audit/first-build-plan.example.json'
+      - 'client/patcher/beam-audit/schemas/first-build-human-decision-package.schema.json'
+      - 'client/patcher/beam-audit/schemas/first-build-human-decision-record.schema.json'
+      - 'scripts/validate-beam-first-build-human-decision.py'
+      - '.github/workflows/validate-beam-first-build-human-decision.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-first-build-human-decision:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate decision package/record (offline; no Rust, no build, no decision, still unauthorized)
+        run: |
+          python scripts/validate-beam-first-build-human-decision.py

@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:beam-audit/first-build-human-decision-record",
+  "title": "Beam Patcher first controlled build HUMAN DECISION RECORD (blank form, pending)",
+  "description": "Formulario de registro da decisao humana do primeiro build controlado do Beam Patcher (ETAPA 2O-D1-B14). O EXEMPLO versionado representa APENAS o estado pendente e NAO pode representar uma decisao tomada. Uma decisao real e tratada em etapa separada, fora deste exemplo.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "stage",
+    "artifact_kind",
+    "title",
+    "document_reference",
+    "package_reference",
+    "request_reference",
+    "authorization_reference",
+    "record_id",
+    "decision_status",
+    "decision",
+    "authorization_granted",
+    "execution_permitted",
+    "authorization_used",
+    "authorization_revoked",
+    "decision_recorded",
+    "build_started",
+    "beam_downloaded",
+    "binary_produced",
+    "single_use_required",
+    "note",
+    "authority",
+    "approval",
+    "refusal",
+    "revocation"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "stage": { "type": "string", "const": "2O-D1-B14" },
+    "artifact_kind": { "type": "string", "const": "human-decision-record" },
+    "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "document_reference": { "type": "string", "const": "docs/26-pacote-decisao-humana-primeiro-build-beam.md" },
+    "package_reference": { "type": "string", "const": "client/patcher/beam-audit/first-build-human-decision-package.example.json" },
+    "request_reference": { "type": "string", "const": "client/patcher/beam-audit/first-build-authorization-request.example.json" },
+    "authorization_reference": { "type": "string", "const": "client/patcher/beam-audit/first-build-authorization.example.json" },
+    "record_id": { "type": "string", "pattern": "^REC-[0-9A-Za-z-]+$" },
+    "decision_status": { "type": "string", "const": "PENDING" },
+    "decision": { "type": "null" },
+    "authorization_granted": { "type": "boolean", "const": false },
+    "execution_permitted": { "type": "boolean", "const": false },
+    "authorization_used": { "type": "boolean", "const": false },
+    "authorization_revoked": { "type": "boolean", "const": false },
+    "decision_recorded": { "type": "boolean", "const": false },
+    "build_started": { "type": "boolean", "const": false },
+    "beam_downloaded": { "type": "boolean", "const": false },
+    "binary_produced": { "type": "boolean", "const": false },
+    "single_use_required": { "type": "boolean", "const": true },
+    "note": { "type": "string", "minLength": 1, "maxLength": 1200 },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "identifier",
+        "role",
+        "authority_basis",
+        "verifiable_channel",
+        "auditable_reference",
+        "decision_timestamp_utc",
+        "identity_confirmed"
+      ],
+      "properties": {
+        "identifier": { "type": "null" },
+        "role": { "type": "null" },
+        "authority_basis": { "type": "null" },
+        "verifiable_channel": { "type": "null" },
+        "auditable_reference": { "type": "null" },
+        "decision_timestamp_utc": { "type": "null" },
+        "identity_confirmed": { "type": "boolean", "const": false }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "window_not_before_utc",
+        "window_not_after_utc",
+        "window_timezone",
+        "max_duration_hours",
+        "justification",
+        "confirmed_faithro_commit",
+        "confirmed_request_sha256",
+        "confirmed_runbook_sha256",
+        "single_use_confirmed"
+      ],
+      "properties": {
+        "window_not_before_utc": { "type": "null" },
+        "window_not_after_utc": { "type": "null" },
+        "window_timezone": { "type": "string", "const": "UTC" },
+        "max_duration_hours": { "type": "integer", "minimum": 1, "maximum": 24 },
+        "justification": { "type": "null" },
+        "confirmed_faithro_commit": { "type": "null" },
+        "confirmed_request_sha256": { "type": "null" },
+        "confirmed_runbook_sha256": { "type": "null" },
+        "single_use_confirmed": { "type": "boolean", "const": false }
+      }
+    },
+    "refusal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["justification", "unmet_conditions"],
+      "properties": {
+        "justification": { "type": "null" },
+        "unmet_conditions": { "type": "null" }
+      }
+    },
+    "revocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["revocable", "revoked", "revoked_reason", "revoked_timestamp_utc"],
+      "properties": {
+        "revocable": { "type": "boolean", "const": true },
+        "revoked": { "type": "boolean", "const": false },
+        "revoked_reason": { "type": "null" },
+        "revoked_timestamp_utc": { "type": "null" }
+      }
+    }
+  }
+}

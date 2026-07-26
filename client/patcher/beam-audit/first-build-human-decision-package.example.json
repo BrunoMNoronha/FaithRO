@@ -1,0 +1,196 @@
+{
+  "schema_version": 1,
+  "stage": "2O-D1-B14",
+  "artifact_kind": "human-decision-package",
+  "title": "Pacote de decisao humana do primeiro build controlado do Beam Patcher",
+  "document_reference": "docs/26-pacote-decisao-humana-primeiro-build-beam.md",
+  "package_id": "PKG-2O-D1-B14-primeiro-build-beam",
+  "package_date_utc": null,
+  "project": "FaithRO - Laos Deos",
+  "purpose": "Reunir, por referencia e hash, os artefatos necessarios para que uma pessoa com autoridade revise a solicitacao do primeiro build controlado do Beam Patcher e registre, em etapa posterior, uma decisao de aprovacao ou recusa. Este pacote NAO concede autorizacao, NAO permite execucao e NAO representa uma decisao.",
+  "presents_decision": true,
+  "grants_authorization": false,
+  "permits_execution": false,
+  "decision_recorded": false,
+  "grant_is_separate_artifact": true,
+  "merge_is_not_authorization": true,
+  "decision_is_not_execution": true,
+  "note": "PACOTE DE DECISAO. Documento declarativo e de leitura. NAO concede autorizacao, NAO permite execucao, NAO inicia a proxima etapa e NAO deve ser confundido com uma decisao humana. A decisao sera registrada, apos revisao tecnica separada, no formulario first-build-human-decision-record. A autorizacao operacional permanece no artefato de autorizacao. Merge ou aprovacao de PR NAO equivalem a decisao humana nem a autorizacao operacional.",
+  "faithro_reference_commit": "4251c373a8bcdbb9e49369668711d64d8140aad3",
+  "pr_integration": {
+    "pr_number": 39,
+    "merge_commit": "4251c373a8bcdbb9e49369668711d64d8140aad3",
+    "merge_is_not_authorization": true
+  },
+  "request_reference": {
+    "path": "client/patcher/beam-audit/first-build-authorization-request.example.json",
+    "sha256": "cc57edff417b6da27f8b1a8b3bf8e833a9906f6a8de0dc0fc7389556fdba4f90",
+    "request_id": "REQ-2O-D1-B12-primeiro-build-beam",
+    "expected_request_status": "PENDING_HUMAN_DECISION"
+  },
+  "decision_record_reference": "client/patcher/beam-audit/first-build-human-decision-record.example.json",
+  "referenced_artifacts": [
+    {
+      "role": "authorization_request",
+      "path": "client/patcher/beam-audit/first-build-authorization-request.example.json",
+      "sha256": "cc57edff417b6da27f8b1a8b3bf8e833a9906f6a8de0dc0fc7389556fdba4f90",
+      "eol": "lf"
+    },
+    {
+      "role": "runbook",
+      "path": "client/patcher/beam-audit/first-build-runbook.example.json",
+      "sha256": "83c701e1e79644f86e5581c8062abacd5e8f2bdf763422ad584807bc5e6c83ed",
+      "eol": "lf"
+    },
+    {
+      "role": "authorization_template",
+      "path": "client/patcher/beam-audit/first-build-authorization.example.json",
+      "sha256": "d057434d3aa1d59f32aa80f360f08aa144c5f58559f699e939fe84edb3705f5b",
+      "eol": "lf"
+    },
+    {
+      "role": "build_plan",
+      "path": "client/patcher/beam-audit/first-build-plan.example.json",
+      "sha256": "5b64f9462e238ba450b40fe431f05ef4d9f04bb81b7daaba504dae722e67094c",
+      "eol": "lf"
+    }
+  ],
+  "toolchain": {
+    "required_toolchain": "1.85.0-x86_64-pc-windows-msvc",
+    "preserved_default_toolchain": "1.77.2-x86_64-pc-windows-msvc",
+    "target": "x86_64-pc-windows-msvc"
+  },
+  "presented_scope": [
+    "obtencao controlada do codigo-fonte a partir de uma origem explicitamente aprovada",
+    "verificacao da origem e da integridade contra o manifesto versionado",
+    "preparacao de workspace temporario efemero externo ao repositorio FaithRO",
+    "uso explicito da toolchain Rust nomeada 1.85.0-x86_64-pc-windows-msvc",
+    "uma unica tentativa controlada de build, offline, com lock fixo",
+    "coleta de evidencias sem executar o binario",
+    "limpeza integral do workspace temporario conforme o runbook"
+  ],
+  "permanently_forbidden": [
+    "execucao do binario produzido",
+    "deploy",
+    "publicacao ou distribuicao do resultado",
+    "entrega a jogadores",
+    "empacotamento com cliente ou asset proprietario",
+    "uso de GRF ou assets proprietarios sem licenca",
+    "assinatura ou modificacao de executaveis",
+    "acesso a VPS",
+    "alteracao permanente de toolchain",
+    "alteracao permanente de PATH",
+    "desativacao de antivirus ou Defender",
+    "reutilizacao da autorizacao",
+    "uso fora da janela",
+    "continuidade automatica para producao"
+  ],
+  "risks": [
+    "origem upstream incorreta",
+    "hash divergente do arquivo referenciado",
+    "SHA do FaithRO obsoleto",
+    "dependencia comprometida",
+    "falha de compilacao",
+    "dependencia nativa ausente",
+    "execucao acidental do binario",
+    "autorizacao reutilizada",
+    "autorizacao expirada",
+    "evidencia incompleta",
+    "exposicao de dados no stdout ou stderr",
+    "diferenca de fim de linha alterando os hashes",
+    "confusao entre aprovacao do PR e autorizacao humana",
+    "decisao registrada por pessoa sem autoridade",
+    "modificacao de artefatos depois da decisao",
+    "escopo interpretado alem do permitido"
+  ],
+  "authority_criteria": [
+    "mantenedor responsavel pelo projeto",
+    "pessoa formalmente designada pelo proprietario do repositorio",
+    "pessoa com responsabilidade explicita pela seguranca e operacao do build",
+    "identidade verificavel no canal de decisao adotado",
+    "ausencia de conflito com quem executara o build, quando possivel"
+  ],
+  "approval_rules": [
+    "todos os artefatos referenciados sao encontrados",
+    "todos os hashes sao recomputados e coincidem",
+    "os SHAs sao confirmados",
+    "a origem do Beam esta explicitamente aprovada",
+    "o escopo esta integralmente compreendido",
+    "o uso e unico",
+    "ha inicio e expiracao definidos",
+    "a duracao respeita o limite estabelecido",
+    "a autorizacao ainda nao foi usada",
+    "nao ha revogacao",
+    "nao houve mudanca posterior nos artefatos",
+    "o registro esta associado a solicitacao e ao pacote",
+    "a decisao e feita por pessoa com autoridade verificavel",
+    "a aprovacao NAO autoriza execucao nem distribuicao do binario",
+    "uma revisao tecnica separada aprova o registro preenchido antes do build"
+  ],
+  "refusal_rules": [
+    "a recusa registra a decisao de negar",
+    "a recusa registra justificativa",
+    "a recusa registra riscos ou condicoes nao satisfeitas",
+    "a recusa registra identidade e autoridade",
+    "a recusa registra data e hora",
+    "a recusa registra referencia auditavel",
+    "a recusa mantem autorizacao nao concedida e execucao proibida",
+    "a recusa mantem ausencia de janela e ausencia de uso",
+    "a recusa mantem o build bloqueado",
+    "a recusa NAO exige preenchimento de campos exclusivos de uma aprovacao"
+  ],
+  "window_rules": {
+    "requires_absolute_start": true,
+    "requires_absolute_expiration": true,
+    "timezone": "UTC",
+    "max_duration_hours": 4,
+    "retroactive_window_forbidden": true,
+    "expiration_before_start_forbidden": true,
+    "unlimited_window_forbidden": true
+  },
+  "single_use_rules": [
+    "uma autorizacao corresponde a uma unica tentativa",
+    "qualquer inicio de execucao consome a autorizacao",
+    "falha de build NAO reabre automaticamente a autorizacao",
+    "nova tentativa exige nova decisao"
+  ],
+  "revocation_rules": [
+    "a revogacao pode ocorrer antes da execucao",
+    "a revogacao registra identidade, data, razao e referencia",
+    "a revogacao prevalece sobre aprovacao anterior",
+    "a revogacao impede a execucao",
+    "a revogacao NAO pode ser revertida silenciosamente"
+  ],
+  "decision_checklist": [
+    "confirmar identidade e autoridade do decisor",
+    "confirmar entendimento integral do escopo apresentado",
+    "recomputar e confirmar o SHA do FaithRO 4251c373a8bcdbb9e49369668711d64d8140aad3",
+    "recomputar e confirmar os hashes SHA-256 de todos os artefatos referenciados",
+    "confirmar que os arquivos com hash estao em fim de linha LF (checkout novo)",
+    "confirmar a origem prevista explicitamente aprovada do Beam",
+    "confirmar a toolchain nomeada 1.85.0-x86_64-pc-windows-msvc e a padrao preservada 1.77.2",
+    "revisar os riscos apresentados",
+    "revisar as proibicoes permanentes",
+    "confirmar o requisito de uso unico",
+    "confirmar inicio e expiracao da janela dentro do limite",
+    "confirmar a possibilidade de revogacao",
+    "confirmar que nao existe autorizacao implicita",
+    "confirmar que a decisao NAO executa o build automaticamente",
+    "confirmar que uma revisao tecnica separada precede qualquer build"
+  ],
+  "delivery_procedure": [
+    "entregar este pacote e o formulario de registro por um canal auditavel",
+    "o decisor recomputa os hashes e os SHAs em um checkout novo",
+    "o decisor le o escopo, os riscos e as proibicoes",
+    "o decisor decide aprovar ou negar, sem preencher aprovacao ficticia",
+    "o decisor registra a decisao no formulario de registro, em instancia separada",
+    "a decisao preenchida e submetida a revisao tecnica em etapa posterior"
+  ],
+  "return_procedure": [
+    "devolver o formulario de registro preenchido pelo mesmo canal auditavel",
+    "manter o pacote e o registro sob controle de versao",
+    "nao editar os exemplos versionados para simular uma decisao",
+    "a autorizacao operacional so podera ser registrada apos revisao tecnica da decisao"
+  ],
+  "eol_note": "Os arquivos referenciados cujo hash e persistido estao fixados como LF via .gitattributes. Recompute os hashes em um checkout novo (por exemplo com Get-FileHash SHA256) apos verificar que o arquivo esta em LF. Um checkout preexistente pode precisar de re-normalizacao unica antes da conferencia."
+}

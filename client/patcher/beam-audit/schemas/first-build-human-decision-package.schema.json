@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:beam-audit/first-build-human-decision-package",
+  "title": "Beam Patcher first controlled build HUMAN DECISION PACKAGE (read-only, grants nothing)",
+  "description": "Pacote apresentado a uma pessoa com autoridade para decidir sobre o primeiro build controlado do Beam Patcher (ETAPA 2O-D1-B14). Reune artefatos por referencia e hash. NAO concede autorizacao, NAO permite execucao e NAO representa uma decisao.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "stage",
+    "artifact_kind",
+    "title",
+    "document_reference",
+    "package_id",
+    "package_date_utc",
+    "project",
+    "purpose",
+    "presents_decision",
+    "grants_authorization",
+    "permits_execution",
+    "decision_recorded",
+    "grant_is_separate_artifact",
+    "merge_is_not_authorization",
+    "decision_is_not_execution",
+    "note",
+    "faithro_reference_commit",
+    "pr_integration",
+    "request_reference",
+    "decision_record_reference",
+    "referenced_artifacts",
+    "toolchain",
+    "presented_scope",
+    "permanently_forbidden",
+    "risks",
+    "authority_criteria",
+    "approval_rules",
+    "refusal_rules",
+    "window_rules",
+    "single_use_rules",
+    "revocation_rules",
+    "decision_checklist",
+    "delivery_procedure",
+    "return_procedure",
+    "eol_note"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "stage": { "type": "string", "const": "2O-D1-B14" },
+    "artifact_kind": { "type": "string", "const": "human-decision-package" },
+    "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "document_reference": { "type": "string", "const": "docs/26-pacote-decisao-humana-primeiro-build-beam.md" },
+    "package_id": { "type": "string", "pattern": "^PKG-[0-9A-Za-z-]+$" },
+    "package_date_utc": { "type": "null" },
+    "project": { "type": "string", "const": "FaithRO - Laos Deos" },
+    "purpose": { "type": "string", "minLength": 1, "maxLength": 800 },
+    "presents_decision": { "type": "boolean", "const": true },
+    "grants_authorization": { "type": "boolean", "const": false },
+    "permits_execution": { "type": "boolean", "const": false },
+    "decision_recorded": { "type": "boolean", "const": false },
+    "grant_is_separate_artifact": { "type": "boolean", "const": true },
+    "merge_is_not_authorization": { "type": "boolean", "const": true },
+    "decision_is_not_execution": { "type": "boolean", "const": true },
+    "note": { "type": "string", "minLength": 1, "maxLength": 1200 },
+    "faithro_reference_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "pr_integration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pr_number", "merge_commit", "merge_is_not_authorization"],
+      "properties": {
+        "pr_number": { "type": "integer", "const": 39 },
+        "merge_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "merge_is_not_authorization": { "type": "boolean", "const": true }
+      }
+    },
+    "request_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "request_id", "expected_request_status"],
+      "properties": {
+        "path": { "type": "string", "const": "client/patcher/beam-audit/first-build-authorization-request.example.json" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "request_id": { "type": "string", "pattern": "^REQ-[0-9A-Za-z-]+$" },
+        "expected_request_status": { "type": "string", "const": "PENDING_HUMAN_DECISION" }
+      }
+    },
+    "decision_record_reference": { "type": "string", "const": "client/patcher/beam-audit/first-build-human-decision-record.example.json" },
+    "referenced_artifacts": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role", "path", "sha256", "eol"],
+        "properties": {
+          "role": { "type": "string", "enum": ["authorization_request", "runbook", "authorization_template", "build_plan"] },
+          "path": { "type": "string", "pattern": "^client/patcher/beam-audit/[A-Za-z0-9._/-]+\\.json$" },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "eol": { "type": "string", "const": "lf" }
+        }
+      }
+    },
+    "toolchain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required_toolchain", "preserved_default_toolchain", "target"],
+      "properties": {
+        "required_toolchain": { "type": "string", "const": "1.85.0-x86_64-pc-windows-msvc" },
+        "preserved_default_toolchain": { "type": "string", "const": "1.77.2-x86_64-pc-windows-msvc" },
+        "target": { "type": "string", "const": "x86_64-pc-windows-msvc" }
+      }
+    },
+    "presented_scope": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "type": "string", "minLength": 1, "maxLength": 300 } },
+    "permanently_forbidden": { "type": "array", "minItems": 1, "maxItems": 30, "items": { "type": "string", "minLength": 1, "maxLength": 300 } },
+    "risks": { "type": "array", "minItems": 1, "maxItems": 40, "items": { "type": "string", "minLength": 1, "maxLength": 300 } },
+    "authority_criteria": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "type": "string", "minLength": 1, "maxLength": 300 } },
+    "approval_rules": { "type": "array", "minItems": 1, "maxItems": 30, "items": { "type": "string", "minLength": 1, "maxLength": 300 } },
+    "refusal_rules": { "type": "array", "minItems": 1, "maxItems": 30, "items": { "type": "string", "minLength": 1, "maxLength": 300 } },
+    "window_rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requires_absolute_start",
+        "requires_absolute_expiration",
+        "timezone",
+        "max_duration_hours",
+        "retroactive_window_forbidden",
+        "expiration_before_start_forbidden",
+        "unlimited_window_forbidden"
+      ],
+      "properties": {
+        "requires_absolute_start": { "type": "boolean", "const": true },
+        "requires_absolute_expiration": { "type": "boolean", "const": true },
+        "timezone": { "type": "string", "const": "UTC" },
+        "max_duration_hours": { "type": "integer", "minimum": 1, "maximum": 24 },
+        "retroactive_window_forbidden": { "type": "boolean", "const": true },
+        "expiration_before_start_forbidden": { "type": "boolean", "const": true },
+        "unlimited_window_forbidden": { "type": "boolean", "const": true }
+      }
+    },
+    "single_use_rules": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "type": "string", "minLength": 1, "maxLength": 300 } },
+    "revocation_rules": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "type": "string", "minLength": 1, "maxLength": 300 } },
+    "decision_checklist": { "type": "array", "minItems": 1, "maxItems": 40, "items": { "type": "string", "minLength": 1, "maxLength": 300 } },
+    "delivery_procedure": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "type": "string", "minLength": 1, "maxLength": 300 } },
+    "return_procedure": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "type": "string", "minLength": 1, "maxLength": 300 } },
+    "eol_note": { "type": "string", "minLength": 1, "maxLength": 600 }
+  }
+}
