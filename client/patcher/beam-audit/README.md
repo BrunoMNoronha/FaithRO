@@ -22,6 +22,7 @@ beam-audit/
 ├── first-build-plan.example.json    # plano do primeiro build controlado / autorização de execução (D1-B8)
 ├── first-build-runbook.example.json # runbook operacional do primeiro build (D1-B10)
 ├── first-build-authorization.example.json    # modelo de autorização humana (template, não concedido) (D1-B10)
+├── first-build-authorization-request.example.json # solicitação formal de autorização humana (pendente, não concede) (D1-B12)
 ├── first-build-execution-evidence.example.json # template de evidência da execução futura (não executado) (D1-B10)
 ├── toolchain-installation-plan.example.json # plano de instalação isolada da Rust 1.85.0 (D1-B4)
 ├── evidence/
@@ -37,6 +38,7 @@ beam-audit/
     ├── first-build-plan.schema.json
     ├── first-build-runbook.schema.json
     ├── first-build-authorization.schema.json
+    ├── first-build-authorization-request.schema.json
     ├── first-build-execution-evidence.schema.json
     ├── toolchain-compatibility.schema.json
     ├── toolchain-selection.schema.json
@@ -149,4 +151,22 @@ confirma que a autorização continua não concedida):
 
 ```bash
 python scripts/validate-beam-first-build-runbook.py
+```
+
+## Solicitação formal de autorização (ETAPA 2O-D1-B12)
+
+`first-build-authorization-request.example.json` (schema em
+`schemas/first-build-authorization-request.schema.json`) registra a
+**solicitação formal** de autorização humana do primeiro build, vinculada ao
+commit de referência do FaithRO e ao **SHA-256 do runbook e do modelo de
+autorização** já existentes no repositório. A solicitação **não** concede e
+**não** pode conceder autorização a si mesma (`request_status=PENDING_HUMAN_DECISION`,
+`authorization_granted=false`, `execution_permitted=false`); a decisão pertence
+ao artefato de autorização separado, em etapa posterior. Documentação completa em
+[`docs/25-solicitacao-autorizacao-primeiro-build-beam.md`](../../../docs/25-solicitacao-autorizacao-primeiro-build-beam.md).
+Validação estática offline (não clona, não instala, não constrói, não executa,
+não concede autorização; recomputa e confere os hashes):
+
+```bash
+python scripts/validate-beam-first-build-authorization-request.py
 ```

@@ -51,6 +51,7 @@ client/patcher/
 │   ├── first-build-plan.example.json # plano do primeiro build controlado (D1-B8)
 │   ├── first-build-runbook.example.json        # runbook operacional do primeiro build (D1-B10)
 │   ├── first-build-authorization.example.json  # modelo de autorização humana, não concedido (D1-B10)
+│   ├── first-build-authorization-request.example.json # solicitação formal de autorização, pendente (D1-B12)
 │   ├── first-build-execution-evidence.example.json # template de evidência futura, não executado (D1-B10)
 │   ├── evidence/                     # evidências de compatibilidade/seleção/instalação
 │   ├── overlays/                     # overlay de segurança de laboratório (.patch textual)
@@ -90,6 +91,8 @@ Na ETAPA 2O-D1-B6, a instalação isolada da toolchain nomeada `1.85.0-x86_64-pc
 Na ETAPA 2O-D1-B8, o **plano do primeiro build controlado** foi modelado como artefato versionado e validável ([`beam-audit/first-build-plan.example.json`](beam-audit/first-build-plan.example.json)) e documentado em [`docs/23-planejamento-primeiro-build-controlado-beam.md`](../../docs/23-planejamento-primeiro-build-controlado-beam.md). O plano registra a **autorização de execução como BLOQUEADA** (`build_authorized=false`, `next_human_authorization_required=true`) e exige autorização humana explícita em etapa posterior.
 
 Na ETAPA 2O-D1-B10, o plano foi transformado em **runbook operacional** com **checkpoint de autorização humana**, **go/no-go** e **modelo de evidência**, em três artefatos separados por responsabilidade ([`beam-audit/first-build-runbook.example.json`](beam-audit/first-build-runbook.example.json), [`beam-audit/first-build-authorization.example.json`](beam-audit/first-build-authorization.example.json), [`beam-audit/first-build-execution-evidence.example.json`](beam-audit/first-build-execution-evidence.example.json)) e documentado em [`docs/24-runbook-primeiro-build-controlado-beam.md`](../../docs/24-runbook-primeiro-build-controlado-beam.md). A **autorização humana continua NÃO concedida** (`authorization_granted=false`, `execution_permitted=false`).
+
+Na ETAPA 2O-D1-B12, foi preparada a **solicitação formal de autorização humana** do primeiro build como artefato versionado e validável ([`beam-audit/first-build-authorization-request.example.json`](beam-audit/first-build-authorization-request.example.json)), vinculada ao commit de referência do FaithRO e ao SHA-256 do runbook e do modelo de autorização, e documentada em [`docs/25-solicitacao-autorizacao-primeiro-build-beam.md`](../../docs/25-solicitacao-autorizacao-primeiro-build-beam.md). A solicitação **não concede** e **não pode conceder** autorização a si mesma (`request_status=PENDING_HUMAN_DECISION`); a decisão pertence ao artefato de autorização separado, em etapa posterior. **Merge ou aprovação de PR não equivalem à autorização operacional.**
 
 **Build permanece NÃO autorizado. Nenhum binário foi compilado ou executado.**
 

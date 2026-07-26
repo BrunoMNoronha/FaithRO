@@ -24,3 +24,13 @@ client/patcher/beam-audit/overlays/beam-lab-security.patch -text diff -whitespac
 # validador anti-drift compara byte a byte com a saída determinística (LF) do
 # gerador. Ver docs/18-homologacao-patch-sintetico-beam.md.
 client/patcher/fixtures/synthetic/** text eol=lf
+
+# O SHA-256 do runbook e do modelo de autorização é FIXADO na solicitação de
+# autorização (D1-B12) e recomputado byte a byte pelo validador
+# scripts/validate-beam-first-build-authorization-request.py. Esses arquivos
+# DEVEM permanecer com LF em qualquer plataforma (incluindo checkout Windows com
+# core.autocrlf=true), para que o hash fixado seja reproduzível e verificável no
+# host de build. Ver docs/25-solicitacao-autorizacao-primeiro-build-beam.md.
+client/patcher/beam-audit/first-build-runbook.example.json text eol=lf
+client/patcher/beam-audit/first-build-authorization.example.json text eol=lf
+client/patcher/beam-audit/first-build-authorization-request.example.json text eol=lf
