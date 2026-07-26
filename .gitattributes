@@ -44,3 +44,12 @@ client/patcher/beam-audit/first-build-authorization-request.example.json text eo
 client/patcher/beam-audit/first-build-plan.example.json text eol=lf
 client/patcher/beam-audit/first-build-human-decision-package.example.json text eol=lf
 client/patcher/beam-audit/first-build-human-decision-record.example.json text eol=lf
+
+# O manifesto de apresentacao (D1-B16) persiste o SHA-256 dos artefatos
+# apresentados e sera, ele proprio, referenciado por hash em etapa posterior
+# (D1-B17). O manifesto e o comprovante DEVEM permanecer com LF para que os
+# hashes fixados sejam reproduziveis em qualquer plataforma, conforme o
+# validador scripts/validate-beam-first-build-human-presentation.py. Ver
+# docs/27-apresentacao-controlada-pacote-decisao-beam.md.
+client/patcher/beam-audit/first-build-human-presentation-manifest.example.json text eol=lf
+client/patcher/beam-audit/first-build-human-presentation-receipt.example.json text eol=lf

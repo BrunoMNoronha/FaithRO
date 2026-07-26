@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:beam-audit/first-build-human-presentation-receipt",
+  "title": "Beam Patcher first build presentation RECEIPT (blank, not presented)",
+  "description": "Comprovante de entrega e recebimento da apresentacao do pacote de decisao (ETAPA 2O-D1-B16). O EXEMPLO versionado representa APENAS o estado anterior a apresentacao e NAO pode representar entrega, recebimento, identidade ou decisao. Uma entrega real e tratada em etapa separada, fora deste exemplo.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "stage",
+    "artifact_kind",
+    "title",
+    "document_reference",
+    "manifest_reference",
+    "package_reference",
+    "decision_record_reference",
+    "receipt_id",
+    "presentation_status",
+    "channel_selected",
+    "delivered",
+    "received",
+    "recipient_identity_confirmed",
+    "authority_confirmed",
+    "package_integrity_confirmed",
+    "decision_requested",
+    "decision_received",
+    "authorization_granted",
+    "execution_permitted",
+    "build_started",
+    "beam_downloaded",
+    "binary_produced",
+    "note",
+    "channel",
+    "recipient",
+    "delivery"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "stage": { "type": "string", "const": "2O-D1-B16" },
+    "artifact_kind": { "type": "string", "const": "human-presentation-receipt" },
+    "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "document_reference": { "type": "string", "const": "docs/27-apresentacao-controlada-pacote-decisao-beam.md" },
+    "manifest_reference": { "type": "string", "const": "client/patcher/beam-audit/first-build-human-presentation-manifest.example.json" },
+    "package_reference": { "type": "string", "const": "client/patcher/beam-audit/first-build-human-decision-package.example.json" },
+    "decision_record_reference": { "type": "string", "const": "client/patcher/beam-audit/first-build-human-decision-record.example.json" },
+    "receipt_id": { "type": "string", "pattern": "^RCP-[0-9A-Za-z-]+$" },
+    "presentation_status": { "type": "string", "const": "NOT_PRESENTED" },
+    "channel_selected": { "type": "boolean", "const": false },
+    "delivered": { "type": "boolean", "const": false },
+    "received": { "type": "boolean", "const": false },
+    "recipient_identity_confirmed": { "type": "boolean", "const": false },
+    "authority_confirmed": { "type": "boolean", "const": false },
+    "package_integrity_confirmed": { "type": "boolean", "const": false },
+    "decision_requested": { "type": "boolean", "const": false },
+    "decision_received": { "type": "boolean", "const": false },
+    "authorization_granted": { "type": "boolean", "const": false },
+    "execution_permitted": { "type": "boolean", "const": false },
+    "build_started": { "type": "boolean", "const": false },
+    "beam_downloaded": { "type": "boolean", "const": false },
+    "binary_produced": { "type": "boolean", "const": false },
+    "note": { "type": "string", "minLength": 1, "maxLength": 1400 },
+    "channel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["category", "reference", "access_controlled", "sender", "recipient", "presented_utc"],
+      "properties": {
+        "category": { "type": "null" },
+        "reference": { "type": "null" },
+        "access_controlled": { "type": "null" },
+        "sender": { "type": "null" },
+        "recipient": { "type": "null" },
+        "presented_utc": { "type": "null" }
+      }
+    },
+    "recipient": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identifier", "role", "authority_basis", "contact_channel", "designation_reference"],
+      "properties": {
+        "identifier": { "type": "null" },
+        "role": { "type": "null" },
+        "authority_basis": { "type": "null" },
+        "contact_channel": { "type": "null" },
+        "designation_reference": { "type": "null" }
+      }
+    },
+    "delivery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["delivered_utc", "delivery_reference", "presented_version", "presented_manifest_sha256", "integrity_report_reference"],
+      "properties": {
+        "delivered_utc": { "type": "null" },
+        "delivery_reference": { "type": "null" },
+        "presented_version": { "type": "null" },
+        "presented_manifest_sha256": { "type": "null" },
+        "integrity_report_reference": { "type": "null" }
+      }
+    }
+  }
+}

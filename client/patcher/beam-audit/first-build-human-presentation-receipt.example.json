@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "stage": "2O-D1-B16",
+  "artifact_kind": "human-presentation-receipt",
+  "title": "Comprovante de entrega e recebimento da apresentacao do pacote de decisao (formulario nao preenchido)",
+  "document_reference": "docs/27-apresentacao-controlada-pacote-decisao-beam.md",
+  "manifest_reference": "client/patcher/beam-audit/first-build-human-presentation-manifest.example.json",
+  "package_reference": "client/patcher/beam-audit/first-build-human-decision-package.example.json",
+  "decision_record_reference": "client/patcher/beam-audit/first-build-human-decision-record.example.json",
+  "receipt_id": "RCP-2O-D1-B16-primeiro-build-beam",
+  "presentation_status": "NOT_PRESENTED",
+  "channel_selected": false,
+  "delivered": false,
+  "received": false,
+  "recipient_identity_confirmed": false,
+  "authority_confirmed": false,
+  "package_integrity_confirmed": false,
+  "decision_requested": false,
+  "decision_received": false,
+  "authorization_granted": false,
+  "execution_permitted": false,
+  "build_started": false,
+  "beam_downloaded": false,
+  "binary_produced": false,
+  "note": "FORMULARIO NAO PREENCHIDO. Este exemplo versionado representa APENAS o estado anterior a apresentacao. Nenhuma apresentacao ocorreu, nenhum canal foi selecionado, nenhuma identidade foi confirmada, nenhum recebimento foi registrado e nenhuma decisao foi solicitada ou recebida. Uma entrega real sera registrada em etapa posterior (ETAPA 2O-D1-B17), com entrada humana explicita e canal auditavel, como instancia separada. Nunca se edita este exemplo para simular entrega, recebimento, identidade ou decisao. Campos nulos permanecem nulos ate a entrada humana verificavel.",
+  "channel": {
+    "category": null,
+    "reference": null,
+    "access_controlled": null,
+    "sender": null,
+    "recipient": null,
+    "presented_utc": null
+  },
+  "recipient": {
+    "identifier": null,
+    "role": null,
+    "authority_basis": null,
+    "contact_channel": null,
+    "designation_reference": null
+  },
+  "delivery": {
+    "delivered_utc": null,
+    "delivery_reference": null,
+    "presented_version": null,
+    "presented_manifest_sha256": null,
+    "integrity_report_reference": null
+  }
+}

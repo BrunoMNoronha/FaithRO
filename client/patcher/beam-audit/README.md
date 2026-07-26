@@ -25,6 +25,8 @@ beam-audit/
 ├── first-build-authorization-request.example.json # solicitação formal de autorização humana (pendente, não concede) (D1-B12)
 ├── first-build-human-decision-package.example.json # pacote de decisão humana (leitura, não concede) (D1-B14)
 ├── first-build-human-decision-record.example.json  # registro de decisão em branco (pendente) (D1-B14)
+├── first-build-human-presentation-manifest.example.json # manifesto de apresentação (não apresentado) (D1-B16)
+├── first-build-human-presentation-receipt.example.json  # comprovante de entrega em branco (D1-B16)
 ├── first-build-execution-evidence.example.json # template de evidência da execução futura (não executado) (D1-B10)
 ├── toolchain-installation-plan.example.json # plano de instalação isolada da Rust 1.85.0 (D1-B4)
 ├── evidence/
@@ -43,6 +45,8 @@ beam-audit/
     ├── first-build-authorization-request.schema.json
     ├── first-build-human-decision-package.schema.json
     ├── first-build-human-decision-record.schema.json
+    ├── first-build-human-presentation-manifest.schema.json
+    ├── first-build-human-presentation-receipt.schema.json
     ├── first-build-execution-evidence.schema.json
     ├── toolchain-compatibility.schema.json
     ├── toolchain-selection.schema.json
@@ -195,4 +199,30 @@ não decide, não autoriza; recomputa hashes e confere EOL LF):
 
 ```bash
 python scripts/validate-beam-first-build-human-decision.py
+```
+
+## Apresentação controlada do pacote ao decisor (ETAPA 2O-D1-B16)
+
+`first-build-human-presentation-manifest.example.json` (schema em
+`schemas/first-build-human-presentation-manifest.schema.json`) registra, em
+estado `NOT_PRESENTED`, o **conteúdo exato**, os **canais permitidos**, os
+**critérios de autoridade** e os **procedimentos** de integridade, entrega,
+devolução e aceitação para uma futura apresentação do pacote a uma pessoa com
+autoridade, referenciando os seis artefatos por **caminho relativo + SHA-256
+(LF)**, ancorados ao merge do PR #40
+(`c5473a22c4c4fb301e91f35779a83d9bc4bca99a`).
+`first-build-human-presentation-receipt.example.json` (schema em
+`schemas/first-build-human-presentation-receipt.schema.json`) é o
+**comprovante de entrega/recebimento em branco** (`NOT_PRESENTED`, entrega e
+recebimento `false`, canal/identidade/decisão `null`). Nenhum dos dois
+**apresenta**, **seleciona canal**, **identifica decisor**, **confirma
+recebimento**, **registra decisão** ou **concede autorização**; a entrega real
+será registrada na ETAPA 2O-D1-B17, com entrada humana explícita. Documentação
+completa em
+[`docs/27-apresentacao-controlada-pacote-decisao-beam.md`](../../../docs/27-apresentacao-controlada-pacote-decisao-beam.md).
+Validação estática offline (não apresenta, não decide, não autoriza, não envia
+comunicação; recomputa hashes e confere EOL LF):
+
+```bash
+python scripts/validate-beam-first-build-human-presentation.py
 ```

@@ -1,0 +1,52 @@
+name: Validate beam first build human presentation manifest
+
+on:
+  push:
+    branches: [ main, dev ]
+    paths:
+      - 'client/patcher/beam-audit/first-build-human-presentation-manifest.example.json'
+      - 'client/patcher/beam-audit/first-build-human-presentation-receipt.example.json'
+      - 'client/patcher/beam-audit/first-build-human-decision-package.example.json'
+      - 'client/patcher/beam-audit/first-build-human-decision-record.example.json'
+      - 'client/patcher/beam-audit/first-build-authorization-request.example.json'
+      - 'client/patcher/beam-audit/first-build-runbook.example.json'
+      - 'client/patcher/beam-audit/first-build-authorization.example.json'
+      - 'client/patcher/beam-audit/first-build-plan.example.json'
+      - 'client/patcher/beam-audit/schemas/first-build-human-presentation-manifest.schema.json'
+      - 'client/patcher/beam-audit/schemas/first-build-human-presentation-receipt.schema.json'
+      - 'scripts/validate-beam-first-build-human-presentation.py'
+      - '.github/workflows/validate-beam-first-build-human-presentation.yml'
+  pull_request:
+    branches: [ main, dev ]
+    paths:
+      - 'client/patcher/beam-audit/first-build-human-presentation-manifest.example.json'
+      - 'client/patcher/beam-audit/first-build-human-presentation-receipt.example.json'
+      - 'client/patcher/beam-audit/first-build-human-decision-package.example.json'
+      - 'client/patcher/beam-audit/first-build-human-decision-record.example.json'
+      - 'client/patcher/beam-audit/first-build-authorization-request.example.json'
+      - 'client/patcher/beam-audit/first-build-runbook.example.json'
+      - 'client/patcher/beam-audit/first-build-authorization.example.json'
+      - 'client/patcher/beam-audit/first-build-plan.example.json'
+      - 'client/patcher/beam-audit/schemas/first-build-human-presentation-manifest.schema.json'
+      - 'client/patcher/beam-audit/schemas/first-build-human-presentation-receipt.schema.json'
+      - 'scripts/validate-beam-first-build-human-presentation.py'
+      - '.github/workflows/validate-beam-first-build-human-presentation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-first-build-human-presentation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate presentation manifest/receipt (offline; no Rust, no build, no presentation, no decision)
+        run: |
+          python scripts/validate-beam-first-build-human-presentation.py
