@@ -78,6 +78,7 @@ FORBIDDEN_TOKENS = [
     (re.compile(r"(?i)\bcmd(\.exe)?\s+/c\b"), "usa wrapper cmd /c"),
     (re.compile(r"(?i)\b(powershell|pwsh)(\.exe)?\b[^\n]*\s-(c|command|enc|encodedcommand)\b"),
      "usa wrapper powershell -Command/-EncodedCommand"),
+    (re.compile(r"(?i)\b(bash|sh|zsh|dash)\b\s+-c\b"), "usa wrapper de shell POSIX -c"),
     (re.compile(r"(?i)\b(invoke-expression|iex)\b"), "usa Invoke-Expression"),
     (re.compile(r"(?i)\b(invoke-webrequest|iwr|curl|wget|start-bitstransfer)\b"),
      "usa verbo de download"),
@@ -91,6 +92,10 @@ FORBIDDEN_TOKENS = [
     (re.compile(r"(?i)\b(rm|rmdir|del|erase|format|mkfs|shutdown|reboot|"
                 r"taskkill|schtasks|icacls|takeown|attrib)\b\s+[-/]?\S"),
      "usa verbo de comando destrutivo"),
+    # Redirecionamento de shell e quebra de linha embutida (ocultariam um
+    # segundo comando): campos declarativos são de linha única, sem < > nem CR/LF.
+    (re.compile(r"[<>]"), "usa redirecionamento/sinal de shell (< ou >)"),
+    (re.compile(r"[\r\n]"), "contém quebra de linha embutida"),
 ]
 
 
@@ -266,7 +271,11 @@ def check_request(req, runbook, authorization, runbook_sha, auth_sha, errors):
         errors.append("request.evidence_reference incorreto")
 
     # Submissão: vínculo com o SHA do FaithRO e hashes reais.
+    # Guarda de tipo: se o schema já rejeitou o tipo do nó, evita AttributeError
+    # e mantém mensagens de erro limpas (o erro de tipo é reportado por schema_check).
     sub = req.get("submission", {})
+    if not isinstance(sub, dict):
+        sub = {}
     if sub.get("faithro_reference_commit") != EXPECTED_FAITHRO_COMMIT:
         errors.append("request.submission.faithro_reference_commit != commit de referência (%s)"
                       % EXPECTED_FAITHRO_COMMIT)
@@ -299,6 +308,8 @@ def check_request(req, runbook, authorization, runbook_sha, auth_sha, errors):
 
     # Alvo da decisão: artefato SEPARADO, com expiração e uso único obrigatórios.
     dt = req.get("decision_target", {})
+    if not isinstance(dt, dict):
+        dt = {}
     if dt.get("artifact") != AUTHORIZATION_REF:
         errors.append("request.decision_target.artifact deve apontar para a autorização separada")
     if dt.get("expiration_required_on_grant") is not True:
@@ -307,7 +318,9 @@ def check_request(req, runbook, authorization, runbook_sha, auth_sha, errors):
         errors.append("request.decision_target.single_use_required_on_grant deve ser true")
 
     # Cross-check: o runbook referenciado deve permanecer NÃO autorizado.
-    ps = runbook.get("process_state", {})
+    ps = runbook.get("process_state", {}) if isinstance(runbook, dict) else {}
+    if not isinstance(ps, dict):
+        ps = {}
     for k in ("human_authorization_granted", "execution_authorized", "execution_started",
               "build_started", "build_completed", "binary_produced", "binary_executed",
               "deploy_performed", "vps_accessed"):
