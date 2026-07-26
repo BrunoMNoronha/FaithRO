@@ -34,3 +34,13 @@ client/patcher/fixtures/synthetic/** text eol=lf
 client/patcher/beam-audit/first-build-runbook.example.json text eol=lf
 client/patcher/beam-audit/first-build-authorization.example.json text eol=lf
 client/patcher/beam-audit/first-build-authorization-request.example.json text eol=lf
+
+# O pacote de decisão humana (D1-B14) persiste o SHA-256 da solicitação, do
+# runbook, do modelo de autorização e do plano de build, recomputados byte a
+# byte por scripts/validate-beam-first-build-human-decision.py. O plano e os
+# novos artefatos de decisão DEVEM permanecer com LF para que os hashes fixados
+# sejam reproduzíveis em qualquer plataforma. Ver
+# docs/26-pacote-decisao-humana-primeiro-build-beam.md.
+client/patcher/beam-audit/first-build-plan.example.json text eol=lf
+client/patcher/beam-audit/first-build-human-decision-package.example.json text eol=lf
+client/patcher/beam-audit/first-build-human-decision-record.example.json text eol=lf

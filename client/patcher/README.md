@@ -52,6 +52,8 @@ client/patcher/
 │   ├── first-build-runbook.example.json        # runbook operacional do primeiro build (D1-B10)
 │   ├── first-build-authorization.example.json  # modelo de autorização humana, não concedido (D1-B10)
 │   ├── first-build-authorization-request.example.json # solicitação formal de autorização, pendente (D1-B12)
+│   ├── first-build-human-decision-package.example.json # pacote de decisão humana, não concede (D1-B14)
+│   ├── first-build-human-decision-record.example.json  # registro de decisão em branco, pendente (D1-B14)
 │   ├── first-build-execution-evidence.example.json # template de evidência futura, não executado (D1-B10)
 │   ├── evidence/                     # evidências de compatibilidade/seleção/instalação
 │   ├── overlays/                     # overlay de segurança de laboratório (.patch textual)
@@ -93,6 +95,8 @@ Na ETAPA 2O-D1-B8, o **plano do primeiro build controlado** foi modelado como ar
 Na ETAPA 2O-D1-B10, o plano foi transformado em **runbook operacional** com **checkpoint de autorização humana**, **go/no-go** e **modelo de evidência**, em três artefatos separados por responsabilidade ([`beam-audit/first-build-runbook.example.json`](beam-audit/first-build-runbook.example.json), [`beam-audit/first-build-authorization.example.json`](beam-audit/first-build-authorization.example.json), [`beam-audit/first-build-execution-evidence.example.json`](beam-audit/first-build-execution-evidence.example.json)) e documentado em [`docs/24-runbook-primeiro-build-controlado-beam.md`](../../docs/24-runbook-primeiro-build-controlado-beam.md). A **autorização humana continua NÃO concedida** (`authorization_granted=false`, `execution_permitted=false`).
 
 Na ETAPA 2O-D1-B12, foi preparada a **solicitação formal de autorização humana** do primeiro build como artefato versionado e validável ([`beam-audit/first-build-authorization-request.example.json`](beam-audit/first-build-authorization-request.example.json)), vinculada ao commit de referência do FaithRO e ao SHA-256 do runbook e do modelo de autorização, e documentada em [`docs/25-solicitacao-autorizacao-primeiro-build-beam.md`](../../docs/25-solicitacao-autorizacao-primeiro-build-beam.md). A solicitação **não concede** e **não pode conceder** autorização a si mesma (`request_status=PENDING_HUMAN_DECISION`); a decisão pertence ao artefato de autorização separado, em etapa posterior. **Merge ou aprovação de PR não equivalem à autorização operacional.**
+
+Na ETAPA 2O-D1-B14, foram preparados o **pacote de decisão humana** e o **registro de decisão em branco** ([`beam-audit/first-build-human-decision-package.example.json`](beam-audit/first-build-human-decision-package.example.json), [`beam-audit/first-build-human-decision-record.example.json`](beam-audit/first-build-human-decision-record.example.json)), documentados em [`docs/26-pacote-decisao-humana-primeiro-build-beam.md`](../../docs/26-pacote-decisao-humana-primeiro-build-beam.md). O pacote reúne a solicitação, o runbook, a autorização e o plano por referência e hash (ancorados ao merge do PR #39); o registro é um formulário `PENDING`. Nenhum dos dois **concede autorização**, **permite execução** ou **representa uma decisão**; a decisão real será registrada na ETAPA 2O-D1-B15, após revisão técnica separada. **Decisão humana não executa o build automaticamente.**
 
 **Build permanece NÃO autorizado. Nenhum binário foi compilado ou executado.**
 

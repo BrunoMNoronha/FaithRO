@@ -23,6 +23,8 @@ beam-audit/
 ├── first-build-runbook.example.json # runbook operacional do primeiro build (D1-B10)
 ├── first-build-authorization.example.json    # modelo de autorização humana (template, não concedido) (D1-B10)
 ├── first-build-authorization-request.example.json # solicitação formal de autorização humana (pendente, não concede) (D1-B12)
+├── first-build-human-decision-package.example.json # pacote de decisão humana (leitura, não concede) (D1-B14)
+├── first-build-human-decision-record.example.json  # registro de decisão em branco (pendente) (D1-B14)
 ├── first-build-execution-evidence.example.json # template de evidência da execução futura (não executado) (D1-B10)
 ├── toolchain-installation-plan.example.json # plano de instalação isolada da Rust 1.85.0 (D1-B4)
 ├── evidence/
@@ -39,6 +41,8 @@ beam-audit/
     ├── first-build-runbook.schema.json
     ├── first-build-authorization.schema.json
     ├── first-build-authorization-request.schema.json
+    ├── first-build-human-decision-package.schema.json
+    ├── first-build-human-decision-record.schema.json
     ├── first-build-execution-evidence.schema.json
     ├── toolchain-compatibility.schema.json
     ├── toolchain-selection.schema.json
@@ -169,4 +173,26 @@ não concede autorização; recomputa e confere os hashes):
 
 ```bash
 python scripts/validate-beam-first-build-authorization-request.py
+```
+
+## Pacote de decisão humana e registro de decisão (ETAPA 2O-D1-B14)
+
+`first-build-human-decision-package.example.json` (schema em
+`schemas/first-build-human-decision-package.schema.json`) reúne, por
+**referência e hash**, a solicitação, o runbook, o modelo de autorização e o
+plano de build, ancorados ao commit de integração do PR #39
+(`4251c373a8bcdbb9e49369668711d64d8140aad3`), para que uma pessoa com autoridade
+decida em etapa posterior. `first-build-human-decision-record.example.json`
+(schema em `schemas/first-build-human-decision-record.schema.json`) é o
+**formulário de registro em branco** (`decision_status=PENDING`, `decision=null`,
+todos os flags `false`). Nenhum dos dois **concede autorização**, **permite
+execução** ou **representa uma decisão**; a decisão real será registrada em
+instância separada na ETAPA 2O-D1-B15, após revisão técnica. Documentação
+completa em
+[`docs/26-pacote-decisao-humana-primeiro-build-beam.md`](../../../docs/26-pacote-decisao-humana-primeiro-build-beam.md).
+Validação estática offline (não clona, não instala, não constrói, não executa,
+não decide, não autoriza; recomputa hashes e confere EOL LF):
+
+```bash
+python scripts/validate-beam-first-build-human-decision.py
 ```
