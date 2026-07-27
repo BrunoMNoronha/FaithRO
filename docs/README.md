@@ -45,6 +45,7 @@ apenas os organiza por categoria e registra estado e dependências.
 | [24-runbook-primeiro-build-controlado-beam.md](24-runbook-primeiro-build-controlado-beam.md) | Runbook operacional, modelo de autorização humana e template de evidência do primeiro build (build bloqueado; autorização não concedida) | Cliente/build/segurança | validado | não iniciado (autorização não concedida) | 19, 20, 21, 22, 23 | 2026-07-25 |
 | [25-solicitacao-autorizacao-primeiro-build-beam.md](25-solicitacao-autorizacao-primeiro-build-beam.md) | Solicitação formal de autorização humana do primeiro build (pendente de decisão; não concede autorização; merge do PR não equivale à autorização) | Cliente/build/segurança | validado | não iniciado (decisão humana pendente) | 19, 20, 21, 22, 23, 24 | 2026-07-26 |
 | [26-pacote-decisao-humana-primeiro-build-beam.md](26-pacote-decisao-humana-primeiro-build-beam.md) | Pacote de decisão humana e registro de decisão em branco do primeiro build (decisão não tomada; não concede autorização; decisão não executa o build) | Cliente/build/segurança | validado | não iniciado (decisão humana pendente) | 19, 20, 21, 22, 23, 24, 25 | 2026-07-26 |
+| [27-apresentacao-controlada-pacote-decisao-beam.md](27-apresentacao-controlada-pacote-decisao-beam.md) | Manifesto de apresentação e comprovante em branco do pacote de decisão (não apresentado; sem canal/identidade/decisão; merge não equivale à apresentação) | Cliente/build/segurança | validado | não iniciado (apresentação não realizada) | 19, 20, 21, 22, 23, 24, 25, 26 | 2026-07-26 |
 | [99-checklists.md](99-checklists.md) | Checklists de PR, deploy, balanceamento | Todos | validado | não aplicável | — | 2026-07-10 |
 
 [^1]: No documento 03, "parcialmente implantado" significa apenas que a
@@ -78,7 +79,9 @@ apenas os organiza por categoria e registra estado e dependências.
   [25](25-solicitacao-autorizacao-primeiro-build-beam.md) (solicitação formal
   de autorização humana; pendente de decisão, não concede autorização),
   [26](26-pacote-decisao-humana-primeiro-build-beam.md) (pacote de decisão
-  humana e registro em branco; decisão não tomada, não concede autorização).
+  humana e registro em branco; decisão não tomada, não concede autorização),
+  [27](27-apresentacao-controlada-pacote-decisao-beam.md) (manifesto de
+  apresentação e comprovante em branco; não apresentado, sem canal/decisão).
 - **Fontes comunitárias:** [10](10-fontes-comunitarias-rathena.md).
 - **Templates:** [templates/ADR.md](templates/ADR.md),
   [templates/PULL_REQUEST_TEMPLATE.md](templates/PULL_REQUEST_TEMPLATE.md).
