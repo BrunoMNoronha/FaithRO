@@ -92,8 +92,22 @@ percorre `client/` e falha (código de saída ≠ 0) se encontrar qualquer arqui
 fora da allowlist textual (por exemplo, um binário ou pacote proprietário).
 Ele usa **apenas a biblioteca padrão** e não acessa nada fora do repositório.
 
+## Preparação do executável (hex) — decisão
+
+A preparação do **executável** do cliente (habilitar `data` folder, `clientinfo`
+de FaithRO, `langtype` etc.) **não** é feita por um patcher de GRF. A ferramenta
+para isso é decidida em
+[`docs/28-decisao-ferramenta-preparacao-cliente.md`](../docs/28-decisao-ferramenta-preparacao-cliente.md)
+(**WARP** — `APROVAR COM RESTRIÇÕES`; NEMO atual **rejeitado** por licença
+ausente). A compatibilidade do cliente 2021-11-05 com o servidor está em
+[`docs/29-compatibilidade-cliente-2021-11-05-packetver.md`](../docs/29-compatibilidade-cliente-2021-11-05-packetver.md)
+(`PROVÁVEL`, sem rebuild). Nenhuma dessas etapas modifica o executável sem
+autorização humana; nada do cliente é versionado aqui.
+
 ## Referências
 
 - [`docs/15-cliente-primeiro-acesso.md`](../docs/15-cliente-primeiro-acesso.md)
 - [`docs/16-politica-distribuicao-cliente.md`](../docs/16-politica-distribuicao-cliente.md)
 - [`docs/09-cliente-baseline-protocolo.md`](../docs/09-cliente-baseline-protocolo.md)
+- [`docs/28-decisao-ferramenta-preparacao-cliente.md`](../docs/28-decisao-ferramenta-preparacao-cliente.md)
+- [`docs/29-compatibilidade-cliente-2021-11-05-packetver.md`](../docs/29-compatibilidade-cliente-2021-11-05-packetver.md)
