@@ -45,6 +45,8 @@ apenas os organiza por categoria e registra estado e dependências.
 | [24-runbook-primeiro-build-controlado-beam.md](24-runbook-primeiro-build-controlado-beam.md) | Runbook operacional, modelo de autorização humana e template de evidência do primeiro build (build bloqueado; autorização não concedida) | Cliente/build/segurança | validado | não iniciado (autorização não concedida) | 19, 20, 21, 22, 23 | 2026-07-25 |
 | [25-solicitacao-autorizacao-primeiro-build-beam.md](25-solicitacao-autorizacao-primeiro-build-beam.md) | Solicitação formal de autorização humana do primeiro build (pendente de decisão; não concede autorização; merge do PR não equivale à autorização) | Cliente/build/segurança | validado | não iniciado (decisão humana pendente) | 19, 20, 21, 22, 23, 24 | 2026-07-26 |
 | [26-pacote-decisao-humana-primeiro-build-beam.md](26-pacote-decisao-humana-primeiro-build-beam.md) | Pacote de decisão humana e registro de decisão em branco do primeiro build (decisão não tomada; não concede autorização; decisão não executa o build) | Cliente/build/segurança | validado | não iniciado (decisão humana pendente) | 19, 20, 21, 22, 23, 24, 25 | 2026-07-26 |
+| [28-decisao-ferramenta-preparacao-cliente.md](28-decisao-ferramenta-preparacao-cliente.md) | Decisão da ferramenta de preparação (hex) do executável do cliente: WARP `APROVAR COM RESTRIÇÕES`, NEMO atual (4144) `REJEITADO` por licença ausente; não autoriza execução | Cliente/segurança | validado | não iniciado (autorização humana pendente) | 09, 16, 17, 29 | 2026-07-27 |
+| [29-compatibilidade-cliente-2021-11-05-packetver.md](29-compatibilidade-cliente-2021-11-05-packetver.md) | Reconciliação do cliente 2021-11-05 com `PACKETVER=20211103`: compatibilidade `PROVÁVEL`, sem rebuild do servidor; teste de login controlado pendente | Cliente/protocolo | validado | não iniciado | 09, 12 | 2026-07-27 |
 | [99-checklists.md](99-checklists.md) | Checklists de PR, deploy, balanceamento | Todos | validado | não aplicável | — | 2026-07-10 |
 
 [^1]: No documento 03, "parcialmente implantado" significa apenas que a
@@ -69,7 +71,13 @@ apenas os organiza por categoria e registra estado e dependências.
   [14](14-progressao-base-255-overrides.md) (overrides versionados de
   progressão; ainda não implantados).
 - **Cliente e protocolo:** [09](09-cliente-baseline-protocolo.md),
-  [12](12-configuracao-packetver.md).
+  [12](12-configuracao-packetver.md),
+  [29](29-compatibilidade-cliente-2021-11-05-packetver.md) (cliente 2021-11-05 ×
+  `PACKETVER=20211103`, compatibilidade `PROVÁVEL`, sem rebuild).
+- **Preparação do executável do cliente:**
+  [28](28-decisao-ferramenta-preparacao-cliente.md) (decisão da ferramenta de
+  hex: WARP aprovado com restrições; NEMO atual rejeitado por licença ausente;
+  não autoriza execução).
 - **Patcher e build auditável do Beam:**
   [23](23-planejamento-primeiro-build-controlado-beam.md) (planejamento do
   primeiro build controlado; build ainda não autorizado),

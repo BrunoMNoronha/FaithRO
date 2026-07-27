@@ -16,6 +16,13 @@
 - **Candidato reserva:** **RPatchur** (`L1nkZ/rpatchur`), v0.3.0 / commit
   `21a5482771` — permissivo, porém upstream estagnado (exigiria fork interno).
 
+> **Escopo — patcher de GRF, não do executável.** Beam e RPatchur atualizam
+> **apenas conteúdo próprio/licenciado** (o `faithro.grf` futuro) e **nunca**
+> modificam o `Ragexe` nem os GRFs oficiais. A preparação (hex) do **executável**
+> é outra ferramenta e outra decisão — ver
+> [`docs/28-decisao-ferramenta-preparacao-cliente.md`](../../docs/28-decisao-ferramenta-preparacao-cliente.md)
+> (WARP, `APROVAR COM RESTRIÇÕES`).
+
 ## Não há binário versionado
 
 O binário do patcher **nunca** entra no Git (bloqueado por
