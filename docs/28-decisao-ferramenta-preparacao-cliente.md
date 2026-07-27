@@ -58,8 +58,9 @@ repositório oficial → arquivos de licença → estrutura do código → docum
 autor.
 
 - **WARP:** repositório oficial `Neo-Mind/WARP` (branch `rock_win32`, HEAD
-  `9b1173e9e4e1`, 2026-05-07). `LICENSE` = GNU GPL v3. Submódulos: apenas o
-  **Wiki** (documentação), sem submódulo de código.
+  `9b1173e9e4e135c68e150704f01186ab5e763acd` — abreviação `9b1173e9e4e1` —,
+  2026-05-07). `LICENSE` = GNU GPL v3. Submódulos: apenas o **Wiki**
+  (documentação), sem submódulo de código.
 - **NEMO atual:** o `README` do repositório histórico `Neo-Mind/NEMO` declara
   literalmente que o repositório está obsoleto e aponta para
   `gitlab.com/4144/Nemo` como a versão atual (mantenedor **4144**). Projeto
@@ -67,17 +68,23 @@ autor.
 
 ## 5. Licença
 
-- **WARP:** **GPL-3.0**, explícita (arquivo `LICENSE`). Uso **local** para
-  modificar arquivos próprios do operador **não** obriga redistribuição; a GPL só
-  se aplica à redistribuição do WARP ou de derivados dele — o que o FaithRO **não**
-  fará. O `Ragexe` preparado **não** é derivado do WARP (o WARP apenas edita bytes
-  do executável de terceiros).
+> Esta seção é uma decisão **técnica e de conformidade do projeto**, não um
+> parecer jurídico. As afirmações abaixo são de **política e risco**; qualquer
+> obrigação de licença deve ser reavaliada antes de qualquer execução.
+
+- **WARP:** identificada como **GPL-3.0** (arquivo `LICENSE` = GNU GPL v3). Como
+  **política do FaithRO**, o projeto **não** distribuirá o WARP (original ou
+  modificado), o `Ragexe` (original ou preparado), nem qualquer asset
+  proprietário; qualquer eventual obrigação da GPL para uso local seria
+  reavaliada antes da execução.
 - **NEMO atual:** **sem licença declarada** (nenhum `LICENSE`/`COPYING` na raiz;
-  SPDX nulo na API do GitLab). Sem concessão explícita de direitos → tratado como
-  **todos os direitos reservados**. É bloqueio de conformidade, análogo ao do Thor
-  em [17 §6](17-decisao-patcher-launcher.md).
-- O `Ragexe` (original ou preparado) permanece **proprietário da Gravity**;
-  **nunca** pode ser redistribuído ([16](16-politica-distribuicao-cliente.md)).
+  SPDX nulo na API do GitLab). A **ausência de concessão explícita de direitos**
+  impede o projeto de considerar o NEMO adequado para adoção ou redistribuição —
+  bloqueio de **conformidade**, análogo ao tratamento do Thor em
+  [17 §6](17-decisao-patcher-launcher.md).
+- O `Ragexe` (original ou preparado) e os assets da Gravity são **proprietários**;
+  como política, **nunca** serão redistribuídos, versionados ou compartilhados
+  ([16](16-politica-distribuicao-cliente.md)).
 
 ## 6. Análise de segurança (inspeção estática — sem executar)
 
@@ -87,19 +94,29 @@ autor.
 | --- | --- | --- |
 | Núcleo | C++/Qt, app Windows 32-bit; patches em JS (ECMA-262) | README |
 | Submódulos | apenas `Wiki` (docs), sem código externo | `.gitmodules` |
-| Rede / auto-update / telemetria | **Não encontrados** nos scripts de init/suporte (únicos `http` são URLs da licença GPL) | `Scripts/Init/*`, `Scripts/Support/*` |
-| Execução de shell / ActiveX / WScript | **Não encontrados** no núcleo inspecionado | idem |
+| Rede / auto-update / telemetria | **Não foram encontrados** no conjunto inspecionado (únicos `http` são URLs da licença GPL) | `Scripts/Init/*`, `Scripts/Support/*` |
+| Execução de shell / ActiveX / WScript | **Não foram encontrados** no conjunto inspecionado | idem |
 | Reconhecimento do executável | por tabelas (`Tables/Input.yml`, `NemoMap.yml`, `Patch.yml`) | estrutura |
 | Separação entrada/saída | `Inputs/` e `Outputs/` distintos; `LastSession.yml` | README |
 | Catálogo de patches | `Patches.yml` + 159 scripts em `Scripts/Patches/` | estrutura |
-| Operação offline | patch é local, sobre o executável | design |
+| Operação offline (aparente) | patch é local, sobre o executável | design |
 
-**Ressalvas (para auditoria aprofundada — ETAPA 2P-D):** a inspeção acima cobriu
-os scripts de **inicialização/suporte** e o catálogo; ainda faltam, antes de
-qualquer uso real: auditoria dos 159 scripts de patch aplicáveis, do binário Qt
-(se o pré-compilado for usado), de `path traversal`/escrita fora do diretório,
-tratamento de arquivo parcialmente alterado, `CustomDLL`/carregamento de DLL, e
-reprodutibilidade do build. Preferir **compilar do fonte**.
+> **Escopo da conclusão de segurança.** Não foram encontrados mecanismos de rede,
+> auto-update, telemetria ou execução de shell no **conjunto de arquivos e
+> scripts efetivamente inspecionado nesta etapa**. A conclusão **não** abrange
+> componentes, dependências, binários pré-compilados ou scripts ainda não
+> auditados.
+>
+> - **Inspecionado nesta etapa:** `README.md`, `LICENSE`, `.gitmodules`,
+>   `Patches.yml`/`Extensions.yml` (catálogo), listagem de `Scripts/Patches`,
+>   `Scripts/Init/*` e `Scripts/Support/*` (grep de rede/exec/update), listagem
+>   de `Tables/`.
+> - **Não inspecionado nesta etapa:** os 159 scripts de patch individuais, o
+>   binário/núcleo Qt (se o pré-compilado for usado), `path traversal`/escrita
+>   fora do diretório, tratamento de arquivo parcialmente alterado, carregamento
+>   de DLL (`CustomDLL`), reprodutibilidade do build e superfície completa.
+> - **Transferido para a ETAPA 2P-D:** auditoria integral dos itens acima antes
+>   de qualquer uso real. Preferir **compilar do fonte**.
 
 ### 6.2 NEMO atual (`4144/Nemo`)
 
@@ -145,7 +162,7 @@ inviabiliza a adoção, mesmo o projeto estando ativo.
 
 | Candidato | Decisão | Motivo |
 | --- | --- | --- |
-| **WARP** | **APROVAR COM RESTRIÇÕES** | Licença clara (GPL-3.0), fonte auditável, versão fixável, manutenção ativa, sem rede/auto-update no núcleo, patches de capacidade presentes. Restrições: auditoria aprofundada + autorização humana antes de qualquer uso. |
+| **WARP** | **APROVAR COM RESTRIÇÕES** | Licença clara (GPL-3.0), fonte auditável, versão fixável, manutenção ativa, sem rede/auto-update **no conjunto inspecionado**, patches de capacidade presentes. Restrições: auditoria aprofundada + autorização humana antes de qualquer uso. |
 | **NEMO atual (4144)** | **REJEITADO** | Licença **ausente** + binários versionados sem build reproduzível (risco de PI e de cadeia de suprimentos). **Não** rejeitado por arquivamento (o projeto atual está ativo). Reavaliável se receber licença clara e build reproduzível. |
 | NEMO histórico | **REJEITADO** | Arquivado e superado pelo próprio autor; sem licença. |
 | Hex manual | **REJEITADO** | Sem perfil reconhecível, não reprodutível, alto risco de corrupção. |
@@ -154,18 +171,26 @@ inviabiliza a adoção, mesmo o projeto estando ativo.
 ### Recomendação principal — **WARP** (APROVAR COM RESTRIÇÕES)
 
 - **Qual ferramenta:** WARP (`github.com/Neo-Mind/WARP`), sem mirror.
-- **Commit a fixar:** `9b1173e9e4e1` (branch `rock_win32`, 2026-05-07) — reconfirmar
-  e registrar SHA-256 da árvore no início da 2P-D.
+- **Commit a fixar:** `9b1173e9e4e135c68e150704f01186ab5e763acd` (abreviação
+  `9b1173e9e4e1`; branch `rock_win32`, 2026-05-07) — reconfirmar e registrar
+  SHA-256 da árvore no início da 2P-D.
 - **Compilar internamente:** **sim, preferencialmente** — compilar o núcleo Qt do
   fonte para máxima auditabilidade.
 - **Binário oficial:** aceitável **apenas** após auditoria estática do fonte,
   verificação de integridade e varredura com as proteções locais; execução
   **local**, **não** elevada; **nunca** na VPS. Preferir o build próprio.
-- **Patches mínimos a considerar** (confirmar cada um contra o comportamento real
-  do cliente): `DataFolderFirst` (ler pasta `data`), `CallKoreaClientInfo`/`RestoreClientInfo`
+- **Patches — apenas candidatos por capacidade, nada obrigatório.** Nenhum patch
+  é obrigatório antes de: reconhecimento real do executável, auditoria
+  aprofundada, teste em cópia isolada e autorização humana. Candidatos a
+  **avaliar** (confirmar cada um contra o comportamento real do cliente):
+  `DataFolderFirst` (ler pasta `data`), `CallKoreaClientInfo`/`RestoreClientInfo`
   (ler `clientinfo.xml`), `EnableDnsSupport` (host por nome, se aplicável),
-  `LangType` (idioma) e — **somente se comprovadamente necessário** — `DisableProtect`
-  (proteção/GameGuard) e/ou `DisableEncr` (encriptação de pacote).
+  `LangType` (idioma).
+- **Patches sensíveis — jamais selecionados automaticamente:** `DisableProtect`
+  (proteção/GameGuard), `DisableEncr` (encriptação), `CustomDLL` (carregamento de
+  DLL) e `EnableProxy` (proxy). Cada um exige justificativa comprovada, auditoria
+  específica e **autorização humana**; **nenhum** pode ser aplicado por padrão na
+  futura execução.
 - **Patches proibidos/desnecessários:** todos os cosméticos e de gameplay
   (`Custom*` visuais, `CashShop`, auras, etc.) e qualquer patch não essencial à
   conexão básica.
@@ -262,10 +287,12 @@ Autorização humana:       PENDENTE (exigida antes de qualquer preparação rea
 
 ## Estado de verificação
 
-- **Fato:** metadados de WARP (GPL-3.0, ativo, submódulo só de Wiki, sem
-  rede/auto-update no núcleo) e de NEMO atual (sem licença, binários versionados,
-  ativo); estrutura de patches do WARP.
-- **Inferência:** adequação do WARP como ferramenta mínima; rejeição do NEMO
-  atual por licença/cadeia de suprimentos.
+- **Fato:** metadados de WARP (licença GPL-3.0 declarada, ativo, submódulo só de
+  Wiki, sem rede/auto-update **no conjunto inspecionado**) e de NEMO atual (sem
+  licença declarada, binários versionados, ativo); estrutura de patches do WARP.
+- **Inferência/decisão:** adequação do WARP como ferramenta mínima (APROVAR COM
+  RESTRIÇÕES); rejeição do NEMO atual por licença ausente/cadeia de suprimentos.
 - **Pendência:** auditoria aprofundada (2P-D) e autorização humana antes de
-  qualquer preparação do `Ragexe`.
+  qualquer preparação do `Ragexe`; teste de login controlado para compatibilidade.
+- **Nota:** decisão técnica e de conformidade do projeto, **não** parecer
+  jurídico.

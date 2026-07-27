@@ -59,11 +59,13 @@ Inspeção do código-fonte do rAthena no commit **instalado na VPS**
 - [`src/map/packets_struct.hpp`](https://github.com/rathena/rathena/blob/7f080871c8b3bbe7a79027194633201c63422ee1/src/map/packets_struct.hpp),
   [`src/map/clif_packetdb.hpp`](https://github.com/rathena/rathena/blob/7f080871c8b3bbe7a79027194633201c63422ee1/src/map/clif_packetdb.hpp)
   e [`src/map/clif_shuffle.hpp`](https://github.com/rathena/rathena/blob/7f080871c8b3bbe7a79027194633201c63422ee1/src/map/clif_shuffle.hpp):
-  - **todas** as estruturas de pacote e o *shuffle* da era de novembro/2021 no
-    ramo RE são chaveados por **`PACKETVER_RE_NUM >= 20211103`**;
-  - **não existe** nenhum guard intermediário em `20211104`, `20211105` ou
-    qualquer data até `20211118` — a única fronteira RE nessa janela é
-    `20211103`, e o intervalo RE encerra em `20211118` (`packets.hpp`).
+  - as estruturas de pacote e o *shuffle* da era de novembro/2021 no ramo RE
+    **inspecionadas nesses arquivos** são chaveadas por
+    **`PACKETVER_RE_NUM >= 20211103`**;
+  - **não foi encontrado** nenhum guard intermediário em `20211104`, `20211105`
+    ou qualquer data até `20211118` **nos arquivos inspecionados** — a única
+    fronteira RE observada nessa janela é `20211103`, e o intervalo RE encerra em
+    `20211118` (`packets.hpp`).
 
 **Consequência:** o rAthena modela **toda a janela `[20211103, 20211118]`** com
 **a mesma** estrutura de pacotes e o mesmo *shuffle*. Um servidor compilado com
@@ -78,13 +80,24 @@ isso vale igualmente para 20211103 e 20211105.
 ## 5. `PACKETVER` mais provável do cliente
 
 ```text
-CLIENTE COMPROVADO:            Ragexe família, build (PE link) 2021-11-05, x86, assinado Gravity
-PACKETVER MAIS PROVÁVEL:       20211105 (data de build), pertencente à mesma geração RE de 20211103
+EXECUTÁVEL (fato):             Ragexe família, build (PE link) 2021-11-05, x86, assinado Gravity
+PACKETVER MAIS PROVÁVEL:       20211105 — INFERÊNCIA NOMINAL pela data de build do executável,
+                               NÃO uma identificação empírica do protocolo
 NÍVEL DE CONFIANÇA:            MÉDIO-ALTO
-EVIDÊNCIA:                     guards RE chaveados em 20211103 sem branch até 20211118
-                               (packets_struct.hpp, clif_packetdb.hpp, clif_shuffle.hpp @ 7f080871c)
-COMPATIBILIDADE COM 20211103:  PROVÁVEL
+EVIDÊNCIA (fato):              nos guards inspecionados, as structs/shuffle RE de nov/2021 usam
+                               PACKETVER_RE_NUM >= 20211103, sem separação adicional entre
+                               20211103 e 20211105 (packets_struct.hpp, clif_packetdb.hpp,
+                               clif_shuffle.hpp @ 7f080871c)
+COMPATIBILIDADE COM 20211103:  PROVÁVEL (somente um teste funcional controlado eleva a COMPROVADA)
 ```
+
+> **Esclarecimento.** O timestamp PE 2021-11-05 é **fato** apenas quanto à data
+> de *build* do executável. Ele **não** prova, por si só, `PACKETVER=20211105`,
+> o protocolo exato, o nome comunitário exato do cliente ou compatibilidade
+> comprovada. "`PACKETVER` mais provável 20211105" é **inferência nominal** pela
+> data; a base técnica da compatibilidade é a **ausência de separação de pacotes
+> entre 20211103 e 20211105 nos guards inspecionados** do rAthena no commit
+> fixado — o que sustenta `PROVÁVEL`, nunca `COMPROVADA` sem teste funcional.
 
 ## 6. Compatibilidade com o servidor
 
