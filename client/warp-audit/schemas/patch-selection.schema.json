@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:warp-audit/patch-selection",
+  "title": "WARP patch selection",
+  "description": "Selecao candidata de patches do WARP para o primeiro acesso (ETAPA 2P-D). Nao autoriza execucao nem aplicacao. Flags de seguranca fixadas em falso/verdadeiro.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "project",
+    "commit",
+    "audit_scope",
+    "execution_allowed",
+    "final_selection_allowed",
+    "human_authorization_required",
+    "candidate_minimal",
+    "sensitive"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "project": { "type": "string", "const": "WARP" },
+    "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "audit_scope": { "type": "string", "const": "static-pre-build" },
+    "execution_allowed": { "type": "boolean", "const": false },
+    "final_selection_allowed": { "type": "boolean", "const": false },
+    "human_authorization_required": { "type": "boolean", "const": true },
+    "candidate_minimal": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "purpose", "needed_for_first_access", "classification"],
+        "additionalProperties": true,
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "purpose": { "type": "string", "minLength": 1 },
+          "needed_for_first_access": { "type": "boolean" },
+          "classification": {
+            "type": "string",
+            "enum": ["CANDIDATO MINIMO", "PENDENTE DE TESTE", "SENSIVEL — DECISAO SEPARADA", "DESNECESSARIO", "REJEITADO"]
+          }
+        }
+      }
+    },
+    "sensitive": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "purpose", "why_sensitive", "needed_for_first_access", "classification"],
+        "additionalProperties": true,
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "purpose": { "type": "string", "minLength": 1 },
+          "why_sensitive": { "type": "string", "minLength": 1 },
+          "needed_for_first_access": { "type": "boolean", "const": false },
+          "classification": { "type": "string", "const": "SENSIVEL — DECISAO SEPARADA" }
+        }
+      }
+    }
+  }
+}
