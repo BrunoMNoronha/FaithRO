@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Validador dos artefatos do WARP (ETAPAS 2P-D / 2P-E-A / 2P-E-A2 / 2P-E-B-PREBUILT).
+Validador dos artefatos do WARP (2P-D / 2P-E-A / 2P-E-A2 / 2P-E-B-PREBUILT / 2P-E-C0-A).
 
 Valida os JSONs versionados em client/warp-audit/ contra os schemas
 (draft-07, subconjunto) em client/warp-audit/schemas/ e contra regras de
@@ -112,6 +112,32 @@ IMPLICIT_APPROVAL_RES = [
     re.compile(r"(?i)\b(aprovad[oa]|validad[oa]|homologad[oa])\s+(o\s+|do\s+)?"
               r"(prebuilt|binario|nucleo)\b"),
 ]
+
+# --- ETAPA 2P-E-C0-A: registro real da autorizacao humana do GATE 0 ---
+GATE0_SCHEMA = "binary-audit-gate-00-decision-record-real.schema.json"
+# Metodos permitidos: conjunto FECHADO (nem extra, nem faltante).
+GATE0_ALLOWED_METHODS = {
+    "GitHub API de metadados", "GitHub web metadata", "GitHub connector",
+    "git ls-remote", "endpoints de commit", "endpoints de arvore",
+    "endpoints de refs", "metadados de tags", "metadados de releases",
+    "licenca e documentacao textual",
+}
+# Acoes proibidas: conjunto MINIMO obrigatorio (subconjunto exigido).
+GATE0_PROHIBITED_MIN = {
+    "clone", "fetch upstream", "pull upstream", "archive", "release asset",
+    "blob binario", "conteudo do prebuilt", "materializacao", "extracao",
+    "hashing do binario real", "inspecao PE", "Authenticode", "antivirus",
+    "execucao", "sandbox", "cliente", "patches", "login", "VPS",
+    "distribuicao", "alteracao do servidor",
+}
+GATE0_TRUE_FLAGS = {
+    "human_decision_required", "human_decision_received", "gate_selected",
+    "provenance_reconfirmation_authorized",
+}
+# Nomes de arquivo permitidos no diretorio decisions/.
+DECISION_FILE_PREFIXES = (
+    "core-path-decision-record-", "binary-audit-gate-",
+)
 # Deteccao de placeholders em identidade/autoridade/canal (nao inventados).
 PLACEHOLDER_RE = re.compile(
     r"(?i)(<[^>]*>|\bplaceholder\b|\bexample\b|\bexemplo\b|\bto ?do\b|\btbd\b|"
@@ -227,7 +253,8 @@ def security_scan(data, errors):
         for m in IPV4_RE.finditer(text):
             octs = m.group(0).split(".")
             if all(0 <= int(o) <= 255 for o in octs):
-                errors.append(f"{where}: possivel IP literal '{m.group(0)}'")
+                errors.append(f"{where}: possivel IP literal detectado (categoria: IP)")
+                break
         if DRIVE_PATH_RE.search(text):
             errors.append(f"{where}: caminho com unidade (drive) proibido")
         if PERSONAL_PATH_RE.search(text):
@@ -358,7 +385,7 @@ def validate_real_record(record, schema, package, filename, errors):
         if not isinstance(val, str) or not val.strip():
             errors.append(f"{filename}: campo '{field}' vazio")
         elif PLACEHOLDER_RE.search(val):
-            errors.append(f"{filename}: campo '{field}' parece placeholder: {val!r}")
+            errors.append(f"{filename}: campo '{field}' parece placeholder (categoria: placeholder)")
 
     if not valid_iso_date(record.get("date")):
         errors.append(f"{filename}: campo 'date' nao e uma data ISO valida")
@@ -420,12 +447,11 @@ def validate_real_record(record, schema, package, filename, errors):
 
 
 def check_decisions_dir_names(names, errors):
-    """decisions/ so pode conter registros reais do caminho do nucleo. Qualquer
-    outro arquivo (ex.: um registro de gate colocado indevidamente) e reprovado."""
+    """decisions/ so pode conter registros reais reconhecidos (caminho do nucleo e
+    registros de gate da auditoria binaria). Qualquer outro arquivo e reprovado."""
     for n in names:
-        if not (n.startswith("core-path-decision-record-") and n.endswith(".json")):
-            errors.append(f"decisions/: arquivo inesperado '{n}' "
-                          f"(registros de gate devem ficar em diretorio separado)")
+        if not (n.endswith(".json") and n.startswith(DECISION_FILE_PREFIXES)):
+            errors.append(f"decisions/: arquivo inesperado '{n}'")
 
 
 def validate_real_records(errors):
@@ -669,6 +695,127 @@ def validate_binary_audit(errors):
         print(f"[OK]    {GATE_TEMPLATE}")
 
 
+def validate_gate0_record(record, schema, plan, filename, errors):
+    """Valida o registro REAL da autorizacao humana do GATE 0 (importavel)."""
+    kv = []
+    schema_keyword_violations(schema, "gate-00.schema", kv)
+    errors.extend(kv)
+    validate_node(record, schema, filename, errors)
+    security_scan(record, errors)
+    planning_content_scan(record, filename, errors)
+
+    if not isinstance(record, dict):
+        errors.append(f"{filename}: registro nao e objeto")
+        return errors
+
+    if record.get("status") != "AUTHORIZED_FOR_SINGLE_GATE":
+        errors.append(f"{filename}: status deve ser AUTHORIZED_FOR_SINGLE_GATE")
+    g = record.get("gate")
+    gid = g.get("id") if isinstance(g, dict) else None
+    gname = g.get("name") if isinstance(g, dict) else None
+    if gid != 0:
+        errors.append(f"{filename}: gate.id deve ser 0")
+    if gname != "PROVENANCE_RECONFIRMATION":
+        errors.append(f"{filename}: gate.name deve ser PROVENANCE_RECONFIRMATION")
+    if record.get("decision") != "APPROVE_GATE_0":
+        errors.append(f"{filename}: decision deve ser APPROVE_GATE_0")
+    if record.get("execution_state") != "AUTHORIZED_NOT_STARTED":
+        errors.append(f"{filename}: execution_state deve ser AUTHORIZED_NOT_STARTED")
+
+    # Identidade/autoridade nao vazias nem placeholder.
+    for field in ("decider", "role", "authority", "channel"):
+        val = record.get(field)
+        if not isinstance(val, str) or not val.strip():
+            errors.append(f"{filename}: campo '{field}' vazio")
+        elif PLACEHOLDER_RE.search(val):
+            errors.append(f"{filename}: campo '{field}' parece placeholder (categoria: placeholder)")
+    if not valid_iso_date(record.get("date")):
+        errors.append(f"{filename}: campo 'date' nao e uma data ISO valida")
+
+    # Condicoes: >=17, numeradas 1..N em ordem, sem lacuna/repeticao, com texto.
+    conds = record.get("conditions")
+    if not isinstance(conds, list) or len(conds) < 17:
+        errors.append(f"{filename}: 'conditions' deve ter ao menos 17 itens")
+        conds = conds if isinstance(conds, list) else []
+    ns = [c.get("n") for c in conds if isinstance(c, dict)]
+    if ns != list(range(1, len(conds) + 1)):
+        errors.append(f"{filename}: conditions devem ser numeradas 1..N em ordem, sem lacuna/repeticao")
+    for i, c in enumerate(conds):
+        if not isinstance(c, dict) or not str(c.get("text", "")).strip():
+            errors.append(f"{filename}: conditions[{i}] sem texto")
+
+    # Metodos permitidos: conjunto FECHADO (exatamente o esperado).
+    am = record.get("allowed_methods")
+    if not isinstance(am, list) or set(am) != GATE0_ALLOWED_METHODS:
+        errors.append(f"{filename}: allowed_methods deve ser exatamente o conjunto permitido de metadados")
+    # Acoes proibidas: conjunto MINIMO obrigatorio (subconjunto exigido).
+    pa = record.get("prohibited_actions")
+    if not isinstance(pa, list) or not GATE0_PROHIBITED_MIN.issubset(set(pa)):
+        faltando = sorted(GATE0_PROHIBITED_MIN - set(pa if isinstance(pa, list) else []))
+        errors.append(f"{filename}: prohibited_actions faltando itens obrigatorios: {faltando}")
+
+    # Autorizacoes: somente as quatro documentais/GATE0 em true; todas as demais false.
+    auth = record.get("authorizations")
+    if not isinstance(auth, dict):
+        errors.append(f"{filename}: 'authorizations' ausente")
+    else:
+        for k, v in auth.items():
+            if k in GATE0_TRUE_FLAGS:
+                if v is not True:
+                    errors.append(f"{filename}: authorizations.{k} deve ser true")
+            elif v is not False:
+                errors.append(f"{filename}: authorizations.{k} deve ser false (nenhuma autorizacao alem do GATE 0)")
+        # Defesa explicita dos pontos criticos.
+        for k in ("gate_0_started", "gate_0_completed", "gate_1_authorized",
+                  "materialization_authorized", "execution_without_client_authorized"):
+            if auth.get(k) is not False:
+                errors.append(f"{filename}: authorizations.{k} deve ser false")
+
+    # Referencias relativas e existentes; plano e registro no mesmo GATE 0.
+    for field in ("plan_ref", "source_decision_ref"):
+        ref = record.get(field)
+        _ref_ok(ref.get("path") if isinstance(ref, dict) else None, field, filename, errors)
+    if isinstance(plan, dict):
+        plan_gate_ids = [x.get("gate_id") for x in plan.get("gates", []) if isinstance(x, dict)]
+        if 0 not in plan_gate_ids:
+            errors.append(f"{filename}: plano nao contem GATE 0 correspondente")
+    return errors
+
+
+def validate_gate0(errors):
+    """Orquestra a validacao do(s) registro(s) reais de decisao do GATE 0."""
+    if not os.path.isdir(DECISIONS_DIR):
+        return
+    names = sorted(f for f in os.listdir(DECISIONS_DIR)
+                   if f.startswith("binary-audit-gate-00-decision-record-") and f.endswith(".json"))
+    if not names:
+        return  # ainda sem registro de GATE 0
+    plan = {}
+    try:
+        plan = load_json(os.path.join(AUDIT_DIR, PLAN_TEMPLATE))
+    except Fail:
+        plan = {}
+    try:
+        schema = load_json(os.path.join(SCHEMA_DIR, GATE0_SCHEMA))
+    except Fail as exc:
+        errors.append(str(exc))
+        return
+    for name in names:
+        rec_errors = []
+        try:
+            record = load_json(os.path.join(DECISIONS_DIR, name))
+            validate_gate0_record(record, schema, plan, name, rec_errors)
+        except Fail as exc:
+            rec_errors.append(str(exc))
+        if rec_errors:
+            errors.extend(rec_errors)
+            print(f"[FALHA] decisions/{name}: {len(rec_errors)} problema(s)")
+            for e in rec_errors:
+                print(f"    - {e}")
+        else:
+            print(f"[OK]    decisions/{name}")
+
+
 def main():
     all_errors = []
     for artifact, schema_name in ARTIFACTS:
@@ -712,11 +859,16 @@ def main():
     validate_binary_audit(binary_errors)
     all_errors.extend(binary_errors)
 
+    gate0_errors = []
+    validate_gate0(gate0_errors)
+    all_errors.extend(gate0_errors)
+
     if all_errors:
         print(f"\nValidacao FALHOU com {len(all_errors)} problema(s).")
         return 1
     print(f"\nValidacao OK: {len(ARTIFACTS)} artefatos, schemas, regras de seguranca, "
-          f"cross-checks, registro(s) real(is) de decisao e plano da auditoria binaria.")
+          f"cross-checks, registros reais de decisao, plano da auditoria binaria e "
+          f"autorizacao do GATE 0.")
     return 0
 
 

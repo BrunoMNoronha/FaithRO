@@ -35,7 +35,8 @@ auditoria. O relatório completo está em
 | [`decisions/core-path-decision-record-2026-07-31.json`](decisions/core-path-decision-record-2026-07-31.json) | (2P-E-A2) Registro **real** da decisão humana: `PREBUILT_PATH` **selecionado apenas para planejamento**; flags operacionais `false`. |
 | [`binary-audit-plan.example.json`](binary-audit-plan.example.json) | (2P-E-B-PREBUILT) **Template** do plano da auditoria binária offline em 17 gates independentes; `PLANNED_NOT_AUTHORIZED`; nenhuma autorização operacional; nenhum binário materializado. |
 | [`binary-audit-gate-record.example.json`](binary-audit-gate-record.example.json) | (2P-E-B-PREBUILT) **Template em branco** do registro de decisão por gate (`status=PENDING`, campos `null`, autoriza no máximo um gate; sem autorização transitiva). |
-| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json` e `binary-audit-gate-record.schema.json`. |
+| [`decisions/binary-audit-gate-00-decision-record-2026-07-31.json`](decisions/binary-audit-gate-00-decision-record-2026-07-31.json) | (2P-E-C0-A) Registro **real** da autorização humana **exclusiva do GATE 0** (reconfirmação de proveniência por metadados): `AUTHORIZED_FOR_SINGLE_GATE`; GATE 0 autorizado, **não iniciado**; GATE 1 proibido. |
+| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json` e `binary-audit-gate-00-decision-record-real.schema.json`. |
 
 ## Garantias desta etapa
 
@@ -117,6 +118,19 @@ o GATE 1. O template de decisão por gate
 permanece em branco; o **futuro registro real** de cada gate deverá ser criado em
 diretório separado, autorizando **no máximo um gate**, sem autorização transitiva.
 
+## Autorização do GATE 0 (2P-E-C0-A)
+
+A autorização humana **exclusiva do GATE 0** (reconfirmação de proveniência por
+metadados) está registrada em
+[`decisions/binary-audit-gate-00-decision-record-2026-07-31.json`](decisions/binary-audit-gate-00-decision-record-2026-07-31.json)
+e em [docs/34](../../docs/34-registro-autorizacao-gate-0-proveniencia-warp.md):
+`GATE 0 AUTORIZADO — AINDA NÃO INICIADO`. Apenas
+`provenance_reconfirmation_authorized` (mais as flags de decisão) está `true`; todas
+as demais permanecem `false`. **Nenhuma** consulta upstream foi realizada nesta
+etapa; **nenhuma** evidência coletada; o **GATE 1 continua proibido**; o merge do
+registro **não** executa o GATE 0. A execução ocorrerá em etapa futura e separada
+(2P-E-C0-B), somente por metadados oficiais.
+
 ## Propriedade intelectual
 
 WARP é **GPL-3.0** (uso apenas local; binário não versionado no FaithRO). `Ragexe`,
@@ -131,4 +145,5 @@ empacotar ou compartilhar (ver [docs/16](../../docs/16-politica-distribuicao-cli
 - [docs/31](../../docs/31-decisao-caminho-nucleo-warp.md) — decisão do caminho do núcleo.
 - [docs/32](../../docs/32-registro-decisao-caminho-nucleo-warp.md) — registro da decisão humana.
 - [docs/33](../../docs/33-plano-auditoria-binaria-offline-warp.md) — plano da auditoria binária offline.
+- [docs/34](../../docs/34-registro-autorizacao-gate-0-proveniencia-warp.md) — autorização do GATE 0.
 - [docs/16](../../docs/16-politica-distribuicao-cliente.md) — política de distribuição.
