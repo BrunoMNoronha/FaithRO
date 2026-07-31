@@ -30,7 +30,9 @@ auditoria. O relatório completo está em
 | [`upstream-manifest.example.json`](upstream-manifest.example.json) | Origem, integridade (tree digest, SHA-256 de arquivos críticos), inventário, binários rastreados, submódulos, toolchain. |
 | [`security-findings.example.json`](security-findings.example.json) | Achados W1–W10 (severidade, evidência, impacto, mitigação, pendência humana). |
 | [`patch-selection.example.json`](patch-selection.example.json) | Patches candidatos mínimos, sensíveis e rejeitados; flags de autorização. |
-| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos três artefatos. |
+| [`core-path-decision-package.example.json`](core-path-decision-package.example.json) | (2P-E-A) Investigação do caminho do núcleo: fonte não localizada, proveniência do prebuilt, opções, matriz, requisitos de auditoria binária; `PENDING_HUMAN_DECISION`. |
+| [`core-path-decision-record.example.json`](core-path-decision-record.example.json) | (2P-E-A) Registro de decisão humana **em branco** (`status=PENDING`, campos `null`, flags `false`). |
+| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos cinco artefatos. |
 
 ## Garantias desta etapa
 
@@ -61,10 +63,20 @@ execution_allowed=false  final_selection_allowed=false  human_authorization_requ
 ## Validação
 
 O script [`scripts/validate-warp-audit.py`](../../scripts/validate-warp-audit.py)
-valida os três JSONs contra os schemas e contra regras de segurança (SHA de 40/64
-caracteres, flags de build/execução/modificação proibidas em `true`, ausência de
-IP, senha, token e caminho pessoal). Usa **apenas a biblioteca padrão** do Python
-e não acessa a rede.
+valida os **cinco** JSONs contra os schemas e contra regras de segurança (SHA de
+40/64 caracteres, flags de build/execução/uso-do-prebuilt/modificação e de decisão
+proibidas em `true`, registro de decisão em branco, referências existentes,
+consistência pacote/registro, ausência de IP, senha, token e caminho pessoal). Usa
+**apenas a biblioteca padrão** do Python e não acessa a rede.
+
+## Decisão do caminho do núcleo (2P-E-A)
+
+A investigação do caminho do núcleo e o pacote de decisão humana estão em
+[`core-path-decision-package.example.json`](core-path-decision-package.example.json)
+/ [`core-path-decision-record.example.json`](core-path-decision-record.example.json)
+e em [docs/31](../../docs/31-decisao-caminho-nucleo-warp.md): fonte C++/Qt
+**não localizada**; prebuilt de origem oficial com **proveniência parcial** (custody
+FRACA); **nenhuma opção selecionada**, **nenhuma autorização** concedida.
 
 ## Propriedade intelectual
 

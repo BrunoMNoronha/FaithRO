@@ -40,6 +40,8 @@ ARTIFACTS = [
     ("upstream-manifest.example.json", "upstream-manifest.schema.json"),
     ("security-findings.example.json", "security-findings.schema.json"),
     ("patch-selection.example.json", "patch-selection.schema.json"),
+    ("core-path-decision-package.example.json", "core-path-decision-package.schema.json"),
+    ("core-path-decision-record.example.json", "core-path-decision-record.schema.json"),
 ]
 
 # --- Regras de seguranca (valores, nao prosa) ---
@@ -84,6 +86,8 @@ def type_ok(value, jtype):
         return isinstance(value, (int, float)) and not isinstance(value, bool)
     if jtype == "boolean":
         return isinstance(value, bool)
+    if jtype == "null":
+        return value is None
     return True
 
 
@@ -177,12 +181,52 @@ def forbidden_flags(data, name, errors):
         "source_executed", "source_built", "binary_created", "client_modified",
         "execution_allowed", "final_selection_allowed",
         "prebuilt_use_authorized", "core_build_possible_with_pinned_commit",
+        # ETAPA 2P-E-A: pacote e registro de decisao do caminho do nucleo.
+        "human_decision_received",
+        "decision_received", "option_selected", "source_path_authorized",
+        "prebuilt_path_authorized", "alternative_tool_authorized",
+        "stop_path_selected", "materialization_authorized", "build_authorized",
+        "execution_authorized", "client_provision_authorized",
+        "client_modification_authorized", "first_login_authorized",
     ]
     for key in must_be_false:
         if key in data and data[key] is not False:
             errors.append(f"{name}: flag '{key}' deve ser false")
     if "human_authorization_required" in data and data["human_authorization_required"] is not True:
         errors.append(f"{name}: 'human_authorization_required' deve ser true")
+
+
+def cross_checks(errors):
+    """Checagens entre artefatos e existencia de referencias (ETAPA 2P-E-A)."""
+    pkg_path = os.path.join(AUDIT_DIR, "core-path-decision-package.example.json")
+    rec_path = os.path.join(AUDIT_DIR, "core-path-decision-record.example.json")
+    if not (os.path.isfile(pkg_path) and os.path.isfile(rec_path)):
+        return
+    try:
+        pkg = load_json(pkg_path)
+        rec = load_json(rec_path)
+    except Fail as exc:
+        errors.append(str(exc))
+        return
+    # Referencias do pacote devem existir no repositorio.
+    for ref in pkg.get("references", []):
+        rp = ref.get("path", "")
+        if not os.path.isfile(os.path.join(REPO_ROOT, rp)):
+            errors.append(f"pacote: referencia ausente no repo: {rp}")
+    # Pacote e registro nao podem se contradizer: ambos em estado pendente/branco.
+    if pkg.get("state") != "PENDING_HUMAN_DECISION":
+        errors.append("pacote: state deve ser PENDING_HUMAN_DECISION")
+    if rec.get("status") != "PENDING":
+        errors.append("registro: status deve ser PENDING")
+    for flag in ("decision_received", "option_selected", "human_decision_received"):
+        if pkg.get(flag) is not False or rec.get(flag) is not False:
+            errors.append(f"contradicao pacote/registro: '{flag}' deve ser false em ambos")
+    if rec.get("selected_option") is not None:
+        errors.append("registro: selected_option deve permanecer null")
+    # Nenhuma opcao do pacote pode estar selecionada (defesa em profundidade).
+    for i, opt in enumerate(pkg.get("options", [])):
+        if opt.get("selected") is not False:
+            errors.append(f"pacote: options[{i}].selected deve ser false")
 
 
 def main():
@@ -210,10 +254,20 @@ def main():
         else:
             print(f"[OK]    {artifact}")
 
+    cross_errors = []
+    cross_checks(cross_errors)
+    if cross_errors:
+        all_errors.extend(cross_errors)
+        print(f"[FALHA] cross-checks: {len(cross_errors)} problema(s)")
+        for e in cross_errors:
+            print(f"    - {e}")
+    else:
+        print("[OK]    cross-checks (pacote/registro/referencias)")
+
     if all_errors:
         print(f"\nValidacao FALHOU com {len(all_errors)} problema(s).")
         return 1
-    print("\nValidacao OK: 3 artefatos, schemas e regras de seguranca.")
+    print(f"\nValidacao OK: {len(ARTIFACTS)} artefatos, schemas, regras de seguranca e cross-checks.")
     return 0
 
 

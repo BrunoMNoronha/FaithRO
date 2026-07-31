@@ -48,6 +48,7 @@ apenas os organiza por categoria e registra estado e dependências.
 | [28-decisao-ferramenta-preparacao-cliente.md](28-decisao-ferramenta-preparacao-cliente.md) | Decisão da ferramenta de preparação (hex) do executável do cliente: WARP `APROVAR COM RESTRIÇÕES`, NEMO atual (4144) `REJEITADO` por licença ausente; não autoriza execução | Cliente/segurança | validado | não iniciado (autorização humana pendente) | 09, 16, 17, 29 | 2026-07-27 |
 | [29-compatibilidade-cliente-2021-11-05-packetver.md](29-compatibilidade-cliente-2021-11-05-packetver.md) | Reconciliação do cliente 2021-11-05 com `PACKETVER=20211103`: compatibilidade `PROVÁVEL`, sem rebuild do servidor; teste de login controlado pendente | Cliente/protocolo | validado | não iniciado | 09, 12 | 2026-07-27 |
 | [30-auditoria-estatica-warp.md](30-auditoria-estatica-warp.md) | Auditoria estática aprofundada do WARP (commit fixado) e laboratório vazio: `BLOQUEADO PARA BUILD DO FONTE` (núcleo só prebuilt no commit — W1) e `APROVADO COM RESTRIÇÕES` apenas para decidir o caminho do núcleo (2P-E-A); patches sensíveis fora do mínimo; não autoriza build/execução/uso do prebuilt/modificação do cliente | Cliente/build/segurança | validado | não iniciado (build não autorizado) | 16, 28, 29 | 2026-07-31 |
+| [31-decisao-caminho-nucleo-warp.md](31-decisao-caminho-nucleo-warp.md) | Investigação do caminho do núcleo (2P-E-A) e pacote de decisão humana: fonte C++/Qt `FONTE NÃO LOCALIZADA NO ESCOPO PESQUISADO`; blob do prebuilt no repo oficial com `PROVENIÊNCIA PARCIAL` (custody FRACA, sem validar o binário); recomendação = submeter `PREBUILT_PATH` e `STOP_PATH` ao decisor sem preferência automática; nenhuma opção selecionada, nenhuma autorização | Cliente/build/segurança | validado | não iniciado (decisão humana pendente) | 16, 28, 30 | 2026-07-31 |
 | [99-checklists.md](99-checklists.md) | Checklists de PR, deploy, balanceamento | Todos | validado | não aplicável | — | 2026-07-10 |
 
 [^1]: No documento 03, "parcialmente implantado" significa apenas que a
@@ -82,7 +83,10 @@ apenas os organiza por categoria e registra estado e dependências.
   [30](30-auditoria-estatica-warp.md) (auditoria estática aprofundada do WARP no
   commit fixado e laboratório vazio; `BLOQUEADO PARA BUILD DO FONTE` e `APROVADO
   COM RESTRIÇÕES` apenas para decidir o caminho do núcleo (2P-E-A); não autoriza
-  build, execução, uso do prebuilt nem modificação do cliente).
+  build, execução, uso do prebuilt nem modificação do cliente),
+  [31](31-decisao-caminho-nucleo-warp.md) (investigação do caminho do núcleo e
+  pacote de decisão humana; fonte não localizada, prebuilt com proveniência
+  parcial; nenhuma opção selecionada, nenhuma autorização).
 - **Patcher e build auditável do Beam:**
   [23](23-planejamento-primeiro-build-controlado-beam.md) (planejamento do
   primeiro build controlado; build ainda não autorizado),
