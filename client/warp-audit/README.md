@@ -31,8 +31,9 @@ auditoria. O relatório completo está em
 | [`security-findings.example.json`](security-findings.example.json) | Achados W1–W10 (severidade, evidência, impacto, mitigação, pendência humana). |
 | [`patch-selection.example.json`](patch-selection.example.json) | Patches candidatos mínimos, sensíveis e rejeitados; flags de autorização. |
 | [`core-path-decision-package.example.json`](core-path-decision-package.example.json) | (2P-E-A) Investigação do caminho do núcleo: fonte não localizada, proveniência do prebuilt, opções, matriz, requisitos de auditoria binária; `PENDING_HUMAN_DECISION`. |
-| [`core-path-decision-record.example.json`](core-path-decision-record.example.json) | (2P-E-A) Registro de decisão humana **em branco** (`status=PENDING`, campos `null`, flags `false`). |
-| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos cinco artefatos. |
+| [`core-path-decision-record.example.json`](core-path-decision-record.example.json) | (2P-E-A) Registro de decisão humana **em branco** — template (`status=PENDING`, campos `null`, flags `false`). Permanece intocado. |
+| [`decisions/core-path-decision-record-2026-07-31.json`](decisions/core-path-decision-record-2026-07-31.json) | (2P-E-A2) Registro **real** da decisão humana: `PREBUILT_PATH` **selecionado apenas para planejamento**; flags operacionais `false`. |
+| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json` (registro real). |
 
 ## Garantias desta etapa
 
@@ -63,11 +64,17 @@ execution_allowed=false  final_selection_allowed=false  human_authorization_requ
 ## Validação
 
 O script [`scripts/validate-warp-audit.py`](../../scripts/validate-warp-audit.py)
-valida os **cinco** JSONs contra os schemas e contra regras de segurança (SHA de
-40/64 caracteres, flags de build/execução/uso-do-prebuilt/modificação e de decisão
-proibidas em `true`, registro de decisão em branco, referências existentes,
-consistência pacote/registro, ausência de IP, senha, token e caminho pessoal). Usa
-**apenas a biblioteca padrão** do Python e não acessa a rede.
+valida os cinco JSONs de auditoria contra os schemas e contra regras de segurança
+(SHA de 40/64 caracteres, flags de build/execução/uso-do-prebuilt/modificação e de
+decisão proibidas em `true`, template de decisão em branco, referências existentes,
+consistência pacote/registro, ausência de IP, senha, token e caminho pessoal) e —
+desde a ETAPA 2P-E-A2 — cada **registro real** em [`decisions/`](decisions/): que o
+template continua vazio, que o registro real contém a decisão, que a opção é
+`PREBUILT_PATH`, que nenhuma autorização operacional está `true`, que
+identidade/autoridade não são placeholders, que a data é válida, que justificativa e
+condições não estão vazias, que pacote e registro usam o mesmo commit fixado e que
+propriedades extras são rejeitadas. Usa **apenas a biblioteca padrão** do Python e
+não acessa a rede.
 
 ## Decisão do caminho do núcleo (2P-E-A)
 
@@ -77,6 +84,14 @@ A investigação do caminho do núcleo e o pacote de decisão humana estão em
 e em [docs/31](../../docs/31-decisao-caminho-nucleo-warp.md): fonte C++/Qt
 **não localizada**; prebuilt de origem oficial com **proveniência parcial** (custody
 FRACA); **nenhuma opção selecionada**, **nenhuma autorização** concedida.
+
+A decisão humana (2P-E-A2) está registrada em
+[`decisions/core-path-decision-record-2026-07-31.json`](decisions/core-path-decision-record-2026-07-31.json)
+e em [docs/32](../../docs/32-registro-decisao-caminho-nucleo-warp.md):
+`PREBUILT_PATH` foi **selecionado apenas para planejamento** da auditoria binária
+offline. O prebuilt **não** foi materializado nem executado; **todas** as flags
+operacionais permanecem `false`; o template continua **em branco**; o merge do PR
+**não** autoriza a próxima ação; **cada gate futuro exige decisão humana separada**.
 
 ## Propriedade intelectual
 

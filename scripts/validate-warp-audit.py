@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Validador dos artefatos da auditoria estatica do WARP (ETAPA 2P-D).
+Validador dos artefatos da auditoria estatica do WARP (ETAPAS 2P-D / 2P-E-A / 2P-E-A2).
 
-Valida os tres JSONs versionados em client/warp-audit/ contra os schemas
+Valida os JSONs versionados em client/warp-audit/ contra os schemas
 (draft-07, subconjunto) em client/warp-audit/schemas/ e contra regras de
-seguranca do projeto.
+seguranca do projeto. Inclui, alem do template EM BRANCO do registro de decisao,
+o(s) registro(s) REAL(is) de decisao humana em client/warp-audit/decisions/
+(ETAPA 2P-E-A2): confirma que o template continua vazio, que o registro real
+contem a decisao (opcao PREBUILT_PATH para 2026-07-31), que nenhuma autorizacao
+operacional esta true, que identidade/autoridade nao sao placeholders, que a data
+e valida, que justificativa e condicoes nao estao vazias e que pacote e registro
+usam o mesmo commit fixado.
 
 Garantias (ver docs/30-auditoria-estatica-warp.md, FASE N):
   * Apenas biblioteca padrao do Python (sem dependencias externas).
@@ -22,6 +28,7 @@ Este validador NAO concede autorizacao. Uma classificacao positiva, o merge do
 PR, a presenca de um patch candidato ou a criacao do laboratorio NAO equivalem a
 autorizacao de build, execucao, uso do prebuilt ou modificacao do cliente.
 """
+import datetime
 import json
 import os
 import re
@@ -35,6 +42,7 @@ except (AttributeError, ValueError):
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 AUDIT_DIR = os.path.join(REPO_ROOT, "client", "warp-audit")
 SCHEMA_DIR = os.path.join(AUDIT_DIR, "schemas")
+DECISIONS_DIR = os.path.join(AUDIT_DIR, "decisions")
 
 ARTIFACTS = [
     ("upstream-manifest.example.json", "upstream-manifest.schema.json"),
@@ -43,6 +51,31 @@ ARTIFACTS = [
     ("core-path-decision-package.example.json", "core-path-decision-package.schema.json"),
     ("core-path-decision-record.example.json", "core-path-decision-record.schema.json"),
 ]
+
+# ETAPA 2P-E-A2: registro REAL da decisao humana (preenchido, fora do template).
+REAL_RECORD_SCHEMA = "core-path-decision-record-real.schema.json"
+EXPECTED_PINNED_COMMIT = "9b1173e9e4e135c68e150704f01186ab5e763acd"
+# Opcao esperada por registro real datado (comprova a selecao registrada sem
+# engessar registros futuros de outra opcao). A selecao NAO e autorizacao.
+EXPECTED_OPTION_BY_FILE = {
+    "core-path-decision-record-2026-07-31.json": "PREBUILT_PATH",
+}
+# Flags operacionais que DEVEM permanecer false mesmo com uma opcao selecionada.
+OPERATIONAL_FLAGS = [
+    "source_path_authorized", "prebuilt_path_authorized",
+    "alternative_tool_authorized", "stop_path_selected",
+    "materialization_authorized", "build_authorized", "execution_authorized",
+    "client_provision_authorized", "client_modification_authorized",
+    "first_login_authorized",
+]
+# Flags de decisao humana que DEVEM ser true no registro real.
+DECISION_TRUE_FLAGS = [
+    "human_decision_required", "human_decision_received", "option_selected",
+]
+# Deteccao de placeholders em identidade/autoridade/canal (nao inventados).
+PLACEHOLDER_RE = re.compile(
+    r"(?i)(<[^>]*>|\bplaceholder\b|\bexample\b|\bexemplo\b|\bto ?do\b|\btbd\b|"
+    r"\bfulano\b|\bpreencher\b|\bnull\b|\bnome do decisor\b|\bseu nome\b|x{3,})")
 
 # --- Regras de seguranca (valores, nao prosa) ---
 IPV4_RE = re.compile(r"(?<!\d)(?:\d{1,3}\.){3}\d{1,3}(?!\d)")
@@ -229,6 +262,133 @@ def cross_checks(errors):
             errors.append(f"pacote: options[{i}].selected deve ser false")
 
 
+def valid_iso_date(value):
+    if not isinstance(value, str):
+        return False
+    try:
+        datetime.date.fromisoformat(value)
+        return True
+    except ValueError:
+        return False
+
+
+def validate_real_record(record, schema, package, filename, errors):
+    """Valida um registro REAL de decisao humana (ETAPA 2P-E-A2).
+
+    Importavel pelos testes negativos. `package` e o pacote de decisao (dict) para
+    conferir o commit fixado. Nao concede autorizacao: exige que toda flag
+    operacional permaneca false, inclusive quando uma opcao esta selecionada.
+    """
+    if not isinstance(schema, dict):
+        errors.append(f"{filename}: schema do registro real ausente/invalido")
+        return errors
+    validate_node(record, schema, filename, errors)
+    security_scan(record, errors)
+
+    if not isinstance(record, dict):
+        errors.append(f"{filename}: registro nao e objeto")
+        return errors
+
+    if record.get("status") != "DECIDED":
+        errors.append(f"{filename}: status deve ser DECIDED")
+
+    decision = record.get("decision")
+    option = decision.get("option") if isinstance(decision, dict) else None
+    if not option:
+        errors.append(f"{filename}: decision.option ausente (selecao deve estar em decision.option)")
+    expected_opt = EXPECTED_OPTION_BY_FILE.get(filename)
+    if expected_opt is not None and option != expected_opt:
+        errors.append(f"{filename}: decision.option deve ser {expected_opt}, obtido {option!r}")
+
+    # A selecao NUNCA pode aparecer como *_authorized=true (defesa em profundidade).
+    auth = record.get("authorizations")
+    if not isinstance(auth, dict):
+        auth = {}
+        errors.append(f"{filename}: bloco 'authorizations' ausente")
+    for k in DECISION_TRUE_FLAGS:
+        if auth.get(k) is not True:
+            errors.append(f"{filename}: authorizations.{k} deve ser true")
+    for k in OPERATIONAL_FLAGS:
+        if auth.get(k) is not False:
+            errors.append(f"{filename}: authorizations.{k} deve ser false (selecao nao e autorizacao)")
+
+    # Identidade e autoridade nao podem ser placeholders nem vazios.
+    for field in ("decider", "role", "authority", "channel"):
+        val = record.get(field)
+        if not isinstance(val, str) or not val.strip():
+            errors.append(f"{filename}: campo '{field}' vazio")
+        elif PLACEHOLDER_RE.search(val):
+            errors.append(f"{filename}: campo '{field}' parece placeholder: {val!r}")
+
+    if not valid_iso_date(record.get("date")):
+        errors.append(f"{filename}: campo 'date' nao e uma data ISO valida")
+
+    just = record.get("justification")
+    if not isinstance(just, str) or not just.strip():
+        errors.append(f"{filename}: 'justification' vazia")
+
+    conds = record.get("conditions")
+    if not isinstance(conds, list) or len(conds) < 15:
+        errors.append(f"{filename}: 'conditions' deve ter ao menos 15 itens")
+    else:
+        for i, c in enumerate(conds):
+            if not isinstance(c, dict) or not str(c.get("text", "")).strip():
+                errors.append(f"{filename}: conditions[{i}] sem texto")
+
+    # Pacote e registro devem usar o mesmo commit fixado.
+    rec_commit = record.get("commit_pinned")
+    if rec_commit != EXPECTED_PINNED_COMMIT:
+        errors.append(f"{filename}: commit_pinned != commit fixado ({EXPECTED_PINNED_COMMIT})")
+    pref = record.get("package_ref")
+    pref_commit = pref.get("commit_pinned") if isinstance(pref, dict) else None
+    if pref_commit != rec_commit:
+        errors.append(f"{filename}: package_ref.commit_pinned difere de commit_pinned")
+    pkg_commit = package.get("commit_pinned") if isinstance(package, dict) else None
+    if pkg_commit is not None and rec_commit != pkg_commit:
+        errors.append(f"{filename}: commit_pinned difere do commit do pacote ({pkg_commit})")
+
+    return errors
+
+
+def validate_real_records(errors):
+    """Percorre client/warp-audit/decisions/ e valida cada registro real."""
+    if not os.path.isdir(DECISIONS_DIR):
+        return  # sem registros reais ainda: nada a validar
+    package = {}
+    pkg_path = os.path.join(AUDIT_DIR, "core-path-decision-package.example.json")
+    try:
+        package = load_json(pkg_path)
+    except Fail:
+        package = {}
+    try:
+        schema = load_json(os.path.join(SCHEMA_DIR, REAL_RECORD_SCHEMA))
+    except Fail as exc:
+        errors.append(str(exc))
+        return
+    names = sorted(
+        f for f in os.listdir(DECISIONS_DIR)
+        if f.startswith("core-path-decision-record-") and f.endswith(".json"))
+    if not names:
+        errors.append("decisions/: nenhum registro real de decisao encontrado")
+        return
+    for name in names:
+        try:
+            record = load_json(os.path.join(DECISIONS_DIR, name))
+        except Fail as exc:
+            errors.append(str(exc))
+            print(f"[FALHA] decisions/{name}: JSON invalido")
+            continue
+        rec_errors = []
+        validate_real_record(record, schema, package, name, rec_errors)
+        if rec_errors:
+            errors.extend(rec_errors)
+            print(f"[FALHA] decisions/{name}: {len(rec_errors)} problema(s)")
+            for e in rec_errors:
+                print(f"    - {e}")
+        else:
+            print(f"[OK]    decisions/{name}")
+
+
 def main():
     all_errors = []
     for artifact, schema_name in ARTIFACTS:
@@ -264,10 +424,15 @@ def main():
     else:
         print("[OK]    cross-checks (pacote/registro/referencias)")
 
+    real_errors = []
+    validate_real_records(real_errors)
+    all_errors.extend(real_errors)
+
     if all_errors:
         print(f"\nValidacao FALHOU com {len(all_errors)} problema(s).")
         return 1
-    print(f"\nValidacao OK: {len(ARTIFACTS)} artefatos, schemas, regras de seguranca e cross-checks.")
+    print(f"\nValidacao OK: {len(ARTIFACTS)} artefatos, schemas, regras de seguranca, "
+          f"cross-checks e registro(s) real(is) de decisao.")
     return 0
 
 
