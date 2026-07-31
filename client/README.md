@@ -113,8 +113,12 @@ A decisão humana foi registrada em
 [`docs/32-registro-decisao-caminho-nucleo-warp.md`](../docs/32-registro-decisao-caminho-nucleo-warp.md)
 (`PREBUILT_PATH` **selecionado apenas para planejamento** da auditoria binária
 offline; prebuilt não materializado nem executado; flags operacionais `false`; o
-merge não autoriza a próxima ação). Nenhuma dessas etapas modifica o executável sem
-autorização humana; nada do cliente é versionado aqui.
+merge não autoriza a próxima ação). O plano dessa auditoria (17 gates independentes,
+ainda sem materialização) está em
+[`docs/33-plano-auditoria-binaria-offline-warp.md`](../docs/33-plano-auditoria-binaria-offline-warp.md)
+(`PLANO CRIADO — NENHUMA MATERIALIZAÇÃO AUTORIZADA`; o merge não autoriza o GATE 1).
+Nenhuma dessas etapas modifica o executável sem autorização humana; nada do cliente é
+versionado aqui.
 
 ## Referências
 
@@ -124,3 +128,4 @@ autorização humana; nada do cliente é versionado aqui.
 - [`docs/28-decisao-ferramenta-preparacao-cliente.md`](../docs/28-decisao-ferramenta-preparacao-cliente.md)
 - [`docs/29-compatibilidade-cliente-2021-11-05-packetver.md`](../docs/29-compatibilidade-cliente-2021-11-05-packetver.md)
 - [`docs/32-registro-decisao-caminho-nucleo-warp.md`](../docs/32-registro-decisao-caminho-nucleo-warp.md)
+- [`docs/33-plano-auditoria-binaria-offline-warp.md`](../docs/33-plano-auditoria-binaria-offline-warp.md)
