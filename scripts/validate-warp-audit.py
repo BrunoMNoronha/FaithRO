@@ -10,8 +10,10 @@ o(s) registro(s) REAL(is) de decisao humana em client/warp-audit/decisions/
 (ETAPA 2P-E-A2): confirma que o template continua vazio, que o registro real
 contem a decisao (opcao PREBUILT_PATH para 2026-07-31), que nenhuma autorizacao
 operacional esta true, que identidade/autoridade nao sao placeholders, que a data
-e valida, que justificativa e condicoes nao estao vazias e que pacote e registro
-usam o mesmo commit fixado.
+e valida, que justificativa e condicoes nao estao vazias, que as condicoes estao
+numeradas 1..N em ordem (sem lacuna/repeticao), que os patches sensiveis continuam
+bloqueados e os candidatos apenas revisados (conjuntos exatos), que as referencias
+existem e que pacote e registro usam o mesmo commit fixado.
 
 Garantias (ver docs/30-auditoria-estatica-warp.md, FASE N):
   * Apenas biblioteca padrao do Python (sem dependencias externas).
@@ -72,6 +74,14 @@ OPERATIONAL_FLAGS = [
 DECISION_TRUE_FLAGS = [
     "human_decision_required", "human_decision_received", "option_selected",
 ]
+# Patches sensiveis que DEVEM permanecer bloqueados (nao remover/reclassificar).
+EXPECTED_BLOCKED_PATCHES = {
+    "CustomDLL", "DisableProtect", "DisableEncr", "EnableProxy",
+}
+# Patches que permanecem SOMENTE candidatos revisados (nao autorizar/aplicar).
+EXPECTED_REVIEWED_CANDIDATES = {
+    "DataFolderFirst", "CallKoreaClientInfo",
+}
 # Deteccao de placeholders em identidade/autoridade/canal (nao inventados).
 PLACEHOLDER_RE = re.compile(
     r"(?i)(<[^>]*>|\bplaceholder\b|\bexample\b|\bexemplo\b|\bto ?do\b|\btbd\b|"
@@ -334,6 +344,26 @@ def validate_real_record(record, schema, package, filename, errors):
         for i, c in enumerate(conds):
             if not isinstance(c, dict) or not str(c.get("text", "")).strip():
                 errors.append(f"{filename}: conditions[{i}] sem texto")
+        # Numeracao sequencial 1..N, sem lacuna, sem repeticao, sem fora de ordem.
+        ns = [c.get("n") for c in conds if isinstance(c, dict)]
+        if ns != list(range(1, len(conds) + 1)):
+            errors.append(f"{filename}: conditions devem ser numeradas 1..N em ordem, "
+                          f"sem lacuna nem repeticao")
+
+    # Patches sensiveis: conjunto EXATO (nao remover, reclassificar nem adicionar).
+    bp = record.get("blocked_patches")
+    if not isinstance(bp, list) or set(bp) != EXPECTED_BLOCKED_PATCHES:
+        errors.append(f"{filename}: blocked_patches deve ser exatamente "
+                      f"{sorted(EXPECTED_BLOCKED_PATCHES)} (bloqueio nao pode ser enfraquecido)")
+    roc = record.get("reviewed_only_candidates")
+    if not isinstance(roc, list) or set(roc) != EXPECTED_REVIEWED_CANDIDATES:
+        errors.append(f"{filename}: reviewed_only_candidates deve ser exatamente "
+                      f"{sorted(EXPECTED_REVIEWED_CANDIDATES)} (nao aprovar nem reclassificar)")
+    if isinstance(bp, list) and isinstance(roc, list):
+        overlap = set(bp) & set(roc)
+        if overlap:
+            errors.append(f"{filename}: patch nao pode estar em blocked_patches e "
+                          f"reviewed_only_candidates ao mesmo tempo: {sorted(overlap)}")
 
     # Pacote e registro devem usar o mesmo commit fixado.
     rec_commit = record.get("commit_pinned")
@@ -346,6 +376,15 @@ def validate_real_record(record, schema, package, filename, errors):
     pkg_commit = package.get("commit_pinned") if isinstance(package, dict) else None
     if pkg_commit is not None and rec_commit != pkg_commit:
         errors.append(f"{filename}: commit_pinned difere do commit do pacote ({pkg_commit})")
+
+    # Referencias (pacote e template) devem existir no repositorio.
+    tref = record.get("template_ref")
+    for field, ref in (("package_ref", pref), ("template_ref", tref)):
+        rp = ref.get("path") if isinstance(ref, dict) else None
+        if not rp:
+            errors.append(f"{filename}: {field}.path ausente")
+        elif not os.path.isfile(os.path.join(REPO_ROOT, rp)):
+            errors.append(f"{filename}: {field}.path referencia arquivo inexistente")
 
     return errors
 
