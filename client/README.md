@@ -117,8 +117,12 @@ merge não autoriza a próxima ação). O plano dessa auditoria (17 gates indepe
 ainda sem materialização) está em
 [`docs/33-plano-auditoria-binaria-offline-warp.md`](../docs/33-plano-auditoria-binaria-offline-warp.md)
 (`PLANO CRIADO — NENHUMA MATERIALIZAÇÃO AUTORIZADA`; o merge não autoriza o GATE 1).
-Nenhuma dessas etapas modifica o executável sem autorização humana; nada do cliente é
-versionado aqui.
+A autorização humana **exclusiva do GATE 0** (reconfirmação de proveniência por
+metadados) está registrada em
+[`docs/34-registro-autorizacao-gate-0-proveniencia-warp.md`](../docs/34-registro-autorizacao-gate-0-proveniencia-warp.md)
+(`GATE 0 AUTORIZADO — AINDA NÃO INICIADO`; nenhuma consulta upstream nesta etapa;
+GATE 1 proibido; merge não executa o GATE 0). Nenhuma dessas etapas modifica o
+executável sem autorização humana; nada do cliente é versionado aqui.
 
 ## Referências
 
@@ -129,3 +133,4 @@ versionado aqui.
 - [`docs/29-compatibilidade-cliente-2021-11-05-packetver.md`](../docs/29-compatibilidade-cliente-2021-11-05-packetver.md)
 - [`docs/32-registro-decisao-caminho-nucleo-warp.md`](../docs/32-registro-decisao-caminho-nucleo-warp.md)
 - [`docs/33-plano-auditoria-binaria-offline-warp.md`](../docs/33-plano-auditoria-binaria-offline-warp.md)
+- [`docs/34-registro-autorizacao-gate-0-proveniencia-warp.md`](../docs/34-registro-autorizacao-gate-0-proveniencia-warp.md)
