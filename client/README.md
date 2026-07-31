@@ -105,8 +105,12 @@ ausente). A compatibilidade do cliente 2021-11-05 com o servidor está em
 fixado está em [`warp-audit/`](warp-audit/) e
 [`docs/30-auditoria-estatica-warp.md`](../docs/30-auditoria-estatica-warp.md)
 (`BLOQUEADO PARA BUILD DO FONTE` — núcleo só prebuilt no commit — e `APROVADO COM
-RESTRIÇÕES` apenas para decidir o caminho do núcleo). Nenhuma dessas etapas
-modifica o executável sem autorização humana; nada do cliente é versionado aqui.
+RESTRIÇÕES` apenas para decidir o caminho do núcleo). A investigação do caminho do
+núcleo e o pacote de decisão humana estão em
+[`docs/31-decisao-caminho-nucleo-warp.md`](../docs/31-decisao-caminho-nucleo-warp.md)
+(fonte não localizada; prebuilt com proveniência parcial; decisão humana pendente).
+Nenhuma dessas etapas modifica o executável sem autorização humana; nada do cliente
+é versionado aqui.
 
 ## Referências
 

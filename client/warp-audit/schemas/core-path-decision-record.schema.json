@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:warp-audit/core-path-decision-record",
+  "title": "WARP core-path decision record (blank)",
+  "description": "Registro de decisao humana do caminho do nucleo. Deve permanecer EM BRANCO (campos null, status PENDING, flags false) ate uma decisao humana explicita.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "project", "stage", "note", "package_ref", "status",
+    "decider", "role", "authority", "channel", "date", "decision",
+    "selected_option", "justification", "conditions", "validity",
+    "decision_received", "option_selected",
+    "source_path_authorized", "prebuilt_path_authorized",
+    "alternative_tool_authorized", "stop_path_selected",
+    "materialization_authorized", "build_authorized", "execution_authorized",
+    "client_provision_authorized", "client_modification_authorized",
+    "first_login_authorized"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "project": { "type": "string", "const": "WARP" },
+    "stage": { "type": "string", "const": "2P-E-A" },
+    "note": { "type": "string", "minLength": 1 },
+    "package_ref": {
+      "type": "object",
+      "required": ["path", "sha256"],
+      "additionalProperties": false,
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "null" }
+      }
+    },
+    "status": { "type": "string", "const": "PENDING" },
+    "decider": { "type": "null" },
+    "role": { "type": "null" },
+    "authority": { "type": "null" },
+    "channel": { "type": "null" },
+    "date": { "type": "null" },
+    "decision": { "type": "null" },
+    "selected_option": { "type": "null" },
+    "justification": { "type": "null" },
+    "conditions": { "type": "null" },
+    "validity": { "type": "null" },
+    "decision_received": { "type": "boolean", "const": false },
+    "option_selected": { "type": "boolean", "const": false },
+    "source_path_authorized": { "type": "boolean", "const": false },
+    "prebuilt_path_authorized": { "type": "boolean", "const": false },
+    "alternative_tool_authorized": { "type": "boolean", "const": false },
+    "stop_path_selected": { "type": "boolean", "const": false },
+    "materialization_authorized": { "type": "boolean", "const": false },
+    "build_authorized": { "type": "boolean", "const": false },
+    "execution_authorized": { "type": "boolean", "const": false },
+    "client_provision_authorized": { "type": "boolean", "const": false },
+    "client_modification_authorized": { "type": "boolean", "const": false },
+    "first_login_authorized": { "type": "boolean", "const": false }
+  }
+}

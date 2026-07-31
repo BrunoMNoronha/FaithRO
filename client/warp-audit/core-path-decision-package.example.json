@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "project": "WARP",
+  "stage": "2P-E-A",
+  "purpose": "Pacote de decisao humana sobre o CAMINHO DO NUCLEO do WARP apos o achado W1. Nao seleciona opcao nem concede autorizacao. Estado PENDING_HUMAN_DECISION.",
+  "commit_pinned": "9b1173e9e4e135c68e150704f01186ab5e763acd",
+  "state": "PENDING_HUMAN_DECISION",
+  "references": [
+    { "path": "docs/30-auditoria-estatica-warp.md", "sha256": "8b099f8609a884c46ef03986a97ea8ffb6eb6beb23188705d1442621646f1892" },
+    { "path": "client/warp-audit/upstream-manifest.example.json", "sha256": "d06ab43aaf978cd20bc1ad59fdac6c742a58611c74f477df34475b44fa268263" },
+    { "path": "client/warp-audit/security-findings.example.json", "sha256": "49af524731ced0e61767218c56fee2f0e5e8efe6e7070edb65f5fe9be44d2063" },
+    { "path": "client/warp-audit/patch-selection.example.json", "sha256": "ff0cab8d5fca53e18d75eb4694e054614d8f6c4a3938ae2580ccba5118e416eb" }
+  ],
+  "source_investigation": {
+    "scope": "Todas as 10 branches oficiais (base, deb32, deb64, docs, gh-pages, rock, rock_deb32, rock_deb64, rock_win32, win32), tags, releases, submodulo Wiki, README/CHANGELOG, issues e repositorios do mantenedor Neo-Mind.",
+    "cpp_qt_source_found_any_branch": false,
+    "build_recipe_found_any_branch": false,
+    "tags_count": 0,
+    "releases_count": 0,
+    "wiki_has_build_from_source_docs": false,
+    "maintainer_separate_source_repo": false,
+    "maintainer_repo_note": "Nenhum repositorio do mantenedor publica o codigo-fonte C++/Qt do nucleo do WARP. 'sfui' (C++) e uma lib antiga exportada do Google Code (2015, NOASSERTION), nao relacionada ao build do WARP.",
+    "source_binary_correspondence": "FONTE NAO LOCALIZADA"
+  },
+  "prebuilt_provenance": {
+    "official_origin": "SIM",
+    "introduced_commit": "b5f4b6a1f8d3",
+    "introduced_date_utc": "2020-11-26",
+    "commits_touching_warp_exe": 21,
+    "authorship": "Todos os commits que tocam win32/WARP.exe sao do mantenedor (Neo / Neo Mind), commit direto; sem CI, sem automacao de release, sem committer GitHub-web.",
+    "current_warp_exe_blob": "c853da42d18dfe090b4e941b435d989311faf3dc",
+    "current_warp_exe_size": 1137152,
+    "official_hash_published": "NAO",
+    "signature_documented": "NAO",
+    "corresponding_source_identified": "NAO",
+    "corresponding_build_recipe": "NAO",
+    "reproducibility_demonstrated": "NAO",
+    "custody_chain": "FRACA",
+    "note": "A unica evidencia de proveniencia e a autoria dos commits no repositorio oficial. Nao ha hash publicado, assinatura documentada, receita de build nem reprodutibilidade. A eventual assinatura Authenticode embutida no PE nao foi materializada nem verificada nesta etapa. Nao se conclui que o prebuilt e seguro nem malicioso."
+  },
+  "options": [
+    {
+      "id": "SOURCE_PATH",
+      "title": "Localizar fonte oficial completa e receita de build",
+      "state": "NAO DISPONIVEL",
+      "evidence": "FONTE NAO LOCALIZADA em qualquer branch/tag/release/fork/wiki/issue oficial.",
+      "benefits": "Auditabilidade e reprodutibilidade maximas; caminho preferido se existisse.",
+      "risks": "Inaplicavel: a fonte nao existe publicamente.",
+      "allows_progress": false
+    },
+    {
+      "id": "PREBUILT_PATH",
+      "title": "Considerar excepcionalmente o binario prebuilt oficial",
+      "state": "ADEQUADO COM RESTRICOES",
+      "evidence": "Origem oficial (commits do mantenedor); proveniencia PARCIAL; sem hash/assinatura/receita/reprodutibilidade; custody FRACA.",
+      "benefits": "Unico caminho tecnicamente disponivel para usar o WARP sem fonte.",
+      "risks": "Cadeia de suprimentos: confiar em binario de terceiros sem fonte nem integridade publicada. Exige auditoria binaria offline futura (ver requirements).",
+      "allows_progress": true,
+      "requires": "AUDITORIA_BINARIA_OFFLINE_FUTURA + AUTORIZACAO_HUMANA_ESPECIFICA"
+    },
+    {
+      "id": "ALTERNATIVE_TOOL",
+      "title": "Rejeitar o WARP e selecionar outra ferramenta",
+      "state": "INCONCLUSIVO",
+      "evidence": "NEMO atual (4144) permanece REJEITADO (licenca ausente + binarios versionados, ver docs/28). Nenhuma outra ferramenta com fonte completa + receita de build foi localizada nesta etapa.",
+      "benefits": "Poderia oferecer melhor cadeia de confianca se existisse tal ferramenta.",
+      "risks": "Sem candidato material superior identificado; exigiria nova auditoria dedicada.",
+      "allows_progress": false
+    },
+    {
+      "id": "STOP_PATH",
+      "title": "Interromper a preparacao do cliente",
+      "state": "ADEQUADO",
+      "evidence": "O servidor pode permanecer em homologacao de infraestrutura; a preparacao do cliente aguarda cadeia de confianca melhor.",
+      "benefits": "Elimina o risco de cadeia de suprimentos; nenhuma acao irreversivel.",
+      "risks": "Adia o primeiro acesso do cliente.",
+      "allows_progress": true
+    }
+  ],
+  "future_binary_audit_requirements": [
+    { "step": 1, "name": "Autorizar materializar o blob oficial", "authorized": false },
+    { "step": 2, "name": "Calcular SHA-256 local do blob", "authorized": false },
+    { "step": 3, "name": "Validar assinatura Authenticode", "authorized": false },
+    { "step": 4, "name": "Inventario PE (cabecalhos, secoes)", "authorized": false },
+    { "step": 5, "name": "Dependencias importadas (import table)", "authorized": false },
+    { "step": 6, "name": "Strings e recursos", "authorized": false },
+    { "step": 7, "name": "Analise estatica offline", "authorized": false },
+    { "step": 8, "name": "Analise com antivirus locais", "authorized": false },
+    { "step": 9, "name": "Execucao em sandbox descartavel sem cliente", "authorized": false },
+    { "step": 10, "name": "Bloqueio de rede na sandbox", "authorized": false },
+    { "step": 11, "name": "Monitoramento de processos", "authorized": false },
+    { "step": 12, "name": "Monitoramento de arquivos", "authorized": false },
+    { "step": 13, "name": "Monitoramento de registro", "authorized": false },
+    { "step": 14, "name": "Comparacao de estado antes/depois", "authorized": false },
+    { "step": 15, "name": "Descarte integral do ambiente", "authorized": false },
+    { "step": 16, "name": "Autorizar fornecer uma copia do Ragexe", "authorized": false },
+    { "step": 17, "name": "Autorizar produzir saida modificada", "authorized": false }
+  ],
+  "acceptance_conditions": "Uma decisao humana explicita e revisada, registrada em core-path-decision-record, selecionando UMA opcao e definindo as condicoes; nenhuma autorizacao operacional e concedida por este pacote.",
+  "rejection_conditions": "Ausencia de decisao humana, evidencia insuficiente, ou custody considerada inaceitavel mantem o fluxo bloqueado.",
+  "technical_recommendation": {
+    "label": "SUBMETER CAMINHO DO PREBUILT A DECISAO HUMANA EXCEPCIONAL",
+    "rationale": "A fonte nao existe publicamente (SOURCE_PATH indisponivel); nenhuma ferramenta alternativa superior foi localizada; restam PREBUILT_PATH (apenas sob auditoria binaria offline futura e autorizacao especifica) e STOP_PATH. Dada a custody FRACA do prebuilt, rejeitar/interromper permanecem opcoes igualmente validas para o decisor. Nenhuma opcao e selecionada aqui.",
+    "not_an_authorization": true
+  },
+  "decision_received": false,
+  "option_selected": false,
+  "source_path_authorized": false,
+  "prebuilt_path_authorized": false,
+  "alternative_tool_authorized": false,
+  "stop_path_selected": false,
+  "materialization_authorized": false,
+  "build_authorized": false,
+  "execution_authorized": false,
+  "client_provision_authorized": false,
+  "client_modification_authorized": false,
+  "first_login_authorized": false
+}

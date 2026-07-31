@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "project": "WARP",
+  "stage": "2P-E-A",
+  "note": "Registro de decisao humana do caminho do nucleo. Permanece EM BRANCO ate uma decisao humana explicita e revisada. Este registro NAO pode conceder autorizacao a si mesmo; a autorizacao operacional depende de etapas futuras separadas.",
+  "package_ref": {
+    "path": "client/warp-audit/core-path-decision-package.example.json",
+    "sha256": null
+  },
+  "status": "PENDING",
+  "decider": null,
+  "role": null,
+  "authority": null,
+  "channel": null,
+  "date": null,
+  "decision": null,
+  "selected_option": null,
+  "justification": null,
+  "conditions": null,
+  "validity": null,
+  "decision_received": false,
+  "option_selected": false,
+  "source_path_authorized": false,
+  "prebuilt_path_authorized": false,
+  "alternative_tool_authorized": false,
+  "stop_path_selected": false,
+  "materialization_authorized": false,
+  "build_authorized": false,
+  "execution_authorized": false,
+  "client_provision_authorized": false,
+  "client_modification_authorized": false,
+  "first_login_authorized": false
+}
