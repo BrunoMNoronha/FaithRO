@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:warp-audit/security-findings",
+  "title": "WARP security findings",
+  "description": "Achados da auditoria estatica do WARP (ETAPA 2P-D). Nao contem fonte de terceiros, segredos, IPs nem caminhos pessoais.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema_version", "project", "commit", "audit_scope", "findings"],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "project": { "type": "string", "const": "WARP" },
+    "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "audit_scope": { "type": "string", "const": "static-pre-build" },
+    "findings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id", "severity", "component", "description", "evidence",
+          "impact", "mitigation", "state", "blocks_next_step", "human_pending"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^W[0-9]+$" },
+          "severity": { "type": "string", "enum": ["CRITICO", "ALTO", "MEDIO", "BAIXO", "INFORMATIVO"] },
+          "component": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 1 },
+          "evidence": { "type": "string", "minLength": 1 },
+          "impact": { "type": "string", "minLength": 1 },
+          "mitigation": { "type": "string", "minLength": 1 },
+          "state": { "type": "string", "enum": ["ABERTO", "ACEITO", "MITIGADO", "FECHADO"] },
+          "blocks_next_step": { "type": "boolean" },
+          "human_pending": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

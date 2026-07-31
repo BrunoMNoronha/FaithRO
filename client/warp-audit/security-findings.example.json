@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "project": "WARP",
+  "commit": "9b1173e9e4e135c68e150704f01186ab5e763acd",
+  "audit_scope": "static-pre-build",
+  "note": "Achados da auditoria estatica do commit fixado (ETAPA 2P-D). Nenhum binario foi executado, compilado, copiado ou modificado. As URLs 'http' presentes nos scripts do WARP sao exclusivamente cabecalhos de licenca GPL (http://www.gnu.org/licenses/); nenhuma superficie de rede foi encontrada no conjunto inspecionado.",
+  "findings": [
+    {
+      "id": "W1",
+      "severity": "ALTO",
+      "component": "distribuicao",
+      "description": "A branch rock_win32 no commit fixado NAO contem fonte C++/Qt nem receita de build (.pro/.pri/CMake/.sln/Makefile). O nucleo do WARP e distribuido apenas como binario prebuilt em win32/ (WARP.exe + Qt5*.dll + runtime MSVC = 29,2 MiB de DLL + 2,5 MiB de EXE).",
+      "evidence": "0 arquivos C++/Qt ou de build na arvore; win32/ contem 24 binarios rastreados; README declara 'Supported Platforms: Windows (Only this version is available as of now)'.",
+      "impact": "A recomendacao de 'compilar do fonte para maxima auditabilidade' (docs/28) NAO e satisfeita por esta branch: o nucleo so existe como binario nao auditavel estaticamente. Usar o WARP exigiria confiar no binario prebuilt OU localizar a fonte real do nucleo em outra origem/branch.",
+      "mitigation": "Antes de qualquer execucao: (a) localizar e auditar a fonte do nucleo C++/Qt, OU (b) tratar win32/WARP.exe como binario de terceiros nao confiavel (execucao local nao elevada, fora da VPS, com varredura). Decisao humana separada exigida.",
+      "state": "ABERTO",
+      "blocks_next_step": true,
+      "human_pending": true
+    },
+    {
+      "id": "W2",
+      "severity": "ALTO",
+      "component": "patch-sensivel/injecao-dll",
+      "description": "O patch CustomDLL reconstroi a import table do cliente para injetar uma DLL arbitraria (lida de Inputs/DLLSpec.yml). O repositorio ja versiona payloads injetaveis: Inputs/CDClient.dll e Inputs/rdll2.asi.",
+      "evidence": "Scripts/Patches/CustomDLL.qjs: GetImpTable + Exe.GetUserInput('$customDLL', D_InFile, ...'Inputs/DLLSpec.yml') + Warp.LoadYaml; blobs Inputs/CDClient.dll e Inputs/rdll2.asi na arvore.",
+      "impact": "Carregar DLL arbitraria no cliente e uma superficie critica de cadeia de suprimentos; os payloads padrao sao binarios opacos nao auditados.",
+      "mitigation": "CustomDLL permanece SENSIVEL — DECISAO SEPARADA. Nunca selecionar por padrao. Se algum dia for necessario, auditar o DLL especifico antes. Nao e necessario para o primeiro acesso.",
+      "state": "ABERTO",
+      "blocks_next_step": false,
+      "human_pending": true
+    },
+    {
+      "id": "W3",
+      "severity": "ALTO",
+      "component": "patches-sensiveis",
+      "description": "Estao presentes os patches sensiveis previstos: DisableProtect (neutraliza HackShield/AhnLab e remove aossdk.dll do import), DisableEncr (envia a senha NAO criptografada no login) e EnableProxy (desvia connect() para funcao custom que reusa o primeiro IP).",
+      "evidence": "Scripts/Patches/DisableProtect.qjs (func NoHShield), DisableEncr.qjs (func NoLoginEncr), EnableProxy.qjs (desvio de CConnection::Connect).",
+      "impact": "Cada um altera protecao, criptografia ou trafego do cliente. Nenhum e necessario para o primeiro acesso basico.",
+      "mitigation": "Permanecem SENSIVEL — DECISAO SEPARADA, com auditoria especifica e autorizacao humana individual. Jamais aplicados automaticamente.",
+      "state": "ABERTO",
+      "blocks_next_step": false,
+      "human_pending": true
+    },
+    {
+      "id": "W4",
+      "severity": "MEDIO",
+      "component": "js/escrita-arquivo",
+      "description": "A camada JS expoe a classe nativa TextFile(caminho, encoding, modo) capaz de abrir caminho arbitrario para escrita ('w'). Normalmente o caminho vem de um dialogo D_OutFile (Save As), mas um script pode fixar o caminho.",
+      "evidence": "Scripts/Extensions/ExtractMsgStrings.qjs:113 new TextFile(outFile, ASCII, 'w'); outFile de Exe.GetUserInput(..., D_OutFile, ..., OUTDIR + ...).",
+      "impact": "Escrita de arquivos nao e sandboxed; depende da confianca nos scripts e do dialogo do usuario. Sem evidencia de path traversal malicioso nos scripts inspecionados.",
+      "mitigation": "Operar somente com os scripts oficiais do commit fixado; nao introduzir scripts de terceiros; no laboratorio, restringir a escrita ao diretorio de saida.",
+      "state": "ABERTO",
+      "blocks_next_step": false,
+      "human_pending": false
+    },
+    {
+      "id": "W5",
+      "severity": "MEDIO",
+      "component": "js/codigo-dinamico",
+      "description": "O framework usa eval() sobre strings construidas para metaprogramacao (registrar nomes de patches/registradores no assistente de sintaxe do editor e recarregar patches).",
+      "evidence": "Scripts/Support/AllFuncs.qjs (ReloadPatch, IdentifyObj, Assign, AssignStr), Class_Register.qjs, Instructions.qjs:896.",
+      "impact": "Avaliacao dinamica de codigo e permitida pelo engine e usada internamente sobre identificadores proprios do WARP (nao derivados do cliente). Risco condicionado a confiar nos scripts oficiais.",
+      "mitigation": "Manter apenas scripts oficiais do commit fixado; nao carregar scripts externos.",
+      "state": "ABERTO",
+      "blocks_next_step": false,
+      "human_pending": false
+    },
+    {
+      "id": "W6",
+      "severity": "MEDIO",
+      "component": "auditabilidade",
+      "description": "Um patch cosmetico (IncrHairs) contem estagios opacos: Warp.Execute([...]) recebe blobs de bytes criptografados/ofuscados decodificados e executados pelo nucleo nativo, reduzindo a auditabilidade estatica desse estagio.",
+      "evidence": "Scripts/Patches/IncrHairs.qjs:453 IncrHairs.stage2 = Warp.Execute([ ...blobs hex opacos... ]). Unica ocorrencia de Warp.Execute e unico arquivo com blobs longos.",
+      "impact": "Baixo para o FaithRO: IncrHairs e cosmetico (estilos de cabelo) e NAO faz parte do conjunto minimo de primeiro acesso.",
+      "mitigation": "Nao selecionar IncrHairs. Registrar como area nao auditavel estaticamente.",
+      "state": "ABERTO",
+      "blocks_next_step": false,
+      "human_pending": false
+    },
+    {
+      "id": "W7",
+      "severity": "MEDIO",
+      "component": "reconhecimento",
+      "description": "O reconhecimento do cliente e heuristico: baseado em Exe.BuildDate (timestamp PE), Exe.Version e casamento de padroes (Exe.FindHex/FindText). NAO ha reconhecimento por hash/checksum nem allowlist de builds exatos.",
+      "evidence": "Ausencia total de sha1/sha256/md5/crc em Scripts e Tables; NemoMap.yml apenas inclui Patch.yml e Input.yml; patches validam por padrao e lancam erro quando nao encontram.",
+      "impact": "Cliente desconhecido nao e rejeitado globalmente; cada patch falha individualmente se seu padrao nao casar. Ha risco de falso positivo (padrao casar em build nao previsto).",
+      "mitigation": "Na futura etapa autorizada, confirmar manualmente que o Ragexe casa com um perfil e conferir o SHA-256 ja registrado antes de qualquer escrita; se nao reconhecer com seguranca, interromper.",
+      "state": "ABERTO",
+      "blocks_next_step": false,
+      "human_pending": true
+    },
+    {
+      "id": "W8",
+      "severity": "INFORMATIVO",
+      "component": "rede/atualizacao/telemetria",
+      "description": "Nao foram encontradas superficies de rede, auto-update, telemetria, execucao de shell ou spawn de processo do sistema no conjunto de scripts inspecionado.",
+      "evidence": "Grep sem resultados relevantes para QNetwork*, QTcpSocket, XMLHttpRequest, fetch, WebSocket, download, QProcess, system(, ShellExecute (como chamada do WARP), LoadLibrary (como chamada do WARP). Referencias a ShellExecuteA/LoadLibraryA/GetProcAddress sao codigo x86 EMITIDO NO CLIENTE por patches, nao chamadas do WARP.",
+      "impact": "Positivo, porem limitado ao conjunto inspecionado (scripts + tabelas). O nucleo nativo (binario) nao foi auditado estaticamente.",
+      "mitigation": "Manter a distincao no relatorio: a conclusao nao abrange o binario prebuilt.",
+      "state": "ACEITO",
+      "blocks_next_step": false,
+      "human_pending": false
+    },
+    {
+      "id": "W9",
+      "severity": "BAIXO",
+      "component": "caminhos/escrita/backup",
+      "description": "A logica de escrita do executavel de saida, backup automatico, atomicidade e tratamento de path traversal reside no nucleo C++/Qt (binario), nao presente como fonte. Do lado JS, a saida usa diretorio Outputs/ por convencao e dialogo de arquivo.",
+      "evidence": "README: Inputs/ (entrada) e Outputs/ (saida) separados; nucleo em win32/ (binario).",
+      "impact": "Separacao entrada/saida, backup e atomicidade sao INCONCLUSIVOS a partir do fonte.",
+      "mitigation": "No laboratorio futuro: trabalhar sobre copia (input-working), preservar input-original, gerar hash antes/depois e backup manual antes de qualquer escrita.",
+      "state": "ABERTO",
+      "blocks_next_step": false,
+      "human_pending": true
+    },
+    {
+      "id": "W10",
+      "severity": "INFORMATIVO",
+      "component": "submodulos",
+      "description": "O unico submodulo declarado e o Wiki (documentacao), nao inicializado. Nenhum submodulo de codigo.",
+      "evidence": ".gitmodules: [submodule \"Wiki\"] url .../WARP.wiki.git; git submodule status vazio.",
+      "impact": "Nenhum.",
+      "mitigation": "Nao inicializar submodulos.",
+      "state": "ACEITO",
+      "blocks_next_step": false,
+      "human_pending": false
+    }
+  ]
+}

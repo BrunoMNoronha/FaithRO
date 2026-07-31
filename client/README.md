@@ -101,8 +101,12 @@ para isso é decidida em
 (**WARP** — `APROVAR COM RESTRIÇÕES`; NEMO atual **rejeitado** por licença
 ausente). A compatibilidade do cliente 2021-11-05 com o servidor está em
 [`docs/29-compatibilidade-cliente-2021-11-05-packetver.md`](../docs/29-compatibilidade-cliente-2021-11-05-packetver.md)
-(`PROVÁVEL`, sem rebuild). Nenhuma dessas etapas modifica o executável sem
-autorização humana; nada do cliente é versionado aqui.
+(`PROVÁVEL`, sem rebuild). A auditoria estática aprofundada do WARP no commit
+fixado está em [`warp-audit/`](warp-audit/) e
+[`docs/30-auditoria-estatica-warp.md`](../docs/30-auditoria-estatica-warp.md)
+(`BLOQUEADO PARA BUILD DO FONTE` — núcleo só prebuilt no commit — e `APROVADO COM
+RESTRIÇÕES` apenas para decidir o caminho do núcleo). Nenhuma dessas etapas
+modifica o executável sem autorização humana; nada do cliente é versionado aqui.
 
 ## Referências
 
