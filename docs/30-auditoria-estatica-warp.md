@@ -2,10 +2,15 @@
 
 > **Status:** AUDITORIA ESTÁTICA CONCLUÍDA / NADA COMPILADO OU EXECUTADO (ETAPA 2P-D).
 > **Data:** 2026-07-31.
-> **Classificação final:** **APROVADO COM RESTRIÇÕES** (para *planejar* um build
-> controlado; ver [§16](#16-decisão-final)).
-> **Escopo:** auditoria estática do código-fonte textual do WARP no commit
-> fixado e preparação de um laboratório **vazio**. O WARP **não** foi compilado
+> **Classificação final:** **BLOQUEADO PARA BUILD DO FONTE** (o núcleo não existe
+> como fonte no commit e não há receita de build — achado W1) **e APROVADO COM
+> RESTRIÇÕES PARA DECIDIR O CAMINHO DO NÚCLEO** (decisão humana separada, ETAPA
+> 2P-E-A). Esta etapa **não** aprova nem planeja diretamente um build do núcleo;
+> ver [§16](#16-decisão-final).
+> **Escopo:** auditoria estática da **camada textual** do WARP (scripts, YAML,
+> tabelas, metadados, documentação) no commit fixado e preparação de um
+> laboratório **vazio**. O **núcleo C++/Qt não está presente como fonte** no
+> commit. O WARP **não** foi compilado
 > nem executado; **nenhum** binário de terceiros foi executado; **nenhum**
 > executável do cliente foi copiado ou modificado; **PACKETVER** não foi
 > alterado; a VPS não foi acessada.
@@ -15,15 +20,20 @@
 
 ## 1. Objetivo
 
-Auditar estaticamente, em profundidade, o código-fonte do WARP no commit fixado
+Auditar estaticamente, em profundidade, a **camada textual** do WARP (scripts,
+YAML, tabelas, metadados) no commit fixado
 `9b1173e9e4e135c68e150704f01186ab5e763acd` e preparar um laboratório local
-isolado para uma **futura** compilação e execução controlada — sem compilar,
-executar, baixar binários, modificar o `Ragexe`, criar conta, acessar a VPS ou
-realizar login. A etapa determina se o WARP pode **avançar para o planejamento**
-de um build controlado e quais controles adicionais serão necessários.
+isolado — sem compilar, executar, baixar binários, modificar o `Ragexe`, criar
+conta, acessar a VPS ou realizar login.
 
-Esta aprovação **não** autoriza build, execução, modificação do cliente,
-preparação do `Ragexe`, acesso ao servidor ou primeiro login.
+Como o núcleo C++/Qt **não** está presente como fonte no commit e **não** há
+receita de build (achado **W1**), esta etapa **não** pode aprovar nem planejar
+diretamente um build do núcleo. A única decisão permitida é **avançar para uma
+etapa humana separada** ([ETAPA 2P-E-A](#18-próxima-etapa-permitida)) que escolha
+o **caminho do núcleo**.
+
+Esta etapa **não** autoriza build, execução, uso do binário prebuilt, modificação
+do cliente, preparação do `Ragexe`, acesso ao servidor ou primeiro login.
 
 ## 2. Contexto
 
@@ -91,9 +101,31 @@ O commit versiona **24 binários** (31,78 MiB):
 - `Inputs/CDClient.dll` e `Inputs/rdll2.asi`: **payloads injetáveis no cliente**
   (usados pelo patch `CustomDLL`).
 
-Todos foram **classificados por metadados** (caminho, blob SHA, tamanho) e
-**nenhum** foi materializado no working tree (via `sparse-checkout`) nem copiado
-para o FaithRO. O checkout seletivo trouxe **somente texto**.
+Contagens e tamanhos vieram **exclusivamente** da árvore Git, dos metadados de
+blobs (`git ls-tree`) e da API oficial do GitHub; **nenhum** binário foi
+materializado no working tree (via `sparse-checkout`), executado ou copiado para o
+FaithRO. O checkout seletivo trouxe **somente texto**. A classificação é **por
+extensão/caminho**, apenas para inventário: **não** constitui juízo de segurança —
+nenhum binário foi declarado seguro nem malicioso, e um blob versionado **não** é
+um arquivo executado. Extensões desconhecidas ou arquivos sem extensão são
+tratados como "desconhecido", não presumidos seguros.
+
+### 5.2 Terminologia: "fonte" × "prebuilt"
+
+Para evitar ambiguidade, este documento distingue:
+
+- **Camada textual auditada** (presente e legível): scripts JavaScript
+  (`.mjs`/`.qjs`/`.ejs`), YAML, tabelas, metadados e documentação.
+- **Núcleo não auditável como fonte** (binário): `WARP.exe`, bibliotecas Qt,
+  runtimes MSVC/DirectX e payloads compilados (`Inputs/*.dll`/`*.asi`).
+- **Fonte C++/Qt do núcleo:** **ausente** no commit fixado.
+- **Receita de build:** **ausente** no commit fixado.
+
+O conteúdo fixado **não** é, portanto, a "fonte completa do WARP" — é a camada
+textual mais um núcleo prebuilt. A presença do arquivo `LICENSE` (GPL-3.0) no
+repositório **não** prova, por si só, que o código-fonte completo correspondente
+ao binário distribuído esteja neste commit. Isto é observação **técnica e de
+conformidade**, **não** parecer jurídico.
 
 ## 6. Cadeia de build
 
@@ -147,11 +179,15 @@ Busca em `Scripts/` por `QNetworkAccessManager/Request/Reply`, `QTcpSocket`,
 `QUdpSocket`, `XMLHttpRequest`, `fetch(`, `WebSocket`, `download`, `auto-update`,
 `telemetry`, `QProcess`, `system(`, `popen`, `ShellExecute`/`CreateProcess`/
 `WinExec` (como chamada do WARP), `LoadLibrary`/`GetProcAddress` (como chamada do
-WARP), `QPluginLoader`, `QSettings`: **nenhuma ocorrência de superfície de rede,
-atualização, telemetria, shell ou plugin no conjunto de scripts inspecionado**.
-As únicas URLs `http` nos scripts são cabeçalhos de licença GPL
-(`http://www.gnu.org/licenses/`). (Achado informativo **W8**; a conclusão **não**
-abrange o binário do núcleo.)
+WARP), `QPluginLoader`, `QSettings`. As únicas URLs `http` nos scripts são
+cabeçalhos de licença GPL (`http://www.gnu.org/licenses/`).
+
+> **Alegações negativas — escopo (D7/W8):** não foram encontrados mecanismos de
+> rede, auto-update, telemetria, shell ou plugin **no conjunto textual
+> efetivamente inspecionado** (scripts e tabelas). O resultado **não** abrange o
+> núcleo prebuilt, as bibliotecas compiladas nem o comportamento dinâmico — que
+> não foram auditados. Ausência de string encontrada **não** é prova de ausência
+> global de capacidade.
 
 ## 9. JavaScript
 
@@ -223,7 +259,12 @@ RISCO DE FALSO POSITIVO:          MÉDIO
 Detalhes em
 [`client/warp-audit/patch-selection.example.json`](../client/warp-audit/patch-selection.example.json).
 
-| Patch | Finalidade | Necessário 1º acesso | Classificação |
+Os campos têm **semântica estática**: `statically_reviewed` = apenas lido
+estaticamente (não aplicado/testado); `candidate_for_first_access` = candidato
+**provável**, não requisito comprovado; `rollback_method` = restauração da cópia
+original (sem inversão automática testada).
+
+| Patch | Finalidade | Candidato ao 1º acesso | Classificação |
 | --- | --- | :-: | --- |
 | `DataFolderFirst` | Ler pasta `data` antes do GRF (NOP em saltos após `g_readFolderFirst`; valida e lança erro se o padrão não casar) | Sim | CANDIDATO MÍNIMO |
 | `CallKoreaClientInfo` | Corrigir `InitClientInfo` para chamar ambos os seletores de `clientinfo` | Sim | CANDIDATO MÍNIMO |
@@ -231,10 +272,13 @@ Detalhes em
 | `EnableDnsSupport` | Resolver host por nome (se `clientinfo` usar domínio) | Não | PENDENTE DE TESTE |
 | `RestoreClientInfo` | Restaurar leitura de `clientinfo` (variante `.ejs`) | Não | PENDENTE DE TESTE |
 
-Todos os candidatos observados fazem **edições de bytes pequenas e
-determinísticas**, com validação prévia (lançam `Error` quando o padrão não é
-encontrado — sem escrita às cegas). Nenhum é obrigatório antes do reconhecimento
-real, teste em cópia isolada e autorização humana.
+`DataFolderFirst` e `CallKoreaClientInfo` permanecem **apenas candidatos revisados
+estaticamente**: **não** aplicados, **não** testados no executável real, **não**
+obrigatórios e **não** comprovadamente suficientes para o primeiro acesso. Todos
+os candidatos fazem **edições de bytes pequenas e determinísticas**, com validação
+prévia (lançam `Error` quando o padrão não é encontrado — sem escrita às cegas),
+mas continuam sujeitos ao reconhecimento real do cliente e a **autorização humana
+posterior**. O merge deste PR **não** os seleciona nem os habilita.
 
 ## 13. Patches sensíveis
 
@@ -266,11 +310,14 @@ caminho pessoal do laboratório **não** é versionado.
   = `rock_win32`; `fsck --full` sem corrupção; `detached HEAD` limpo.
 - **Checkout seletivo:** confirmado que **nenhum** binário (`.dll/.exe/.asi/.png/
   .ttf/.ico`) foi materializado no working tree.
-- **Validador:** `scripts/validate-warp-audit.py` aprova os três JSONs; **14
-  testes negativos** rejeitados (SHA curto, `source_built/binary_created/
-  client_modified=true`, `sha256` inválido, IP, caminho pessoal, drive, path
-  absoluto, travessia, senha/token atribuídos, propriedade extra, `const`
-  errado, JSON inválido) — todos com código de saída ≠ 0 e sem traceback.
+- **Validador:** `scripts/validate-warp-audit.py` aprova os três JSONs; **19
+  testes negativos** rejeitados (SHA curto, `sha256` inválido, tipo incorreto,
+  propriedade extra, `source_built/client_modified=true`, **`prebuilt_use_authorized=true`**,
+  **`core_build_possible_with_pinned_commit=true`**, `execution_allowed/
+  final_selection_allowed=true`, `human_authorization_required=false`, **patch
+  sensível marcado como candidato/classificação mínima**, IP, caminho pessoal,
+  drive, path absoluto, travessia, senha/token atribuídos, JSON inválido) — todos
+  com código de saída ≠ 0 e **sem traceback**.
 - **Hardening do diff:** varredura por `.exe/.dll/.grf/.zip`, `password/senha/
   secret/token`, `C:\Users\`, `/home/`, `BEGIN PRIVATE KEY`, `Authorization:` —
   ocorrências revisadas individualmente (ver [§15.4](#154-notas-da-varredura)).
@@ -341,14 +388,19 @@ Nenhuma reversão de VPS, banco, cliente ou firewall é necessária.
 | Reprodutibilidade | Baixa neste commit | Parcial |
 | Laboratório | Criado, vazio, isolado | Não |
 
-**Resultado:** **APROVADO COM RESTRIÇÕES** para *planejar* um build controlado.
-As restrições materiais são W1 (definir o caminho: auditar a fonte do núcleo ou
-tratar o prebuilt como binário de terceiros), o tratamento separado dos patches
-sensíveis (W2/W3) e as mitigações de laboratório para W4/W7/W9.
+**Resultado:** **BLOQUEADO PARA BUILD DO FONTE** (achado W1: sem fonte do núcleo e
+sem receita de build no commit fixado) **e APROVADO COM RESTRIÇÕES PARA DECIDIR O
+CAMINHO DO NÚCLEO**. Esta etapa **não** aprova nem planeja diretamente um build; a
+única decisão permitida é **avançar para a ETAPA 2P-E-A** (decisão humana separada
+sobre o caminho do núcleo — [§18](#18-próxima-etapa-permitida)). As restrições
+materiais são W1, o tratamento separado dos patches sensíveis (W2/W3) e as
+mitigações de laboratório para W4/W7/W9.
 
 ```text
+BUILD_DO_NUCLEO_POSSIVEL_COM_O_COMMIT_FIXADO=false
 BUILD_AUTORIZADO=false
 EXECUCAO_AUTORIZADA=false
+USO_DO_PREBUILT_AUTORIZADO=false
 MODIFICACAO_CLIENTE_AUTORIZADA=false
 PRIMEIRO_LOGIN_AUTORIZADO=false
 ```
@@ -365,12 +417,26 @@ PRIMEIRO_LOGIN_AUTORIZADO=false
 
 ## 18. Próxima etapa permitida
 
-Somente após revisão e integração humana desta etapa: **ETAPA 2P-E** —
-planejamento e autorização do primeiro build controlado do WARP, mantendo
-separadas as autorizações para (1) instalar/selecionar toolchain, (2) compilar,
-(3) executar o WARP sem cliente, (4) testar o reconhecimento do `Ragexe`, (5)
-modificar uma cópia do `Ragexe`, (6) primeiro login. **Nenhuma** dessas
-autorizações é concedida aqui.
+Somente após revisão e integração humana desta etapa: **ETAPA 2P-E-A — decisão
+humana sobre o caminho do núcleo do WARP** (etapa **apenas decisória e
+documental**). Ela **não** autoriza automaticamente download/uso do prebuilt,
+compilação, execução, fornecimento do `Ragexe`, modificação do cliente, criação de
+conta, acesso à VPS nem primeiro login. Alternativas obrigatórias, nenhuma
+selecionada automaticamente:
+
+1. **Localizar uma origem oficial** contendo o **código-fonte completo e a receita
+   de build** correspondentes ao commit/binário, e então auditá-los.
+2. **Considerar excepcionalmente o prebuilt**, sujeito a: hashes completos,
+   verificação de assinatura, análise estática binária, varredura antivírus,
+   sandbox, execução **sem** cliente e **autorização humana específica**.
+3. **Rejeitar o WARP** e avaliar outra ferramenta.
+4. **Interromper** a preparação do cliente.
+
+Somente **após** a decisão do caminho do núcleo é que se poderia cogitar uma
+futura etapa de build/execução, mantendo separadas as autorizações para
+toolchain, compilação, execução sem cliente, reconhecimento do `Ragexe`,
+modificação de uma cópia do `Ragexe` e primeiro login. **Nenhuma** é concedida
+aqui.
 
 ## Estado de verificação
 
@@ -378,8 +444,9 @@ autorizações é concedida aqui.
   receita no commit; superfície nativa (`Exe`/`Warp`) e ausência de rede/shell nos
   scripts; reconhecimento heurístico sem hash; comportamento dos patches
   candidatos e sensíveis.
-- **Inferência/decisão:** APROVADO COM RESTRIÇÕES para planejar o build; W1 como
-  restrição material; patches sensíveis fora do mínimo.
+- **Inferência/decisão:** BLOQUEADO PARA BUILD DO FONTE (W1) e APROVADO COM
+  RESTRIÇÕES apenas para **decidir o caminho do núcleo** (ETAPA 2P-E-A); patches
+  sensíveis fora do mínimo; uso do prebuilt não autorizado.
 - **Pendência:** decisão humana sobre o caminho do núcleo (fonte × prebuilt) e
   sobre cada patch sensível; reconhecimento real e teste de login em etapas
   futuras autorizadas.

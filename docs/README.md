@@ -47,7 +47,7 @@ apenas os organiza por categoria e registra estado e dependências.
 | [26-pacote-decisao-humana-primeiro-build-beam.md](26-pacote-decisao-humana-primeiro-build-beam.md) | Pacote de decisão humana e registro de decisão em branco do primeiro build (decisão não tomada; não concede autorização; decisão não executa o build) | Cliente/build/segurança | validado | não iniciado (decisão humana pendente) | 19, 20, 21, 22, 23, 24, 25 | 2026-07-26 |
 | [28-decisao-ferramenta-preparacao-cliente.md](28-decisao-ferramenta-preparacao-cliente.md) | Decisão da ferramenta de preparação (hex) do executável do cliente: WARP `APROVAR COM RESTRIÇÕES`, NEMO atual (4144) `REJEITADO` por licença ausente; não autoriza execução | Cliente/segurança | validado | não iniciado (autorização humana pendente) | 09, 16, 17, 29 | 2026-07-27 |
 | [29-compatibilidade-cliente-2021-11-05-packetver.md](29-compatibilidade-cliente-2021-11-05-packetver.md) | Reconciliação do cliente 2021-11-05 com `PACKETVER=20211103`: compatibilidade `PROVÁVEL`, sem rebuild do servidor; teste de login controlado pendente | Cliente/protocolo | validado | não iniciado | 09, 12 | 2026-07-27 |
-| [30-auditoria-estatica-warp.md](30-auditoria-estatica-warp.md) | Auditoria estática aprofundada do WARP (commit fixado) e laboratório vazio: `APROVADO COM RESTRIÇÕES` para planejar build; núcleo só prebuilt no commit (W1); patches sensíveis fora do mínimo; não autoriza build/execução/modificação do cliente | Cliente/build/segurança | validado | não iniciado (build não autorizado) | 16, 28, 29 | 2026-07-31 |
+| [30-auditoria-estatica-warp.md](30-auditoria-estatica-warp.md) | Auditoria estática aprofundada do WARP (commit fixado) e laboratório vazio: `BLOQUEADO PARA BUILD DO FONTE` (núcleo só prebuilt no commit — W1) e `APROVADO COM RESTRIÇÕES` apenas para decidir o caminho do núcleo (2P-E-A); patches sensíveis fora do mínimo; não autoriza build/execução/uso do prebuilt/modificação do cliente | Cliente/build/segurança | validado | não iniciado (build não autorizado) | 16, 28, 29 | 2026-07-31 |
 | [99-checklists.md](99-checklists.md) | Checklists de PR, deploy, balanceamento | Todos | validado | não aplicável | — | 2026-07-10 |
 
 [^1]: No documento 03, "parcialmente implantado" significa apenas que a
@@ -80,8 +80,9 @@ apenas os organiza por categoria e registra estado e dependências.
   hex: WARP aprovado com restrições; NEMO atual rejeitado por licença ausente;
   não autoriza execução),
   [30](30-auditoria-estatica-warp.md) (auditoria estática aprofundada do WARP no
-  commit fixado e laboratório vazio; `APROVADO COM RESTRIÇÕES` para planejar
-  build; não autoriza build, execução nem modificação do cliente).
+  commit fixado e laboratório vazio; `BLOQUEADO PARA BUILD DO FONTE` e `APROVADO
+  COM RESTRIÇÕES` apenas para decidir o caminho do núcleo (2P-E-A); não autoriza
+  build, execução, uso do prebuilt nem modificação do cliente).
 - **Patcher e build auditável do Beam:**
   [23](23-planejamento-primeiro-build-controlado-beam.md) (planejamento do
   primeiro build controlado; build ainda não autorizado),

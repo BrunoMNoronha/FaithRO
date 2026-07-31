@@ -13,10 +13,14 @@ Garantias (ver docs/30-auditoria-estatica-warp.md, FASE N):
   * Independente do CWD (resolve caminhos a partir da raiz do repositorio).
   * Valida tipos, campos, const, enum, pattern, required e additionalProperties.
   * Exige SHA de 40 caracteres (commit) e 64 (sha256) quando presentes.
-  * Impede flags de build/execucao/modificacao em `true`.
+  * Impede flags de build/execucao/modificacao/uso-do-prebuilt em `true`.
   * Rejeita caminhos absolutos e travessia em campos `path`.
   * Rejeita IPs literais, segredos, tokens e caminhos pessoais.
   * Codigo de saida != 0 em falha; sem traceback para entradas invalidas.
+
+Este validador NAO concede autorizacao. Uma classificacao positiva, o merge do
+PR, a presenca de um patch candidato ou a criacao do laboratorio NAO equivalem a
+autorizacao de build, execucao, uso do prebuilt ou modificacao do cliente.
 """
 import json
 import os
@@ -172,6 +176,7 @@ def forbidden_flags(data, name, errors):
     must_be_false = [
         "source_executed", "source_built", "binary_created", "client_modified",
         "execution_allowed", "final_selection_allowed",
+        "prebuilt_use_authorized", "core_build_possible_with_pinned_commit",
     ]
     for key in must_be_false:
         if key in data and data[key] is not False:

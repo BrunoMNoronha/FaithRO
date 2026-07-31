@@ -3,7 +3,12 @@
   "project": "WARP",
   "commit": "9b1173e9e4e135c68e150704f01186ab5e763acd",
   "audit_scope": "static-pre-build",
-  "note": "Selecao candidata de patches para o PRIMEIRO ACESSO. Nada aqui autoriza execucao ou aplicacao. Todo patch permanece candidato ate reconhecimento real do Ragexe, teste em copia isolada e autorizacao humana.",
+  "note": "Selecao CANDIDATA de patches, obtida por REVISAO ESTATICA. Nada aqui autoriza execucao ou aplicacao. Nenhum patch foi aplicado nem testado no executavel real. Nenhum patch e comprovadamente suficiente para o primeiro acesso. O merge deste PR NAO seleciona, habilita nem autoriza qualquer patch. Todo patch permanece candidato ate reconhecimento real do Ragexe, teste em copia isolada e autorizacao humana especifica.",
+  "field_semantics": {
+    "statically_reviewed": "O patch foi lido estaticamente. NAO significa que foi aplicado, testado ou validado dinamicamente.",
+    "candidate_for_first_access": "Candidato PROVAVEL ao primeiro acesso. NAO e requisito comprovado nem suficiencia demonstrada.",
+    "rollback_method": "Metodo de reversao previsto. Descreve restauracao da COPIA original integral; nenhuma inversao automatica do patch foi testada."
+  },
   "execution_allowed": false,
   "final_selection_allowed": false,
   "human_authorization_required": true,
@@ -13,11 +18,11 @@
       "purpose": "Fazer o cliente ler a pasta 'data' antes do GRF (habilita assets/clientinfo locais).",
       "reads": [],
       "byte_behavior": "NOP/ajuste de saltos condicionais apos a comparacao de g_readFolderFirst; SetUint16/SetNOPs em poucos bytes.",
-      "validated": true,
+      "statically_reviewed": true,
       "on_pattern_missing": "throw Error (patch falha, sem escrita as cegas)",
       "dependencies": [],
-      "reversible": true,
-      "needed_for_first_access": true,
+      "rollback_method": "restaurar a copia original integral; nenhuma reversao automatica do patch foi testada",
+      "candidate_for_first_access": true,
       "classification": "CANDIDATO MINIMO"
     },
     {
@@ -25,11 +30,11 @@
       "purpose": "Corrigir InitClientInfo/InitDefaultClientInfo para chamar SelectKoreaClientInfo e SelectClientInfo (leitura consistente de clientinfo).",
       "reads": [],
       "byte_behavior": "Ajuste de switch/jmp em torno do PUSH da string 'Unknown ServiceType !!!'.",
-      "validated": true,
+      "statically_reviewed": true,
       "on_pattern_missing": "throw Error",
       "dependencies": [],
-      "reversible": true,
-      "needed_for_first_access": true,
+      "rollback_method": "restaurar a copia original integral; nenhuma reversao automatica do patch foi testada",
+      "candidate_for_first_access": true,
       "classification": "CANDIDATO MINIMO"
     },
     {
@@ -37,11 +42,11 @@
       "purpose": "Permitir multiplos GRFs (util se o FaithRO distribuir GRF proprio ao lado do oficial).",
       "reads": [],
       "byte_behavior": "Reescreve a rotina de abertura de GRF; usa GetProcAddress do proprio cliente (codigo emitido no cliente).",
-      "validated": true,
+      "statically_reviewed": true,
       "on_pattern_missing": "throw Error",
       "dependencies": [],
-      "reversible": true,
-      "needed_for_first_access": false,
+      "rollback_method": "restaurar a copia original integral; nenhuma reversao automatica do patch foi testada",
+      "candidate_for_first_access": false,
       "classification": "PENDENTE DE TESTE"
     },
     {
@@ -49,11 +54,11 @@
       "purpose": "Resolver host por nome (se o clientinfo usar dominio em vez de IP).",
       "reads": [],
       "byte_behavior": "Emite chamada a LoadLibraryA/ws2_32 no cliente para suporte a DNS.",
-      "validated": true,
+      "statically_reviewed": true,
       "on_pattern_missing": "throw Error",
       "dependencies": [],
-      "reversible": true,
-      "needed_for_first_access": false,
+      "rollback_method": "restaurar a copia original integral; nenhuma reversao automatica do patch foi testada",
+      "candidate_for_first_access": false,
       "classification": "PENDENTE DE TESTE"
     },
     {
@@ -61,11 +66,11 @@
       "purpose": "Restaurar/forcar leitura do clientinfo (variante .ejs).",
       "reads": [],
       "byte_behavior": "A confirmar (template .ejs).",
-      "validated": false,
+      "statically_reviewed": false,
       "on_pattern_missing": "a confirmar",
       "dependencies": [],
-      "reversible": true,
-      "needed_for_first_access": false,
+      "rollback_method": "restaurar a copia original integral; nenhuma reversao automatica do patch foi testada",
+      "candidate_for_first_access": false,
       "classification": "PENDENTE DE TESTE"
     }
   ],
@@ -75,7 +80,7 @@
       "internal_name": "NoHShield",
       "purpose": "Neutralizar checagens do HackShield/AhnLab e remover aossdk.dll do import.",
       "why_sensitive": "Desativa protecao/anticheat do cliente.",
-      "needed_for_first_access": false,
+      "candidate_for_first_access": false,
       "classification": "SENSIVEL — DECISAO SEPARADA"
     },
     {
@@ -83,7 +88,7 @@
       "internal_name": "NoLoginEncr",
       "purpose": "Fazer o login usar a senha original (nao criptografada) em vez da criptografada.",
       "why_sensitive": "Altera criptografia do login; envia senha em claro.",
-      "needed_for_first_access": false,
+      "candidate_for_first_access": false,
       "classification": "SENSIVEL — DECISAO SEPARADA"
     },
     {
@@ -91,7 +96,7 @@
       "internal_name": "CustomDLL",
       "purpose": "Injetar DLL arbitraria reescrevendo a import table (payloads padrao: Inputs/CDClient.dll, Inputs/rdll2.asi).",
       "why_sensitive": "Carregamento de DLL arbitraria no cliente; risco de cadeia de suprimentos.",
-      "needed_for_first_access": false,
+      "candidate_for_first_access": false,
       "classification": "SENSIVEL — DECISAO SEPARADA"
     },
     {
@@ -99,7 +104,7 @@
       "internal_name": "EnableProxy",
       "purpose": "Desviar connect() em CConnection::Connect para funcao custom que reusa o primeiro IP.",
       "why_sensitive": "Altera roteamento/trafego de rede do cliente.",
-      "needed_for_first_access": false,
+      "candidate_for_first_access": false,
       "classification": "SENSIVEL — DECISAO SEPARADA"
     }
   ],

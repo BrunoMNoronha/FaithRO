@@ -16,9 +16,12 @@
   "client_modified": false,
   "audit_scope": "static-pre-build",
   "acquisition_method": "git clone --filter=blob:none --no-checkout + sparse-checkout excluindo binarios",
-  "source_code_present_at_commit": false,
+  "core_cpp_source_present_at_commit": false,
   "build_recipe_present": false,
+  "core_build_possible_with_pinned_commit": false,
+  "prebuilt_use_authorized": false,
   "engine_distribution": "prebuilt-binary-only (win32/)",
+  "w1_note": "W1: a camada textual (scripts .qjs/.mjs, YAML, tabelas, docs) e auditavel; o NUCLEO C++/Qt NAO esta presente como fonte no commit e NAO ha receita de build. O nucleo e fornecido apenas como binario prebuilt (win32/WARP.exe + Qt + runtimes). A presenca da GPL no repositorio nao prova, por si so, que o codigo-fonte completo correspondente ao binario esteja neste commit. Nao e parecer juridico.",
   "tree_object_sha1": "1aebae06d5c71a145afc35cc72fcf5c210a08758",
   "tree_digest_algorithm": "sha256",
   "tree_digest": "c09b48906f940f9d579a7f1eef94e0108ba791aa2bc8fae0c9b4633154a0521a",
@@ -44,7 +47,8 @@
     { "path": "win32/GATE.dll", "classification": "biblioteca-compilada-warp", "size": 0 },
     { "path": "win32/YAML.dll", "classification": "biblioteca-compilada-warp", "size": 0 }
   ],
-  "tracked_binaries_note": "Lista representativa (24 binarios no total: 20 .dll + 3 .exe + 1 .asi = 31,78 MiB). NENHUM foi materializado no working tree (sparse-checkout) nem copiado ao FaithRO. size=0 quando registrado apenas via metadados de arvore.",
+  "tracked_binaries_note": "Lista representativa (24 binarios no total: 20 .dll + 3 .exe + 1 .asi = 31,78 MiB). Contagens e tamanhos vieram EXCLUSIVAMENTE da arvore Git e dos metadados de blobs (git ls-tree) e da API oficial do GitHub; NENHUM binario foi materializado no working tree (sparse-checkout), executado ou copiado ao FaithRO. size=0 quando registrado apenas via metadados de arvore. Um blob versionado NAO e um arquivo executado.",
+  "binary_classification_note": "A classificacao e por extensao/caminho e serve apenas para inventario; NAO constitui juizo de seguranca (nenhum binario foi declarado seguro nem malicioso). Extensoes desconhecidas ou arquivos sem extensao foram tratados como 'desconhecido' e nao presumidos seguros.",
   "submodules": [
     { "name": "Wiki", "path": "Wiki", "url": "https://github.com/Neo-Mind/WARP.wiki.git", "initialized": false, "type": "documentacao" }
   ],
