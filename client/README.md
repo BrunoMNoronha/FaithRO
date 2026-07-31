@@ -109,8 +109,12 @@ RESTRIÇÕES` apenas para decidir o caminho do núcleo). A investigação do cam
 núcleo e o pacote de decisão humana estão em
 [`docs/31-decisao-caminho-nucleo-warp.md`](../docs/31-decisao-caminho-nucleo-warp.md)
 (fonte não localizada; prebuilt com proveniência parcial; decisão humana pendente).
-Nenhuma dessas etapas modifica o executável sem autorização humana; nada do cliente
-é versionado aqui.
+A decisão humana foi registrada em
+[`docs/32-registro-decisao-caminho-nucleo-warp.md`](../docs/32-registro-decisao-caminho-nucleo-warp.md)
+(`PREBUILT_PATH` **selecionado apenas para planejamento** da auditoria binária
+offline; prebuilt não materializado nem executado; flags operacionais `false`; o
+merge não autoriza a próxima ação). Nenhuma dessas etapas modifica o executável sem
+autorização humana; nada do cliente é versionado aqui.
 
 ## Referências
 
@@ -119,3 +123,4 @@ Nenhuma dessas etapas modifica o executável sem autorização humana; nada do c
 - [`docs/09-cliente-baseline-protocolo.md`](../docs/09-cliente-baseline-protocolo.md)
 - [`docs/28-decisao-ferramenta-preparacao-cliente.md`](../docs/28-decisao-ferramenta-preparacao-cliente.md)
 - [`docs/29-compatibilidade-cliente-2021-11-05-packetver.md`](../docs/29-compatibilidade-cliente-2021-11-05-packetver.md)
+- [`docs/32-registro-decisao-caminho-nucleo-warp.md`](../docs/32-registro-decisao-caminho-nucleo-warp.md)

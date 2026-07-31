@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "project": "WARP",
+  "stage": "2P-E-A2",
+  "record_type": "human-decision-real",
+  "note": "Registro REAL e separado (fora do template .example.json) da decisao humana do caminho do nucleo do WARP. Reproduz fielmente a decisao, a justificativa e as condicoes fornecidas por entrada humana. A selecao de PREBUILT_PATH vale SOMENTE para submeter o caminho ao planejamento da auditoria binaria offline: NAO significa confianca no binario, aprovacao de uso, nem autorizacao para materializar, baixar, extrair, executar ou enviar o binario. Todas as autorizacoes operacionais permanecem false. O merge do futuro PR nao autoriza a proxima acao; cada gate futuro exige decisao humana separada. STOP_PATH permanece disponivel a qualquer momento e nao e falha do projeto.",
+  "status": "DECIDED",
+  "commit_pinned": "9b1173e9e4e135c68e150704f01186ab5e763acd",
+  "package_ref": {
+    "path": "client/warp-audit/core-path-decision-package.example.json",
+    "commit_pinned": "9b1173e9e4e135c68e150704f01186ab5e763acd"
+  },
+  "template_ref": {
+    "path": "client/warp-audit/core-path-decision-record.example.json",
+    "must_remain_blank": true
+  },
+  "decider": "BrunoMNoronha",
+  "role": "Responsavel tecnico e mantenedor do projeto FaithRO - Laos Deos",
+  "authority": "Responsavel tecnico e mantenedor do projeto FaithRO - Laos Deos",
+  "channel": "ChatGPT - conversa do projeto FaithRO",
+  "date": "2026-07-31",
+  "decision": {
+    "option": "PREBUILT_PATH",
+    "meaning": "Selecionado apenas como o caminho que sera submetido ao planejamento da auditoria binaria offline. A palavra 'selecionado' nao significa que o binario esta autorizado para uso, materializacao ou execucao."
+  },
+  "justification": "O WARP e atualmente o unico caminho tecnico identificado para preparar o executavel legalmente possuido pelo responsavel pelo FaithRO, mas seu nucleo e distribuido apenas como binario prebuilt, sem fonte C++/Qt correspondente, receita de build, hash externo publicado ou reprodutibilidade demonstrada.\n\nSeleciono PREBUILT_PATH somente para permitir o planejamento de uma auditoria binaria offline, gradual, reproduzivel e sujeita a autorizacoes humanas separadas.\n\nEsta selecao nao significa confianca no binario, aprovacao de seu uso ou autorizacao para materializa-lo ou executa-lo. O caminho podera ser interrompido e substituido por STOP_PATH a qualquer momento se a analise futura identificar risco incompativel com as politicas de seguranca, manutencao ou propriedade intelectual do FaithRO.",
+  "conditions": [
+    {
+      "n": 1,
+      "text": "Esta decisao autoriza somente o registro documental de PREBUILT_PATH e a preparacao do plano da futura auditoria binaria offline."
+    },
+    {
+      "n": 2,
+      "text": "O binario prebuilt nao pode ser baixado, materializado, extraido, executado ou enviado a qualquer servico nesta etapa."
+    },
+    {
+      "n": 3,
+      "text": "Uma futura materializacao dependera de autorizacao humana especifica e devera ocorrer somente a partir do blob do commit oficial fixado (WARP commit 9b1173e9e4e135c68e150704f01186ab5e763acd)."
+    },
+    {
+      "n": 4,
+      "text": "Antes de qualquer execucao futura, deverao existir gates separados para: calculo local de SHA-256; verificacao Authenticode; inventario PE; analise de imports, recursos e dependencias; analise estatica offline; verificacao por mecanismos locais de seguranca; preparacao de sandbox descartavel; bloqueio de rede; baseline de processos, arquivos e registro; plano de descarte e rollback."
+    },
+    {
+      "n": 5,
+      "text": "A autorizacao para materializar o prebuilt nao autorizara sua execucao."
+    },
+    {
+      "n": 6,
+      "text": "A autorizacao para executar o prebuilt sem cliente nao autorizara fornecer o Ragexe."
+    },
+    {
+      "n": 7,
+      "text": "O Ragexe original devera permanecer preservado fora do diretorio operacional. Qualquer teste futuro utilizara somente copia isolada e descartavel."
+    },
+    {
+      "n": 8,
+      "text": "Nenhum arquivo do cliente, executavel modificado, GRF, DLL, arquivo .asi ou asset proprietario podera ser versionado, publicado, enviado a VPS ou distribuido."
+    },
+    {
+      "n": 9,
+      "text": "Os patches CustomDLL, DisableProtect, DisableEncr e EnableProxy permanecem bloqueados e exigirao decisao humana individual."
+    },
+    {
+      "n": 10,
+      "text": "Os patches DataFolderFirst e CallKoreaClientInfo permanecem somente candidatos revisados estaticamente. Nao estao aprovados, nao foram aplicados e nao sao considerados suficientes para o primeiro acesso."
+    },
+    {
+      "n": 11,
+      "text": "Nao alterar PACKETVER, nao recompilar o rAthena e nao adaptar o servidor por tentativa. A compatibilidade atual permanece PROVAVEL ate teste controlado."
+    },
+    {
+      "n": 12,
+      "text": "Nao acessar a VPS, nao criar conta de teste e nao alterar firewall, MariaDB ou servicos nesta etapa."
+    },
+    {
+      "n": 13,
+      "text": "Nao executar o Beam Patcher. O Beam pertence ao fluxo de atualizacao de conteudo proprio/licenciado e nao resolve a preparacao do executavel."
+    },
+    {
+      "n": 14,
+      "text": "Qualquer comportamento inesperado, alerta de seguranca, dependencia nao explicada, tentativa de rede ou inconsistencia de proveniencia deve interromper automaticamente o fluxo e retornar a decisao para revisao humana."
+    },
+    {
+      "n": 15,
+      "text": "STOP_PATH permanece disponivel a qualquer momento e nao deve ser tratado como falha do projeto."
+    }
+  ],
+  "future_binary_audit_gates": [
+    "calculo local de SHA-256",
+    "verificacao Authenticode",
+    "inventario PE",
+    "analise de imports, recursos e dependencias",
+    "analise estatica offline",
+    "verificacao por mecanismos locais de seguranca",
+    "preparacao de sandbox descartavel",
+    "bloqueio de rede",
+    "baseline de processos, arquivos e registro",
+    "plano de descarte e rollback"
+  ],
+  "blocked_patches": [
+    "CustomDLL",
+    "DisableProtect",
+    "DisableEncr",
+    "EnableProxy"
+  ],
+  "reviewed_only_candidates": [
+    "DataFolderFirst",
+    "CallKoreaClientInfo"
+  ],
+  "authorizations": {
+    "human_decision_required": true,
+    "human_decision_received": true,
+    "option_selected": true,
+    "source_path_authorized": false,
+    "prebuilt_path_authorized": false,
+    "alternative_tool_authorized": false,
+    "stop_path_selected": false,
+    "materialization_authorized": false,
+    "build_authorized": false,
+    "execution_authorized": false,
+    "client_provision_authorized": false,
+    "client_modification_authorized": false,
+    "first_login_authorized": false
+  }
+}
