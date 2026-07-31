@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Validador dos artefatos da auditoria estatica do WARP (ETAPAS 2P-D / 2P-E-A / 2P-E-A2).
+Validador dos artefatos do WARP (ETAPAS 2P-D / 2P-E-A / 2P-E-A2 / 2P-E-B-PREBUILT).
 
 Valida os JSONs versionados em client/warp-audit/ contra os schemas
 (draft-07, subconjunto) em client/warp-audit/schemas/ e contra regras de
@@ -82,6 +82,36 @@ EXPECTED_BLOCKED_PATCHES = {
 EXPECTED_REVIEWED_CANDIDATES = {
     "DataFolderFirst", "CallKoreaClientInfo",
 }
+
+# --- ETAPA 2P-E-B-PREBUILT: plano da auditoria binaria offline (templates) ---
+PLAN_TEMPLATE = "binary-audit-plan.example.json"
+PLAN_SCHEMA = "binary-audit-plan.schema.json"
+GATE_TEMPLATE = "binary-audit-gate-record.example.json"
+GATE_SCHEMA = "binary-audit-gate-record.schema.json"
+EXPECTED_GATE_COUNT = 17  # GATE 0..16
+# Flags documentais que PODEM ser true no plano; todas as demais sao operacionais.
+PLAN_DOC_TRUE_FLAGS = {"plan_creation_authorized", "plan_created"}
+# Palavras-chave de JSON Schema que o mini-validador (validate_node) implementa.
+IMPLEMENTED_SCHEMA_KEYWORDS = {
+    "$schema", "$id", "title", "description", "$comment",
+    "type", "const", "enum", "pattern", "minLength", "minimum",
+    "required", "additionalProperties", "properties", "items", "minItems",
+}
+# Conteudo proibido nos templates de planejamento (defesa em profundidade).
+DOWNLOAD_CMD_RE = re.compile(
+    r"(?i)\b(curl|wget|invoke-webrequest|iwr|start-bitstransfer|bitsadmin|"
+    r"certutil|git\s+clone|scp|sftp|aria2c|Start-BitsTransfer)\b")
+BINARY_URL_RE = re.compile(
+    r"(?i)\bhttps?://\S+\.(exe|dll|zip|7z|rar|grf|rgz|thor|asi|msi|bin|cab)\b")
+WARP_EXEC_RE = re.compile(r"(?i)\bWARP(?:_console|_bench)?\.exe\b")
+CLIENT_EXEC_RE = re.compile(r"(?i)\bragexe[a-z0-9_]*\.exe\b")
+BIN_HASH_RE = re.compile(r"(?<![0-9a-fA-F])[0-9a-fA-F]{64}(?![0-9a-fA-F])")
+IMPLICIT_APPROVAL_RES = [
+    re.compile(r"(?i)\b(prebuilt|binario|nucleo)\b[^.\n]{0,24}\b"
+              r"(aprovad[oa]|validad[oa]|homologad[oa]|confiavel|seguro)\b"),
+    re.compile(r"(?i)\b(aprovad[oa]|validad[oa]|homologad[oa])\s+(o\s+|do\s+)?"
+              r"(prebuilt|binario|nucleo)\b"),
+]
 # Deteccao de placeholders em identidade/autoridade/canal (nao inventados).
 PLACEHOLDER_RE = re.compile(
     r"(?i)(<[^>]*>|\bplaceholder\b|\bexample\b|\bexemplo\b|\bto ?do\b|\btbd\b|"
@@ -389,10 +419,20 @@ def validate_real_record(record, schema, package, filename, errors):
     return errors
 
 
+def check_decisions_dir_names(names, errors):
+    """decisions/ so pode conter registros reais do caminho do nucleo. Qualquer
+    outro arquivo (ex.: um registro de gate colocado indevidamente) e reprovado."""
+    for n in names:
+        if not (n.startswith("core-path-decision-record-") and n.endswith(".json")):
+            errors.append(f"decisions/: arquivo inesperado '{n}' "
+                          f"(registros de gate devem ficar em diretorio separado)")
+
+
 def validate_real_records(errors):
     """Percorre client/warp-audit/decisions/ e valida cada registro real."""
     if not os.path.isdir(DECISIONS_DIR):
         return  # sem registros reais ainda: nada a validar
+    check_decisions_dir_names(sorted(os.listdir(DECISIONS_DIR)), errors)
     package = {}
     pkg_path = os.path.join(AUDIT_DIR, "core-path-decision-package.example.json")
     try:
@@ -426,6 +466,207 @@ def validate_real_records(errors):
                 print(f"    - {e}")
         else:
             print(f"[OK]    decisions/{name}")
+
+
+def schema_keyword_violations(node, where, viol):
+    """Reprova se um schema usar keyword de validacao nao implementada pelo
+    mini-validador (evita 'validacao aparente')."""
+    if not isinstance(node, dict):
+        return
+    for k in node:
+        if k not in IMPLEMENTED_SCHEMA_KEYWORDS:
+            viol.append(f"{where}: keyword de schema nao suportada pelo validador: {k}")
+    props = node.get("properties")
+    if isinstance(props, dict):
+        for name, sub in props.items():
+            schema_keyword_violations(sub, f"{where}.properties.{name}", viol)
+    items = node.get("items")
+    if isinstance(items, dict):
+        schema_keyword_violations(items, f"{where}.items", viol)
+    ap = node.get("additionalProperties")
+    if isinstance(ap, dict):
+        schema_keyword_violations(ap, f"{where}.additionalProperties", viol)
+
+
+def planning_content_scan(data, label, errors):
+    """Regras de conteudo dos templates de planejamento (sem materializacao)."""
+    for where, text in iter_strings(data):
+        if DOWNLOAD_CMD_RE.search(text):
+            errors.append(f"{label}{where}: comando de download proibido no plano")
+        if BINARY_URL_RE.search(text):
+            errors.append(f"{label}{where}: URL direta para binario proibida")
+        if WARP_EXEC_RE.search(text):
+            errors.append(f"{label}{where}: comando de execucao do WARP proibido")
+        if CLIENT_EXEC_RE.search(text):
+            errors.append(f"{label}{where}: comando de execucao do cliente proibido")
+        if BIN_HASH_RE.search(text):
+            errors.append(f"{label}{where}: possivel hash de binario (64 hex) proibido no plano")
+        for rx in IMPLICIT_APPROVAL_RES:
+            if rx.search(text):
+                errors.append(f"{label}{where}: texto sugere aprovacao implicita do prebuilt")
+                break
+
+
+def _ref_ok(rel_path, field, label, errors):
+    if not isinstance(rel_path, str) or not rel_path:
+        errors.append(f"{label}: {field} ausente")
+        return
+    if rel_path.startswith("/") or rel_path.startswith("\\") or DRIVE_PATH_RE.match(rel_path):
+        errors.append(f"{label}: {field} nao pode ser caminho absoluto")
+    if TRAVERSAL_RE.search(rel_path):
+        errors.append(f"{label}: {field} nao pode conter travessia '..'")
+    if not os.path.isfile(os.path.join(REPO_ROOT, rel_path)):
+        errors.append(f"{label}: {field} referencia arquivo inexistente")
+
+
+def validate_binary_audit_plan(plan, schema, record, filename, errors):
+    """Valida o template do plano da auditoria binaria (importavel nos testes)."""
+    kv = []
+    schema_keyword_violations(schema, "binary-audit-plan.schema", kv)
+    errors.extend(kv)
+    validate_node(plan, schema, filename, errors)
+    security_scan(plan, errors)
+    planning_content_scan(plan, filename, errors)
+
+    if not isinstance(plan, dict):
+        errors.append(f"{filename}: plano nao e objeto")
+        return errors
+
+    # Referencias relativas existentes.
+    _ref_ok(plan.get("source_decision_record"), "source_decision_record", filename, errors)
+
+    # Commit fixado consistente com a ETAPA 2P-E-A2.
+    commit = plan.get("upstream_commit_pinned")
+    if commit != EXPECTED_PINNED_COMMIT:
+        errors.append(f"{filename}: upstream_commit_pinned != commit fixado ({EXPECTED_PINNED_COMMIT})")
+    rec_commit = record.get("commit_pinned") if isinstance(record, dict) else None
+    if rec_commit is not None and commit != rec_commit:
+        errors.append(f"{filename}: upstream_commit_pinned difere do registro 2P-E-A2 ({rec_commit})")
+
+    # Gates: quantidade, IDs unicos e ordenados 0..N, nomes, STOP_PATH previsto.
+    gates = plan.get("gates")
+    if not isinstance(gates, list) or len(gates) < EXPECTED_GATE_COUNT:
+        errors.append(f"{filename}: gates deve ter ao menos {EXPECTED_GATE_COUNT} itens")
+        gates = gates if isinstance(gates, list) else []
+    ids = [g.get("gate_id") for g in gates if isinstance(g, dict)]
+    if ids != list(range(0, len(gates))):
+        errors.append(f"{filename}: gate_id deve ser unico e sequencial 0..N em ordem")
+    for i, g in enumerate(gates):
+        if not isinstance(g, dict):
+            errors.append(f"{filename}: gates[{i}] nao e objeto")
+            continue
+        if not str(g.get("gate_name", "")).strip():
+            errors.append(f"{filename}: gates[{i}].gate_name vazio")
+        if "STOP_PATH" not in (g.get("exit_options") or []):
+            errors.append(f"{filename}: gates[{i}] deve prever STOP_PATH em exit_options")
+
+    # Criterios de interrupcao nao vazios.
+    if not plan.get("stop_criteria"):
+        errors.append(f"{filename}: stop_criteria nao pode ser vazio")
+
+    # Conjuntos de patches exatos e disjuntos.
+    bp = plan.get("blocked_patches")
+    if not isinstance(bp, list) or set(bp) != EXPECTED_BLOCKED_PATCHES:
+        errors.append(f"{filename}: blocked_patches deve ser exatamente {sorted(EXPECTED_BLOCKED_PATCHES)}")
+    roc = plan.get("reviewed_only_candidates")
+    if not isinstance(roc, list) or set(roc) != EXPECTED_REVIEWED_CANDIDATES:
+        errors.append(f"{filename}: reviewed_only_candidates deve ser exatamente {sorted(EXPECTED_REVIEWED_CANDIDATES)}")
+    if isinstance(bp, list) and isinstance(roc, list) and (set(bp) & set(roc)):
+        errors.append(f"{filename}: blocked_patches e reviewed_only_candidates devem ser disjuntos")
+
+    # Autorizacoes: somente as documentais em true; todas as demais em false.
+    auth = plan.get("authorizations")
+    if not isinstance(auth, dict):
+        errors.append(f"{filename}: 'authorizations' ausente")
+    else:
+        for k, v in auth.items():
+            if k in PLAN_DOC_TRUE_FLAGS:
+                if v is not True:
+                    errors.append(f"{filename}: authorizations.{k} deve ser true")
+            elif v is not False:
+                errors.append(f"{filename}: authorizations.{k} deve ser false (autorizacao operacional)")
+    return errors
+
+
+def validate_binary_audit_gate_template(gate, schema, filename, errors):
+    """Valida o template EM BRANCO do registro de decisao por gate."""
+    kv = []
+    schema_keyword_violations(schema, "binary-audit-gate-record.schema", kv)
+    errors.extend(kv)
+    validate_node(gate, schema, filename, errors)
+    security_scan(gate, errors)
+    planning_content_scan(gate, filename, errors)
+
+    if not isinstance(gate, dict):
+        errors.append(f"{filename}: template de gate nao e objeto")
+        return errors
+
+    if gate.get("status") != "PENDING":
+        errors.append(f"{filename}: status do template de gate deve ser PENDING")
+    for k in ("gate_id", "gate_name", "decision", "decider", "role", "authority",
+              "channel", "date", "justification", "conditions", "evidence_required",
+              "supersedes", "rollback", "notes"):
+        if gate.get(k) is not None:
+            errors.append(f"{filename}: campo '{k}' deve ser null no template (sem decisao real)")
+    pref = gate.get("plan_ref")
+    _ref_ok(pref.get("path") if isinstance(pref, dict) else None, "plan_ref.path", filename, errors)
+
+    auth = gate.get("authorizations")
+    if not isinstance(auth, dict):
+        errors.append(f"{filename}: 'authorizations' ausente")
+    else:
+        if auth.get("human_decision_required") is not True:
+            errors.append(f"{filename}: authorizations.human_decision_required deve ser true")
+        for k, v in auth.items():
+            if k == "human_decision_required":
+                continue
+            if v is not False:
+                errors.append(f"{filename}: authorizations.{k} deve ser false no template")
+    return errors
+
+
+def validate_binary_audit(errors):
+    """Orquestra a validacao dos templates da ETAPA 2P-E-B-PREBUILT."""
+    plan_path = os.path.join(AUDIT_DIR, PLAN_TEMPLATE)
+    gate_path = os.path.join(AUDIT_DIR, GATE_TEMPLATE)
+    if not (os.path.isfile(plan_path) or os.path.isfile(gate_path)):
+        return  # etapa ainda nao presente
+    record = {}
+    rec_path = os.path.join(DECISIONS_DIR, "core-path-decision-record-2026-07-31.json")
+    try:
+        record = load_json(rec_path)
+    except Fail:
+        record = {}
+    # Plano
+    perr = []
+    try:
+        plan = load_json(plan_path)
+        pschema = load_json(os.path.join(SCHEMA_DIR, PLAN_SCHEMA))
+        validate_binary_audit_plan(plan, pschema, record, PLAN_TEMPLATE, perr)
+    except Fail as exc:
+        perr.append(str(exc))
+    if perr:
+        errors.extend(perr)
+        print(f"[FALHA] {PLAN_TEMPLATE}: {len(perr)} problema(s)")
+        for e in perr:
+            print(f"    - {e}")
+    else:
+        print(f"[OK]    {PLAN_TEMPLATE}")
+    # Template de gate
+    gerr = []
+    try:
+        gate = load_json(gate_path)
+        gschema = load_json(os.path.join(SCHEMA_DIR, GATE_SCHEMA))
+        validate_binary_audit_gate_template(gate, gschema, GATE_TEMPLATE, gerr)
+    except Fail as exc:
+        gerr.append(str(exc))
+    if gerr:
+        errors.extend(gerr)
+        print(f"[FALHA] {GATE_TEMPLATE}: {len(gerr)} problema(s)")
+        for e in gerr:
+            print(f"    - {e}")
+    else:
+        print(f"[OK]    {GATE_TEMPLATE}")
 
 
 def main():
@@ -467,11 +708,15 @@ def main():
     validate_real_records(real_errors)
     all_errors.extend(real_errors)
 
+    binary_errors = []
+    validate_binary_audit(binary_errors)
+    all_errors.extend(binary_errors)
+
     if all_errors:
         print(f"\nValidacao FALHOU com {len(all_errors)} problema(s).")
         return 1
     print(f"\nValidacao OK: {len(ARTIFACTS)} artefatos, schemas, regras de seguranca, "
-          f"cross-checks e registro(s) real(is) de decisao.")
+          f"cross-checks, registro(s) real(is) de decisao e plano da auditoria binaria.")
     return 0
 
 

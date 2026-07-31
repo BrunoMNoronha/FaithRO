@@ -33,7 +33,9 @@ auditoria. O relatório completo está em
 | [`core-path-decision-package.example.json`](core-path-decision-package.example.json) | (2P-E-A) Investigação do caminho do núcleo: fonte não localizada, proveniência do prebuilt, opções, matriz, requisitos de auditoria binária; `PENDING_HUMAN_DECISION`. |
 | [`core-path-decision-record.example.json`](core-path-decision-record.example.json) | (2P-E-A) Registro de decisão humana **em branco** — template (`status=PENDING`, campos `null`, flags `false`). Permanece intocado. |
 | [`decisions/core-path-decision-record-2026-07-31.json`](decisions/core-path-decision-record-2026-07-31.json) | (2P-E-A2) Registro **real** da decisão humana: `PREBUILT_PATH` **selecionado apenas para planejamento**; flags operacionais `false`. |
-| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json` (registro real). |
+| [`binary-audit-plan.example.json`](binary-audit-plan.example.json) | (2P-E-B-PREBUILT) **Template** do plano da auditoria binária offline em 17 gates independentes; `PLANNED_NOT_AUTHORIZED`; nenhuma autorização operacional; nenhum binário materializado. |
+| [`binary-audit-gate-record.example.json`](binary-audit-gate-record.example.json) | (2P-E-B-PREBUILT) **Template em branco** do registro de decisão por gate (`status=PENDING`, campos `null`, autoriza no máximo um gate; sem autorização transitiva). |
+| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json` e `binary-audit-gate-record.schema.json`. |
 
 ## Garantias desta etapa
 
@@ -73,8 +75,16 @@ template continua vazio, que o registro real contém a decisão, que a opção �
 `PREBUILT_PATH`, que nenhuma autorização operacional está `true`, que
 identidade/autoridade não são placeholders, que a data é válida, que justificativa e
 condições não estão vazias, que pacote e registro usam o mesmo commit fixado e que
-propriedades extras são rejeitadas. Usa **apenas a biblioteca padrão** do Python e
-não acessa a rede.
+propriedades extras são rejeitadas. Desde a ETAPA 2P-E-B-PREBUILT também valida os
+**templates de planejamento** ([`binary-audit-plan.example.json`](binary-audit-plan.example.json)
+e [`binary-audit-gate-record.example.json`](binary-audit-gate-record.example.json)):
+gates com IDs únicos e ordenados, `STOP_PATH` previsto, critérios de interrupção não
+vazios, conjuntos exatos de patches bloqueados/candidatos, commit consistente com o
+registro 2P-E-A2, template de gate em branco, ausência de comando de download, de URL
+direta para binário, de comando de execução do WARP/cliente, de hash de binário como
+evidência e de texto que sugira aprovação implícita do prebuilt; e confirma que as
+palavras-chave dos schemas são implementadas pelo validador. Usa **apenas a
+biblioteca padrão** do Python e não acessa a rede.
 
 ## Decisão do caminho do núcleo (2P-E-A)
 
@@ -93,6 +103,20 @@ offline. O prebuilt **não** foi materializado nem executado; **todas** as flags
 operacionais permanecem `false`; o template continua **em branco**; o merge do PR
 **não** autoriza a próxima ação; **cada gate futuro exige decisão humana separada**.
 
+## Plano da auditoria binária offline (2P-E-B-PREBUILT)
+
+O **plano** da futura auditoria binária offline está em
+[`binary-audit-plan.example.json`](binary-audit-plan.example.json) e em
+[docs/33](../../docs/33-plano-auditoria-binaria-offline-warp.md): **17 gates
+independentes** (0–16), cada um com decisão humana própria e `STOP_PATH`. Estes são
+**artefatos de planejamento** — templates. **Nenhum** binário foi baixado,
+materializado, extraído ou executado; **nenhum** gate operacional está autorizado;
+todas as autorizações operacionais permanecem `false`; o merge do PR **não** autoriza
+o GATE 1. O template de decisão por gate
+([`binary-audit-gate-record.example.json`](binary-audit-gate-record.example.json))
+permanece em branco; o **futuro registro real** de cada gate deverá ser criado em
+diretório separado, autorizando **no máximo um gate**, sem autorização transitiva.
+
 ## Propriedade intelectual
 
 WARP é **GPL-3.0** (uso apenas local; binário não versionado no FaithRO). `Ragexe`,
@@ -104,4 +128,7 @@ empacotar ou compartilhar (ver [docs/16](../../docs/16-politica-distribuicao-cli
 - [docs/28](../../docs/28-decisao-ferramenta-preparacao-cliente.md) — decisão da ferramenta.
 - [docs/29](../../docs/29-compatibilidade-cliente-2021-11-05-packetver.md) — compatibilidade do cliente.
 - [docs/30](../../docs/30-auditoria-estatica-warp.md) — relatório desta auditoria.
+- [docs/31](../../docs/31-decisao-caminho-nucleo-warp.md) — decisão do caminho do núcleo.
+- [docs/32](../../docs/32-registro-decisao-caminho-nucleo-warp.md) — registro da decisão humana.
+- [docs/33](../../docs/33-plano-auditoria-binaria-offline-warp.md) — plano da auditoria binária offline.
 - [docs/16](../../docs/16-politica-distribuicao-cliente.md) — política de distribuição.
