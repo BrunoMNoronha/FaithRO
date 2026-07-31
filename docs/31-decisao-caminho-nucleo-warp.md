@@ -2,13 +2,17 @@
 
 > **Status:** PACOTE DE DECISÃO HUMANA PREPARADO / NENHUMA OPÇÃO SELECIONADA (ETAPA 2P-E-A).
 > **Data:** 2026-07-31.
-> **Classificação da investigação:** **PREBUILT COM PROVENIÊNCIA PARCIAL**
-> (fonte não localizada; prebuilt de origem oficial, sem hash/assinatura/receita/
-> reprodutibilidade — custody FRACA). Esta classificação **não** é uma decisão
-> humana.
+> **Classificação da investigação:** **PREBUILT COM PROVENIÊNCIA PARCIAL** —
+> retrato pontual de 2026-07-31 (fonte não localizada **no escopo pesquisado**;
+> blob do prebuilt presente no repositório oficial, mas sem hash publicado,
+> assinatura verificada, receita ou reprodutibilidade — custody FRACA por
+> critérios objetivos, ver [§6](#6-proveniência-do-prebuilt)). Esta classificação
+> **não** é uma decisão humana e **não** valida o binário.
 > **Escopo:** investigação documental e preparação de um pacote de decisão humana.
-> **Nada** foi materializado, compilado ou executado; nenhuma opção foi
-> selecionada; nenhuma autorização operacional foi concedida.
+> **Nada** foi materializado, baixado, compilado ou executado; **nenhuma** opção
+> foi selecionada; o registro de decisão permanece **em branco**; **nenhuma**
+> autorização operacional foi concedida; o merge do PR **não** constitui decisão
+> humana.
 > Continua [30](30-auditoria-estatica-warp.md); observa
 > [16](16-politica-distribuicao-cliente.md) e [28](28-decisao-ferramenta-preparacao-cliente.md).
 
@@ -49,37 +53,48 @@ Somente fontes oficiais, via API/páginas oficiais, **sem baixar binários**:
 
 ## 5. Resultado da busca por fonte
 
-| Verificação | Resultado |
-| --- | --- |
-| Fonte C++/Qt do núcleo em **alguma** branch | **Não** (`src/build = 0` em todas as 10 branches) |
-| Receita de build (`.pro/.pri/CMake/.sln/Makefile`) | **Não** (nenhuma branch) |
-| Tags / Releases | **0 / 0** |
-| Wiki documenta build a partir do fonte | **Não** |
-| Repositório de fonte separado do mantenedor | **Não** (`sfui` em C++ é lib de 2015 do Google Code, `NOASSERTION`, não relacionada) |
-| Issues sobre "build from source" | **0** |
+Retrato pontual da consulta de **2026-07-31** (API oficial, com paginação); os
+números são o resultado dessa consulta, não uma verdade permanente.
 
-**Correspondência fonte-binário: `FONTE NÃO LOCALIZADA`.** O código-fonte C++/Qt
-do núcleo do WARP não é publicado oficialmente (repositório descrito como "Win App
-Revamp Package", linguagem GitHub = JavaScript).
+| Verificação | Resultado observado |
+| --- | --- |
+| Fonte C++/Qt do núcleo em **alguma** branch | Não localizada (`src/build = 0` nas 10 branches observadas) |
+| Receita de build (`.pro/.pri/CMake/.sln/Makefile`) | Não localizada (nenhuma branch observada) |
+| Tags / Releases | 0 / 0 (observados) |
+| Wiki documenta build a partir do fonte | Não |
+| Repositório de fonte separado do mantenedor | Não localizado (`sfui` em C++ é lib de 2015 do Google Code, `NOASSERTION`, sem relação demonstrada) |
+| Issues sobre "build from source" | 0 (observadas) |
+
+**Correspondência fonte-binário: `FONTE NÃO LOCALIZADA NO ESCOPO PESQUISADO`.** A
+fonte C++/Qt do núcleo e uma receita de build correspondente **não foram
+localizadas** no conjunto de branches, tags, releases, Wiki, issues, documentação e
+repositórios oficiais pesquisados nesta etapa (repositório descrito como "Win App
+Revamp Package", linguagem GitHub = JavaScript). **Ausência de evidência no escopo
+pesquisado não é prova de inexistência.**
 
 ## 6. Proveniência do prebuilt
 
 Por **metadados oficiais** (sem materializar o binário):
 
-| Item | Resultado |
+| Item | Resultado observado |
 | --- | --- |
-| PREBUILT TEM ORIGEM OFICIAL | **SIM** (commit direto do mantenedor no repo oficial) |
-| COMMIT DE INTRODUÇÃO IDENTIFICADO | **SIM** (`b5f4b6a1f8d3`, 2020-11-26, "Added the Binaries & DLL") |
-| Commits que tocam `win32/WARP.exe` | 21 (todos por Neo / Neo Mind; sem CI/automação) |
+| Blob presente no repositório **oficial** | **SIM** — o blob está versionado no repo oficial; introdução/atualizações são rastreáveis no histórico Git. **Não** significa binário autenticado nem validado. |
+| Commit de introdução (SHA completo) | `b5f4b6a1f8d326fd2e1d882c5ffaf107f2a6dea0` (abrev. `b5f4b6a1f8d3`), 2020-11-26, "Added the Binaries & DLL" |
+| Commits que tocam `win32/WARP.exe` (observados) | 21 |
+| Autoria (metadados Git) | atribuída à identidade **Neo / Neo Mind** do repo oficial; **não** comprova ambiente de build, identidade civil, integridade do binário nem custódia |
 | `win32/WARP.exe` (blob / tamanho) | `c853da42d18dfe090b4e941b435d989311faf3dc` / 1.137.152 bytes |
-| FONTE CORRESPONDENTE IDENTIFICADA | **NÃO** |
-| RECEITA DE BUILD CORRESPONDENTE | **NÃO** |
-| HASH OFICIAL PUBLICADO | **NÃO** (sem releases/tags) |
-| ASSINATURA DOCUMENTADA | **NÃO** (Authenticode eventual no PE não materializada nem verificada) |
-| REPRODUTIBILIDADE DEMONSTRADA | **NÃO** |
-| CADEIA DE CUSTÓDIA | **FRACA** |
+| Fonte correspondente identificada | **NÃO** |
+| Receita de build correspondente | **NÃO** |
+| Hash oficial publicado | **NÃO** (sem releases/tags) |
+| Assinatura verificada | **NÃO** (Authenticode eventual no PE não materializada nem verificada) |
+| Reprodutibilidade demonstrada | **NÃO** |
+| Binário materializado / comportamento analisado | **NÃO / NÃO** |
 
-Não se conclui que o prebuilt é seguro nem malicioso.
+**Cadeia de custódia: `FRACA`** — derivada objetivamente destes critérios (não é
+juízo subjetivo): blob no repo oficial *(positivo)*; histórico rastreável
+*(positivo)*; fonte correspondente, receita de build, hash externo publicado,
+assinatura verificada, release/tag, CI/build provenance e reprodutibilidade
+*(todos ausentes)*. **Não se conclui que o prebuilt é seguro nem malicioso.**
 
 ## 7. Lacunas
 
@@ -90,43 +105,59 @@ Não se conclui que o prebuilt é seguro nem malicioso.
 
 ## 8. Alternativas
 
-- **Fonte oficial (SOURCE_PATH):** `NÃO DISPONÍVEL`.
-- **Prebuilt oficial (PREBUILT_PATH):** `ADEQUADO COM RESTRIÇÕES` — só sob
-  auditoria binária offline futura e autorização humana específica.
-- **Outra ferramenta (ALTERNATIVE_TOOL):** `INCONCLUSIVO` — NEMO atual (4144)
-  permanece **rejeitado** (licença ausente + binários versionados, [28](28-decisao-ferramenta-preparacao-cliente.md));
-  nenhuma outra ferramenta com fonte completa + receita foi localizada nesta etapa.
-- **Interromper (STOP_PATH):** `ADEQUADO` — manter o servidor em homologação de
-  infraestrutura e aguardar cadeia de confiança melhor.
+Cada opção é apenas **elegível para consideração humana** (`selected=false`).
+
+- **Fonte oficial (SOURCE_PATH):** `NÃO DISPONÍVEL` — não elegível (fonte não
+  localizada no escopo pesquisado).
+- **Prebuilt oficial (PREBUILT_PATH):** `ELEGÍVEL PARA CONSIDERAÇÃO EXCEPCIONAL` —
+  único caminho WARP tecnicamente identificado, porém **insuficiente** para
+  execução sem **auditoria binária offline futura** e **decisão humana
+  excepcional**; sem materialização/download/execução nesta etapa; **sujeito a
+  rejeição**.
+- **Outra ferramenta (ALTERNATIVE_TOOL):** `INCONCLUSIVO` — **nenhuma alternativa
+  materialmente superior foi localizada nesta etapa**; NEMO atual (4144) permanece
+  rejeitado pela política do projeto ([28](28-decisao-ferramenta-preparacao-cliente.md));
+  uma pesquisa dedicada futura pode encontrar outro candidato; nenhuma foi aprovada.
+- **Interromper (STOP_PATH):** `ADEQUADO` — **opção de primeira classe**, não é
+  falha do projeto: preserva segurança e propriedade intelectual, mantém o servidor
+  disponível para homologação de infraestrutura, é reversível se surgir ferramenta
+  melhor e não exige rollback.
 
 ## 9. Matriz de decisão
 
 | Alternativa | Fonte completa | Build reproduzível | Licença | Proveniência | Risco supply chain | Risco de PI | Esforço | Permite avançar? |
 | --- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
 | Fonte oficial do WARP localizada | Não | Não | GPL-3.0 | — | — | — | — | **Não** (`NÃO DISPONÍVEL`) |
-| Prebuilt oficial do WARP | Não | Não | GPL-3.0 | Parcial (oficial, custody FRACA) | Alto | Baixo (uso local) | Alto (auditoria binária) | **Com restrições** |
+| Prebuilt oficial do WARP | Não | Não | GPL-3.0 | Parcial (blob oficial, custody FRACA) | Alto | Baixo (uso local) | Alto (auditoria binária) | **Elegível p/ consideração excepcional** |
 | Outra ferramenta aberta | ? | ? | ? | ? | ? | ? | Alto | **Inconclusivo** |
 | Cliente-base alternativo legal | — | — | — | — | Médio | Alto (proprietário) | Alto | **Inconclusivo** |
-| Interromper o fluxo | — | — | — | — | Nenhum | Nenhum | Nenhum | **Sim** |
+| Interromper o fluxo | — | — | — | — | Nenhum | Nenhum | Nenhum | **Adequado (1ª classe)** |
 
-Estados: `ADEQUADO`, `ADEQUADO COM RESTRIÇÕES`, `INCONCLUSIVO`, `INADEQUADO`,
-`NÃO DISPONÍVEL`.
+Estados: `ADEQUADO`, `ELEGÍVEL PARA CONSIDERAÇÃO EXCEPCIONAL`, `INCONCLUSIVO`,
+`INADEQUADO`, `NÃO DISPONÍVEL`. "Elegível" significa que a opção **pode ser
+discutida** pelo decisor, **não** que possa ser executada.
 
 ## 10. Recomendação técnica
 
-**`SUBMETER CAMINHO DO PREBUILT À DECISÃO HUMANA EXCEPCIONAL`** — como **opção**,
-nunca como autorização. Justificativa: `SOURCE_PATH` está indisponível; nenhuma
-ferramenta alternativa superior foi localizada; restam `PREBUILT_PATH` (apenas sob
-auditoria binária offline futura + autorização específica) e `STOP_PATH`. Dada a
-**custody FRACA**, **rejeitar** ou **interromper** permanecem opções igualmente
-válidas para o decisor humano. **Nenhuma opção é selecionada aqui.**
+**`SUBMETER PREBUILT_PATH E STOP_PATH AO DECISOR, SEM PREFERÊNCIA AUTOMÁTICA`.** O
+caminho do prebuilt é tecnicamente o **único** caminho WARP identificado, mas
+possui **cadeia de confiança insuficiente** para execução sem auditoria binária e
+decisão humana excepcional. `SOURCE_PATH` está indisponível; `ALTERNATIVE_TOOL` é
+inconclusivo. A recomendação desta etapa é **submeter conjuntamente**
+`PREBUILT_PATH` e `STOP_PATH` ao decisor humano, **sem preferência operacional
+automática** e sem induzir aprovação. **Nenhuma opção é selecionada aqui**, e esta
+recomendação **não** é uma autorização.
 
 ## 11. Decisão humana necessária
 
-O decisor deve, no registro
-[`core-path-decision-record.example.json`](../client/warp-audit/core-path-decision-record.example.json),
-selecionar **uma** opção e definir condições. Enquanto `status = PENDING`, o fluxo
-permanece bloqueado. O registro **não** concede autorização a si mesmo.
+O arquivo
+[`core-path-decision-record.example.json`](../client/warp-audit/core-path-decision-record.example.json)
+é **somente template** e deve permanecer **em branco** (`status = PENDING`, campos
+`null`, flags `false`). A decisão real futura deve ser registrada em um **artefato
+separado, fora do template**, com identidade, autoridade, canal e data vindos de
+**entrada humana** — o agente **não** pode inventá-los. O merge deste PR **não**
+preenche o registro nem seleciona opção; o registro **não** concede autorização a
+si mesmo. Enquanto não houver decisão humana explícita, o fluxo permanece bloqueado.
 
 ## 12. Autorizações separadas (todas negadas nesta etapa)
 
@@ -147,6 +178,11 @@ Criados/atualizados (apenas texto): `docs/31` (este documento),
 correspondentes, `scripts/validate-warp-audit.py` (estendido), e atualizações em
 `docs/README.md`, `client/warp-audit/README.md`, `client/README.md`. Não alterados:
 `client/patcher/`, documentos do Beam, PR #41.
+
+Os SHA-256 das referências no pacote usam a estratégia canônica **SHA-256 do
+conteúdo do blob Git (normalizado a LF)**, reproduzível por
+`git show <rev>:<caminho> | sha256sum` — **não** o working tree (que pode ter CRLF
+no Windows).
 
 ## 14. Passos futuros
 
@@ -201,8 +237,9 @@ Somente após **decisão humana explícita e revisada** registrada em
   sem build-from-source; proveniência do prebuilt (commit introdutor, autoria,
   blob/tamanho) por metadados.
 - **Inferência/decisão:** classificação da investigação = PREBUILT COM
-  PROVENIÊNCIA PARCIAL; recomendação técnica = submeter o prebuilt à decisão humana
-  excepcional (não é autorização).
+  PROVENIÊNCIA PARCIAL (retrato pontual); recomendação técnica = submeter
+  `PREBUILT_PATH` **e** `STOP_PATH` ao decisor **sem preferência automática** (não é
+  autorização); nenhuma opção selecionada.
 - **Pendência:** decisão humana do caminho do núcleo; auditoria binária offline se
   o prebuilt for escolhido.
 - **Nota:** decisão técnica e de conformidade do projeto, **não** parecer jurídico.

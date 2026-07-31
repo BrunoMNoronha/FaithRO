@@ -7,6 +7,7 @@
   "additionalProperties": false,
   "required": [
     "schema_version", "project", "stage", "note", "package_ref", "status",
+    "human_decision_required", "human_decision_received",
     "decider", "role", "authority", "channel", "date", "decision",
     "selected_option", "justification", "conditions", "validity",
     "decision_received", "option_selected",
@@ -31,6 +32,8 @@
       }
     },
     "status": { "type": "string", "const": "PENDING" },
+    "human_decision_required": { "type": "boolean", "const": true },
+    "human_decision_received": { "type": "boolean", "const": false },
     "decider": { "type": "null" },
     "role": { "type": "null" },
     "authority": { "type": "null" },

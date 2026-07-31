@@ -2,12 +2,14 @@
   "schema_version": 1,
   "project": "WARP",
   "stage": "2P-E-A",
-  "note": "Registro de decisao humana do caminho do nucleo. Permanece EM BRANCO ate uma decisao humana explicita e revisada. Este registro NAO pode conceder autorizacao a si mesmo; a autorizacao operacional depende de etapas futuras separadas.",
+  "note": "SOMENTE template. Deve permanecer EM BRANCO. Nao preencher este .example.json. A decisao real futura deve usar um artefato separado, fora do template, com identidade/autoridade/canal/data vindos de entrada humana (o agente nao pode inventa-los). O merge do PR nao preenche o registro nem seleciona opcao; este registro nao concede autorizacao a si mesmo.",
   "package_ref": {
     "path": "client/warp-audit/core-path-decision-package.example.json",
     "sha256": null
   },
   "status": "PENDING",
+  "human_decision_required": true,
+  "human_decision_received": false,
   "decider": null,
   "role": null,
   "authority": null,

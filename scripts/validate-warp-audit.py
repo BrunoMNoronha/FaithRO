@@ -182,6 +182,7 @@ def forbidden_flags(data, name, errors):
         "execution_allowed", "final_selection_allowed",
         "prebuilt_use_authorized", "core_build_possible_with_pinned_commit",
         # ETAPA 2P-E-A: pacote e registro de decisao do caminho do nucleo.
+        "human_decision_received",
         "decision_received", "option_selected", "source_path_authorized",
         "prebuilt_path_authorized", "alternative_tool_authorized",
         "stop_path_selected", "materialization_authorized", "build_authorized",
@@ -217,11 +218,15 @@ def cross_checks(errors):
         errors.append("pacote: state deve ser PENDING_HUMAN_DECISION")
     if rec.get("status") != "PENDING":
         errors.append("registro: status deve ser PENDING")
-    for flag in ("decision_received", "option_selected"):
+    for flag in ("decision_received", "option_selected", "human_decision_received"):
         if pkg.get(flag) is not False or rec.get(flag) is not False:
             errors.append(f"contradicao pacote/registro: '{flag}' deve ser false em ambos")
     if rec.get("selected_option") is not None:
         errors.append("registro: selected_option deve permanecer null")
+    # Nenhuma opcao do pacote pode estar selecionada (defesa em profundidade).
+    for i, opt in enumerate(pkg.get("options", [])):
+        if opt.get("selected") is not False:
+            errors.append(f"pacote: options[{i}].selected deve ser false")
 
 
 def main():
