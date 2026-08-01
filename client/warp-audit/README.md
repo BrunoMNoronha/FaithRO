@@ -38,7 +38,9 @@ auditoria. O relatório completo está em
 | [`decisions/binary-audit-gate-00-decision-record-2026-07-31.json`](decisions/binary-audit-gate-00-decision-record-2026-07-31.json) | (2P-E-C0-A) Registro **real** da autorização humana **exclusiva do GATE 0** (reconfirmação de proveniência por metadados): `AUTHORIZED_FOR_SINGLE_GATE`; GATE 0 autorizado, **não iniciado**; GATE 1 proibido. |
 | [`evidence/binary-audit-gate-00-provenance-evidence-2026-08-01.json`](evidence/binary-audit-gate-00-provenance-evidence-2026-08-01.json) | (2P-E-C0-B) Evidência **real** da execução do GATE 0 por metadados oficiais: `COMPLETED_PASS`; proveniência consistente; **nenhum** conteúdo de blob acessado; Git object ID ≠ SHA-256 local; GATE 1 ainda proibido. |
 | [`decisions/binary-audit-gate-01-decision-record-2026-08-01.json`](decisions/binary-audit-gate-01-decision-record-2026-08-01.json) | (2P-E-C1-A) Registro **real** da autorização humana **exclusiva do GATE 1** (autorização para materialização): `AUTHORIZE_MATERIALIZATION`; **decisão-humana-apenas** (nada materializado/baixado/hasheado/executado); escopo fechado ao blob fixado; `materialization_authorized=true`; **GATE 2 não autorizado**. |
-| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json`, `binary-audit-gate-00-decision-record-real.schema.json`, `binary-audit-gate-00-provenance-evidence.schema.json` e `binary-audit-gate-01-decision-record-real.schema.json`. |
+| [`decisions/binary-audit-gate-02-decision-record-2026-08-01.json`](decisions/binary-audit-gate-02-decision-record-2026-08-01.json) | (2P-E-C2-A) Registro **real** da autorização humana **exclusiva do GATE 2** (materialização e integridade local): `AUTHORIZE_GATE_2`; `gate_2_authorized=true`, `hashing_authorized=true`; **GATE 3 não autorizado**. |
+| [`evidence/binary-audit-gate-02-integrity-evidence-2026-08-01.json`](evidence/binary-audit-gate-02-integrity-evidence-2026-08-01.json) | (2P-E-C2-A) Evidência **real** do GATE 2: `COMPLETED_PASS`; **1** blob materializado fora do repo, tamanho `1137152` e Git blob OID **iguais** aos esperados; SHA-256 local registrado (≠ Git OID); arquivo **removido**; nenhuma execução/inspeção/sandbox/distribuição; **binário não versionado**. |
+| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json`, `binary-audit-gate-00-decision-record-real.schema.json`, `binary-audit-gate-00-provenance-evidence.schema.json`, `binary-audit-gate-01-decision-record-real.schema.json`, `binary-audit-gate-02-decision-record-real.schema.json` e `binary-audit-gate-02-integrity-evidence.schema.json`. |
 
 ## Garantias desta etapa
 
@@ -94,7 +96,16 @@ decisão `AUTHORIZE_MATERIALIZATION`, escopo fechado ao blob fixado por `const`,
 `false` (sem autorização transitiva), `binary_sha256=null` e demais invariantes de
 não-materialização, e cross-checks com o plano, a decisão e a evidência do GATE 0 e
 com o squash do PR #48. Os testes positivos e negativos estão em
-[`scripts/test-warp-audit-gate-01.py`](../../scripts/test-warp-audit-gate-01.py). Usa
+[`scripts/test-warp-audit-gate-01.py`](../../scripts/test-warp-audit-gate-01.py).
+Desde a ETAPA 2P-E-C2-A valida a **decisão e a evidência do GATE 2**
+([`decisions/binary-audit-gate-02-decision-record-2026-08-01.json`](decisions/binary-audit-gate-02-decision-record-2026-08-01.json)
+e [`evidence/binary-audit-gate-02-integrity-evidence-2026-08-01.json`](evidence/binary-audit-gate-02-integrity-evidence-2026-08-01.json)):
+decisão `AUTHORIZE_GATE_2` com escopo fechado, evidência `COMPLETED_PASS` com
+`materialized_file_count=1`, tamanho e Git blob OID iguais aos esperados, SHA-256 local
+válido (64 hex) e **distinto** do Git OID, `temporary_file_removed=true`,
+`gate_3_authorized=false`, e cross-checks com o plano, o GATE 1 e a evidência do
+GATE 0 e com o squash do PR #49 (testes em
+[`scripts/test-warp-audit-gate-02.py`](../../scripts/test-warp-audit-gate-02.py)). Usa
 **apenas a biblioteca padrão** do Python e não acessa a rede.
 
 ## Decisão do caminho do núcleo (2P-E-A)
