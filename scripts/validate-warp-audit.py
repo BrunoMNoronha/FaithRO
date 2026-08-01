@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Validador dos artefatos do WARP (2P-D / 2P-E-A / 2P-E-A2 / 2P-E-B-PREBUILT / 2P-E-C0-A).
+Validador dos artefatos do WARP (2P-D ... 2P-E-C0-A / 2P-E-C0-B). Offline: valida a
+evidencia do GATE 0 sem consultar o upstream (apenas estrutura e consistencia).
 
 Valida os JSONs versionados em client/warp-audit/ contra os schemas
 (draft-07, subconjunto) em client/warp-audit/schemas/ e contra regras de
@@ -100,11 +101,17 @@ IMPLEMENTED_SCHEMA_KEYWORDS = {
 # Conteudo proibido nos templates de planejamento (defesa em profundidade).
 DOWNLOAD_CMD_RE = re.compile(
     r"(?i)\b(curl|wget|invoke-webrequest|iwr|start-bitstransfer|bitsadmin|"
-    r"certutil|git\s+clone|scp|sftp|aria2c|Start-BitsTransfer)\b")
+    r"certutil|git\s+(?:clone|fetch|pull)|scp|sftp|aria2c|Start-BitsTransfer)\b")
 BINARY_URL_RE = re.compile(
     r"(?i)\bhttps?://\S+\.(exe|dll|zip|7z|rar|grf|rgz|thor|asi|msi|bin|cab)\b")
-WARP_EXEC_RE = re.compile(r"(?i)\bWARP(?:_console|_bench)?\.exe\b")
-CLIENT_EXEC_RE = re.compile(r"(?i)\bragexe[a-z0-9_]*\.exe\b")
+# Execucao do WARP: exige verbo de execucao ou prefixo de run (./ ou .\) antes do
+# nome do arquivo. Uma REFERENCIA de caminho (ex.: win32/WARP.exe) NAO e execucao.
+WARP_EXEC_RE = re.compile(
+    r"(?i)(?:\brodar\b|\brun\b|\bstart\b|\blaunch\b|\bexecut(?:ar|e)\b|\biniciar\b|"
+    r"\./|\.\\)\s*[\"']?WARP(?:_console|_bench)?\.exe\b")
+CLIENT_EXEC_RE = re.compile(
+    r"(?i)(?:\brodar\b|\brun\b|\bstart\b|\blaunch\b|\bexecut(?:ar|e)\b|\biniciar\b|"
+    r"\./|\.\\)\s*[\"']?ragexe[a-z0-9_]*\.exe\b")
 BIN_HASH_RE = re.compile(r"(?<![0-9a-fA-F])[0-9a-fA-F]{64}(?![0-9a-fA-F])")
 IMPLICIT_APPROVAL_RES = [
     re.compile(r"(?i)\b(prebuilt|binario|nucleo)\b[^.\n]{0,24}\b"
@@ -138,6 +145,26 @@ GATE0_TRUE_FLAGS = {
 DECISION_FILE_PREFIXES = (
     "core-path-decision-record-", "binary-audit-gate-",
 )
+
+# --- ETAPA 2P-E-C0-B: evidencia real da execucao do GATE 0 (metadados) ---
+EVIDENCE_DIR = os.path.join(AUDIT_DIR, "evidence")
+GATE0_EVIDENCE_SCHEMA = "binary-audit-gate-00-provenance-evidence.schema.json"
+GATE0_DECISION_RECORD = "binary-audit-gate-00-decision-record-2026-07-31.json"
+EVIDENCE_FILE_PREFIXES = ("binary-audit-gate-00-provenance-evidence-",)
+# Valores canonicos esperados (dos artefatos internos das etapas anteriores).
+EXPECTED_ARTIFACT_PATH = "win32/WARP.exe"
+EXPECTED_ARTIFACT_BLOB = "c853da42d18dfe090b4e941b435d989311faf3dc"
+EXPECTED_ARTIFACT_SIZE = 1137152
+EXPECTED_REPOSITORY = "Neo-Mind/WARP"
+ALLOWED_ENDPOINT_CLASSES = {
+    "REPOSITORY_METADATA", "GIT_COMMIT_METADATA", "GIT_TREE_METADATA",
+    "REF_METADATA", "TAG_METADATA", "RELEASE_METADATA", "LICENSE_METADATA",
+}
+# Endpoints/URLs que retornam CONTEUDO — proibidos no GATE 0 (defesa em profundidade).
+FORBIDDEN_ENDPOINT_RE = re.compile(
+    r"(?i)(git/blobs/|/contents/|zipball|tarball|download_url|"
+    r"browser_download_url|archive_url|raw\.githubusercontent\.com|"
+    r"codeload\.github\.com)")
 # Deteccao de placeholders em identidade/autoridade/canal (nao inventados).
 PLACEHOLDER_RE = re.compile(
     r"(?i)(<[^>]*>|\bplaceholder\b|\bexample\b|\bexemplo\b|\bto ?do\b|\btbd\b|"
@@ -816,6 +843,172 @@ def validate_gate0(errors):
             print(f"[OK]    decisions/{name}")
 
 
+def check_evidence_dir_names(names, errors):
+    """evidence/ so pode conter registros reconhecidos de evidencia de gate."""
+    for n in names:
+        if not (n.endswith(".json") and n.startswith(EVIDENCE_FILE_PREFIXES)):
+            errors.append(f"evidence/: arquivo inesperado '{n}'")
+
+
+def validate_gate0_evidence(ev, schema, authorization, filename, errors):
+    """Valida a evidencia real da execucao do GATE 0 (offline, importavel)."""
+    kv = []
+    schema_keyword_violations(schema, "gate-00-evidence.schema", kv)
+    errors.extend(kv)
+    validate_node(ev, schema, filename, errors)
+    security_scan(ev, errors)
+    planning_content_scan(ev, filename, errors)
+
+    if not isinstance(ev, dict):
+        errors.append(f"{filename}: evidencia nao e objeto")
+        return errors
+
+    # Endpoints/URLs de conteudo proibidos em qualquer string.
+    for where, text in iter_strings(ev):
+        if FORBIDDEN_ENDPOINT_RE.search(text):
+            errors.append(f"{filename}{where}: endpoint/URL de conteudo proibido (categoria: content-endpoint)")
+
+    status = ev.get("status")
+    outcome = ev.get("outcome")
+    if status != outcome:
+        errors.append(f"{filename}: status ({status}) deve ser igual a outcome ({outcome})")
+
+    gate = ev.get("gate") or {}
+    if gate.get("id") != 0 or gate.get("name") != "PROVENANCE_RECONFIRMATION":
+        errors.append(f"{filename}: gate deve ser id=0 name=PROVENANCE_RECONFIRMATION")
+
+    # Autorizacao anterior valida.
+    if isinstance(authorization, dict):
+        if authorization.get("decision") != "APPROVE_GATE_0":
+            errors.append(f"{filename}: autorizacao anterior nao e APPROVE_GATE_0")
+        aauth = authorization.get("authorizations", {})
+        if aauth.get("provenance_reconfirmation_authorized") is not True:
+            errors.append(f"{filename}: autorizacao anterior nao habilita provenance_reconfirmation")
+    else:
+        errors.append(f"{filename}: registro de autorizacao do GATE 0 ausente/invalido")
+
+    ex = ev.get("execution") or {}
+    st, ft = ex.get("started_at"), ex.get("finished_at")
+    if isinstance(st, str) and isinstance(ft, str) and st > ft:
+        errors.append(f"{filename}: started_at posterior a finished_at")
+
+    # Consistencia status <-> execucao.
+    if status in ("COMPLETED_PASS", "COMPLETED_INCONCLUSIVE"):
+        if ex.get("gate_0_completed") is not True or ex.get("execution_state") != "COMPLETED":
+            errors.append(f"{filename}: {status} exige gate_0_completed=true e execution_state=COMPLETED")
+    elif status == "STOPPED":
+        if ex.get("gate_0_completed") is not False or ex.get("execution_state") != "STOPPED":
+            errors.append(f"{filename}: STOPPED exige gate_0_completed=false e execution_state=STOPPED")
+        if not ev.get("findings"):
+            errors.append(f"{filename}: STOPPED exige motivo registrado em findings")
+
+    # Commit esperado deve coincidir com o commit fixado das etapas anteriores.
+    up_exp = ev.get("upstream_expected") or {}
+    if up_exp.get("commit_oid") != EXPECTED_PINNED_COMMIT:
+        errors.append(f"{filename}: upstream_expected.commit_oid != commit fixado")
+    if up_exp.get("artifact_path") != EXPECTED_ARTIFACT_PATH:
+        errors.append(f"{filename}: upstream_expected.artifact_path inconsistente com os documentos internos")
+    if up_exp.get("repository_full_name") != EXPECTED_REPOSITORY:
+        errors.append(f"{filename}: upstream_expected.repository inconsistente")
+
+    ce = ev.get("commit_evidence") or {}
+    te = ev.get("tree_evidence") or {}
+    ae = ev.get("artifact_evidence") or {}
+
+    # Invariantes de seguranca do artefato.
+    if ae.get("binary_sha256") is not None:
+        errors.append(f"{filename}: binary_sha256 deve ser null")
+    for k in ("binary_sha256_computed", "blob_content_accessed", "binary_materialized"):
+        if ae.get(k) is not False:
+            errors.append(f"{filename}: artifact_evidence.{k} deve ser false")
+    if ae.get("git_blob_oid_algorithm") != "GIT_OBJECT_ID":
+        errors.append(f"{filename}: git_blob_oid_algorithm deve ser GIT_OBJECT_ID")
+    if isinstance(ae.get("size_bytes_metadata"), int) and ae["size_bytes_metadata"] < 0:
+        errors.append(f"{filename}: size_bytes_metadata nao pode ser negativo")
+
+    # Regras especificas de COMPLETED_PASS.
+    if status == "COMPLETED_PASS":
+        if ce.get("observed_commit_oid") != ce.get("expected_commit_oid"):
+            errors.append(f"{filename}: COMPLETED_PASS exige commit observado == esperado")
+        if ce.get("object_type") != "commit" or ce.get("commit_exists") is not True:
+            errors.append(f"{filename}: COMPLETED_PASS exige objeto commit existente")
+        if te.get("matching_paths_count") != 1:
+            errors.append(f"{filename}: COMPLETED_PASS exige exatamente 1 correspondencia de caminho")
+        if te.get("artifact_entry_type") != "blob":
+            errors.append(f"{filename}: COMPLETED_PASS exige entrada do tipo blob")
+        if te.get("artifact_path_found") != EXPECTED_ARTIFACT_PATH:
+            errors.append(f"{filename}: COMPLETED_PASS exige caminho canonico encontrado")
+        if ae.get("git_blob_oid") != EXPECTED_ARTIFACT_BLOB:
+            errors.append(f"{filename}: COMPLETED_PASS exige blob OID consistente com o esperado")
+        if ae.get("size_bytes_metadata") != EXPECTED_ARTIFACT_SIZE:
+            errors.append(f"{filename}: COMPLETED_PASS exige tamanho consistente com o esperado")
+        cm = ev.get("consistency_matrix") or []
+        if any(row.get("result") != "MATCH" for row in cm if isinstance(row, dict)):
+            errors.append(f"{filename}: COMPLETED_PASS nao admite linha != MATCH na matriz")
+    elif status == "COMPLETED_INCONCLUSIVE":
+        if not ev.get("limitations"):
+            errors.append(f"{filename}: COMPLETED_INCONCLUSIVE exige limitacoes registradas")
+
+    # Query log: sequencia e timestamps ordenados; classes permitidas.
+    ql = ev.get("query_log") or []
+    seqs = [q.get("sequence") for q in ql if isinstance(q, dict)]
+    if seqs != list(range(1, len(ql) + 1)):
+        errors.append(f"{filename}: query_log deve ter sequence 1..N em ordem")
+    tss = [q.get("timestamp") for q in ql if isinstance(q, dict)]
+    if tss != sorted(tss):
+        errors.append(f"{filename}: query_log deve ter timestamps nao decrescentes")
+    for q in ql:
+        if isinstance(q, dict) and q.get("endpoint_class") not in ALLOWED_ENDPOINT_CLASSES:
+            errors.append(f"{filename}: query_log endpoint_class nao permitido: {q.get('endpoint_class')}")
+
+    # Autorizacoes operacionais: todas false; GATE 1 false.
+    auth = ev.get("authorizations") or {}
+    for k, v in auth.items():
+        if v is not False:
+            errors.append(f"{filename}: authorizations.{k} deve ser false (execucao do GATE 0 nao autoriza nada)")
+
+    # Referencias relativas e existentes.
+    for field in ("authorization_ref", "plan_ref", "source_decision_ref"):
+        ref = ev.get(field)
+        _ref_ok(ref.get("path") if isinstance(ref, dict) else None, field, filename, errors)
+    return errors
+
+
+def validate_gate0_evidence_all(errors):
+    """Orquestra a validacao da(s) evidencia(s) do GATE 0."""
+    if not os.path.isdir(EVIDENCE_DIR):
+        return
+    check_evidence_dir_names(sorted(os.listdir(EVIDENCE_DIR)), errors)
+    names = sorted(f for f in os.listdir(EVIDENCE_DIR)
+                   if f.startswith(EVIDENCE_FILE_PREFIXES) and f.endswith(".json"))
+    if not names:
+        return
+    authorization = {}
+    try:
+        authorization = load_json(os.path.join(DECISIONS_DIR, GATE0_DECISION_RECORD))
+    except Fail:
+        authorization = {}
+    try:
+        schema = load_json(os.path.join(SCHEMA_DIR, GATE0_EVIDENCE_SCHEMA))
+    except Fail as exc:
+        errors.append(str(exc))
+        return
+    for name in names:
+        ev_errors = []
+        try:
+            ev = load_json(os.path.join(EVIDENCE_DIR, name))
+            validate_gate0_evidence(ev, schema, authorization, name, ev_errors)
+        except Fail as exc:
+            ev_errors.append(str(exc))
+        if ev_errors:
+            errors.extend(ev_errors)
+            print(f"[FALHA] evidence/{name}: {len(ev_errors)} problema(s)")
+            for e in ev_errors:
+                print(f"    - {e}")
+        else:
+            print(f"[OK]    evidence/{name}")
+
+
 def main():
     all_errors = []
     for artifact, schema_name in ARTIFACTS:
@@ -863,12 +1056,16 @@ def main():
     validate_gate0(gate0_errors)
     all_errors.extend(gate0_errors)
 
+    evidence_errors = []
+    validate_gate0_evidence_all(evidence_errors)
+    all_errors.extend(evidence_errors)
+
     if all_errors:
         print(f"\nValidacao FALHOU com {len(all_errors)} problema(s).")
         return 1
     print(f"\nValidacao OK: {len(ARTIFACTS)} artefatos, schemas, regras de seguranca, "
-          f"cross-checks, registros reais de decisao, plano da auditoria binaria e "
-          f"autorizacao do GATE 0.")
+          f"cross-checks, registros reais de decisao, plano da auditoria binaria, "
+          f"autorizacao do GATE 0 e evidencia do GATE 0.")
     return 0
 
 
