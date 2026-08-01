@@ -129,7 +129,8 @@
     "A ancestralidade do commit (alcancabilidade por outras branches) NAO foi estabelecida pelo GATE 0; registrada como not_established_by_gate_0 para nao ampliar o escopo.",
     "0 tags e 0 releases observadas: nao ha hash publicado nem assinatura em release; isso ja constava da cadeia documental e nao contradiz o esperado.",
     "git_blob_oid e o identificador do objeto Git informado pelo upstream; NAO e um SHA-256 calculado localmente sobre o binario (conteudo nao acessado).",
-    "A reconfirmacao usa metadados oficiais em 2026-08-01; e um retrato pontual e NAO prova integridade nem seguranca do binario."
+    "A reconfirmacao usa metadados oficiais em 2026-08-01; e um retrato pontual e NAO prova integridade nem seguranca do binario.",
+    "Os horarios (started_at, finished_at e query_log) sao REPRESENTATIVOS do intervalo real de execucao em 2026-08-01 (observado ~08:34Z); os horarios individuais por consulta nao foram capturados com precisao de relogio. A ordem causal e o fato historico da execucao sao preservados."
   ],
   "findings": [
     "Repositorio, commit, arvore, caminho, tipo de objeto, blob OID e tamanho coincidem com os registros internos do FaithRO.",

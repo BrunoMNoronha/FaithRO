@@ -130,6 +130,10 @@ Detalhes normalizados em
   da cadeia documental; não contradiz o esperado.
 - O `git_blob_oid` **não** é um SHA-256 local do binário (conteúdo não acessado).
 - Retrato pontual de 2026-08-01; **não** prova integridade nem segurança do binário.
+- Os horários (`started_at`/`finished_at` e `query_log`) são **representativos** do
+  intervalo real de execução em 2026-08-01 (observado ~08:34Z); os horários por
+  consulta não foram capturados com precisão de relógio. A ordem causal e o fato
+  histórico da execução são preservados.
 
 ## 19. Achados
 
