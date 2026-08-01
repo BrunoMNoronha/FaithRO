@@ -33,6 +33,10 @@ dist/
 tmp/
 cache/
 
+# Python (validadores/testes em scripts/)
+__pycache__/
+*.pyc
+
 # Cliente / binarios e assets proprietarios (NAO versionar)
 # Bloqueio amplo por extensao para evitar commit acidental de executaveis,
 # GRFs, pacotes de patch e arquivos compactados. Arquivos legitimos com

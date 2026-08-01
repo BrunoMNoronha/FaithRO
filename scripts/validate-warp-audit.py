@@ -170,6 +170,27 @@ PLACEHOLDER_RE = re.compile(
     r"(?i)(<[^>]*>|\bplaceholder\b|\bexample\b|\bexemplo\b|\bto ?do\b|\btbd\b|"
     r"\bfulano\b|\bpreencher\b|\bnull\b|\bnome do decisor\b|\bseu nome\b|x{3,})")
 
+# --- ETAPA 2P-E-C1-A: registro real da autorizacao humana do GATE 1 ---
+# GATE 1 e DECISAO HUMANA APENAS (autorizacao para materializacao): nao materializa,
+# nao baixa, nao acessa conteudo, nao hasheia, nao inspeciona e nao executa nada. Ele
+# apenas autoriza uma materializacao FUTURA do blob fixado, num GATE 2 separado.
+GATE1_SCHEMA = "binary-audit-gate-01-decision-record-real.schema.json"
+GATE1_DECISION_PREFIX = "binary-audit-gate-01-decision-record-"
+EXPECTED_TREE_OID = "1aebae06d5c71a145afc35cc72fcf5c210a08758"
+EXPECTED_PR48_SQUASH = "219b96b0688d9e5b71ae555b23e4166ef136424d"
+# Flags que DEVEM ser true no registro do GATE 1 (decisao humana + autorizacao concedida).
+GATE1_TRUE_FLAGS = {
+    "human_decision_required", "human_decision_received", "gate_selected",
+    "gate_0_completed", "materialization_authorized",
+}
+# Pontos criticos que DEVEM permanecer false mesmo com a materializacao autorizada.
+GATE1_CRITICAL_FALSE = {
+    "gate_2_authorized", "hashing_authorized", "static_inspection_authorized",
+    "execution_without_client_authorized", "client_copy_provision_authorized",
+    "execution_with_client_copy_authorized", "distribution_authorized",
+    "first_login_authorized", "vps_access_authorized",
+}
+
 # --- Regras de seguranca (valores, nao prosa) ---
 IPV4_RE = re.compile(r"(?<!\d)(?:\d{1,3}\.){3}\d{1,3}(?!\d)")
 DRIVE_PATH_RE = re.compile(r"(?<![A-Za-z])[A-Za-z]:[\\/]")
@@ -1009,6 +1030,228 @@ def validate_gate0_evidence_all(errors):
             print(f"[OK]    evidence/{name}")
 
 
+def validate_gate1_record(record, schema, plan, gate0_decision, gate0_evidence,
+                          filename, errors):
+    """Valida o registro REAL da autorizacao humana do GATE 1 (importavel).
+
+    O GATE 1 e decisao-humana-apenas: autoriza uma materializacao FUTURA do blob
+    fixado (GATE 2 separado). NADA e materializado, baixado, acessado, hasheado,
+    inspecionado ou executado nesta etapa. A funcao exige, alem do schema, que a
+    unica autorizacao concedida seja materialization_authorized=true, que todos os
+    demais pontos criticos permanecam false, que o escopo esteja fechado ao objeto
+    imutavel canonico e que a cadeia (plano, decisao e evidencia do GATE 0, squash
+    do PR #48) seja coerente.
+    """
+    kv = []
+    schema_keyword_violations(schema, "gate-01.schema", kv)
+    errors.extend(kv)
+    validate_node(record, schema, filename, errors)
+    security_scan(record, errors)
+    planning_content_scan(record, filename, errors)
+
+    if not isinstance(record, dict):
+        errors.append(f"{filename}: registro nao e objeto")
+        return errors
+
+    if record.get("status") != "AUTHORIZED_FOR_SINGLE_GATE":
+        errors.append(f"{filename}: status deve ser AUTHORIZED_FOR_SINGLE_GATE")
+    g = record.get("gate")
+    gid = g.get("id") if isinstance(g, dict) else None
+    gname = g.get("name") if isinstance(g, dict) else None
+    if gid != 1:
+        errors.append(f"{filename}: gate.id deve ser 1")
+    if gname != "MATERIALIZATION_AUTHORIZATION":
+        errors.append(f"{filename}: gate.name deve ser MATERIALIZATION_AUTHORIZATION")
+    if record.get("decision") != "AUTHORIZE_MATERIALIZATION":
+        errors.append(f"{filename}: decision deve ser AUTHORIZE_MATERIALIZATION")
+    if record.get("execution_state") != "AUTHORIZED_NOT_STARTED":
+        errors.append(f"{filename}: execution_state deve ser AUTHORIZED_NOT_STARTED")
+
+    # Identidade/autoridade nao vazias nem placeholder.
+    for field in ("decider", "role", "authority", "channel"):
+        val = record.get(field)
+        if not isinstance(val, str) or not val.strip():
+            errors.append(f"{filename}: campo '{field}' vazio")
+        elif PLACEHOLDER_RE.search(val):
+            errors.append(f"{filename}: campo '{field}' parece placeholder (categoria: placeholder)")
+    if not valid_iso_date(record.get("date")):
+        errors.append(f"{filename}: campo 'date' nao e uma data ISO valida")
+
+    # Condicoes: >=20, numeradas 1..N em ordem, sem lacuna/repeticao, com texto.
+    conds = record.get("conditions")
+    if not isinstance(conds, list) or len(conds) < 20:
+        errors.append(f"{filename}: 'conditions' deve ter ao menos 20 itens")
+        conds = conds if isinstance(conds, list) else []
+    ns = [c.get("n") for c in conds if isinstance(c, dict)]
+    if ns != list(range(1, len(conds) + 1)):
+        errors.append(f"{filename}: conditions devem ser numeradas 1..N em ordem, sem lacuna/repeticao")
+    for i, c in enumerate(conds):
+        if not isinstance(c, dict) or not str(c.get("text", "")).strip():
+            errors.append(f"{filename}: conditions[{i}] sem texto")
+
+    # Autorizacoes: SOMENTE a materializacao (e as flags de decisao/pre-condicao) em
+    # true; todas as demais false. Defesa explicita dos pontos criticos.
+    auth = record.get("authorizations")
+    if not isinstance(auth, dict):
+        errors.append(f"{filename}: 'authorizations' ausente")
+    else:
+        for k, v in auth.items():
+            if k in GATE1_TRUE_FLAGS:
+                if v is not True:
+                    errors.append(f"{filename}: authorizations.{k} deve ser true")
+            elif v is not False:
+                errors.append(f"{filename}: authorizations.{k} deve ser false "
+                              f"(unica autorizacao concedida e materialization_authorized)")
+        if auth.get("materialization_authorized") is not True:
+            errors.append(f"{filename}: authorizations.materialization_authorized deve ser true (grant do GATE 1)")
+        for k in GATE1_CRITICAL_FALSE:
+            if auth.get(k) is not False:
+                errors.append(f"{filename}: authorizations.{k} deve ser false (sem autorizacao transitiva)")
+
+    # Invariantes de seguranca: nada foi materializado/acessado/hasheado nesta etapa.
+    sa = record.get("security_assertions")
+    if not isinstance(sa, dict):
+        errors.append(f"{filename}: 'security_assertions' ausente")
+    else:
+        if sa.get("binary_sha256") is not None:
+            errors.append(f"{filename}: security_assertions.binary_sha256 deve ser null")
+        for k in ("blob_content_accessed", "binary_materialized", "binary_sha256_computed",
+                  "raw_responses_versioned", "binary_versioned"):
+            if sa.get(k) is not False:
+                errors.append(f"{filename}: security_assertions.{k} deve ser false")
+        for k in ("no_download_performed", "no_upstream_query_this_stage",
+                  "no_clone_or_fetch_upstream", "no_archive_or_release_asset",
+                  "no_static_inspection_performed", "no_execution_performed",
+                  "no_sandbox_created", "no_vps_access"):
+            if sa.get(k) is not True:
+                errors.append(f"{filename}: security_assertions.{k} deve ser true")
+
+    # Escopo fechado ao objeto imutavel canonico (identificadores exatos).
+    ms = record.get("materialization_scope")
+    if not isinstance(ms, dict):
+        errors.append(f"{filename}: 'materialization_scope' ausente")
+    else:
+        expected_scope = {
+            "repository_full_name": EXPECTED_REPOSITORY,
+            "commit_oid": EXPECTED_PINNED_COMMIT,
+            "tree_oid": EXPECTED_TREE_OID,
+            "artifact_path": EXPECTED_ARTIFACT_PATH,
+            "artifact_blob_oid": EXPECTED_ARTIFACT_BLOB,
+            "artifact_blob_oid_algorithm": "GIT_OBJECT_ID",
+            "artifact_blob_size": EXPECTED_ARTIFACT_SIZE,
+            "max_files": 1,
+            "network_scope": "GITHUB_OFFICIAL_ONLY",
+        }
+        for k, exp in expected_scope.items():
+            if ms.get(k) != exp:
+                errors.append(f"{filename}: materialization_scope.{k} deve ser {exp!r}")
+
+    # Referencia explicita e correta ao squash do PR #48.
+    ir = record.get("integration_ref")
+    if not isinstance(ir, dict):
+        errors.append(f"{filename}: 'integration_ref' ausente")
+    else:
+        if ir.get("pr") != 48:
+            errors.append(f"{filename}: integration_ref.pr deve ser 48")
+        if ir.get("squash_commit") != EXPECTED_PR48_SQUASH:
+            errors.append(f"{filename}: integration_ref.squash_commit deve ser o squash do PR #48")
+        if ir.get("base_branch") != "dev":
+            errors.append(f"{filename}: integration_ref.base_branch deve ser dev")
+
+    # Pre-condicao do GATE 0 (declarada no registro).
+    pc = record.get("gate_0_precondition")
+    if not isinstance(pc, dict):
+        errors.append(f"{filename}: 'gate_0_precondition' ausente")
+    else:
+        if pc.get("gate_0_completed") is not True:
+            errors.append(f"{filename}: gate_0_precondition.gate_0_completed deve ser true")
+        if pc.get("gate_0_outcome") != "COMPLETED_PASS":
+            errors.append(f"{filename}: gate_0_precondition.gate_0_outcome deve ser COMPLETED_PASS")
+
+    # Referencias relativas e existentes.
+    for field in ("plan_ref", "source_decision_ref", "prior_gate_decision_ref",
+                  "gate_0_evidence_ref"):
+        ref = record.get(field)
+        _ref_ok(ref.get("path") if isinstance(ref, dict) else None, field, filename, errors)
+
+    # Cross-check: plano contem GATE 1.
+    if isinstance(plan, dict):
+        plan_gate_ids = [x.get("gate_id") for x in plan.get("gates", []) if isinstance(x, dict)]
+        if 1 not in plan_gate_ids:
+            errors.append(f"{filename}: plano nao contem GATE 1 correspondente")
+
+    # Cross-check: decisao anterior (GATE 0) e APPROVE_GATE_0.
+    if isinstance(gate0_decision, dict):
+        if gate0_decision.get("decision") != "APPROVE_GATE_0":
+            errors.append(f"{filename}: decisao anterior referenciada nao e APPROVE_GATE_0")
+    else:
+        errors.append(f"{filename}: registro de decisao do GATE 0 ausente/invalido")
+
+    # Cross-check: evidencia do GATE 0 concluida com COMPLETED_PASS e sem materializacao.
+    if isinstance(gate0_evidence, dict):
+        if gate0_evidence.get("outcome") != "COMPLETED_PASS":
+            errors.append(f"{filename}: evidencia do GATE 0 nao esta COMPLETED_PASS")
+        ex = gate0_evidence.get("execution") or {}
+        if ex.get("gate_0_completed") is not True:
+            errors.append(f"{filename}: evidencia do GATE 0 nao confirma gate_0_completed=true")
+        ae = gate0_evidence.get("artifact_evidence") or {}
+        if ae.get("binary_materialized") is not False or ae.get("binary_sha256") is not None:
+            errors.append(f"{filename}: evidencia do GATE 0 indica materializacao/hash inesperados")
+    else:
+        errors.append(f"{filename}: evidencia do GATE 0 ausente/invalida")
+
+    return errors
+
+
+def validate_gate1(errors):
+    """Orquestra a validacao do(s) registro(s) reais de decisao do GATE 1."""
+    if not os.path.isdir(DECISIONS_DIR):
+        return
+    names = sorted(f for f in os.listdir(DECISIONS_DIR)
+                   if f.startswith(GATE1_DECISION_PREFIX) and f.endswith(".json"))
+    if not names:
+        return  # ainda sem registro de GATE 1
+    plan = {}
+    try:
+        plan = load_json(os.path.join(AUDIT_DIR, PLAN_TEMPLATE))
+    except Fail:
+        plan = {}
+    gate0_decision = {}
+    try:
+        gate0_decision = load_json(os.path.join(DECISIONS_DIR, GATE0_DECISION_RECORD))
+    except Fail:
+        gate0_decision = {}
+    gate0_evidence = {}
+    if os.path.isdir(EVIDENCE_DIR):
+        ev_names = sorted(f for f in os.listdir(EVIDENCE_DIR)
+                          if f.startswith(EVIDENCE_FILE_PREFIXES) and f.endswith(".json"))
+        if ev_names:
+            try:
+                gate0_evidence = load_json(os.path.join(EVIDENCE_DIR, ev_names[-1]))
+            except Fail:
+                gate0_evidence = {}
+    try:
+        schema = load_json(os.path.join(SCHEMA_DIR, GATE1_SCHEMA))
+    except Fail as exc:
+        errors.append(str(exc))
+        return
+    for name in names:
+        rec_errors = []
+        try:
+            record = load_json(os.path.join(DECISIONS_DIR, name))
+            validate_gate1_record(record, schema, plan, gate0_decision,
+                                  gate0_evidence, name, rec_errors)
+        except Fail as exc:
+            rec_errors.append(str(exc))
+        if rec_errors:
+            errors.extend(rec_errors)
+            print(f"[FALHA] decisions/{name}: {len(rec_errors)} problema(s)")
+            for e in rec_errors:
+                print(f"    - {e}")
+        else:
+            print(f"[OK]    decisions/{name}")
+
+
 def main():
     all_errors = []
     for artifact, schema_name in ARTIFACTS:
@@ -1060,12 +1303,16 @@ def main():
     validate_gate0_evidence_all(evidence_errors)
     all_errors.extend(evidence_errors)
 
+    gate1_errors = []
+    validate_gate1(gate1_errors)
+    all_errors.extend(gate1_errors)
+
     if all_errors:
         print(f"\nValidacao FALHOU com {len(all_errors)} problema(s).")
         return 1
     print(f"\nValidacao OK: {len(ARTIFACTS)} artefatos, schemas, regras de seguranca, "
           f"cross-checks, registros reais de decisao, plano da auditoria binaria, "
-          f"autorizacao do GATE 0 e evidencia do GATE 0.")
+          f"autorizacao do GATE 0, evidencia do GATE 0 e autorizacao do GATE 1.")
     return 0
 
 
