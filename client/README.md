@@ -121,8 +121,13 @@ A autorização humana **exclusiva do GATE 0** (reconfirmação de proveniência
 metadados) está registrada em
 [`docs/34-registro-autorizacao-gate-0-proveniencia-warp.md`](../docs/34-registro-autorizacao-gate-0-proveniencia-warp.md)
 (`GATE 0 AUTORIZADO — AINDA NÃO INICIADO`; nenhuma consulta upstream nesta etapa;
-GATE 1 proibido; merge não executa o GATE 0). Nenhuma dessas etapas modifica o
-executável sem autorização humana; nada do cliente é versionado aqui.
+GATE 1 proibido; merge não executa o GATE 0). O GATE 0 foi então **executado por
+metadados oficiais** — resultado em
+[`docs/35-resultado-gate-0-proveniencia-warp.md`](../docs/35-resultado-gate-0-proveniencia-warp.md)
+(`GATE 0 CONCLUÍDO — APROVADO POR METADADOS`; proveniência consistente; nada baixado,
+materializado ou executado; Git object ID ≠ SHA-256 local; GATE 1 exige nova decisão
+humana). Nenhuma dessas etapas modifica o executável sem autorização humana; nada do
+cliente é versionado aqui.
 
 ## Referências
 
@@ -134,3 +139,4 @@ executável sem autorização humana; nada do cliente é versionado aqui.
 - [`docs/32-registro-decisao-caminho-nucleo-warp.md`](../docs/32-registro-decisao-caminho-nucleo-warp.md)
 - [`docs/33-plano-auditoria-binaria-offline-warp.md`](../docs/33-plano-auditoria-binaria-offline-warp.md)
 - [`docs/34-registro-autorizacao-gate-0-proveniencia-warp.md`](../docs/34-registro-autorizacao-gate-0-proveniencia-warp.md)
+- [`docs/35-resultado-gate-0-proveniencia-warp.md`](../docs/35-resultado-gate-0-proveniencia-warp.md)

@@ -36,7 +36,8 @@ auditoria. O relatório completo está em
 | [`binary-audit-plan.example.json`](binary-audit-plan.example.json) | (2P-E-B-PREBUILT) **Template** do plano da auditoria binária offline em 17 gates independentes; `PLANNED_NOT_AUTHORIZED`; nenhuma autorização operacional; nenhum binário materializado. |
 | [`binary-audit-gate-record.example.json`](binary-audit-gate-record.example.json) | (2P-E-B-PREBUILT) **Template em branco** do registro de decisão por gate (`status=PENDING`, campos `null`, autoriza no máximo um gate; sem autorização transitiva). |
 | [`decisions/binary-audit-gate-00-decision-record-2026-07-31.json`](decisions/binary-audit-gate-00-decision-record-2026-07-31.json) | (2P-E-C0-A) Registro **real** da autorização humana **exclusiva do GATE 0** (reconfirmação de proveniência por metadados): `AUTHORIZED_FOR_SINGLE_GATE`; GATE 0 autorizado, **não iniciado**; GATE 1 proibido. |
-| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json` e `binary-audit-gate-00-decision-record-real.schema.json`. |
+| [`evidence/binary-audit-gate-00-provenance-evidence-2026-08-01.json`](evidence/binary-audit-gate-00-provenance-evidence-2026-08-01.json) | (2P-E-C0-B) Evidência **real** da execução do GATE 0 por metadados oficiais: `COMPLETED_PASS`; proveniência consistente; **nenhum** conteúdo de blob acessado; Git object ID ≠ SHA-256 local; GATE 1 ainda proibido. |
+| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json`, `binary-audit-gate-00-decision-record-real.schema.json` e `binary-audit-gate-00-provenance-evidence.schema.json`. |
 
 ## Garantias desta etapa
 
@@ -131,6 +132,21 @@ etapa; **nenhuma** evidência coletada; o **GATE 1 continua proibido**; o merge 
 registro **não** executa o GATE 0. A execução ocorrerá em etapa futura e separada
 (2P-E-C0-B), somente por metadados oficiais.
 
+## Resultado do GATE 0 (2P-E-C0-B)
+
+O GATE 0 foi **executado por metadados oficiais** — evidência em
+[`evidence/binary-audit-gate-00-provenance-evidence-2026-08-01.json`](evidence/binary-audit-gate-00-provenance-evidence-2026-08-01.json)
+e em [docs/35](../../docs/35-resultado-gate-0-proveniencia-warp.md): resultado
+`COMPLETED_PASS` (`GATE 0 CONCLUÍDO — APROVADO POR METADADOS`). Repositório, commit,
+árvore, caminho, tipo de objeto, **Git blob object ID** e tamanho **coincidem** com os
+registros internos; licença GPL-3.0 consistente. **Nenhum** conteúdo de blob foi
+acessado; **nenhum** binário foi baixado, materializado, hasheado, inspecionado ou
+executado. O `git_blob_oid` é o identificador do objeto Git informado pelo upstream —
+**não** é um SHA-256 calculado localmente sobre o binário. A aprovação por metadados
+**não** significa confiança/segurança do binário e **não** autoriza o GATE 1: qualquer
+avanço exige **nova decisão humana** (`AUTHORIZE_GATE_1` / `REPEAT_GATE_0` /
+`STOP_PATH`).
+
 ## Propriedade intelectual
 
 WARP é **GPL-3.0** (uso apenas local; binário não versionado no FaithRO). `Ragexe`,
@@ -146,4 +162,5 @@ empacotar ou compartilhar (ver [docs/16](../../docs/16-politica-distribuicao-cli
 - [docs/32](../../docs/32-registro-decisao-caminho-nucleo-warp.md) — registro da decisão humana.
 - [docs/33](../../docs/33-plano-auditoria-binaria-offline-warp.md) — plano da auditoria binária offline.
 - [docs/34](../../docs/34-registro-autorizacao-gate-0-proveniencia-warp.md) — autorização do GATE 0.
+- [docs/35](../../docs/35-resultado-gate-0-proveniencia-warp.md) — resultado do GATE 0 (metadados).
 - [docs/16](../../docs/16-politica-distribuicao-cliente.md) — política de distribuição.

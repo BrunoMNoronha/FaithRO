@@ -52,6 +52,7 @@ apenas os organiza por categoria e registra estado e dependências.
 | [32-registro-decisao-caminho-nucleo-warp.md](32-registro-decisao-caminho-nucleo-warp.md) | Registro da decisão humana (2P-E-A2): `PREBUILT_PATH` **selecionado apenas para planejamento** da auditoria binária offline; prebuilt não materializado nem executado; todas as flags operacionais `false`; template preservado em branco; merge não autoriza a próxima ação; cada gate futuro exige decisão humana separada | Cliente/build/segurança | validado | não iniciado (só planejamento autorizado) | 16, 28, 30, 31 | 2026-07-31 |
 | [33-plano-auditoria-binaria-offline-warp.md](33-plano-auditoria-binaria-offline-warp.md) | Plano (2P-E-B-PREBUILT) da auditoria binária **offline** do prebuilt em 17 gates independentes com decisão humana e `STOP_PATH`: `PLANO CRIADO — NENHUMA MATERIALIZAÇÃO AUTORIZADA`; nada baixado/materializado/executado; todas as autorizações operacionais `false`; merge não autoriza o GATE 1 | Cliente/build/segurança | validado | não iniciado (só planejamento) | 16, 30, 31, 32 | 2026-07-31 |
 | [34-registro-autorizacao-gate-0-proveniencia-warp.md](34-registro-autorizacao-gate-0-proveniencia-warp.md) | Registro (2P-E-C0-A) da autorização humana **exclusiva do GATE 0** (reconfirmação de proveniência por metadados): `GATE 0 AUTORIZADO — AINDA NÃO INICIADO`; só `provenance_reconfirmation_authorized=true`; nenhuma consulta upstream nesta etapa; nada materializado; GATE 1 proibido; merge não executa o GATE 0 | Cliente/build/segurança | validado | autorizado, não iniciado | 16, 30, 32, 33 | 2026-07-31 |
+| [35-resultado-gate-0-proveniencia-warp.md](35-resultado-gate-0-proveniencia-warp.md) | Resultado (2P-E-C0-B) da execução do GATE 0 **por metadados oficiais**: `GATE 0 CONCLUÍDO — APROVADO POR METADADOS` (`COMPLETED_PASS`); proveniência declarada consistente com os metadados (repo/commit/árvore/caminho/blob OID/tamanho/licença); **nenhum** conteúdo de blob acessado, nada baixado/materializado/executado; Git object ID ≠ SHA-256 local; GATE 1 ainda proibido, exige nova decisão humana | Cliente/build/segurança | validado | concluído (aprovado por metadados) | 16, 30, 33, 34 | 2026-08-01 |
 | [99-checklists.md](99-checklists.md) | Checklists de PR, deploy, balanceamento | Todos | validado | não aplicável | — | 2026-07-10 |
 
 [^1]: No documento 03, "parcialmente implantado" significa apenas que a
@@ -100,7 +101,11 @@ apenas os organiza por categoria e registra estado e dependências.
   [34](34-registro-autorizacao-gate-0-proveniencia-warp.md) (registro da autorização
   humana **exclusiva do GATE 0** — reconfirmação de proveniência por metadados;
   `GATE 0 AUTORIZADO — AINDA NÃO INICIADO`; nenhuma consulta upstream nesta etapa;
-  GATE 1 proibido; merge não executa o GATE 0).
+  GATE 1 proibido; merge não executa o GATE 0),
+  [35](35-resultado-gate-0-proveniencia-warp.md) (resultado da execução do GATE 0 por
+  metadados oficiais; `GATE 0 CONCLUÍDO — APROVADO POR METADADOS` — proveniência
+  consistente; nada baixado/materializado/executado; Git object ID ≠ SHA-256 local;
+  GATE 1 exige nova decisão humana).
 - **Patcher e build auditável do Beam:**
   [23](23-planejamento-primeiro-build-controlado-beam.md) (planejamento do
   primeiro build controlado; build ainda não autorizado),
