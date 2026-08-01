@@ -37,7 +37,8 @@ auditoria. O relatório completo está em
 | [`binary-audit-gate-record.example.json`](binary-audit-gate-record.example.json) | (2P-E-B-PREBUILT) **Template em branco** do registro de decisão por gate (`status=PENDING`, campos `null`, autoriza no máximo um gate; sem autorização transitiva). |
 | [`decisions/binary-audit-gate-00-decision-record-2026-07-31.json`](decisions/binary-audit-gate-00-decision-record-2026-07-31.json) | (2P-E-C0-A) Registro **real** da autorização humana **exclusiva do GATE 0** (reconfirmação de proveniência por metadados): `AUTHORIZED_FOR_SINGLE_GATE`; GATE 0 autorizado, **não iniciado**; GATE 1 proibido. |
 | [`evidence/binary-audit-gate-00-provenance-evidence-2026-08-01.json`](evidence/binary-audit-gate-00-provenance-evidence-2026-08-01.json) | (2P-E-C0-B) Evidência **real** da execução do GATE 0 por metadados oficiais: `COMPLETED_PASS`; proveniência consistente; **nenhum** conteúdo de blob acessado; Git object ID ≠ SHA-256 local; GATE 1 ainda proibido. |
-| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json`, `binary-audit-gate-00-decision-record-real.schema.json` e `binary-audit-gate-00-provenance-evidence.schema.json`. |
+| [`decisions/binary-audit-gate-01-decision-record-2026-08-01.json`](decisions/binary-audit-gate-01-decision-record-2026-08-01.json) | (2P-E-C1-A) Registro **real** da autorização humana **exclusiva do GATE 1** (autorização para materialização): `AUTHORIZE_MATERIALIZATION`; **decisão-humana-apenas** (nada materializado/baixado/hasheado/executado); escopo fechado ao blob fixado; `materialization_authorized=true`; **GATE 2 não autorizado**. |
+| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json`, `binary-audit-gate-00-decision-record-real.schema.json`, `binary-audit-gate-00-provenance-evidence.schema.json` e `binary-audit-gate-01-decision-record-real.schema.json`. |
 
 ## Garantias desta etapa
 
@@ -85,8 +86,16 @@ vazios, conjuntos exatos de patches bloqueados/candidatos, commit consistente co
 registro 2P-E-A2, template de gate em branco, ausência de comando de download, de URL
 direta para binário, de comando de execução do WARP/cliente, de hash de binário como
 evidência e de texto que sugira aprovação implícita do prebuilt; e confirma que as
-palavras-chave dos schemas são implementadas pelo validador. Usa **apenas a
-biblioteca padrão** do Python e não acessa a rede.
+palavras-chave dos schemas são implementadas pelo validador. Desde a ETAPA
+2P-E-C0-B valida a **evidência real do GATE 0** e, desde a ETAPA 2P-E-C1-A, o
+**registro real do GATE 1** ([`decisions/binary-audit-gate-01-decision-record-2026-08-01.json`](decisions/binary-audit-gate-01-decision-record-2026-08-01.json)):
+decisão `AUTHORIZE_MATERIALIZATION`, escopo fechado ao blob fixado por `const`,
+`materialization_authorized=true` como único grant, todos os demais pontos críticos
+`false` (sem autorização transitiva), `binary_sha256=null` e demais invariantes de
+não-materialização, e cross-checks com o plano, a decisão e a evidência do GATE 0 e
+com o squash do PR #48. Os testes positivos e negativos estão em
+[`scripts/test-warp-audit-gate-01.py`](../../scripts/test-warp-audit-gate-01.py). Usa
+**apenas a biblioteca padrão** do Python e não acessa a rede.
 
 ## Decisão do caminho do núcleo (2P-E-A)
 
