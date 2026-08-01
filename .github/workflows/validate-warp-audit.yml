@@ -11,6 +11,7 @@ on:
     paths:
       - client/warp-audit/**
       - scripts/validate-warp-audit.py
+      - scripts/test-warp-audit-gate-01.py
       - .github/workflows/validate-warp-audit.yml
   workflow_dispatch:
 
@@ -34,3 +35,6 @@ jobs:
 
       - name: Validate WARP audit artifacts
         run: python scripts/validate-warp-audit.py
+
+      - name: Run WARP audit GATE 1 tests
+        run: python scripts/test-warp-audit-gate-01.py
