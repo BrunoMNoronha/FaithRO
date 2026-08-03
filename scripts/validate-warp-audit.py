@@ -155,9 +155,12 @@ GATE0_EVIDENCE_PREFIX = "binary-audit-gate-00-provenance-evidence-"
 GATE2_EVIDENCE_PREFIX = "binary-audit-gate-02-integrity-evidence-"
 # Prefixo de evidencia do GATE 3 (ETAPA 2P-E-C3).
 GATE3_EVIDENCE_PREFIX = "binary-audit-gate-03-identity-signature-evidence-"
+# Prefixo de evidencia da FUTURA repeticao corretiva do GATE 3 (ETAPA 2P-E-C3-R2:
+# convencao; nenhum arquivo real existe ainda).
+GATE3_REPEAT_EVIDENCE_PREFIX = "binary-audit-gate-03-corrective-repeat-evidence-"
 # Prefixos aceitos em evidence/ (o orquestrador de cada gate filtra o seu proprio).
 EVIDENCE_FILE_PREFIXES = (GATE0_EVIDENCE_PREFIX, GATE2_EVIDENCE_PREFIX,
-                          GATE3_EVIDENCE_PREFIX)
+                          GATE3_EVIDENCE_PREFIX, GATE3_REPEAT_EVIDENCE_PREFIX)
 # Valores canonicos esperados (dos artefatos internos das etapas anteriores).
 EXPECTED_ARTIFACT_PATH = "win32/WARP.exe"
 EXPECTED_ARTIFACT_BLOB = "c853da42d18dfe090b4e941b435d989311faf3dc"
@@ -267,6 +270,16 @@ GATE3_CRYPTO_VERIF_STATES = {
 GATE3_CHAIN_TRUST_STATES = {
     "NOT_EVALUATED_OFFLINE", "NOT_APPLICABLE_NO_SIGNATURE",
 }
+
+# --- ETAPA 2P-E-C3-R2: convencao da FUTURA repeticao corretiva do GATE 3 ---
+# Schemas e validadores prontos para quando (e SE) uma repeticao corretiva for
+# autorizada por decisao humana separada. Nesta etapa NAO existe registro real; a
+# evidencia historica invalidada permanece EVIDENCE_INVALIDATED_PENDING_REPEAT e NUNCA
+# pode ser revertida a COMPLETED_PASS.
+GATE3_REPEAT_DECISION_SCHEMA = "binary-audit-gate-03-corrective-repeat-decision-record-real.schema.json"
+GATE3_REPEAT_EVIDENCE_SCHEMA = "binary-audit-gate-03-corrective-repeat-evidence.schema.json"
+GATE3_REPEAT_DECISION_PREFIX = "binary-audit-gate-03-corrective-repeat-decision-record-"
+GATE3_HISTORICAL_INVALIDATED_EVIDENCE = "binary-audit-gate-03-identity-signature-evidence-2026-08-03.json"
 
 # --- Regras de seguranca (valores, nao prosa) ---
 IPV4_RE = re.compile(r"(?<!\d)(?:\d{1,3}\.){3}\d{1,3}(?!\d)")
@@ -1952,19 +1965,20 @@ def validate_gate3_evidence(ev, schema, gate3_decision, gate2_evidence,
         errors.append(f"{filename}: pe_identity_observed nao pode afirmar 'pe_valid' (use pe_valid_status)")
     if pe.get("size_of_optional_header_status") != "MEASUREMENT_REQUIRES_RECONFIRMATION":
         errors.append(f"{filename}: size_of_optional_header_status deve ser MEASUREMENT_REQUIRES_RECONFIRMATION")
-    # D2: rejeitar SizeOfOptionalHeader confirmado igual ao magic (ex.: 267 == 0x010b).
+    # D2 (dependente da PROVENIENCIA — 2P-E-C3-R2): isto NAO e uma regra geral de que
+    # "size_of_optional_header == magic" e invalido. E especifica da evidencia HISTORICA
+    # produzida pelo parser NAO versionado (produced_by=UNVERSIONED_SCRATCHPAD_PARSER),
+    # cuja causa-raiz foi o offset incorreto: naquele contexto, o valor 267 (== magic PE32)
+    # exige status MEASUREMENT_REQUIRES_RECONFIRMATION. Uma futura evidencia do parser
+    # revisado pode registrar valores iguais se os bytes reais assim determinarem (validada
+    # por validate_gate3_corrective_repeat_evidence, sem esta regra).
     soh = pe.get("size_of_optional_header_observed")
     magic_int = _magic_str_to_int(pe.get("optional_header_magic_observed"))
-    if isinstance(soh, int) and magic_int is not None and soh == magic_int:
-        if pe.get("size_of_optional_header_status") != "MEASUREMENT_REQUIRES_RECONFIRMATION":
-            errors.append(f"{filename}: size_of_optional_header ({soh}) == magic ({magic_int}); "
-                          f"nao pode ser apresentado como medicao confirmada")
-    # D2-especifico: PE32 + magic 0x010b + soh 267 exige status de reconfirmacao.
-    if (pe.get("pe_format_observed") == "PE32"
-            and pe.get("optional_header_magic_observed") == "0x010b"
-            and soh == 267
-            and pe.get("size_of_optional_header_status") != "MEASUREMENT_REQUIRES_RECONFIRMATION"):
-        errors.append(f"{filename}: PE32/0x010b/soh=267 exige MEASUREMENT_REQUIRES_RECONFIRMATION")
+    if pe.get("produced_by") == "UNVERSIONED_SCRATCHPAD_PARSER":
+        if isinstance(soh, int) and magic_int is not None and soh == magic_int:
+            if pe.get("size_of_optional_header_status") != "MEASUREMENT_REQUIRES_RECONFIRMATION":
+                errors.append(f"{filename}: size_of_optional_header ({soh}) == magic ({magic_int}) "
+                              f"no parser nao versionado exige MEASUREMENT_REQUIRES_RECONFIRMATION")
     if pe.get("version_info_status") != "NOT_DETERMINED_BY_REVIEWED_PARSER":
         errors.append(f"{filename}: version_info_status deve ser NOT_DETERMINED_BY_REVIEWED_PARSER")
     if pe.get("original_filename_status") != "NOT_DETERMINED_BY_REVIEWED_PARSER":
@@ -2167,6 +2181,213 @@ def validate_gate3(errors):
                     print(f"[OK]    evidence/{name}")
 
 
+def validate_gate3_repeat_decision(record, schema, filename, errors):
+    """Valida a FUTURA decisao humana da repeticao corretiva do GATE 3 (importavel).
+
+    Exige: decisao AUTHORIZE_CORRECTIVE_REPEAT_GATE_3; escopo fechado ao blob fixado;
+    EXATAMENTE uma repeticao (segunda nao autorizada); referencias A decisao original,
+    A evidencia invalidada, A revisao R1, ao parser revisado, aos seus testes e aos Git
+    blob OIDs; gate_4_authorized=false e nenhuma autorizacao transitiva.
+    """
+    kv = []
+    schema_keyword_violations(schema, "gate-03-repeat-decision.schema", kv)
+    errors.extend(kv)
+    validate_node(record, schema, filename, errors)
+    security_scan(record, errors)
+    planning_content_scan(record, filename, errors)
+
+    if not isinstance(record, dict):
+        errors.append(f"{filename}: registro nao e objeto")
+        return errors
+
+    if record.get("decision") != "AUTHORIZE_CORRECTIVE_REPEAT_GATE_3":
+        errors.append(f"{filename}: decision deve ser AUTHORIZE_CORRECTIVE_REPEAT_GATE_3")
+    if record.get("execution_state") != "AUTHORIZED_NOT_STARTED":
+        errors.append(f"{filename}: execution_state deve ser AUTHORIZED_NOT_STARTED")
+
+    for field in ("decider", "role", "authority", "channel"):
+        val = record.get(field)
+        if not isinstance(val, str) or not val.strip():
+            errors.append(f"{filename}: campo '{field}' vazio")
+        elif PLACEHOLDER_RE.search(val):
+            errors.append(f"{filename}: campo '{field}' parece placeholder (categoria: placeholder)")
+    if not valid_iso_date(record.get("date")):
+        errors.append(f"{filename}: campo 'date' nao e uma data ISO valida")
+
+    rs = record.get("repeat_scope") or {}
+    if rs.get("exactly_one_repeat") is not True or rs.get("repeat_index") != 1:
+        errors.append(f"{filename}: repeat_scope deve ser exactly_one_repeat=true, repeat_index=1")
+
+    auth = record.get("authorizations") or {}
+    if auth.get("gate_3_corrective_repeat_authorized") is not True:
+        errors.append(f"{filename}: gate_3_corrective_repeat_authorized deve ser true")
+    for k in ("gate_4_authorized", "execution_authorized", "dynamic_analysis_authorized",
+              "external_reputation_upload_authorized", "network_validation_authorized",
+              "sandbox_creation_authorized", "client_copy_provision_authorized",
+              "client_modification_authorized", "patch_review_authorized",
+              "patch_application_authorized", "client_preparation_authorized",
+              "test_account_authorized", "first_login_authorized", "vps_access_authorized",
+              "distribution_authorized", "second_repeat_authorized"):
+        if auth.get(k) is not False:
+            errors.append(f"{filename}: authorizations.{k} deve ser false (sem autorizacao transitiva)")
+
+    _check_materialization_scope(record.get("materialization_scope"), filename, errors)
+
+    # Referencias exigidas devem existir no repositorio.
+    for field in ("original_decision_ref", "original_invalidated_evidence_ref",
+                  "r1_review_ref", "reviewed_parser_ref", "reviewed_parser_test_ref"):
+        ref = record.get(field)
+        _ref_ok(ref.get("path") if isinstance(ref, dict) else None, field, filename, errors)
+    # A evidencia original referenciada deve ser a historica invalidada.
+    oi = record.get("original_invalidated_evidence_ref") or {}
+    if isinstance(oi, dict) and oi.get("path") and not oi["path"].endswith(GATE3_HISTORICAL_INVALIDATED_EVIDENCE):
+        errors.append(f"{filename}: original_invalidated_evidence_ref deve apontar para a evidencia invalidada do GATE 3")
+    # Referencias ao commit/blobs do parser (40 hex).
+    for field in ("reviewed_parser_commit", "reviewed_parser_git_blob_oid",
+                  "reviewed_parser_test_git_blob_oid"):
+        v = record.get(field)
+        if not isinstance(v, str) or not HEX40_RE.match(v):
+            errors.append(f"{filename}: {field} deve ser Git object ID de 40 hex")
+    return errors
+
+
+def validate_gate3_repeat_evidence(ev, schema, repeat_decision, filename, errors):
+    """Valida a FUTURA evidencia da repeticao corretiva do GATE 3 (importavel).
+
+    Exige: produzida pelo parser REVISADO/VERSIONADO; referencia A evidencia invalidada
+    (que permanece historica), A decisao da repeticao e ao parser; Git blob OID do parser
+    igual ao da decisao (proveniencia); identidade IGUAL ao GATE 2; gate_4_authorized=false;
+    e sem execucao/carga do binario.
+    """
+    kv = []
+    schema_keyword_violations(schema, "gate-03-repeat-evidence.schema", kv)
+    errors.extend(kv)
+    validate_node(ev, schema, filename, errors)
+    security_scan(ev, errors)
+    _content_scan_allow_hashes(ev, filename, errors)
+
+    if not isinstance(ev, dict):
+        errors.append(f"{filename}: evidencia nao e objeto")
+        return errors
+
+    if ev.get("status") != ev.get("outcome"):
+        errors.append(f"{filename}: status deve ser igual a outcome")
+    if ev.get("outcome") not in ("COMPLETED_PASS", "COMPLETED_FAIL", "STOPPED"):
+        errors.append(f"{filename}: outcome fora do conjunto permitido")
+
+    pe = ev.get("pe_identity") or {}
+    if pe.get("produced_by") != "REVIEWED_VERSIONED_PARSER":
+        errors.append(f"{filename}: pe_identity.produced_by deve ser REVIEWED_VERSIONED_PARSER")
+
+    rp = ev.get("reviewed_parser") or {}
+    if rp.get("run_on_warp_exe") is not True:
+        errors.append(f"{filename}: reviewed_parser.run_on_warp_exe deve ser true (repeticao usa o parser revisado)")
+    if rp.get("executes_or_loads_pe") is not False:
+        errors.append(f"{filename}: reviewed_parser.executes_or_loads_pe deve ser false")
+
+    sa = ev.get("security_assertions") or {}
+    if sa.get("gate_4_authorized") is not False:
+        errors.append(f"{filename}: security_assertions.gate_4_authorized deve ser false")
+    for k in ("no_execution_performed", "no_gate4_inspection_performed", "no_ragexe_access",
+              "no_vps_access", "temporary_file_removed"):
+        if sa.get(k) is not True:
+            errors.append(f"{filename}: security_assertions.{k} deve ser true")
+
+    ir = ev.get("identity_reconfirmation") or {}
+    if ir.get("sha256_local") != EXPECTED_ARTIFACT_SHA256 or ir.get("identity_matches_gate_2") is not True:
+        errors.append(f"{filename}: identidade da repeticao deve corresponder ao GATE 2")
+    if ir.get("executed") is not False or ir.get("loaded_as_executable") is not False:
+        errors.append(f"{filename}: identity_reconfirmation executado/carregado devem ser false")
+
+    # Proveniencia: Git blob OID do parser deve coincidir com o da decisao (parser exato).
+    ev_oid = ev.get("reviewed_parser_git_blob_oid")
+    if not isinstance(ev_oid, str) or not HEX40_RE.match(ev_oid):
+        errors.append(f"{filename}: reviewed_parser_git_blob_oid deve ser 40 hex")
+    if isinstance(repeat_decision, dict):
+        if repeat_decision.get("decision") != "AUTHORIZE_CORRECTIVE_REPEAT_GATE_3":
+            errors.append(f"{filename}: repeticao sem decisao AUTHORIZE_CORRECTIVE_REPEAT_GATE_3")
+        dec_oid = repeat_decision.get("reviewed_parser_git_blob_oid")
+        if isinstance(ev_oid, str) and dec_oid is not None and ev_oid != dec_oid:
+            errors.append(f"{filename}: Git blob OID do parser diverge do registrado na decisao da repeticao")
+    else:
+        errors.append(f"{filename}: decisao da repeticao ausente/invalida")
+
+    # Referencias exigidas.
+    for field in ("original_invalidated_evidence_ref", "corrective_repeat_decision_ref",
+                  "reviewed_parser_ref", "reviewed_parser_test_ref"):
+        ref = ev.get(field)
+        _ref_ok(ref.get("path") if isinstance(ref, dict) else None, field, filename, errors)
+    return errors
+
+
+def validate_gate3_repeat(errors):
+    """Orquestra a validacao dos artefatos da repeticao corretiva do GATE 3.
+
+    Nesta etapa NAO deve existir registro real; a funcao roda apenas se arquivos
+    aparecerem no futuro. Sempre reafirma que a evidencia historica permanece
+    invalidada (nunca revertida a COMPLETED_PASS)."""
+    hist = os.path.join(EVIDENCE_DIR, GATE3_HISTORICAL_INVALIDATED_EVIDENCE)
+    if os.path.isfile(hist):
+        try:
+            h = load_json(hist)
+            if h.get("outcome") == "COMPLETED_PASS" or h.get("status") == "COMPLETED_PASS":
+                errors.append(f"evidence/{GATE3_HISTORICAL_INVALIDATED_EVIDENCE}: "
+                              f"evidencia historica invalidada NAO pode voltar a COMPLETED_PASS")
+        except Fail:
+            pass
+    if not os.path.isdir(DECISIONS_DIR):
+        return
+    repeat_decision = {}
+    dec_names = sorted(f for f in os.listdir(DECISIONS_DIR)
+                       if f.startswith(GATE3_REPEAT_DECISION_PREFIX) and f.endswith(".json"))
+    if dec_names:
+        try:
+            dschema = load_json(os.path.join(SCHEMA_DIR, GATE3_REPEAT_DECISION_SCHEMA))
+        except Fail as exc:
+            errors.append(str(exc))
+            dschema = None
+        for name in dec_names:
+            derr = []
+            try:
+                rec = load_json(os.path.join(DECISIONS_DIR, name))
+                repeat_decision = rec
+                if dschema is not None:
+                    validate_gate3_repeat_decision(rec, dschema, name, derr)
+            except Fail as exc:
+                derr.append(str(exc))
+            if derr:
+                errors.extend(derr)
+                print(f"[FALHA] decisions/{name}: {len(derr)} problema(s)")
+                for e in derr:
+                    print(f"    - {e}")
+            else:
+                print(f"[OK]    decisions/{name}")
+    if os.path.isdir(EVIDENCE_DIR):
+        ev_names = sorted(f for f in os.listdir(EVIDENCE_DIR)
+                          if f.startswith(GATE3_REPEAT_EVIDENCE_PREFIX) and f.endswith(".json"))
+        if ev_names:
+            try:
+                eschema = load_json(os.path.join(SCHEMA_DIR, GATE3_REPEAT_EVIDENCE_SCHEMA))
+            except Fail as exc:
+                errors.append(str(exc))
+                eschema = None
+            for name in ev_names:
+                everr = []
+                try:
+                    ev = load_json(os.path.join(EVIDENCE_DIR, name))
+                    if eschema is not None:
+                        validate_gate3_repeat_evidence(ev, eschema, repeat_decision, name, everr)
+                except Fail as exc:
+                    everr.append(str(exc))
+                if everr:
+                    errors.extend(everr)
+                    print(f"[FALHA] evidence/{name}: {len(everr)} problema(s)")
+                    for e in everr:
+                        print(f"    - {e}")
+                else:
+                    print(f"[OK]    evidence/{name}")
+
+
 def main():
     all_errors = []
     for artifact, schema_name in ARTIFACTS:
@@ -2230,13 +2451,18 @@ def main():
     validate_gate3(gate3_errors)
     all_errors.extend(gate3_errors)
 
+    gate3_repeat_errors = []
+    validate_gate3_repeat(gate3_repeat_errors)
+    all_errors.extend(gate3_repeat_errors)
+
     if all_errors:
         print(f"\nValidacao FALHOU com {len(all_errors)} problema(s).")
         return 1
     print(f"\nValidacao OK: {len(ARTIFACTS)} artefatos, schemas, regras de seguranca, "
           f"cross-checks, registros reais de decisao, plano da auditoria binaria, "
           f"autorizacao do GATE 0, evidencia do GATE 0, autorizacao do GATE 1, "
-          f"decisao/evidencia do GATE 2 e decisao/evidencia do GATE 3.")
+          f"decisao/evidencia do GATE 2, decisao/evidencia do GATE 3 e "
+          f"convencao da repeticao corretiva (sem registros reais).")
     return 0
 
 
