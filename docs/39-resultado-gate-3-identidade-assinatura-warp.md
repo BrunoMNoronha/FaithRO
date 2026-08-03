@@ -1,7 +1,9 @@
 # Resultado do GATE 3 — identidade e assinatura estática offline do WARP
 
-> **Estado atual:** `GATE 3 — EVIDÊNCIA INVALIDADA, PENDENTE DE REPETIÇÃO
-> CONTROLADA` (revisões corretivas **2P-E-C3-R1 … R4.1**).
+> **Estado atual:** `GATE 3 — REPETIÇÃO CORRETIVA EXECUTADA: COMPLETED_PASS`
+> (decisão humana `AUTHORIZE_CORRECTIVE_REPEAT_GATE_3`, 2P-E-C3-REPEAT). A evidência
+> histórica **permanece** `EVIDENCE_INVALIDATED_PENDING_REPEAT` e é preservada; o PASS
+> vale para a **nova** evidência da repetição. Revisões prévias: **2P-E-C3-R1 … R4.1**.
 > **Data da execução original:** 2026-08-03 · **Data da revisão corretiva:** 2026-08-03.
 > **Escopo desta correção:** revisar os artefatos já versionados, corrigir schemas,
 > validador, testes, documentação e semântica dos registros, e **versionar um parser
@@ -213,6 +215,46 @@ A revisão **2P-E-C3-R4.1** fechou o caminho `COMPLETED_FAIL` — **sem** materi
   repetição; o **GATE 4 permanece não autorizado**; a evidência histórica permanece
   `EVIDENCE_INVALIDATED_PENDING_REPEAT`.
 
+## 0.5 Repetição corretiva executada (2P-E-C3-REPEAT) — COMPLETED_PASS
+
+Sob a decisão humana real `AUTHORIZE_CORRECTIVE_REPEAT_GATE_3`
+([registro](../client/warp-audit/decisions/binary-audit-gate-03-corrective-repeat-decision-record-2026-08-03.json)),
+executou-se **exatamente uma** repetição corretiva controlada — **sem** executar nem
+carregar o binário:
+
+- **Decisão presa aos objetos autorizados.** `reviewed_parser_commit`
+  `bebe4fe9843e52b45b4d244a0f49f338ec3452d4`; Git blob OIDs do parser
+  `3442ddfc…` e dos testes `6d7cab1b…` (recalculados antes e depois, **inalterados**);
+  blob WARP `c853da42…`, tamanho `1137152`. Nenhuma autorização transitiva concedida.
+- **Materialização única.** Exatamente um arquivo binário, obtido **somente** pela API
+  oficial Git Data do GitHub pelo object ID (`GITHUB_OFFICIAL_GIT_DATA_API_BLOB_BY_OID`),
+  decodificado direto para diretório temporário **fora do repositório**; a resposta não
+  foi persistida; base64/bytes não impressos; rede encerrada após a obtenção.
+- **Identidade reconfirmada IGUAL ao GATE 2.** `size=1137152`,
+  `git_blob_oid=c853da42d18dfe090b4e941b435d989311faf3dc`,
+  `sha256=345f3464…74` (Git OID ≠ SHA-256, ambos conferidos).
+- **Parser revisado (somente leitura estática).** `exit_code=0`,
+  `parser_invoked/parser_completed/parser_output_produced=true`. A saída exata e
+  sanitizada foi versionada em
+  [`…-parser-output-2026-08-03.json`](../client/warp-audit/evidence/binary-audit-gate-03-corrective-repeat-parser-output-2026-08-03.json)
+  (SHA-256 `93296824…`), presa por bytes e por referência exata à evidência.
+- **Resultado estrutural do PE.** `PE32`, machine `0x014c` (x86), subsystem
+  `WINDOWS_GUI`, **5 seções**, `SizeOfHeaders=1024`, `FileAlignment=512`,
+  `SectionAlignment=4096`. **`SizeOfOptionalHeader=224`** e magic **`0x010b`**
+  separados — o achado **D2 da R1** (267 == magic, indício de offset incorreto) fica
+  **definitivamente reconfirmado** como leitura correta (224 ≠ 0x010b).
+- **Certificate Table.** `present=false`, `structurally_parseable=true` — **assinatura
+  Authenticode ausente**. Achado material, **não** malware; sem validação de cadeia,
+  OCSP/CRL, extração de `bCertificate` nem OpenSSL sobre conteúdo não extraído.
+- **Cleanup confirmado.** Arquivo e diretório temporários removidos em qualquer desfecho
+  (`temporary_file_removed`/`temporary_dir_removed=true`); binário **nunca** versionado.
+- **Sem acesso a cliente, `Ragexe` ou VPS; GATE 4 não autorizado; segunda repetição não
+  autorizada.** A evidência histórica invalidada é **preservada**.
+
+> `COMPLETED_PASS` significa **apenas** que a repetição controlada do GATE 3 foi
+> concluída — **não** segurança, confiança, validade de assinatura, nem autorização de
+> uso no cliente, distribuição ou GATE 4.
+
 ## 1. Objetivo
 
 Executar exclusivamente o `GATE 3 — IDENTITY_AND_SIGNATURE`: reconfirmar a identidade
@@ -352,6 +394,9 @@ O inspetor revisável **não** foi executado sobre o `WARP.exe` (`run_on_warp_ex
 | `client/warp-audit/evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json` | edição | invalidação + D1/D2/D4 |
 | `client/warp-audit/schemas/binary-audit-gate-03-identity-signature-evidence.schema.json` | edição | novo estado e semântica |
 | `client/warp-audit/schemas/binary-audit-gate-03-corrective-repeat-fail-evidence.schema.json` | edição | R4.1: descrição registra os três estados fechados do FAIL |
+| `client/warp-audit/decisions/binary-audit-gate-03-corrective-repeat-decision-record-2026-08-03.json` | novo | 2P-E-C3-REPEAT: registro real da decisão humana `AUTHORIZE_CORRECTIVE_REPEAT_GATE_3` |
+| `client/warp-audit/evidence/binary-audit-gate-03-corrective-repeat-evidence-2026-08-03.json` | novo | 2P-E-C3-REPEAT: evidência real `COMPLETED_PASS` da repetição executada |
+| `client/warp-audit/evidence/binary-audit-gate-03-corrective-repeat-parser-output-2026-08-03.json` | novo | 2P-E-C3-REPEAT: saída exata e sanitizada do parser revisado (metadados PE) |
 | `scripts/validate-warp-audit.py` | edição | validação da evidência invalidada; R4: bytes/atomicidade; R4.1: ligação exata no FAIL + `validate_parser_execution_state` |
 | `scripts/test-warp-audit-gate-03.py` | edição | negativos D1-D4; R4.1: estados FAIL válidos/inválidos, ligação da saída e cadeia FAIL pelo orquestrador |
 | `docs/39-*.md` | edição | este registro |
@@ -392,17 +437,19 @@ force push.
 ## 19. Estado atual
 
 ```text
-GATE 3 — EVIDÊNCIA INVALIDADA, PENDENTE DE REPETIÇÃO CONTROLADA
+GATE 3 — REPETIÇÃO CORRETIVA EXECUTADA: COMPLETED_PASS
+(evidência histórica EVIDENCE_INVALIDATED_PENDING_REPEAT preservada)
 ```
 
 ## 20. Próxima decisão humana (proposta)
 
-O GATE 3 precisa de **repetição controlada** para remedir a identidade PE e reconfirmar
-o estado da assinatura com o inspetor revisável. Como **proposta** (nomes ainda não
-canônicos; **nenhuma** opção selecionada):
+A repetição corretiva do GATE 3 foi **executada** e concluiu `COMPLETED_PASS`; a
+identidade PE foi remedida (`SizeOfOptionalHeader=224`, magic `0x010b`) e a Certificate
+Table determinada (`present=false`). A próxima decisão humana é sobre **avançar ou
+parar** — como **proposta** (nomes ainda não canônicos; **nenhuma** opção selecionada):
 
 ```text
-AUTHORIZE_CORRECTIVE_REPEAT_GATE_3
+AUTHORIZE_GATE_4
 STOP_PATH
 ```
 
@@ -410,8 +457,8 @@ STOP_PATH
 GATE 4 NÃO AUTORIZADO
 ```
 
-Um estado invalidado **não** seleciona a repetição automaticamente, e a repetição
-**não** avança para o GATE 4.
+O `COMPLETED_PASS` da repetição **não** seleciona o GATE 4 automaticamente nem autoriza
+uso no cliente ou distribuição; uma segunda repetição **não** está autorizada.
 
 ## Estado de verificação
 

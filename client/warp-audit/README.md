@@ -261,6 +261,22 @@ testes do parser não mudaram** (blob OIDs inalterados) e **nada** foi materiali
 executado ou registrado como repetição real; a evidência histórica permanece
 `EVIDENCE_INVALIDATED_PENDING_REPEAT` e o **GATE 4 continua não autorizado**.
 
+**Repetição corretiva executada (2P-E-C3-REPEAT) — COMPLETED_PASS:** sob a decisão
+humana real `AUTHORIZE_CORRECTIVE_REPEAT_GATE_3`
+([registro](decisions/binary-audit-gate-03-corrective-repeat-decision-record-2026-08-03.json)),
+executou-se **uma** repetição controlada: materialização única do blob `c853da42…` pela
+API oficial Git Data do GitHub (por object ID) em diretório temporário fora do repo,
+identidade reconfirmada **igual** ao GATE 2 (`1137152` / `c853da42…` / `sha256 345f3464…`),
+e **apenas** o parser revisado executado para leitura estática. Resultado: `PE32`,
+5 seções, **`SizeOfOptionalHeader=224`** e magic `0x010b` separados (reconfirmando o
+achado D2 da R1), Certificate Table `present=false` (assinatura ausente ≠ malware). A
+[saída do parser](evidence/binary-audit-gate-03-corrective-repeat-parser-output-2026-08-03.json)
+foi versionada e presa por bytes/referência à
+[evidência `COMPLETED_PASS`](evidence/binary-audit-gate-03-corrective-repeat-evidence-2026-08-03.json).
+Binário temporário removido; **não** executado/carregado; sem cliente/`Ragexe`/VPS; GATE 4
+e segunda repetição **não** autorizados; evidência histórica invalidada **preservada**.
+PASS significa **apenas** que a repetição controlada do GATE 3 foi concluída.
+
 ## Propriedade intelectual
 
 WARP é **GPL-3.0** (uso apenas local; binário não versionado no FaithRO). `Ragexe`,
