@@ -127,6 +127,8 @@ def _parse_certificate_table(data, n, dd_start, num_rva, size_of_headers):
         "first_field_is_file_offset_not_rva": True,
         "present": False,
         "structurally_parseable": True,
+        "within_file": True,
+        "security_directory_entry_present": True,
         "file_offset": 0,
         "size": 0,
         "entry_count": 0,
@@ -137,7 +139,6 @@ def _parse_certificate_table(data, n, dd_start, num_rva, size_of_headers):
     if num_rva <= CERT_TABLE_INDEX:
         cert["security_directory_entry_present"] = False
         return cert
-    cert["security_directory_entry_present"] = True
 
     entry = dd_start + CERT_TABLE_INDEX * DATADIR_ENTRY_SIZE
     cert_off = _u32(data, entry)

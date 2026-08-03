@@ -32,11 +32,17 @@
     },
     "stop": {
       "type": "object", "additionalProperties": false,
-      "required": ["category", "reason", "stage_when_stopped", "gate_3_repeat_completed"],
+      "required": ["category", "reason", "stage_when_stopped", "materialization_started", "parser_invoked", "parser_output_produced", "cleanup_required", "cleanup_attempted", "cleanup_completed", "gate_3_repeat_completed"],
       "properties": {
         "category": { "type": "string", "enum": ["INVALID_AUTHORIZATION", "INVALID_PRECONDITION", "TOOL_UNAVAILABLE", "DESTINATION_NOT_ISOLATED", "UNEXPECTED_NETWORK_ATTEMPT", "STOP_CONDITION", "OPERATOR_STOP_PATH"] },
         "reason": { "type": "string", "minLength": 1 },
         "stage_when_stopped": { "type": "string", "enum": ["BEFORE_MATERIALIZATION", "DURING_MATERIALIZATION", "BEFORE_INSPECTION", "DURING_INSPECTION"] },
+        "materialization_started": { "type": "boolean" },
+        "parser_invoked": { "type": "boolean" },
+        "parser_output_produced": { "type": "boolean", "const": false },
+        "cleanup_required": { "type": "boolean" },
+        "cleanup_attempted": { "type": "boolean" },
+        "cleanup_completed": { "type": "boolean" },
         "gate_3_repeat_completed": { "type": "boolean", "const": false }
       }
     },

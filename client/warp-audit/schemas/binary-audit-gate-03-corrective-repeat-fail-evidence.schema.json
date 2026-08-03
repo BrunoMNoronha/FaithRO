@@ -8,9 +8,10 @@
   "required": [
     "schema_version", "project", "stage", "record_type", "status", "outcome", "gate",
     "original_invalidated_evidence_ref", "corrective_repeat_decision_ref",
-    "reviewed_parser_ref", "reviewed_parser_git_blob_oid", "reviewed_parser_test_ref",
-    "integration_ref", "failure", "reviewed_parser", "security_assertions",
-    "findings", "limitations", "rollback", "notes"
+    "reviewed_parser_ref", "reviewed_parser_commit", "reviewed_parser_git_blob_oid",
+    "reviewed_parser_test_ref", "reviewed_parser_test_git_blob_oid",
+    "integration_ref", "parser_execution", "failure", "reviewed_parser",
+    "security_assertions", "findings", "limitations", "rollback", "notes"
   ],
   "properties": {
     "schema_version": { "type": "integer", "const": 1 },
@@ -26,11 +27,24 @@
     "original_invalidated_evidence_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "const": "client/warp-audit/evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json" } } },
     "corrective_repeat_decision_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "minLength": 1 } } },
     "reviewed_parser_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "const": "scripts/inspect-warp-pe-identity.py" } } },
+    "reviewed_parser_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
     "reviewed_parser_git_blob_oid": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
     "reviewed_parser_test_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "const": "scripts/test-warp-pe-identity.py" } } },
+    "reviewed_parser_test_git_blob_oid": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "reviewed_parser_output_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "minLength": 1 } } },
+    "reviewed_parser_output_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
     "integration_ref": {
       "type": "object", "additionalProperties": false, "required": ["pr", "squash_commit", "base_branch"],
       "properties": { "pr": { "type": "integer", "const": 50 }, "squash_commit": { "type": "string", "const": "6ab37b2a7ae65fd6b4fdf184759b345cf9ce4bd6" }, "base_branch": { "type": "string", "const": "dev" } }
+    },
+    "parser_execution": {
+      "type": "object", "additionalProperties": false,
+      "required": ["parser_invoked", "parser_completed", "parser_output_produced"],
+      "properties": {
+        "parser_invoked": { "type": "boolean" },
+        "parser_completed": { "type": "boolean" },
+        "parser_output_produced": { "type": "boolean" }
+      }
     },
     "failure": {
       "type": "object", "additionalProperties": false,
