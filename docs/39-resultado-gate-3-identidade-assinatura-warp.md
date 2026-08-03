@@ -1,7 +1,7 @@
 # Resultado do GATE 3 — identidade e assinatura estática offline do WARP
 
 > **Estado atual:** `GATE 3 — EVIDÊNCIA INVALIDADA, PENDENTE DE REPETIÇÃO
-> CONTROLADA` (revisão corretiva **2P-E-C3-R1**).
+> CONTROLADA` (revisões corretivas **2P-E-C3-R1 … R4.1**).
 > **Data da execução original:** 2026-08-03 · **Data da revisão corretiva:** 2026-08-03.
 > **Escopo desta correção:** revisar os artefatos já versionados, corrigir schemas,
 > validador, testes, documentação e semântica dos registros, e **versionar um parser
@@ -174,6 +174,45 @@ A quarta revisão fechou a máquina de estados e a proveniência da repetição 
   `certificate_table`, flags de escopo, semântica de leitura, etc.) devem ser
   **idênticos** à saída real; a saída do parser é a **fonte primária**.
 
+## 0.4 Referência do FAIL e invariantes de estado (2P-E-C3-R4.1)
+
+A revisão **2P-E-C3-R4.1** fechou o caminho `COMPLETED_FAIL` — **sem** materializar,
+**sem** acessar o blob upstream e **sem** executar o parser sobre o `WARP.exe`:
+
+- **Referência presa no FAIL (R4.1-D1).** Quando `parser_output_produced=true` no
+  `COMPLETED_FAIL`, o validador passou a exigir a **mesma ligação exata** já aplicada no
+  PASS: `parser_output_raw`, `present_output_name` e `parser_output_path` não podem ser
+  `None`; `reviewed_parser_output_ref.path` deve ser **igual** ao caminho canônico do
+  único arquivo de saída (`client/warp-audit/evidence/<arquivo>`), **não** bastando
+  `endswith`; e o **SHA-256 dos bytes reais** deve conferir. Reprova: saída sem
+  referência, referência sem saída, referência para arquivo diferente, referência para
+  o **mesmo nome em diretório diferente**, hash de um arquivo com referência para outro,
+  e mais de uma saída.
+- **Invariantes de `parser_execution` (R4.1-D2).** Uma função comum
+  (`validate_parser_execution_state`) é usada por PASS, FAIL e STOPPED. Invariantes
+  gerais: `completed⇒invoked`; `output_produced⇒invoked ∧ completed`;
+  `¬invoked⇒¬completed ∧ ¬output_produced`; `¬completed⇒¬output_produced`. Por outcome:
+  **PASS** exige exatamente `true/true/true`; **COMPLETED_FAIL** admite **apenas** três
+  estados fechados — `PRE_PARSER_FAIL` (`false/false/false`),
+  `PARSER_ERROR_WITHOUT_OUTPUT` (`true/false/false`) e `POST_OUTPUT_FAIL`
+  (`true/true/true`); qualquer outra combinação (por exemplo `false/true/false`,
+  `false/false/true`, `false/true/true`, `true/false/true`) é **reprovada**.
+- **STOPPED e a limitação documentada.** O modelo STOPPED não possui `parser_completed`;
+  o campo **não foi inventado**. Validam-se os campos equivalentes existentes
+  (`parser_invoked`, `parser_output_produced=false`) e mantém-se `output_produced⇒invoked`.
+  A limitação (`¬invoked⇒¬completed` não verificável sem o campo) está registrada no
+  código e no schema.
+- **Schema FAIL.** Como o mini-validador não implementa `if/then/else`, os três booleanos
+  permanecem no schema e as relações condicionais são aplicadas em Python; a **descrição**
+  do schema FAIL passou a registrar explicitamente os três estados válidos.
+- **Parser e testes do parser inalterados.** Esta revisão **não** tocou
+  `scripts/inspect-warp-pe-identity.py` nem `scripts/test-warp-pe-identity.py`
+  (Git blob OIDs `3442ddfc…` e `6d7cab1b…` confirmados antes e depois).
+- **Nada materializado ou executado.** Nenhuma nova materialização ocorreu; o parser não
+  foi executado sobre o `WARP.exe`; **não** existe registro/evidência/saída reais da
+  repetição; o **GATE 4 permanece não autorizado**; a evidência histórica permanece
+  `EVIDENCE_INVALIDATED_PENDING_REPEAT`.
+
 ## 1. Objetivo
 
 Executar exclusivamente o `GATE 3 — IDENTITY_AND_SIGNATURE`: reconfirmar a identidade
@@ -312,8 +351,9 @@ O inspetor revisável **não** foi executado sobre o `WARP.exe` (`run_on_warp_ex
 | `client/warp-audit/schemas/binary-audit-gate-03-corrective-repeat-parser-output.schema.json` | novo | R3: schema da saída textual do parser (metadados) |
 | `client/warp-audit/evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json` | edição | invalidação + D1/D2/D4 |
 | `client/warp-audit/schemas/binary-audit-gate-03-identity-signature-evidence.schema.json` | edição | novo estado e semântica |
-| `scripts/validate-warp-audit.py` | edição | validação da evidência invalidada |
-| `scripts/test-warp-audit-gate-03.py` | edição | negativos D1-D4 |
+| `client/warp-audit/schemas/binary-audit-gate-03-corrective-repeat-fail-evidence.schema.json` | edição | R4.1: descrição registra os três estados fechados do FAIL |
+| `scripts/validate-warp-audit.py` | edição | validação da evidência invalidada; R4: bytes/atomicidade; R4.1: ligação exata no FAIL + `validate_parser_execution_state` |
+| `scripts/test-warp-audit-gate-03.py` | edição | negativos D1-D4; R4.1: estados FAIL válidos/inválidos, ligação da saída e cadeia FAIL pelo orquestrador |
 | `docs/39-*.md` | edição | este registro |
 | `docs/README.md`, `client/warp-audit/README.md` | edição pontual | estado atualizado |
 | `.github/workflows/validate-warp-audit.yml` | edição pontual | executar o teste do parser |
@@ -323,10 +363,12 @@ serviços, cliente, `Ragexe` ou progressão foi tocado. Nenhum binário adiciona
 
 ## 16. Testes
 
-- `git diff --check`; `validate-warp-audit.py`; `test-warp-audit-gate-01/02/03.py`;
-  `test-warp-pe-identity.py` (32 casos, inclui a regressão D2: `soh` de `0xE0` **não**
-  vira `267`); `validate-client-assets.py`. Testes dos GATEs anteriores **não** foram
-  enfraquecidos.
+- `git diff --check`; `validate-warp-audit.py`; `test-warp-audit-gate-01/02/03.py`
+  (gate-03 com **133** casos após R4.1, incluindo estados FAIL válidos/inválidos e a
+  ligação exata da saída pelo orquestrador real); `test-warp-pe-identity.py` (32 casos,
+  inclui a regressão D2: `soh` de `0xE0` **não** vira `267`); `validate-client-assets.py`.
+  Testes dos GATEs anteriores **não** foram enfraquecidos. Git blob OIDs do parser e dos
+  testes do parser (`3442ddfc…`, `6d7cab1b…`) **inalterados** antes e depois de R4.1.
 
 ## 17. Riscos
 

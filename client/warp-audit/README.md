@@ -169,7 +169,7 @@ executado. O `git_blob_oid` é o identificador do objeto Git informado pelo upst
 avanço exige **nova decisão humana** (`AUTHORIZE_GATE_1` / `REPEAT_GATE_0` /
 `STOP_PATH`).
 
-## Resultado do GATE 3 (2P-E-C3) e revisão corretiva (2P-E-C3-R1)
+## Resultado do GATE 3 (2P-E-C3) e revisões corretivas (2P-E-C3-R1 … R4.1)
 
 O GATE 3 foi executado por inspeção estática offline — decisão em
 [`decisions/binary-audit-gate-03-decision-record-2026-08-03.json`](decisions/binary-audit-gate-03-decision-record-2026-08-03.json),
@@ -245,6 +245,21 @@ decisão **e** a evidência, exigindo o mesmo commit; `None` é erro. Os campos 
 na evidência PASS devem ser **idênticos** à saída real (fonte primária). PASS/FAIL/
 STOPPED têm schemas distintos e o parser emite `certificate_table.within_file` sempre,
 permitindo fechar o schema da saída.
+
+**Referência do FAIL e invariantes 2P-E-C3-R4.1:** o caminho `COMPLETED_FAIL` passou a
+prender a saída com a **mesma igualdade exata** do PASS — quando
+`parser_output_produced=true`, exige `parser_output_raw`/`present_output_name`/
+`parser_output_path` não nulos, `reviewed_parser_output_ref.path` **igual** ao caminho
+canônico do único arquivo (não basta `endswith`) e SHA-256 dos bytes reais. Uma função
+comum (`validate_parser_execution_state`) aplica em Python os invariantes de
+`parser_invoked`/`parser_completed`/`parser_output_produced` para PASS/FAIL/STOPPED:
+FAIL admite **apenas** `PRE_PARSER_FAIL` (`false/false/false`),
+`PARSER_ERROR_WITHOUT_OUTPUT` (`true/false/false`) e `POST_OUTPUT_FAIL`
+(`true/true/true`) — qualquer outra combinação é reprovada. STOPPED não modela
+`parser_completed` (limitação documentada); o campo não foi inventado. O **parser e os
+testes do parser não mudaram** (blob OIDs inalterados) e **nada** foi materializado,
+executado ou registrado como repetição real; a evidência histórica permanece
+`EVIDENCE_INVALIDATED_PENDING_REPEAT` e o **GATE 4 continua não autorizado**.
 
 ## Propriedade intelectual
 
