@@ -153,8 +153,11 @@ GATE0_DECISION_RECORD = "binary-audit-gate-00-decision-record-2026-07-31.json"
 GATE0_EVIDENCE_PREFIX = "binary-audit-gate-00-provenance-evidence-"
 # Prefixo de evidencia do GATE 2 (ETAPA 2P-E-C2-A).
 GATE2_EVIDENCE_PREFIX = "binary-audit-gate-02-integrity-evidence-"
+# Prefixo de evidencia do GATE 3 (ETAPA 2P-E-C3).
+GATE3_EVIDENCE_PREFIX = "binary-audit-gate-03-identity-signature-evidence-"
 # Prefixos aceitos em evidence/ (o orquestrador de cada gate filtra o seu proprio).
-EVIDENCE_FILE_PREFIXES = (GATE0_EVIDENCE_PREFIX, GATE2_EVIDENCE_PREFIX)
+EVIDENCE_FILE_PREFIXES = (GATE0_EVIDENCE_PREFIX, GATE2_EVIDENCE_PREFIX,
+                          GATE3_EVIDENCE_PREFIX)
 # Valores canonicos esperados (dos artefatos internos das etapas anteriores).
 EXPECTED_ARTIFACT_PATH = "win32/WARP.exe"
 EXPECTED_ARTIFACT_BLOB = "c853da42d18dfe090b4e941b435d989311faf3dc"
@@ -225,6 +228,45 @@ GATE2_CRITICAL_FALSE = {
 # Regex hexadecimal generica (para diferenciar 40-hex Git OID de 64-hex SHA-256).
 HEX64_RE = re.compile(r"^[0-9a-f]{64}$")
 HEX40_RE = re.compile(r"^[0-9a-f]{40}$")
+
+# --- ETAPA 2P-E-C3: GATE 3 (identidade e assinatura estatica offline) ---
+# GATE 3 rematerializa temporariamente o mesmo blob fixado, reconfirma a identidade
+# local (tamanho, Git OID e SHA-256 iguais aos do GATE 2) e inspeciona estaticamente
+# APENAS a identidade do PE e a assinatura Authenticode. NAO executa/carrega o binario,
+# NAO faz analise dinamica/sandbox/rede pos-obtencao, NAO inventaria secoes/imports/
+# exports/strings (GATE 4) e NAO autoriza o GATE 4.
+GATE3_DECISION_SCHEMA = "binary-audit-gate-03-decision-record-real.schema.json"
+GATE3_EVIDENCE_SCHEMA = "binary-audit-gate-03-identity-signature-evidence.schema.json"
+GATE3_DECISION_PREFIX = "binary-audit-gate-03-decision-record-"
+GATE2_DECISION_RECORD = "binary-audit-gate-02-decision-record-2026-08-01.json"
+GATE2_EVIDENCE_RECORD = "binary-audit-gate-02-integrity-evidence-2026-08-01.json"
+# Squash do PR #50 (integrou a decisao/evidencia do GATE 2); referenciado pelo GATE 3.
+EXPECTED_PR50_SQUASH = "6ab37b2a7ae65fd6b4fdf184759b345cf9ce4bd6"
+# Flags true no registro de decisao do GATE 3 (decisao + pre-condicao + grants do gate).
+GATE3_DECISION_TRUE_FLAGS = {
+    "human_decision_required", "human_decision_received", "gate_selected",
+    "gate_2_completed", "temporary_materialization_authorized",
+    "local_hashing_authorized", "static_identity_inspection_authorized",
+    "authenticode_inspection_authorized", "gate_3_authorized",
+}
+# Pontos criticos que DEVEM permanecer false no GATE 3 (sem autorizacao transitiva).
+GATE3_CRITICAL_FALSE = {
+    "gate_4_authorized", "execution_authorized", "dynamic_analysis_authorized",
+    "external_reputation_upload_authorized", "network_validation_authorized",
+    "sandbox_creation_authorized", "client_copy_provision_authorized",
+    "client_modification_authorized", "patch_review_authorized",
+    "patch_application_authorized", "client_preparation_authorized",
+    "test_account_authorized", "first_login_authorized", "vps_access_authorized",
+    "distribution_authorized",
+}
+# Estados fechados da inspecao de assinatura (conjunto FECHADO).
+GATE3_CRYPTO_VERIF_STATES = {
+    "NOT_PERFORMED_OFFLINE", "PERFORMED_VALID", "PERFORMED_INVALID",
+    "NOT_APPLICABLE_NO_SIGNATURE",
+}
+GATE3_CHAIN_TRUST_STATES = {
+    "NOT_EVALUATED_OFFLINE", "NOT_APPLICABLE_NO_SIGNATURE",
+}
 
 # --- Regras de seguranca (valores, nao prosa) ---
 IPV4_RE = re.compile(r"(?<!\d)(?:\d{1,3}\.){3}\d{1,3}(?!\d)")
@@ -1659,6 +1701,387 @@ def validate_gate2(errors):
                     print(f"[OK]    evidence/{name}")
 
 
+def validate_gate3_decision(record, schema, plan, gate2_decision, gate2_evidence,
+                            filename, errors):
+    """Valida o registro REAL da autorizacao humana do GATE 3 (importavel).
+
+    Exige, alem do schema: decisao AUTHORIZE_GATE_3; escopo fechado ao blob fixado
+    canonico; SOMENTE os grants do GATE 3 (materializacao temporaria, hashing local,
+    inspecao de identidade do PE e de Authenticode) em true; gate_4_authorized e todas
+    as demais flags operacionais em false; pre-condicao GATE 2 = COMPLETED_PASS; e
+    cross-checks com o plano, a decisao e a evidencia do GATE 2 e com o squash do PR #50.
+    """
+    kv = []
+    schema_keyword_violations(schema, "gate-03-decision.schema", kv)
+    errors.extend(kv)
+    validate_node(record, schema, filename, errors)
+    security_scan(record, errors)
+    planning_content_scan(record, filename, errors)
+
+    if not isinstance(record, dict):
+        errors.append(f"{filename}: registro nao e objeto")
+        return errors
+
+    if record.get("status") != "AUTHORIZED_FOR_SINGLE_GATE":
+        errors.append(f"{filename}: status deve ser AUTHORIZED_FOR_SINGLE_GATE")
+    g = record.get("gate")
+    if not isinstance(g, dict) or g.get("id") != 3 or g.get("name") != "IDENTITY_AND_SIGNATURE":
+        errors.append(f"{filename}: gate deve ser id=3 name=IDENTITY_AND_SIGNATURE")
+    if record.get("decision") != "AUTHORIZE_GATE_3":
+        errors.append(f"{filename}: decision deve ser AUTHORIZE_GATE_3")
+    if record.get("execution_state") != "AUTHORIZED_NOT_STARTED":
+        errors.append(f"{filename}: execution_state deve ser AUTHORIZED_NOT_STARTED")
+
+    for field in ("decider", "role", "authority", "channel"):
+        val = record.get(field)
+        if not isinstance(val, str) or not val.strip():
+            errors.append(f"{filename}: campo '{field}' vazio")
+        elif PLACEHOLDER_RE.search(val):
+            errors.append(f"{filename}: campo '{field}' parece placeholder (categoria: placeholder)")
+    if not valid_iso_date(record.get("date")):
+        errors.append(f"{filename}: campo 'date' nao e uma data ISO valida")
+
+    conds = record.get("conditions")
+    if not isinstance(conds, list) or len(conds) < 20:
+        errors.append(f"{filename}: 'conditions' deve ter ao menos 20 itens")
+        conds = conds if isinstance(conds, list) else []
+    ns = [c.get("n") for c in conds if isinstance(c, dict)]
+    if ns != list(range(1, len(conds) + 1)):
+        errors.append(f"{filename}: conditions devem ser numeradas 1..N em ordem, sem lacuna/repeticao")
+
+    auth = record.get("authorizations")
+    if not isinstance(auth, dict):
+        errors.append(f"{filename}: 'authorizations' ausente")
+    else:
+        for k, v in auth.items():
+            if k in GATE3_DECISION_TRUE_FLAGS:
+                if v is not True:
+                    errors.append(f"{filename}: authorizations.{k} deve ser true")
+            elif v is not False:
+                errors.append(f"{filename}: authorizations.{k} deve ser false (grants do GATE 3 sao limitados)")
+        if auth.get("gate_3_authorized") is not True:
+            errors.append(f"{filename}: authorizations.gate_3_authorized deve ser true (grant do GATE 3)")
+        for k in GATE3_CRITICAL_FALSE:
+            if auth.get(k) is not False:
+                errors.append(f"{filename}: authorizations.{k} deve ser false (sem autorizacao transitiva)")
+
+    _check_materialization_scope(record.get("materialization_scope"), filename, errors)
+
+    ir = record.get("integration_ref")
+    if not isinstance(ir, dict):
+        errors.append(f"{filename}: 'integration_ref' ausente")
+    else:
+        if ir.get("pr") != 50:
+            errors.append(f"{filename}: integration_ref.pr deve ser 50")
+        if ir.get("squash_commit") != EXPECTED_PR50_SQUASH:
+            errors.append(f"{filename}: integration_ref.squash_commit deve ser o squash do PR #50")
+        if ir.get("base_branch") != "dev":
+            errors.append(f"{filename}: integration_ref.base_branch deve ser dev")
+
+    pc = record.get("precondition")
+    if not isinstance(pc, dict):
+        errors.append(f"{filename}: 'precondition' ausente")
+    else:
+        if pc.get("gate_2_completed") is not True:
+            errors.append(f"{filename}: precondition.gate_2_completed deve ser true")
+        if pc.get("gate_2_outcome") != "COMPLETED_PASS":
+            errors.append(f"{filename}: precondition.gate_2_outcome deve ser COMPLETED_PASS")
+
+    for field in ("plan_ref", "source_decision_ref", "prior_gate_decision_ref",
+                  "gate_2_evidence_ref"):
+        ref = record.get(field)
+        _ref_ok(ref.get("path") if isinstance(ref, dict) else None, field, filename, errors)
+
+    if isinstance(plan, dict):
+        plan_gate_ids = [x.get("gate_id") for x in plan.get("gates", []) if isinstance(x, dict)]
+        if 3 not in plan_gate_ids:
+            errors.append(f"{filename}: plano nao contem GATE 3 correspondente")
+    if isinstance(gate2_decision, dict):
+        a2 = gate2_decision.get("authorizations", {})
+        if gate2_decision.get("decision") != "AUTHORIZE_GATE_2" or a2.get("gate_2_authorized") is not True:
+            errors.append(f"{filename}: GATE 2 referenciado nao autoriza materializacao")
+    else:
+        errors.append(f"{filename}: decisao do GATE 2 ausente/invalida")
+    if isinstance(gate2_evidence, dict):
+        if gate2_evidence.get("outcome") != "COMPLETED_PASS":
+            errors.append(f"{filename}: evidencia do GATE 2 nao esta COMPLETED_PASS")
+    else:
+        errors.append(f"{filename}: evidencia do GATE 2 ausente/invalida")
+    return errors
+
+
+def validate_gate3_evidence(ev, schema, gate3_decision, gate2_evidence,
+                            filename, errors):
+    """Valida a evidencia REAL da execucao do GATE 3 (offline, importavel).
+
+    A evidencia registra legitimamente o SHA-256 (como a do GATE 2); a varredura de
+    conteudo NAO aplica a regra generica de 64-hex, mas ainda proibe download/execucao/
+    URLs de binario. Exige identidade IGUAL A do GATE 2, PE valido, estado da assinatura
+    determinado com precisao (sem overclaim), separacao presenca/validade/confianca/
+    seguranca, limpeza confirmada e gate_4_authorized=false.
+    """
+    kv = []
+    schema_keyword_violations(schema, "gate-03-evidence.schema", kv)
+    errors.extend(kv)
+    validate_node(ev, schema, filename, errors)
+    security_scan(ev, errors)
+    _content_scan_allow_hashes(ev, filename, errors)
+
+    if not isinstance(ev, dict):
+        errors.append(f"{filename}: evidencia nao e objeto")
+        return errors
+
+    if ev.get("status") != ev.get("outcome"):
+        errors.append(f"{filename}: status deve ser igual a outcome")
+    if ev.get("outcome") != "COMPLETED_PASS":
+        errors.append(f"{filename}: outcome deve ser COMPLETED_PASS")
+    g = ev.get("gate")
+    if not isinstance(g, dict) or g.get("id") != 3 or g.get("name") != "IDENTITY_AND_SIGNATURE":
+        errors.append(f"{filename}: gate deve ser id=3 name=IDENTITY_AND_SIGNATURE")
+
+    # Execucao: iniciada, concluida, tempos ordenados e reais.
+    ex = ev.get("execution") or {}
+    if ex.get("gate_3_started") is not True or ex.get("gate_3_completed") is not True:
+        errors.append(f"{filename}: execution deve ter gate_3_started e gate_3_completed true")
+    if ex.get("execution_state") != "COMPLETED":
+        errors.append(f"{filename}: execution_state deve ser COMPLETED")
+    st, ft, cl = ex.get("started_at"), ex.get("finished_at"), ex.get("cleanup_at")
+    if isinstance(st, str) and isinstance(ft, str) and st > ft:
+        errors.append(f"{filename}: started_at posterior a finished_at")
+    if isinstance(ft, str) and isinstance(cl, str) and ft > cl:
+        errors.append(f"{filename}: finished_at posterior a cleanup_at (limpeza deve ser depois)")
+    if ex.get("method") != "GITHUB_OFFICIAL_GIT_DATA_API_BLOB_BY_OID":
+        errors.append(f"{filename}: method fora do conjunto autorizado")
+    if ex.get("network_scope") != "GITHUB_OFFICIAL_ONLY":
+        errors.append(f"{filename}: network_scope deve ser GITHUB_OFFICIAL_ONLY")
+
+    # Identificadores esperados == canonicos.
+    up = ev.get("upstream_expected") or {}
+    for k, exp in (("repository_full_name", EXPECTED_REPOSITORY),
+                   ("commit_oid", EXPECTED_PINNED_COMMIT),
+                   ("tree_oid", EXPECTED_TREE_OID),
+                   ("artifact_path", EXPECTED_ARTIFACT_PATH),
+                   ("artifact_blob_oid", EXPECTED_ARTIFACT_BLOB),
+                   ("artifact_blob_size", EXPECTED_ARTIFACT_SIZE)):
+        if up.get(k) != exp:
+            errors.append(f"{filename}: upstream_expected.{k} deve ser {exp!r}")
+
+    # Reconfirmacao de identidade: IGUAL A do GATE 2 (tamanho, Git OID, SHA-256).
+    ir = ev.get("identity_reconfirmation") or {}
+    if ir.get("materialized_file_count") != 1:
+        errors.append(f"{filename}: identity_reconfirmation.materialized_file_count deve ser 1")
+    if ir.get("temporary_dir_outside_repo") is not True:
+        errors.append(f"{filename}: temporary_dir_outside_repo deve ser true")
+    if ir.get("opened") is not False or ir.get("executed") is not False:
+        errors.append(f"{filename}: identity_reconfirmation.opened/executed devem ser false")
+    if ir.get("size_bytes_observed") != EXPECTED_ARTIFACT_SIZE or ir.get("size_match") is not True:
+        errors.append(f"{filename}: tamanho reconfirmado deve ser {EXPECTED_ARTIFACT_SIZE} e size_match=true")
+    if ir.get("git_blob_oid_algorithm") != "GIT_OBJECT_ID":
+        errors.append(f"{filename}: git_blob_oid_algorithm deve ser GIT_OBJECT_ID")
+    for k in ("git_blob_oid_expected", "git_blob_oid_git_hash_object", "git_blob_oid_independent"):
+        if ir.get(k) != EXPECTED_ARTIFACT_BLOB:
+            errors.append(f"{filename}: identity_reconfirmation.{k} deve ser {EXPECTED_ARTIFACT_BLOB}")
+    if ir.get("git_blob_oid_match") is not True:
+        errors.append(f"{filename}: git_blob_oid_match deve ser true")
+    sha = ir.get("sha256_local")
+    if not isinstance(sha, str) or not HEX64_RE.match(sha):
+        errors.append(f"{filename}: sha256_local deve ter 64 caracteres hex")
+    elif sha != EXPECTED_ARTIFACT_SHA256:
+        errors.append(f"{filename}: sha256_local nao confere com o conteudo do blob fixado (GATE 2)")
+    if ir.get("sha256_expected") != EXPECTED_ARTIFACT_SHA256:
+        errors.append(f"{filename}: sha256_expected deve ser o SHA-256 do GATE 2")
+    if ir.get("sha256_match") is not True:
+        errors.append(f"{filename}: sha256_match deve ser true")
+    if isinstance(sha, str) and (sha == EXPECTED_ARTIFACT_BLOB or HEX40_RE.match(sha)):
+        errors.append(f"{filename}: SHA-256 nao pode ser igual ao Git object ID nem ter 40 hex")
+    if ir.get("sha256_is_not_git_oid") is not True:
+        errors.append(f"{filename}: sha256_is_not_git_oid deve ser true")
+    if ir.get("identity_matches_gate_2") is not True:
+        errors.append(f"{filename}: identity_matches_gate_2 deve ser true")
+
+    # Identidade PE: valida e consistente.
+    pe = ev.get("pe_identity") or {}
+    if pe.get("mz_present") is not True or pe.get("pe_signature_present") is not True:
+        errors.append(f"{filename}: pe_identity deve confirmar MZ e assinatura PE")
+    if pe.get("pe_valid") is not True:
+        errors.append(f"{filename}: pe_identity.pe_valid deve ser true")
+    if pe.get("pe_format") not in ("PE32", "PE32+"):
+        errors.append(f"{filename}: pe_identity.pe_format deve ser PE32 ou PE32+")
+
+    # Assinatura Authenticode: estado determinado com precisao, SEM overclaim.
+    au = ev.get("authenticode") or {}
+    present = au.get("authenticode_signature_present")
+    cert_present = au.get("certificate_table_present")
+    if not isinstance(present, bool) or not isinstance(cert_present, bool):
+        errors.append(f"{filename}: authenticode presence flags devem ser booleanas")
+    if au.get("cryptographic_verification") not in GATE3_CRYPTO_VERIF_STATES:
+        errors.append(f"{filename}: cryptographic_verification fora do conjunto fechado")
+    if au.get("chain_trust_state") not in GATE3_CHAIN_TRUST_STATES:
+        errors.append(f"{filename}: chain_trust_state fora do conjunto fechado")
+    # Coerencia presenca x campos e SEM afirmacao de validade sem evidencia.
+    if present is False:
+        # Assinatura ausente: nada de signatario/algoritmo/validade; nao e malware.
+        for k in ("win_cert_type", "signer_subject", "signer_issuer", "signer_serial"):
+            if au.get(k) is not None:
+                errors.append(f"{filename}: assinatura ausente exige authenticode.{k}=null")
+        if au.get("digest_algorithms_declared"):
+            errors.append(f"{filename}: assinatura ausente exige digest_algorithms_declared vazio")
+        if au.get("timestamp_or_countersignature_present") is not False:
+            errors.append(f"{filename}: assinatura ausente exige timestamp_or_countersignature_present=false")
+        if au.get("structurally_parseable") is not False:
+            errors.append(f"{filename}: assinatura ausente exige structurally_parseable=false")
+        if au.get("cryptographic_verification") != "NOT_APPLICABLE_NO_SIGNATURE":
+            errors.append(f"{filename}: assinatura ausente exige cryptographic_verification=NOT_APPLICABLE_NO_SIGNATURE")
+        if au.get("chain_trust_state") != "NOT_APPLICABLE_NO_SIGNATURE":
+            errors.append(f"{filename}: assinatura ausente exige chain_trust_state=NOT_APPLICABLE_NO_SIGNATURE")
+    elif present is True:
+        # Assinatura presente: NAO pode afirmar validade/confianca sem evidencia da
+        # ferramenta. 'PERFORMED_VALID' exige parse estrutural bem-sucedido.
+        if au.get("cryptographic_verification") == "PERFORMED_VALID" and au.get("structurally_parseable") is not True:
+            errors.append(f"{filename}: 'assinatura valida' sem parse estrutural bem-sucedido (overclaim)")
+        if au.get("chain_trust_state") == "NOT_APPLICABLE_NO_SIGNATURE":
+            errors.append(f"{filename}: assinatura presente nao pode usar estado 'NO_SIGNATURE' de cadeia")
+
+    # Semantica de assinatura: separacao presenca/validade/confianca/seguranca.
+    ss = ev.get("signature_semantics") or {}
+    for k in ("signature_present_means_present_only", "presence_not_equal_valid",
+              "valid_not_equal_trusted", "trusted_not_equal_current_certificate",
+              "timestamp_not_trusted", "not_equal_file_safe", "absence_not_equal_malware"):
+        if ss.get(k) is not True:
+            errors.append(f"{filename}: signature_semantics.{k} deve ser true")
+
+    # Invariantes de seguranca.
+    sa = ev.get("security_assertions") or {}
+    for k in ("blob_content_accessed", "binary_materialized",
+              "static_identity_inspection_performed", "authenticode_inspection_performed"):
+        if sa.get(k) is not True:
+            errors.append(f"{filename}: security_assertions.{k} deve ser true (contexto GATE 3)")
+    for k in ("no_execution_performed", "no_dynamic_analysis_performed",
+              "no_sandbox_created", "no_wine_or_vm_load", "no_network_after_fetch",
+              "no_external_service_upload", "no_additional_file_materialized",
+              "no_gate4_inspection_performed", "no_client_access", "no_ragexe_access",
+              "no_patch_selected_or_applied", "no_clientinfo_modified", "no_vps_access",
+              "temporary_file_removed", "temporary_dir_removed"):
+        if sa.get(k) is not True:
+            errors.append(f"{filename}: security_assertions.{k} deve ser true")
+    for k in ("binary_versioned", "raw_signature_versioned", "gate_4_authorized"):
+        if sa.get(k) is not False:
+            errors.append(f"{filename}: security_assertions.{k} deve ser false")
+
+    tools = ev.get("tools")
+    if not isinstance(tools, list) or not tools:
+        errors.append(f"{filename}: 'tools' deve registrar ao menos uma ferramenta")
+    if not ev.get("findings"):
+        errors.append(f"{filename}: findings obrigatorios ausentes")
+    if not ev.get("limitations") or len(ev.get("limitations")) < 4:
+        errors.append(f"{filename}: limitations obrigatorias (>=4) ausentes")
+
+    for field in ("authorization_ref", "plan_ref", "gate_2_decision_ref",
+                  "gate_2_evidence_ref"):
+        ref = ev.get(field)
+        _ref_ok(ref.get("path") if isinstance(ref, dict) else None, field, filename, errors)
+    ir2 = ev.get("integration_ref")
+    if not isinstance(ir2, dict) or ir2.get("pr") != 50 or ir2.get("squash_commit") != EXPECTED_PR50_SQUASH or ir2.get("base_branch") != "dev":
+        errors.append(f"{filename}: integration_ref deve referenciar o squash do PR #50 em dev")
+
+    # Cross-check: decisao do GATE 3 autoriza (gate_3_authorized=true) e nao o GATE 4.
+    if isinstance(gate3_decision, dict):
+        a3 = gate3_decision.get("authorizations", {})
+        if gate3_decision.get("decision") != "AUTHORIZE_GATE_3" or a3.get("gate_3_authorized") is not True:
+            errors.append(f"{filename}: decisao do GATE 3 nao autoriza a execucao")
+        if a3.get("gate_4_authorized") is not False:
+            errors.append(f"{filename}: decisao do GATE 3 nao pode autorizar o GATE 4")
+    else:
+        errors.append(f"{filename}: decisao do GATE 3 ausente/invalida")
+    # Cross-check: evidencia do GATE 2 esta COMPLETED_PASS (identidade base).
+    if isinstance(gate2_evidence, dict):
+        if gate2_evidence.get("outcome") != "COMPLETED_PASS":
+            errors.append(f"{filename}: evidencia do GATE 2 nao esta COMPLETED_PASS")
+        it2 = gate2_evidence.get("integrity") or {}
+        if it2.get("sha256_local") and it2.get("sha256_local") != ir.get("sha256_local"):
+            errors.append(f"{filename}: SHA-256 do GATE 3 diverge do SHA-256 registrado no GATE 2")
+    else:
+        errors.append(f"{filename}: evidencia do GATE 2 ausente/invalida")
+    return errors
+
+
+def validate_gate3(errors):
+    """Orquestra a validacao dos artefatos do GATE 3 (decisao + evidencia)."""
+    if not os.path.isdir(DECISIONS_DIR):
+        return
+    plan = {}
+    try:
+        plan = load_json(os.path.join(AUDIT_DIR, PLAN_TEMPLATE))
+    except Fail:
+        plan = {}
+    gate2_decision = {}
+    try:
+        gate2_decision = load_json(os.path.join(DECISIONS_DIR, GATE2_DECISION_RECORD))
+    except Fail:
+        gate2_decision = {}
+    gate2_evidence = {}
+    if os.path.isdir(EVIDENCE_DIR):
+        try:
+            gate2_evidence = load_json(os.path.join(EVIDENCE_DIR, GATE2_EVIDENCE_RECORD))
+        except Fail:
+            gate2_evidence = {}
+
+    # Decisao do GATE 3.
+    dec_names = sorted(f for f in os.listdir(DECISIONS_DIR)
+                       if f.startswith(GATE3_DECISION_PREFIX) and f.endswith(".json"))
+    gate3_decision = {}
+    if dec_names:
+        try:
+            dschema = load_json(os.path.join(SCHEMA_DIR, GATE3_DECISION_SCHEMA))
+        except Fail as exc:
+            errors.append(str(exc))
+            dschema = None
+        for name in dec_names:
+            derr = []
+            try:
+                rec = load_json(os.path.join(DECISIONS_DIR, name))
+                gate3_decision = rec
+                if dschema is not None:
+                    validate_gate3_decision(rec, dschema, plan, gate2_decision,
+                                            gate2_evidence, name, derr)
+            except Fail as exc:
+                derr.append(str(exc))
+            if derr:
+                errors.extend(derr)
+                print(f"[FALHA] decisions/{name}: {len(derr)} problema(s)")
+                for e in derr:
+                    print(f"    - {e}")
+            else:
+                print(f"[OK]    decisions/{name}")
+
+    # Evidencia do GATE 3.
+    if os.path.isdir(EVIDENCE_DIR):
+        ev_names = sorted(f for f in os.listdir(EVIDENCE_DIR)
+                          if f.startswith(GATE3_EVIDENCE_PREFIX) and f.endswith(".json"))
+        if ev_names:
+            try:
+                eschema = load_json(os.path.join(SCHEMA_DIR, GATE3_EVIDENCE_SCHEMA))
+            except Fail as exc:
+                errors.append(str(exc))
+                eschema = None
+            for name in ev_names:
+                everr = []
+                try:
+                    ev = load_json(os.path.join(EVIDENCE_DIR, name))
+                    if eschema is not None:
+                        validate_gate3_evidence(ev, eschema, gate3_decision,
+                                                gate2_evidence, name, everr)
+                except Fail as exc:
+                    everr.append(str(exc))
+                if everr:
+                    errors.extend(everr)
+                    print(f"[FALHA] evidence/{name}: {len(everr)} problema(s)")
+                    for e in everr:
+                        print(f"    - {e}")
+                else:
+                    print(f"[OK]    evidence/{name}")
+
+
 def main():
     all_errors = []
     for artifact, schema_name in ARTIFACTS:
@@ -1718,13 +2141,17 @@ def main():
     validate_gate2(gate2_errors)
     all_errors.extend(gate2_errors)
 
+    gate3_errors = []
+    validate_gate3(gate3_errors)
+    all_errors.extend(gate3_errors)
+
     if all_errors:
         print(f"\nValidacao FALHOU com {len(all_errors)} problema(s).")
         return 1
     print(f"\nValidacao OK: {len(ARTIFACTS)} artefatos, schemas, regras de seguranca, "
           f"cross-checks, registros reais de decisao, plano da auditoria binaria, "
-          f"autorizacao do GATE 0, evidencia do GATE 0, autorizacao do GATE 1 e "
-          f"decisao/evidencia do GATE 2.")
+          f"autorizacao do GATE 0, evidencia do GATE 0, autorizacao do GATE 1, "
+          f"decisao/evidencia do GATE 2 e decisao/evidencia do GATE 3.")
     return 0
 
 
