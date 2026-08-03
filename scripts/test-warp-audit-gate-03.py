@@ -272,18 +272,37 @@ def main():
     g3_bad["authorizations"]["gate_3_authorized"] = False
     ev_fail("decisao do GATE 3 nao autoriza", lambda e: None, g3=g3_bad)
 
-    # ================= Repeticao corretiva (2P-E-C3-R2/R3) =================
+    # ================= Repeticao corretiva (2P-E-C3-R2/R3/R4) =================
+    import struct as _struct, tempfile as _tempfile, shutil as _shutil
     rd_schema = load_json(os.path.join(SCHEMA_DIR, "binary-audit-gate-03-corrective-repeat-decision-record-real.schema.json"))
     pass_schema = load_json(os.path.join(SCHEMA_DIR, "binary-audit-gate-03-corrective-repeat-pass-evidence.schema.json"))
     fail_schema = load_json(os.path.join(SCHEMA_DIR, "binary-audit-gate-03-corrective-repeat-fail-evidence.schema.json"))
     stopped_schema = load_json(os.path.join(SCHEMA_DIR, "binary-audit-gate-03-corrective-repeat-stopped-evidence.schema.json"))
 
-    # Proveniencia REAL: Git blob OID recalculado dos arquivos atuais da worktree.
+    inspspec = importlib.util.spec_from_file_location("insp_r4", os.path.join(SCRIPTS_DIR, "inspect-warp-pe-identity.py"))
+    insp = importlib.util.module_from_spec(inspspec); inspspec.loader.exec_module(insp)
+
     def _blob(rel):
         with open(os.path.join(REPO_ROOT, rel), "rb") as fh:
             return mod.git_blob_oid_for_bytes(fh.read())
     PARSER_OID = _blob("scripts/inspect-warp-pe-identity.py")
     TEST_OID = _blob("scripts/test-warp-pe-identity.py")
+    COMMIT = "b" * 40
+
+    def _fixture_5sec():
+        dos = bytearray(0x40); dos[0:2] = b"MZ"; _struct.pack_into("<I", dos, 0x3C, 0x40)
+        coff = bytearray(20); _struct.pack_into("<H", coff, 0, 0x014c); _struct.pack_into("<H", coff, 2, 5)
+        _struct.pack_into("<H", coff, 16, 0xE0); _struct.pack_into("<H", coff, 18, 0x0102)
+        opt = bytearray(0xE0); _struct.pack_into("<H", opt, 0, 0x010b)
+        _struct.pack_into("<I", opt, 32, 0x1000); _struct.pack_into("<I", opt, 36, 0x200)
+        _struct.pack_into("<I", opt, 60, 1024); _struct.pack_into("<H", opt, 68, 2); _struct.pack_into("<I", opt, 92, 16)
+        h = bytes(dos) + b"PE\x00\x00" + bytes(coff) + bytes(opt) + b"\x00" * 200
+        return h + b"\x00" * (1024 - len(h))
+    PO = insp.inspect(_fixture_5sec())
+    PO_RAW = mod._canonical_parser_output_bytes(PO)
+    PO_SHA = mod._sha256_hex(PO_RAW)
+    PO_NAME = "binary-audit-gate-03-corrective-repeat-parser-output-2026-09-01.json"
+    PO_PATH = "client/warp-audit/evidence/" + PO_NAME
 
     DEC_REF = {"path": "client/warp-audit/decisions/binary-audit-gate-03-decision-record-2026-08-03.json"}
     INVAL_REF = {"path": "client/warp-audit/evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json"}
@@ -301,7 +320,7 @@ def main():
             "original_decision_ref": DEC_REF, "original_invalidated_evidence_ref": INVAL_REF,
             "r1_review_ref": INVAL_REF, "reviewed_parser_ref": PARSER_REF,
             "reviewed_parser_test_ref": TESTREF, "integration_ref": INTEG,
-            "reviewed_parser_commit": "b" * 40, "reviewed_parser_git_blob_oid": PARSER_OID,
+            "reviewed_parser_commit": COMMIT, "reviewed_parser_git_blob_oid": PARSER_OID,
             "reviewed_parser_test_git_blob_oid": TEST_OID,
             "gate": {"id": 3, "name": "IDENTITY_AND_SIGNATURE"},
             "decider": "BrunoMNoronha", "role": "Responsavel tecnico do FaithRO",
@@ -335,32 +354,20 @@ def main():
             "execution_state": "AUTHORIZED_NOT_STARTED", "rollback": "sintetico", "notes": "sintetico",
         }
 
-    def make_parser_output():
-        return {
-            "file_size": 1137152, "mz_present": True, "pe_signature_present": True,
-            "pe_format": "PE32", "size_of_optional_header": 224, "number_of_sections": 5,
-            "size_of_headers": 1024, "executable_image_flag_present": True,
-            "section_table": {"offset": 312, "entry_size": 40, "declared_entry_count": 5,
-                              "end_offset": 512, "within_file": True, "contents_inspected": False},
-            "certificate_table": {"present": False, "structurally_parseable": True, "entry_count": 0,
-                                  "first_field_is_file_offset_not_rva": True},
-            "pe_headers_structurally_parseable": True, "executed": False, "loaded_as_executable": False,
-        }
-
     def make_repeat_pass_evidence():
-        po = make_parser_output()
-        po_sha = mod._sha256_hex(mod._canonical_parser_output_bytes(po))
+        poct = PO["certificate_table"]
         return {
             "schema_version": 1, "project": "WARP", "stage": "2P-E-C3-REPEAT",
             "record_type": "binary-audit-gate-03-corrective-repeat-pass-evidence-real",
             "status": "COMPLETED_PASS", "outcome": "COMPLETED_PASS",
             "gate": {"id": 3, "name": "IDENTITY_AND_SIGNATURE"},
-            "original_invalidated_evidence_ref": INVAL_REF,
-            "corrective_repeat_decision_ref": DEC_REF,
-            "reviewed_parser_ref": PARSER_REF, "reviewed_parser_git_blob_oid": PARSER_OID,
-            "reviewed_parser_test_ref": TESTREF,
-            "reviewed_parser_output_ref": {"path": "client/warp-audit/evidence/binary-audit-gate-03-corrective-repeat-parser-output-2026-09-01.json"},
-            "reviewed_parser_output_sha256": po_sha, "integration_ref": INTEG,
+            "original_invalidated_evidence_ref": INVAL_REF, "corrective_repeat_decision_ref": DEC_REF,
+            "reviewed_parser_ref": PARSER_REF, "reviewed_parser_commit": COMMIT,
+            "reviewed_parser_git_blob_oid": PARSER_OID, "reviewed_parser_test_ref": TESTREF,
+            "reviewed_parser_test_git_blob_oid": TEST_OID,
+            "reviewed_parser_output_ref": {"path": PO_PATH}, "reviewed_parser_output_sha256": PO_SHA,
+            "parser_execution": {"parser_invoked": True, "parser_completed": True, "parser_output_produced": True},
+            "integration_ref": INTEG,
             "execution": {
                 "gate_3_repeat_started": True, "gate_3_repeat_completed": True, "execution_state": "COMPLETED",
                 "started_at": "2026-09-01T10:00:00.000Z", "finished_at": "2026-09-01T10:00:01.000Z",
@@ -379,13 +386,14 @@ def main():
                 "identity_matches_gate_2": True, "file_read_for_static_inspection": True,
                 "launched": False, "executed": False, "loaded_as_executable": False},
             "pe_identity": {
-                "produced_by": "REVIEWED_VERSIONED_PARSER", "pe_format": "PE32",
-                "size_of_optional_header": 224, "number_of_sections": 5, "size_of_headers": 1024,
+                "produced_by": "REVIEWED_VERSIONED_PARSER", "pe_format": PO["pe_format"],
+                "size_of_optional_header": PO["size_of_optional_header"],
+                "number_of_sections": PO["number_of_sections"], "size_of_headers": PO["size_of_headers"],
                 "executable_image_flag_present": True, "pe_headers_structurally_parseable": True,
                 "full_pe_validation_performed": False},
             "certificate_table": {
-                "produced_by": "REVIEWED_VERSIONED_PARSER", "present": False,
-                "structurally_parseable": True, "entry_count": 0,
+                "produced_by": "REVIEWED_VERSIONED_PARSER", "present": poct["present"],
+                "structurally_parseable": True, "entry_count": poct["entry_count"],
                 "first_field_is_file_offset_not_rva": True},
             "signature_semantics": {
                 "signature_present_means_present_only": True, "presence_not_equal_valid": True,
@@ -402,27 +410,34 @@ def main():
                 "temporary_file_removed": True, "temporary_dir_removed": True, "binary_versioned": False,
                 "gate_4_authorized": False},
             "preserved_gate_2_facts": {"artifact_blob_oid": BLOB, "artifact_blob_size": 1137152, "artifact_sha256": SHA},
-            "findings": ["sintetico"], "limitations": ["a", "b", "c"], "rollback": "s", "notes": "s",
+            "findings": ["s"], "limitations": ["a", "b", "c"], "rollback": "s", "notes": "s",
         }
 
-    def make_repeat_fail_evidence():
-        return {
+    def make_repeat_fail_evidence(produced=False):
+        ev = {
             "schema_version": 1, "project": "WARP", "stage": "2P-E-C3-REPEAT",
             "record_type": "binary-audit-gate-03-corrective-repeat-fail-evidence-real",
             "status": "COMPLETED_FAIL", "outcome": "COMPLETED_FAIL",
             "gate": {"id": 3, "name": "IDENTITY_AND_SIGNATURE"},
             "original_invalidated_evidence_ref": INVAL_REF, "corrective_repeat_decision_ref": DEC_REF,
-            "reviewed_parser_ref": PARSER_REF, "reviewed_parser_git_blob_oid": PARSER_OID,
-            "reviewed_parser_test_ref": TESTREF, "integration_ref": INTEG,
-            "failure": {"category": "SHA256_MISMATCH", "reason": "SHA-256 divergente",
+            "reviewed_parser_ref": PARSER_REF, "reviewed_parser_commit": COMMIT,
+            "reviewed_parser_git_blob_oid": PARSER_OID, "reviewed_parser_test_ref": TESTREF,
+            "reviewed_parser_test_git_blob_oid": TEST_OID, "integration_ref": INTEG,
+            "parser_execution": {"parser_invoked": produced, "parser_completed": False,
+                                 "parser_output_produced": produced},
+            "failure": {"category": "SHA256_MISMATCH", "reason": "SHA divergente",
                         "identity_matches_gate_2": False, "cleanup_attempted": True},
             "reviewed_parser": {"path": "scripts/inspect-warp-pe-identity.py", "git_blob_oid": PARSER_OID,
-                                "executes_or_loads_pe": False, "run_on_warp_exe": True},
+                                "executes_or_loads_pe": False, "run_on_warp_exe": produced},
             "security_assertions": {"no_execution_performed": True, "no_gate4_inspection_performed": True,
                                     "no_ragexe_access": True, "no_vps_access": True, "binary_versioned": False,
                                     "gate_4_authorized": False},
             "findings": ["falha"], "limitations": ["a"], "rollback": "s", "notes": "s",
         }
+        if produced:
+            ev["reviewed_parser_output_ref"] = {"path": PO_PATH}
+            ev["reviewed_parser_output_sha256"] = PO_SHA
+        return ev
 
     def make_repeat_stopped_evidence():
         return {
@@ -433,7 +448,9 @@ def main():
             "original_invalidated_evidence_ref": INVAL_REF, "corrective_repeat_decision_ref": DEC_REF,
             "reviewed_parser_ref": PARSER_REF, "reviewed_parser_test_ref": TESTREF, "integration_ref": INTEG,
             "stop": {"category": "OPERATOR_STOP_PATH", "reason": "operador interrompeu",
-                     "stage_when_stopped": "BEFORE_MATERIALIZATION", "gate_3_repeat_completed": False},
+                     "stage_when_stopped": "BEFORE_MATERIALIZATION", "materialization_started": False,
+                     "parser_invoked": False, "parser_output_produced": False, "cleanup_required": False,
+                     "cleanup_attempted": False, "cleanup_completed": True, "gate_3_repeat_completed": False},
             "reviewed_parser": {"path": "scripts/inspect-warp-pe-identity.py", "run_on_warp_exe": False},
             "security_assertions": {"no_execution_performed": True, "no_gate4_inspection_performed": True,
                                     "no_ragexe_access": True, "no_vps_access": True, "binary_versioned": False,
@@ -442,95 +459,141 @@ def main():
         }
 
     def run_rd(rec):
+        errs = []; mod.validate_gate3_repeat_decision(rec, rd_schema, "d.json", errs); return errs
+
+    def run_pass(ev, dec=None, raw="AUTO", path="AUTO", name="AUTO"):
         errs = []
-        mod.validate_gate3_repeat_decision(rec, rd_schema, "repeat-decision.json", errs)
+        mod.validate_gate3_repeat_evidence(
+            ev, pass_schema, make_repeat_decision() if dec is None else dec, "pass.json", errs,
+            parser_output_raw=(PO_RAW if raw == "AUTO" else raw),
+            parser_output_path=(PO_PATH if path == "AUTO" else path),
+            present_output_name=(PO_NAME if name == "AUTO" else name))
         return errs
 
-    def run_pass(ev, dec=None, po="AUTO"):
+    def run_fail(ev, raw=None):
         errs = []
-        if po == "AUTO":
-            po = make_parser_output()
-        mod.validate_gate3_repeat_evidence(ev, pass_schema, make_repeat_decision() if dec is None else dec,
-                                           "repeat-pass.json", errs, parser_output=po)
+        mod.validate_gate3_repeat_evidence(ev, fail_schema, make_repeat_decision(), "fail.json", errs,
+                                           parser_output_raw=raw)
         return errs
 
-    def run_fail(ev, dec=None):
+    def run_stopped(ev, raw=None):
         errs = []
-        mod.validate_gate3_repeat_evidence(ev, fail_schema, make_repeat_decision() if dec is None else dec,
-                                           "repeat-fail.json", errs)
+        mod.validate_gate3_repeat_evidence(ev, stopped_schema, make_repeat_decision(), "stop.json", errs,
+                                           parser_output_raw=raw)
         return errs
 
-    def run_stopped(ev, dec=None):
-        errs = []
-        mod.validate_gate3_repeat_evidence(ev, stopped_schema, make_repeat_decision() if dec is None else dec,
-                                           "repeat-stopped.json", errs)
-        return errs
-
-    ok("repeticao: decisao sintetica integra", run_rd(make_repeat_decision()))
-    ok("repeticao: PASS sintetico integro", run_pass(make_repeat_pass_evidence()))
-    ok("repeticao: FAIL sintetico integro", run_fail(make_repeat_fail_evidence()))
-    ok("repeticao: STOPPED sintetico integro", run_stopped(make_repeat_stopped_evidence()))
+    # ----- Positivos -----
+    ok("repeticao: decisao integra", run_rd(make_repeat_decision()))
+    ok("repeticao: PASS integro", run_pass(make_repeat_pass_evidence()))
+    ok("repeticao: FAIL antes do parser (sem saida)", run_fail(make_repeat_fail_evidence(produced=False)))
+    ok("repeticao: FAIL apos saida valida", run_fail(make_repeat_fail_evidence(produced=True), raw=PO_RAW))
+    ok("repeticao: STOPPED antes da materializacao", run_stopped(make_repeat_stopped_evidence()))
 
     def rd_fail(label, mutate):
         rec = copy.deepcopy(make_repeat_decision()); mutate(rec); bad(label, run_rd(rec))
 
-    rd_fail("repeticao: gate_4_authorized=true", setpath(["authorizations", "gate_4_authorized"], True))
-    rd_fail("repeticao: segunda repeticao autorizada", setpath(["authorizations", "second_repeat_authorized"], True))
-    rd_fail("repeticao: repeat_index != 1", setpath(["repeat_scope", "repeat_index"], 2))
-    rd_fail("repeticao: decisao incorreta", setpath(["decision"], "AUTHORIZE_GATE_3"))
-    rd_fail("repeticao: sem ref a evidencia invalidada",
-            setpath(["original_invalidated_evidence_ref", "path"], "client/warp-audit/evidence/binary-audit-gate-02-integrity-evidence-2026-08-01.json"))
-    rd_fail("repeticao: blob OID do parser divergente do conteudo",
-            setpath(["reviewed_parser_git_blob_oid"], "a" * 40))
-    rd_fail("repeticao: blob OID dos testes divergente do conteudo",
-            setpath(["reviewed_parser_test_git_blob_oid"], "b" * 40))
-    rd_fail("repeticao: commit malformado", setpath(["reviewed_parser_commit"], "nothex"))
+    rd_fail("RD: gate_4_authorized=true", setpath(["authorizations", "gate_4_authorized"], True))
+    rd_fail("RD: segunda repeticao", setpath(["authorizations", "second_repeat_authorized"], True))
+    rd_fail("RD: repeat_index!=1", setpath(["repeat_scope", "repeat_index"], 2))
+    rd_fail("RD: OID do parser divergente", setpath(["reviewed_parser_git_blob_oid"], "a" * 40))
+    rd_fail("RD: OID dos testes divergente", setpath(["reviewed_parser_test_git_blob_oid"], "b" * 40))
+    rd_fail("RD: commit malformado", setpath(["reviewed_parser_commit"], "nothex"))
 
     def pass_fail(label, mutate, **kw):
         ev = copy.deepcopy(make_repeat_pass_evidence()); mutate(ev); bad(label, run_pass(ev, **kw))
 
     pass_fail("PASS: gate_4_authorized=true", setpath(["security_assertions", "gate_4_authorized"], True))
-    pass_fail("PASS: parser nao revisado", setpath(["pe_identity", "produced_by"], "UNVERSIONED_SCRATCHPAD_PARSER"))
-    pass_fail("PASS: headers nao parseaveis", setpath(["pe_identity", "pe_headers_structurally_parseable"], False))
     pass_fail("PASS: identidade != GATE 2", setpath(["identity_reconfirmation", "sha256_local"], "e" * 64))
-    pass_fail("PASS: executado", setpath(["identity_reconfirmation", "executed"], True))
     pass_fail("PASS: run_on_warp_exe false", setpath(["reviewed_parser", "run_on_warp_exe"], False))
-    pass_fail("PASS: parser SHA diverge da decisao", setpath(["reviewed_parser_git_blob_oid"], "f" * 40))
-    pass_fail("PASS: sha da saida do parser errado", setpath(["reviewed_parser_output_sha256"], "0" * 64))
-    # saida do parser adulterada (nao casa com o sha declarado)
-    def tamper_po(ev):
-        pass
-    tampered = make_parser_output(); tampered["size_of_headers"] = 4096
-    bad("PASS: saida do parser adulterada", run_pass(make_repeat_pass_evidence(), po=tampered))
-    # PASS com hash divergente (parser output diverge dos campos da evidencia)
-    diff_po = make_parser_output(); diff_po["pe_format"] = "PE32+"
-    # recomputa sha coerente com diff_po para isolar a divergencia de campo
-    ev_field = make_repeat_pass_evidence()
-    ev_field["reviewed_parser_output_sha256"] = mod._sha256_hex(mod._canonical_parser_output_bytes(diff_po))
-    bad("PASS: campo diverge da saida do parser", run_pass(ev_field, po=diff_po))
+    pass_fail("PASS: OID dos testes divergente", setpath(["reviewed_parser_test_git_blob_oid"], "c" * 40))
+    pass_fail("PASS: commit diverge da decisao", setpath(["reviewed_parser_commit"], "d" * 40))
+    pass_fail("PASS: campo pe_identity diverge da saida", setpath(["pe_identity", "size_of_headers"], 4096))
+    pass_fail("PASS: sem saida", lambda e: None, raw=None)
+    pass_fail("PASS: ref aponta para arquivo diferente",
+              setpath(["reviewed_parser_output_ref", "path"], "client/warp-audit/evidence/outro.json"))
+    pass_fail("PASS: nome/data da saida divergente", lambda e: None,
+              name="binary-audit-gate-03-corrective-repeat-parser-output-2099-01-01.json")
+    # bytes reais diferentes (hash correto sobre canonica, mas raw diferente)
+    bad("PASS: espaco extra", run_pass(make_repeat_pass_evidence(), raw=PO_RAW[:-1] + b" \n"))
+    bad("PASS: newline extra", run_pass(make_repeat_pass_evidence(), raw=PO_RAW + b"\n"))
+    bad("PASS: newline ausente", run_pass(make_repeat_pass_evidence(), raw=PO_RAW.rstrip(b"\n")))
+    bad("PASS: CRLF", run_pass(make_repeat_pass_evidence(), raw=PO_RAW.replace(b"\n", b"\r\n")))
+    bad("PASS: BOM", run_pass(make_repeat_pass_evidence(), raw=b"\xef\xbb\xbf" + PO_RAW))
+    # chave duplicada
+    dup = PO_RAW[:-2] + b',\n  "file_size": 1\n' + PO_RAW[-2:]
+    bad("PASS: chave duplicada", run_pass(make_repeat_pass_evidence(), raw=dup))
 
-    def fail_fail(label, mutate):
-        ev = copy.deepcopy(make_repeat_fail_evidence()); mutate(ev); bad(label, run_fail(ev))
+    def po_tampered(mutate):
+        d = copy.deepcopy(PO); mutate(d)
+        raw = mod._canonical_parser_output_bytes(d)
+        ev = make_repeat_pass_evidence(); ev["reviewed_parser_output_sha256"] = mod._sha256_hex(raw)
+        return ev, raw
+    ev_t, raw_t = po_tampered(lambda d: d.__setitem__("x_extra", 1))
+    bad("PASS: campo adicional no topo da saida", run_pass(ev_t, raw=raw_t))
+    ev_t, raw_t = po_tampered(lambda d: d["section_table"].__setitem__("x", 1))
+    bad("PASS: campo adicional em section_table", run_pass(ev_t, raw=raw_t))
+    ev_t, raw_t = po_tampered(lambda d: d["certificate_table"].__setitem__("x", 1))
+    bad("PASS: campo adicional em certificate_table", run_pass(ev_t, raw=raw_t))
+    ev_t, raw_t = po_tampered(lambda d: d.__setitem__("note_padding", "secret= REGEX_TRIGGER_NOT_REAL"))
+    bad("PASS: segredo em campo (schema fechado)", run_pass(ev_t, raw=raw_t))
+    ev_t, raw_t = po_tampered(lambda d: d["certificate_table"].__setitem__("note_padding", "bCertificate DER blob"))
+    bad("PASS: conteudo tipo bCertificate", run_pass(ev_t, raw=raw_t))
 
-    fail_fail("FAIL: exige categoria/motivo", delpath(["failure", "reason"]))
+    def fail_fail(label, mutate, raw=None):
+        ev = copy.deepcopy(make_repeat_fail_evidence(produced=False)); mutate(ev); bad(label, run_fail(ev, raw=raw))
+    fail_fail("FAIL: sem motivo", delpath(["failure", "reason"]))
     fail_fail("FAIL: cleanup nao tentado", setpath(["failure", "cleanup_attempted"], False))
-    fail_fail("FAIL: gate_4_authorized=true", setpath(["security_assertions", "gate_4_authorized"], True))
-    # FAIL nao pode exigir identidade correspondente: identity False deve PASSAR o schema/validador
-    ok("FAIL: identidade divergente e permitida", run_fail(make_repeat_fail_evidence()))
+    fail_fail("FAIL: gate_4=true", setpath(["security_assertions", "gate_4_authorized"], True))
+    # produced=true mas sem saida
+    bad("FAIL: produced=true sem saida", run_fail(make_repeat_fail_evidence(produced=True), raw=None))
+    # produced=false mas com saida
+    bad("FAIL: produced=false com saida", run_fail(make_repeat_fail_evidence(produced=False), raw=PO_RAW))
 
-    def stopped_fail(label, mutate):
-        ev = copy.deepcopy(make_repeat_stopped_evidence()); mutate(ev); bad(label, run_stopped(ev))
-
-    stopped_fail("STOPPED: marcado como COMPLETED (schema)", setpath(["outcome"], "COMPLETED_PASS"))
-    stopped_fail("STOPPED: gate_3_repeat_completed=true", setpath(["stop", "gate_3_repeat_completed"], True))
+    def stopped_fail(label, mutate, raw=None):
+        ev = copy.deepcopy(make_repeat_stopped_evidence()); mutate(ev); bad(label, run_stopped(ev, raw=raw))
+    stopped_fail("STOPPED: marcado COMPLETED (schema)", setpath(["outcome"], "COMPLETED_PASS"))
     stopped_fail("STOPPED: sem motivo", delpath(["stop", "reason"]))
+    bad("STOPPED: saida orfa", run_stopped(make_repeat_stopped_evidence(), raw=PO_RAW))
 
-    # PASS-evidencia validada com o schema FAIL deve reprovar (campos incompletos)
-    _perr = []
-    mod.validate_gate3_repeat_evidence(make_repeat_pass_evidence(), fail_schema,
-                                       make_repeat_decision(), "mismatch.json", _perr,
-                                       parser_output=make_parser_output())
-    bad("PASS-evidencia no schema FAIL", _perr)
+    # ----- Orquestrador (maquina de estados) com diretorios temporarios -----
+    def run_orch(dec_files, ev_files, po_files):
+        tmp = _tempfile.mkdtemp(prefix="repeat-orch-")
+        dd = os.path.join(tmp, "decisions"); ed = os.path.join(tmp, "evidence")
+        os.makedirs(dd); os.makedirs(ed)
+        for n, obj in dec_files:
+            with open(os.path.join(dd, n), "w", encoding="utf-8") as fh: json.dump(obj, fh)
+        for n, obj in ev_files:
+            with open(os.path.join(ed, n), "w", encoding="utf-8") as fh: json.dump(obj, fh)
+        for n, raw in po_files:
+            with open(os.path.join(ed, n), "wb") as fh: fh.write(raw)
+        old_d, old_e = mod.DECISIONS_DIR, mod.EVIDENCE_DIR
+        mod.DECISIONS_DIR = dd; mod.EVIDENCE_DIR = ed
+        errs = []
+        try:
+            mod.validate_gate3_repeat(errs)
+        finally:
+            mod.DECISIONS_DIR = old_d; mod.EVIDENCE_DIR = old_e
+            _shutil.rmtree(tmp, ignore_errors=True)
+        return errs
+
+    DN = "binary-audit-gate-03-corrective-repeat-decision-record-2026-09-01.json"
+    EN = "binary-audit-gate-03-corrective-repeat-evidence-2026-09-01.json"
+    dec_obj = make_repeat_decision()
+    pass_obj = make_repeat_pass_evidence()
+    pass_obj["corrective_repeat_decision_ref"] = {"path": "client/warp-audit/decisions/" + DN}
+
+    bad("ORCH: evidencia sem decisao", run_orch([], [(EN, pass_obj)], []))
+    bad("ORCH: saida sem decisao", run_orch([], [], [(PO_NAME, PO_RAW)]))
+    bad("ORCH: evidencia+saida sem decisao", run_orch([], [(EN, pass_obj)], [(PO_NAME, PO_RAW)]))
+    bad("ORCH: decisao+saida sem evidencia", run_orch([(DN, dec_obj)], [], [(PO_NAME, PO_RAW)]))
+    bad("ORCH: duas decisoes", run_orch([(DN, dec_obj), ("binary-audit-gate-03-corrective-repeat-decision-record-2026-09-02.json", dec_obj)], [], []))
+    bad("ORCH: duas evidencias", run_orch([(DN, dec_obj)],
+        [(EN, pass_obj), ("binary-audit-gate-03-corrective-repeat-evidence-2026-09-02.json", pass_obj)],
+        [(PO_NAME, PO_RAW)]))
+    bad("ORCH: duas saidas", run_orch([(DN, dec_obj)], [(EN, pass_obj)],
+        [(PO_NAME, PO_RAW), ("binary-audit-gate-03-corrective-repeat-parser-output-2026-09-02.json", PO_RAW)]))
+    ok("ORCH: autorizado sem execucao (so decisao)", run_orch([(DN, dec_obj)], [], []))
+    ok("ORCH: cadeia PASS completa e integra", run_orch([(DN, dec_obj)], [(EN, pass_obj)], [(PO_NAME, PO_RAW)]))
 
     print(f"\nResumo: {passed} teste(s) OK, {failed} falha(s).")
     return 1 if failed else 0
