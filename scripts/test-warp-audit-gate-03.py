@@ -413,7 +413,7 @@ def main():
             "findings": ["s"], "limitations": ["a", "b", "c"], "rollback": "s", "notes": "s",
         }
 
-    def make_repeat_fail_evidence(produced=False):
+    def make_repeat_fail_evidence(invoked=False, completed=False, produced=False):
         ev = {
             "schema_version": 1, "project": "WARP", "stage": "2P-E-C3-REPEAT",
             "record_type": "binary-audit-gate-03-corrective-repeat-fail-evidence-real",
@@ -423,12 +423,12 @@ def main():
             "reviewed_parser_ref": PARSER_REF, "reviewed_parser_commit": COMMIT,
             "reviewed_parser_git_blob_oid": PARSER_OID, "reviewed_parser_test_ref": TESTREF,
             "reviewed_parser_test_git_blob_oid": TEST_OID, "integration_ref": INTEG,
-            "parser_execution": {"parser_invoked": produced, "parser_completed": False,
+            "parser_execution": {"parser_invoked": invoked, "parser_completed": completed,
                                  "parser_output_produced": produced},
             "failure": {"category": "SHA256_MISMATCH", "reason": "SHA divergente",
                         "identity_matches_gate_2": False, "cleanup_attempted": True},
             "reviewed_parser": {"path": "scripts/inspect-warp-pe-identity.py", "git_blob_oid": PARSER_OID,
-                                "executes_or_loads_pe": False, "run_on_warp_exe": produced},
+                                "executes_or_loads_pe": False, "run_on_warp_exe": invoked},
             "security_assertions": {"no_execution_performed": True, "no_gate4_inspection_performed": True,
                                     "no_ragexe_access": True, "no_vps_access": True, "binary_versioned": False,
                                     "gate_4_authorized": False},
@@ -438,6 +438,10 @@ def main():
             ev["reviewed_parser_output_ref"] = {"path": PO_PATH}
             ev["reviewed_parser_output_sha256"] = PO_SHA
         return ev
+
+    # Atalho: POST_OUTPUT_FAIL valido (true/true/true) com saida presa.
+    def make_repeat_fail_post_output():
+        return make_repeat_fail_evidence(invoked=True, completed=True, produced=True)
 
     def make_repeat_stopped_evidence():
         return {
@@ -470,10 +474,16 @@ def main():
             present_output_name=(PO_NAME if name == "AUTO" else name))
         return errs
 
-    def run_fail(ev, raw=None):
+    def run_fail(ev, raw=None, path="AUTO", name="AUTO"):
         errs = []
+        # Espelha o orquestrador: quando ha saida, o caminho/nome reais sao fornecidos.
+        if path == "AUTO":
+            path = PO_PATH if raw is not None else None
+        if name == "AUTO":
+            name = PO_NAME if raw is not None else None
         mod.validate_gate3_repeat_evidence(ev, fail_schema, make_repeat_decision(), "fail.json", errs,
-                                           parser_output_raw=raw)
+                                           parser_output_raw=raw, parser_output_path=path,
+                                           present_output_name=name)
         return errs
 
     def run_stopped(ev, raw=None):
@@ -485,8 +495,13 @@ def main():
     # ----- Positivos -----
     ok("repeticao: decisao integra", run_rd(make_repeat_decision()))
     ok("repeticao: PASS integro", run_pass(make_repeat_pass_evidence()))
-    ok("repeticao: FAIL antes do parser (sem saida)", run_fail(make_repeat_fail_evidence(produced=False)))
-    ok("repeticao: FAIL apos saida valida", run_fail(make_repeat_fail_evidence(produced=True), raw=PO_RAW))
+    # Estados FAIL validos (14) PRE_PARSER, (15) PARSER_ERROR_WITHOUT_OUTPUT, (16) POST_OUTPUT.
+    ok("repeticao: FAIL PRE_PARSER (false/false/false, sem saida)",
+       run_fail(make_repeat_fail_evidence()))
+    ok("repeticao: FAIL PARSER_ERROR (true/false/false, sem saida)",
+       run_fail(make_repeat_fail_evidence(invoked=True)))
+    ok("repeticao: FAIL POST_OUTPUT (true/true/true, saida presa)",
+       run_fail(make_repeat_fail_post_output(), raw=PO_RAW))
     ok("repeticao: STOPPED antes da materializacao", run_stopped(make_repeat_stopped_evidence()))
 
     def rd_fail(label, mutate):
@@ -540,20 +555,65 @@ def main():
     bad("PASS: conteudo tipo bCertificate", run_pass(ev_t, raw=raw_t))
 
     def fail_fail(label, mutate, raw=None):
-        ev = copy.deepcopy(make_repeat_fail_evidence(produced=False)); mutate(ev); bad(label, run_fail(ev, raw=raw))
+        ev = copy.deepcopy(make_repeat_fail_evidence()); mutate(ev); bad(label, run_fail(ev, raw=raw))
     fail_fail("FAIL: sem motivo", delpath(["failure", "reason"]))
     fail_fail("FAIL: cleanup nao tentado", setpath(["failure", "cleanup_attempted"], False))
     fail_fail("FAIL: gate_4=true", setpath(["security_assertions", "gate_4_authorized"], True))
-    # produced=true mas sem saida
-    bad("FAIL: produced=true sem saida", run_fail(make_repeat_fail_evidence(produced=True), raw=None))
-    # produced=false mas com saida
-    bad("FAIL: produced=false com saida", run_fail(make_repeat_fail_evidence(produced=False), raw=PO_RAW))
+    # produced=false mas com saida presente (10)
+    bad("FAIL: produced=false com saida", run_fail(make_repeat_fail_evidence(), raw=PO_RAW))
+
+    # ---- (R4.1-D1) Ligacao da saida presa por caminho/hash exatos no POST_OUTPUT ----
+    def fail_post_mut(mutate):
+        ev = copy.deepcopy(make_repeat_fail_post_output()); mutate(ev); return ev
+    # (1) saida presente + referencia para OUTRO arquivo (nome diferente)
+    bad("FAIL: ref para arquivo diferente",
+        run_fail(fail_post_mut(setpath(["reviewed_parser_output_ref", "path"],
+                                       "client/warp-audit/evidence/outro.json")), raw=PO_RAW))
+    # (2) referencia com MESMO nome, porem em DIRETORIO diferente (nao basta endswith)
+    bad("FAIL: ref mesmo nome, diretorio diferente",
+        run_fail(fail_post_mut(setpath(["reviewed_parser_output_ref", "path"],
+                                       "client/warp-audit/decisions/" + PO_NAME)), raw=PO_RAW))
+    # (3) referencia presente, mas SEM o arquivo de saida (raw ausente)
+    bad("FAIL: referencia sem arquivo (saida ausente)",
+        run_fail(make_repeat_fail_post_output(), raw=None))
+    # (4) arquivo de saida presente, mas SEM referencia
+    bad("FAIL: arquivo sem referencia",
+        run_fail(fail_post_mut(delpath(["reviewed_parser_output_ref"])), raw=PO_RAW))
+    # (5) hash correto sobre os bytes, porem referencia apontando para outro arquivo
+    bad("FAIL: hash correto + referencia errada",
+        run_fail(fail_post_mut(setpath(["reviewed_parser_output_ref", "path"],
+                                       "client/warp-audit/evidence/outro-nome.json")), raw=PO_RAW))
+
+    # ---- (R4.1-D2) Estados impossiveis de parser_execution no COMPLETED_FAIL ----
+    # (6) false/true/false
+    bad("FAIL: estado impossivel false/true/false",
+        run_fail(make_repeat_fail_evidence(invoked=False, completed=True, produced=False)))
+    # (7) false/false/true
+    bad("FAIL: estado impossivel false/false/true",
+        run_fail(make_repeat_fail_evidence(invoked=False, completed=False, produced=True), raw=PO_RAW))
+    # (8) false/true/true
+    bad("FAIL: estado impossivel false/true/true",
+        run_fail(make_repeat_fail_evidence(invoked=False, completed=True, produced=True), raw=PO_RAW))
+    # (9) true/false/true
+    bad("FAIL: estado impossivel true/false/true",
+        run_fail(make_repeat_fail_evidence(invoked=True, completed=False, produced=True), raw=PO_RAW))
+
+    # (10) PASS com qualquer estado != true/true/true
+    pass_fail("PASS: parser_execution != true/true/true",
+              setpath(["parser_execution", "parser_completed"], False))
 
     def stopped_fail(label, mutate, raw=None):
         ev = copy.deepcopy(make_repeat_stopped_evidence()); mutate(ev); bad(label, run_stopped(ev, raw=raw))
     stopped_fail("STOPPED: marcado COMPLETED (schema)", setpath(["outcome"], "COMPLETED_PASS"))
     stopped_fail("STOPPED: sem motivo", delpath(["stop", "reason"]))
+    stopped_fail("STOPPED: gate_4=true", setpath(["security_assertions", "gate_4_authorized"], True))
+    # (11) STOPPED com saida presente (orfa)
     bad("STOPPED: saida orfa", run_stopped(make_repeat_stopped_evidence(), raw=PO_RAW))
+    # (12) STOPPED afirmando producao de saida
+    stopped_fail("STOPPED: afirma producao de saida",
+                 setpath(["stop", "parser_output_produced"], True))
+    # (13) gate_4_authorized=true na decisao da repeticao
+    rd_fail("RD: gate_4_authorized=true (bis)", setpath(["authorizations", "gate_4_authorized"], True))
 
     # ----- Orquestrador (maquina de estados) com diretorios temporarios -----
     def run_orch(dec_files, ev_files, po_files):
@@ -594,6 +654,27 @@ def main():
         [(PO_NAME, PO_RAW), ("binary-audit-gate-03-corrective-repeat-parser-output-2026-09-02.json", PO_RAW)]))
     ok("ORCH: autorizado sem execucao (so decisao)", run_orch([(DN, dec_obj)], [], []))
     ok("ORCH: cadeia PASS completa e integra", run_orch([(DN, dec_obj)], [(EN, pass_obj)], [(PO_NAME, PO_RAW)]))
+    # (19) estado sem decisao/evidencia/saida continua valido
+    ok("ORCH: vazio (sem repeticao)", run_orch([], [], []))
+
+    # ---- Cadeia FAIL pelo orquestrador real (ligacao exata da saida) ----
+    def fail_for_orch(base):
+        ev = copy.deepcopy(base); ev["corrective_repeat_decision_ref"] = {"path": "client/warp-audit/decisions/" + DN}
+        return ev
+    fail_post_obj = fail_for_orch(make_repeat_fail_post_output())
+    fail_pre_obj = fail_for_orch(make_repeat_fail_evidence())
+    ok("ORCH: cadeia FAIL POST_OUTPUT integra",
+       run_orch([(DN, dec_obj)], [(EN, fail_post_obj)], [(PO_NAME, PO_RAW)]))
+    ok("ORCH: cadeia FAIL PRE_PARSER integra (sem saida)",
+       run_orch([(DN, dec_obj)], [(EN, fail_pre_obj)], []))
+    fail_wrong = fail_for_orch(make_repeat_fail_post_output())
+    fail_wrong["reviewed_parser_output_ref"] = {"path": "client/warp-audit/evidence/outro.json"}
+    bad("ORCH: FAIL POST_OUTPUT com ref para outro arquivo",
+        run_orch([(DN, dec_obj)], [(EN, fail_wrong)], [(PO_NAME, PO_RAW)]))
+    fail_samename = fail_for_orch(make_repeat_fail_post_output())
+    fail_samename["reviewed_parser_output_ref"] = {"path": "client/warp-audit/decisions/" + PO_NAME}
+    bad("ORCH: FAIL POST_OUTPUT com ref mesmo nome em diretorio diferente",
+        run_orch([(DN, dec_obj)], [(EN, fail_samename)], [(PO_NAME, PO_RAW)]))
 
     print(f"\nResumo: {passed} teste(s) OK, {failed} falha(s).")
     return 1 if failed else 0
