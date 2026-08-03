@@ -84,6 +84,56 @@ Uma segunda revisão endureceu o inspetor e preparou a cadeia da repetição cor
 o WARP.exe**; a evidência invalidada **permanece histórica**; a repetição produzirá
 **decisão e evidência separadas**; o **GATE 4 permanece não autorizado**.
 
+## 0.2 Section Table, fixtures e estados de falha (2P-E-C3-R3)
+
+Uma terceira revisão finalizou o inspetor e o modelo da repetição — ainda **sem**
+materializar nem executar o parser sobre o `WARP.exe`:
+
+- **Section Table validada.** O inspetor passou a validar `NumberOfSections`
+  (`>=1` e `<=96`, com a flag `IMAGE_FILE_EXECUTABLE_IMAGE` presente antes de tratar a
+  estrutura como imagem executável — a flag **não** prova segurança nem
+  executabilidade operacional) e a **Section Table**
+  (`section_table_offset = pe_sig + 4 + COFF + SizeOfOptionalHeader`,
+  `entry_size = 40`, `end_offset`, `within_file`, `contents_inspected=false`), além de
+  `SizeOfHeaders` (`>= section_table_end`, `<= file_size`, alinhado a `FileAlignment`)
+  e dos metadados `SectionAlignment`/`FileAlignment`. **Sem** interpretar o conteúdo
+  das seções (isso é GATE 4).
+- **Sem overclaim.** `pe_valid` foi substituído por
+  `pe_headers_structurally_parseable` (+ `full_pe_validation_performed=false`,
+  `section_contents_validated=false`, `security_evaluation_performed=false`): os
+  cabeçalhos examinados são coerentes e a Section Table declarada cabe no arquivo — **não**
+  houve validação integral das seções, execução ou avaliação de segurança.
+- **Fixtures reconstruídas.** Cada fixture válida contém DOS + PE + COFF + Optional
+  Header + `N` cabeçalhos de seção (40 bytes) + padding até `SizeOfHeaders`, e a
+  Certificate Table (quando presente) **somente após `SizeOfHeaders`** — nunca
+  sobreposta à Section Table/aos cabeçalhos. Cobertura: 1 e 5 seções; `NumberOfSections`
+  0 e 97; Section Table truncada; headers incompletos; `section_table_end > file_size`;
+  `SizeOfHeaders` menor que o fim da tabela, maior que o arquivo e desalinhado; flag
+  executável ausente; cert sobreposta à Section Table e aos headers (rejeitadas); cert
+  após `SizeOfHeaders` (aceita); PE32/PE32+; `soh=267` e regressão `0xE0→224`.
+- **WIN_CERTIFICATE.** Registra `declared_dw_length`, `aligned_span`, `padding_length`
+  e `padding_zero_filled`; avança por `align8(dwLength)` (aceitando `dwLength` não
+  múltiplo de 8), confirma que o padding físico cabe na tabela e contém **apenas
+  zeros**, reconhece o tipo `0x0009` (`WIN_CERT_TYPE_PKCS1_SIGN`) e **não** declara
+  validade criptográfica.
+- **Estados PASS/FAIL/STOPPED separados.** O modelo de resultado deixou de exigir os
+  mesmos campos completos para todos os outcomes. São **três schemas** distintos:
+  `...-pass-evidence` (identidade igual ao GATE 2, cabeçalhos parseáveis, saída do
+  parser amarrada por SHA-256, limpeza), `...-fail-evidence` (motivo de falha; **não**
+  exige `identity_matches_gate_2`) e `...-stopped-evidence` (motivo de interrupção;
+  **não** exige conclusão nem campos completos). A lógica condicional é implementada
+  em Python (o mini-validador não suporta `oneOf`/`if-then-else`).
+- **Proveniência amarrada ao conteúdo.** O validador **recalcula localmente** o Git
+  blob OID do parser e dos testes (`SHA-1("blob <size>\0"+content)`, sem subprocess/rede)
+  e confere contra os valores registrados; o commit é confirmado pelo **gate Git
+  externo** e os blobs pelo **validador offline**. A saída exata do parser é um
+  artefato textual separado (`...-parser-output-*.json`, só metadados) referenciado por
+  `reviewed_parser_output_ref` + `reviewed_parser_output_sha256`, com cruzamento de
+  campos.
+- **Sem duplicação.** O orquestrador exige **no máximo** 1 decisão, 1 evidência e 1
+  saída do parser de repetição, com referências casadas, e reprova segunda repetição.
+  Enquanto não houver autorização: **0** de cada.
+
 ## 1. Objetivo
 
 Executar exclusivamente o `GATE 3 — IDENTITY_AND_SIGNATURE`: reconfirmar a identidade
@@ -218,7 +268,8 @@ O inspetor revisável **não** foi executado sobre o `WARP.exe` (`run_on_warp_ex
 | `scripts/inspect-warp-pe-identity.py` | novo/edição | inspetor PE offline revisável (D3); R2: regra `soh==magic` removida + Certificate Table estrutural |
 | `scripts/test-warp-pe-identity.py` | novo/edição | fixtures sintéticas (D2/D3); R2: `soh=267` válido + 17 cenários da Certificate Table |
 | `client/warp-audit/schemas/binary-audit-gate-03-corrective-repeat-decision-record-real.schema.json` | novo | R2: schema da futura decisão da repetição |
-| `client/warp-audit/schemas/binary-audit-gate-03-corrective-repeat-evidence.schema.json` | novo | R2: schema da futura evidência da repetição |
+| `client/warp-audit/schemas/binary-audit-gate-03-corrective-repeat-{pass,fail,stopped}-evidence.schema.json` | novos | R3: schemas PASS/FAIL/STOPPED da futura evidência |
+| `client/warp-audit/schemas/binary-audit-gate-03-corrective-repeat-parser-output.schema.json` | novo | R3: schema da saída textual do parser (metadados) |
 | `client/warp-audit/evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json` | edição | invalidação + D1/D2/D4 |
 | `client/warp-audit/schemas/binary-audit-gate-03-identity-signature-evidence.schema.json` | edição | novo estado e semântica |
 | `scripts/validate-warp-audit.py` | edição | validação da evidência invalidada |

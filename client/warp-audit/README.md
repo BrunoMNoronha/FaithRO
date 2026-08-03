@@ -42,7 +42,7 @@ auditoria. O relatório completo está em
 | [`evidence/binary-audit-gate-02-integrity-evidence-2026-08-01.json`](evidence/binary-audit-gate-02-integrity-evidence-2026-08-01.json) | (2P-E-C2-A) Evidência **real** do GATE 2: `COMPLETED_PASS`; **1** blob materializado fora do repo, tamanho `1137152` e Git blob OID **iguais** aos esperados; SHA-256 local registrado (≠ Git OID); arquivo **removido**; nenhuma execução/inspeção/sandbox/distribuição; **binário não versionado**. |
 | [`decisions/binary-audit-gate-03-decision-record-2026-08-03.json`](decisions/binary-audit-gate-03-decision-record-2026-08-03.json) | (2P-E-C3) Registro **real** da autorização humana **exclusiva do GATE 3** (identidade e assinatura estática offline): `AUTHORIZE_GATE_3`; `gate_3_authorized=true`, materialização temporária + hashing + inspeção de identidade/Authenticode `true`; **GATE 4 não autorizado**. |
 | [`evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json`](evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json) | (2P-E-C3 / **revisão 2P-E-C3-R1**) Evidência **real** do GATE 3, agora `EVIDENCE_INVALIDATED_PENDING_REPEAT`: o `COMPLETED_PASS` foi **suspenso** (D1-D4). Fatos do GATE 2 (blob OID/tamanho/SHA-256) **preservados**; identidade PE (`size_of_optional_header=267` == magic PE32) e assinatura **pendentes de reconfirmação**; leitura estática explícita (sem `opened` ambíguo); OpenSSL `invoked=false`/`exit_code=null`; **nenhuma nova materialização**; **binário não versionado**. |
-| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json`, `binary-audit-gate-00-decision-record-real.schema.json`, `binary-audit-gate-00-provenance-evidence.schema.json`, `binary-audit-gate-01-decision-record-real.schema.json`, `binary-audit-gate-02-decision-record-real.schema.json`, `binary-audit-gate-02-integrity-evidence.schema.json`, `binary-audit-gate-03-decision-record-real.schema.json`, `binary-audit-gate-03-identity-signature-evidence.schema.json` e (convenção da repetição corretiva, sem registros reais) `binary-audit-gate-03-corrective-repeat-decision-record-real.schema.json` e `binary-audit-gate-03-corrective-repeat-evidence.schema.json`. |
+| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json`, `binary-audit-gate-00-decision-record-real.schema.json`, `binary-audit-gate-00-provenance-evidence.schema.json`, `binary-audit-gate-01-decision-record-real.schema.json`, `binary-audit-gate-02-decision-record-real.schema.json`, `binary-audit-gate-02-integrity-evidence.schema.json`, `binary-audit-gate-03-decision-record-real.schema.json`, `binary-audit-gate-03-identity-signature-evidence.schema.json` e (convenção da repetição corretiva, sem registros reais) `binary-audit-gate-03-corrective-repeat-decision-record-real.schema.json`, `binary-audit-gate-03-corrective-repeat-pass-evidence.schema.json`, `binary-audit-gate-03-corrective-repeat-fail-evidence.schema.json`, `binary-audit-gate-03-corrective-repeat-stopped-evidence.schema.json` e `binary-audit-gate-03-corrective-repeat-parser-output.schema.json`. |
 
 ## Garantias desta etapa
 
@@ -215,6 +215,23 @@ a futura decisão referenciará a decisão original, a evidência invalidada, a 
 o commit exato e os Git blob OIDs do parser e dos testes, o blob imutável do WARP e o
 escopo de **exatamente uma** repetição; a evidência invalidada **nunca** volta a
 `COMPLETED_PASS`.
+
+**Endurecimento 2P-E-C3-R3:** o inspetor passou a validar a **Section Table**
+(`NumberOfSections` 1–96 + flag `IMAGE_FILE_EXECUTABLE_IMAGE`; offset/tamanho/fim;
+`within_file`), `SizeOfHeaders` (coerente com o fim da tabela, o arquivo e o
+`FileAlignment`) e `SectionAlignment`/`FileAlignment`, sem inspecionar o conteúdo das
+seções; `pe_valid` foi substituído por `pe_headers_structurally_parseable` (sem
+overclaim). A Certificate Table exige `offset >= SizeOfHeaders` (nunca sobreposta aos
+cabeçalhos) e registra `declared_dw_length`/`aligned_span`/`padding_length`/
+`padding_zero_filled` (padding só-zero), reconhecendo `0x0009` (`WIN_CERT_TYPE_PKCS1_SIGN`).
+As fixtures foram reconstruídas com Section Table válida. O modelo de resultado da
+repetição virou **três schemas** (`...-{pass,fail,stopped}-evidence`) — FAIL não exige
+`identity_matches_gate_2`, STOPPED não exige conclusão. A **proveniência** é amarrada ao
+conteúdo real: o validador recalcula o Git blob OID do parser e dos testes
+(`SHA-1("blob <size>\0"+content)`, offline) e a saída exata do parser é um artefato
+textual separado (`...-parser-output-*.json`) referenciado por SHA-256. O orquestrador
+reprova duplicações (≤1 decisão, ≤1 evidência, ≤1 saída) e segunda repetição. **Nenhum
+registro real** existe nesta etapa.
 
 ## Propriedade intelectual
 
