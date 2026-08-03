@@ -233,6 +233,19 @@ textual separado (`...-parser-output-*.json`) referenciado por SHA-256. O orques
 reprova duplicações (≤1 decisão, ≤1 evidência, ≤1 saída) e segunda repetição. **Nenhum
 registro real** existe nesta etapa.
 
+**Atomicidade 2P-E-C3-R4:** o orquestrador trata `decisão → evidência → saída do
+parser` como unidade transacional e **reprova órfãos** (evidência/saída sem decisão;
+saída sem evidência). A saída do parser é presa aos **bytes exatos** (SHA-256 sobre os
+bytes reais; sem BOM/CRLF; newline final único; sem chaves duplicadas; `raw == forma
+determinística`) e o seu schema é **fechado** (`additionalProperties=false` em todos os
+níveis, com `security_scan` e proibição de `bCertificate`/base64). As referências de
+saída/decisão exigem **igualdade exata** de caminho. A **proveniência** do parser **e
+dos testes** é recalculada offline (`git_blob_oid_for_bytes`) e conferida contra a
+decisão **e** a evidência, exigindo o mesmo commit; `None` é erro. Os campos duplicados
+na evidência PASS devem ser **idênticos** à saída real (fonte primária). PASS/FAIL/
+STOPPED têm schemas distintos e o parser emite `certificate_table.within_file` sempre,
+permitindo fechar o schema da saída.
+
 ## Propriedade intelectual
 
 WARP é **GPL-3.0** (uso apenas local; binário não versionado no FaithRO). `Ragexe`,

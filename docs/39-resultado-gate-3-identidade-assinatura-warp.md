@@ -134,6 +134,46 @@ materializar nem executar o parser sobre o `WARP.exe`:
   saída do parser de repetição, com referências casadas, e reprova segunda repetição.
   Enquanto não houver autorização: **0** de cada.
 
+## 0.3 Atomicidade, bytes exatos e proveniência (2P-E-C3-R4)
+
+A quarta revisão fechou a máquina de estados e a proveniência da repetição — ainda
+**sem** materializar nem executar o parser sobre o `WARP.exe`:
+
+- **Artefatos como unidade transacional.** O orquestrador trata `DECISÃO → EVIDÊNCIA →
+  SAÍDA DO PARSER` como uma unidade e **reprova órfãos**: evidência ou saída **sem
+  decisão**; saída **sem evidência** (mesmo com decisão presente). Sem autorização, o
+  estado exigido é **0/0/0**; autorizado-mas-não-executado permite **1 decisão / 0 / 0**.
+- **PASS/FAIL/STOPPED honestos.** PASS exige `parser_execution` (`invoked`/`completed`/
+  `output_produced=true`) e a **saída real obrigatória**. FAIL declara
+  `parser_invoked`/`parser_completed`/`parser_output_produced`: falha antes do parser
+  (sem saída), falha do parser sem JSON válido (sem fabricar saída) ou falha após uma
+  saída válida (com referência+hash). STOPPED registra `stage_when_stopped`,
+  `materialization_started`, `parser_invoked`, `parser_output_produced=false`,
+  `cleanup_required`/`cleanup_attempted`/`cleanup_completed`; **não** pode ter saída.
+- **Saída presa aos bytes exatos.** O validador lê o arquivo em modo **binário**,
+  calcula o **SHA-256 diretamente sobre esses bytes** e o compara ao registrado;
+  rejeita **BOM**, **CRLF**, ausência/duplicação de newline final e dados após o
+  newline; carrega o JSON rejeitando **chaves duplicadas** (`object_pairs_hook`); e
+  exige `raw_bytes == forma determinística` (`indent=2`, `sort_keys`). Assim ficam
+  protegidos conteúdo, ordenação, indentação, encoding e newline.
+- **Schema da saída fechado.** `additionalProperties=false` em **todos** os níveis,
+  modelando exatamente os campos emitidos pelo inspetor; a saída passa por
+  `security_scan`, checagem de caminhos pessoais/segredos/endpoints/comandos e
+  **proibição de conteúdo `bCertificate`/base64**. Sem campos livres de notas.
+- **Referências exatas.** `reviewed_parser_output_ref.path` deve apontar **exatamente**
+  para o único arquivo de saída presente; `corrective_repeat_decision_ref` para a
+  decisão presente. FAIL/STOPPED sem saída **não** podem ter `reviewed_parser_output_*`.
+- **Proveniência completa.** O validador **recalcula** o Git blob OID do parser **e dos
+  testes** a partir dos bytes da worktree (`SHA-1("blob <size>\0"+content)`) e os
+  compara à decisão **e** à evidência (quando o parser foi usado), exigindo o **mesmo
+  commit** em ambos; `_git_blob_oid_of_repo_file()==None` é **erro**, nunca validação
+  omitida. O commit é confirmado pelo **gate Git externo**; o validador offline confirma
+  apenas os **bytes** (não a relação commit→árvore).
+- **Cross-check integral.** Todos os campos que a evidência PASS duplica da saída
+  (`file_size`, `pe_format`, `machine`, `subsystem`, `section_table`,
+  `certificate_table`, flags de escopo, semântica de leitura, etc.) devem ser
+  **idênticos** à saída real; a saída do parser é a **fonte primária**.
+
 ## 1. Objetivo
 
 Executar exclusivamente o `GATE 3 — IDENTITY_AND_SIGNATURE`: reconfirmar a identidade
