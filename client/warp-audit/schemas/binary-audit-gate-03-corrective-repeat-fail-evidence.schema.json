@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft-07/schema#",
   "$id": "faithro:warp-audit/binary-audit-gate-03-corrective-repeat-fail-evidence",
   "title": "WARP GATE 3 corrective-repeat evidence — COMPLETED_FAIL (real, future)",
-  "description": "CONVENCAO (2P-E-C3-R3) para a FUTURA evidencia da repeticao corretiva do GATE 3 no caminho COMPLETED_FAIL (ex.: tamanho/Git OID/SHA-256 divergentes, parser retornou erro, estrutura PE/Certificate Table inconsistente, falha de limpeza). NAO exige identity_matches_gate_2=true nem cabecalhos completos; exige um motivo de falha. Nenhum registro real nesta etapa. gate_4_authorized const:false; sem execucao do binario.",
+  "description": "CONVENCAO (2P-E-C3-R3; ligacao/estados fechados em 2P-E-C3-R4.1) para a FUTURA evidencia da repeticao corretiva do GATE 3 no caminho COMPLETED_FAIL (ex.: tamanho/Git OID/SHA-256 divergentes, parser retornou erro, estrutura PE/Certificate Table inconsistente, falha de limpeza). NAO exige identity_matches_gate_2=true nem cabecalhos completos; exige um motivo de falha. parser_execution tem tres estados fechados validos: PRE_PARSER_FAIL(false/false/false), PARSER_ERROR_WITHOUT_OUTPUT(true/false/false) e POST_OUTPUT_FAIL(true/true/true); no POST_OUTPUT_FAIL a saida e presa por SHA-256 dos bytes reais e por igualdade exata do reviewed_parser_output_ref.path com o caminho canonico do unico arquivo de saida. Nenhum registro real nesta etapa. gate_4_authorized const:false; sem execucao do binario.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -39,6 +39,7 @@
     },
     "parser_execution": {
       "type": "object", "additionalProperties": false,
+      "description": "Tri-flag do parser. O mini-validador nao implementa if/then/else, entao as relacoes condicionais sao aplicadas em Python (validate_parser_execution_state, 2P-E-C3-R4.1). Estados FECHADOS validos no COMPLETED_FAIL: PRE_PARSER_FAIL = false/false/false (falha antes de invocar o parser); PARSER_ERROR_WITHOUT_OUTPUT = true/false/false (parser retornou erro sem JSON valido); POST_OUTPUT_FAIL = true/true/true (saida valida produzida, falha posterior, com referencia exata e SHA-256 dos bytes reais). Qualquer outra combinacao e reprovada.",
       "required": ["parser_invoked", "parser_completed", "parser_output_produced"],
       "properties": {
         "parser_invoked": { "type": "boolean" },

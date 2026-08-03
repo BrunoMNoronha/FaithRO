@@ -2388,6 +2388,57 @@ _PASS_CROSSCHECK_FIELDS = (
 )
 
 
+# Estados FECHADOS validos da tri-flag parser_invoked/parser_completed/parser_output_produced
+# no caminho COMPLETED_FAIL (2P-E-C3-R4.1). Qualquer outra combinacao e reprovada.
+GATE3_FAIL_PARSER_STATES = {
+    (False, False, False),  # PRE_PARSER_FAIL: falha antes de invocar o parser.
+    (True, False, False),   # PARSER_ERROR_WITHOUT_OUTPUT: parser retornou erro sem JSON valido.
+    (True, True, True),     # POST_OUTPUT_FAIL: saida valida produzida, falha posterior.
+}
+
+
+def validate_parser_execution_state(invoked, completed, output_produced, outcome,
+                                    filename, errors, has_completed=True):
+    """Valida os invariantes da tri-flag parser_invoked/parser_completed/parser_output_produced
+    e o conjunto FECHADO de estados por outcome (2P-E-C3-R4.1). Compartilhada por PASS/FAIL/STOPPED.
+
+    STOPPED nao modela parser_completed (has_completed=False): valida apenas as relacoes
+    possiveis entre invoked e output_produced. LIMITACAO documentada: sem parser_completed,
+    'parser_invoked=false => parser_completed=false' nao pode ser verificado no STOPPED (o
+    campo nao existe); os campos equivalentes existentes sao validados e a saida permanece
+    proibida (parser_output_produced=false).
+    """
+    # --- Invariantes gerais (implicacoes logicas entre as flags) ---
+    if has_completed:
+        if completed is True and invoked is not True:
+            errors.append(f"{filename}: parser_completed=true exige parser_invoked=true")
+        if output_produced is True and not (invoked is True and completed is True):
+            errors.append(f"{filename}: parser_output_produced=true exige parser_invoked=true e parser_completed=true")
+        if invoked is False and (completed is not False or output_produced is not False):
+            errors.append(f"{filename}: parser_invoked=false exige parser_completed=false e parser_output_produced=false")
+        if completed is False and output_produced is not False:
+            errors.append(f"{filename}: parser_completed=false exige parser_output_produced=false")
+    else:
+        # STOPPED: sem parser_completed. A saida ainda exige invocacao.
+        if output_produced is True and invoked is not True:
+            errors.append(f"{filename}: parser_output_produced=true exige parser_invoked=true")
+
+    # --- Estados FECHADOS por outcome ---
+    if outcome == "COMPLETED_PASS":
+        if not (invoked is True and completed is True and output_produced is True):
+            errors.append(f"{filename}: PASS exige parser_execution invoked/completed/output_produced=true")
+    elif outcome == "COMPLETED_FAIL":
+        if (invoked, completed, output_produced) not in GATE3_FAIL_PARSER_STATES:
+            errors.append(
+                f"{filename}: COMPLETED_FAIL exige um estado valido de parser_execution "
+                f"[PRE_PARSER_FAIL(false/false/false), PARSER_ERROR_WITHOUT_OUTPUT(true/false/false), "
+                f"POST_OUTPUT_FAIL(true/true/true)]; obtido "
+                f"invoked={invoked!r}/completed={completed!r}/output_produced={output_produced!r}")
+    elif outcome == "STOPPED":
+        if output_produced is not False:
+            errors.append(f"{filename}: STOPPED exige parser_output_produced=false")
+
+
 def validate_gate3_repeat_evidence(ev, schema, repeat_decision, filename, errors,
                                    parser_output_raw=None, parser_output_path=None,
                                    present_output_name=None):
@@ -2441,8 +2492,9 @@ def validate_gate3_repeat_evidence(ev, schema, repeat_decision, filename, errors
     pex = ev.get("parser_execution") or {}
 
     if outcome == "COMPLETED_PASS":
-        if pex.get("parser_invoked") is not True or pex.get("parser_completed") is not True or pex.get("parser_output_produced") is not True:
-            errors.append(f"{filename}: PASS exige parser_execution invoked/completed/output_produced=true")
+        validate_parser_execution_state(
+            pex.get("parser_invoked"), pex.get("parser_completed"),
+            pex.get("parser_output_produced"), outcome, filename, errors)
         pe = ev.get("pe_identity") or {}
         if pe.get("produced_by") != "REVIEWED_VERSIONED_PARSER":
             errors.append(f"{filename}: pe_identity.produced_by deve ser REVIEWED_VERSIONED_PARSER")
@@ -2485,6 +2537,9 @@ def validate_gate3_repeat_evidence(ev, schema, repeat_decision, filename, errors
                         if f in ct and ct.get(f) != poct.get(f):
                             errors.append(f"{filename}: certificate_table.{f} diverge da saida do parser")
     elif outcome == "COMPLETED_FAIL":
+        validate_parser_execution_state(
+            pex.get("parser_invoked"), pex.get("parser_completed"),
+            pex.get("parser_output_produced"), outcome, filename, errors)
         fail = ev.get("failure") or {}
         if not fail.get("reason") or not fail.get("category"):
             errors.append(f"{filename}: COMPLETED_FAIL exige failure.category e failure.reason")
@@ -2492,12 +2547,22 @@ def validate_gate3_repeat_evidence(ev, schema, repeat_decision, filename, errors
             errors.append(f"{filename}: COMPLETED_FAIL exige cleanup_attempted=true")
         produced = pex.get("parser_output_produced")
         if produced is True:
+            # POST_OUTPUT_FAIL: saida obrigatoria, PRESA por bytes e por caminho canonico
+            # exato ao unico arquivo reconhecido pelo orquestrador (mesma regra do PASS).
             if parser_output_raw is None:
                 errors.append(f"{filename}: FAIL com parser_output_produced=true exige a saida real")
+            elif present_output_name is None or parser_output_path is None:
+                errors.append(f"{filename}: FAIL com saida exige nome/caminho reais da saida (execute pelo orquestrador)")
             else:
                 validate_parser_output_raw(parser_output_raw, ev.get("reviewed_parser_output_sha256"), filename, errors)
-                if "reviewed_parser_output_ref" not in ev:
+                ref = (ev.get("reviewed_parser_output_ref") or {}).get("path")
+                if "reviewed_parser_output_ref" not in ev or ref is None:
                     errors.append(f"{filename}: FAIL com saida exige reviewed_parser_output_ref")
+                else:
+                    if not ref.endswith("/" + present_output_name):
+                        errors.append(f"{filename}: reviewed_parser_output_ref nao aponta para a saida presente ({present_output_name})")
+                    if ref != parser_output_path:
+                        errors.append(f"{filename}: reviewed_parser_output_ref.path != caminho real da saida")
         else:
             if "reviewed_parser_output_ref" in ev or "reviewed_parser_output_sha256" in ev:
                 errors.append(f"{filename}: FAIL sem saida NAO pode ter reviewed_parser_output_ref/sha256")
@@ -2509,12 +2574,14 @@ def validate_gate3_repeat_evidence(ev, schema, repeat_decision, filename, errors
                                    ev.get("reviewed_parser_test_git_blob_oid"), filename, errors)
     elif outcome == "STOPPED":
         stop = ev.get("stop") or {}
+        # STOPPED modela apenas parser_invoked e parser_output_produced (sem parser_completed).
+        validate_parser_execution_state(
+            stop.get("parser_invoked"), None, stop.get("parser_output_produced"),
+            outcome, filename, errors, has_completed=False)
         if not stop.get("reason") or not stop.get("category"):
             errors.append(f"{filename}: STOPPED exige stop.category e stop.reason")
         if stop.get("gate_3_repeat_completed") is not False:
             errors.append(f"{filename}: STOPPED exige gate_3_repeat_completed=false")
-        if stop.get("parser_output_produced") is not False:
-            errors.append(f"{filename}: STOPPED exige parser_output_produced=false")
         if parser_output_raw is not None:
             errors.append(f"{filename}: STOPPED nao pode ter saida do parser presente")
     else:
