@@ -52,8 +52,13 @@ COFF_SIZE_OF_OPTIONAL_HEADER = 16  # NAO confundir com o inicio do Optional Head
 COFF_CHARACTERISTICS = 18
 COFF_SIZE = 20
 
-# Offsets internos do Optional Header (a partir do Magic).
+# Offsets internos do Optional Header (a partir do Magic). SectionAlignment,
+# FileAlignment, SizeOfHeaders, CheckSum e Subsystem tem o MESMO offset em PE32 e
+# PE32+ (ambos vem depois do ImageBase, que absorve a diferenca de largura).
 OPT_MAGIC = 0
+OPT_SECTION_ALIGNMENT = 32
+OPT_FILE_ALIGNMENT = 36
+OPT_SIZE_OF_HEADERS = 60
 OPT_CHECKSUM = 64
 OPT_SUBSYSTEM = 68
 OPT_NUM_RVA_PE32 = 92
@@ -63,6 +68,11 @@ OPT_DATADIR_PE32_PLUS = 112
 DATADIR_ENTRY_SIZE = 8
 CERT_TABLE_INDEX = 4  # IMAGE_DIRECTORY_ENTRY_SECURITY
 
+# Section Table (2P-E-C3-R3).
+SECTION_HEADER_SIZE = 40
+MAX_IMAGE_SECTIONS = 96
+IMAGE_FILE_EXECUTABLE_IMAGE = 0x0002
+
 # Tipos de WIN_CERTIFICATE (wCertificateType). Apenas metadado estrutural; o
 # conteudo (bCertificate / PKCS#7) NAO e interpretado nem emitido.
 WIN_CERT_TYPE = {
@@ -70,6 +80,7 @@ WIN_CERT_TYPE = {
     0x0002: "WIN_CERT_TYPE_PKCS_SIGNED_DATA",
     0x0003: "WIN_CERT_TYPE_RESERVED_1",
     0x0004: "WIN_CERT_TYPE_TS_STACK_SIGNED",
+    0x0009: "WIN_CERT_TYPE_PKCS1_SIGN",
 }
 
 
@@ -94,20 +105,22 @@ def _u32(data, off):
     return struct.unpack_from("<I", data, off)[0]
 
 
-def _parse_certificate_table(data, n, dd_start, num_rva):
+def _parse_certificate_table(data, n, dd_start, num_rva, size_of_headers):
     """Parsing ESTRUTURAL da Certificate Table (WIN_CERTIFICATE), sem interpretar o
     PKCS#7. Retorna apenas metadados. 'structurally_parseable' significa que a
     presenca/ausencia foi determinada de forma estrutural coerente — NAO que existe
     uma assinatura valida. Levanta PEError em inconsistencia estrutural.
 
-    Regras (2P-E-C3-R2):
+    Regras (2P-E-C3-R2/R3):
       * a entrada so existe quando NumberOfRvaAndSizes > 4;
       * o primeiro campo e file offset (nao RVA);
       * offset e tamanho devem ser ambos zero ou ambos != zero (par parcial e rejeitado);
-      * quando presente: offset/tamanho dentro do arquivo, soma sem overflow, inicio
-        alinhado a 8 bytes, tamanho >= 8 (ao menos um cabecalho WIN_CERTIFICATE);
-      * percorre entradas: >=8 bytes restantes, dwLength>=8, dwLength dentro da tabela,
-        avanco por align8(dwLength) > 0 (sem loop), soma final == tamanho da tabela.
+      * quando presente: offset >= SizeOfHeaders (NAO pode sobrepor cabecalhos/Section
+        Table), offset/tamanho dentro do arquivo, soma sem overflow, inicio alinhado a
+        8 bytes, tamanho >= 8;
+      * percorre entradas: dwLength>=8, dwLength dentro da tabela, avanco por
+        align8(dwLength) (dwLength pode NAO ser multiplo de 8), padding fisico dentro da
+        tabela e composto apenas por zeros, soma final == tamanho da tabela.
     """
     cert = {
         "index": CERT_TABLE_INDEX,
@@ -118,6 +131,7 @@ def _parse_certificate_table(data, n, dd_start, num_rva):
         "size": 0,
         "entry_count": 0,
         "entries": [],
+        "note_padding": "dwLength pode nao incluir o padding; o avanco usa align8(dwLength) e o padding examinado deve ser zero. NAO ha validacao criptografica.",
     }
     # 1) A entrada so existe quando NumberOfRvaAndSizes > 4.
     if num_rva <= CERT_TABLE_INDEX:
@@ -137,9 +151,12 @@ def _parse_certificate_table(data, n, dd_start, num_rva):
     if (cert_off == 0) != (cert_size == 0):
         raise PEError("Certificate Table com par offset/tamanho parcialmente zerado")
 
-    # 5) Presente: bounds, overflow, alinhamento e tamanho minimo.
+    # 5) Presente: NAO pode sobrepor cabecalhos/Section Table; bounds; alinhamento.
     if cert_off < 0 or cert_size < 0:
         raise PEError("Certificate Table com offset/tamanho negativo")
+    if cert_off < size_of_headers:
+        raise PEError("Certificate Table sobreposta aos cabecalhos/Section Table "
+                      "(offset %d < SizeOfHeaders %d)" % (cert_off, size_of_headers))
     if cert_off > n or cert_size > n:
         raise PEError("Certificate Table: offset/tamanho fora do arquivo")
     if cert_off + cert_size > n:  # soma sem overflow (Python: inteiros exatos)
@@ -169,18 +186,27 @@ def _parse_certificate_table(data, n, dd_start, num_rva):
             raise PEError("WIN_CERTIFICATE dwLength (%d) < 8" % dw_length)
         if pos + dw_length > end:
             raise PEError("WIN_CERTIFICATE dwLength ultrapassa a tabela")
+        aligned = align8(dw_length)
+        if pos + aligned > end:
+            raise PEError("WIN_CERTIFICATE padding align8 ultrapassa a tabela")
+        # Padding fisico [dwLength, align8(dwLength)) deve conter apenas zeros.
+        pad = data[pos + dw_length:pos + aligned]
+        pad_zero = all(b == 0 for b in pad)
+        if not pad_zero:
+            raise PEError("WIN_CERTIFICATE padding contem bytes nao-zero")
         entries.append({
-            "dw_length": dw_length,
+            "declared_dw_length": dw_length,
+            "aligned_span": aligned,
+            "padding_length": aligned - dw_length,
+            "padding_zero_filled": pad_zero,
             "revision": "0x%04x" % w_revision,
             "certificate_type": "0x%04x" % w_cert_type,
             "certificate_type_name": WIN_CERT_TYPE.get(w_cert_type, "OTHER"),
         })
-        step = align8(dw_length)
-        if step <= 0:
+        if aligned <= 0:
             raise PEError("WIN_CERTIFICATE avanco nao positivo")
-        pos += step
-    # 9) A soma dos avancos deve coincidir exatamente com o tamanho da tabela
-    #    (cada entrada e alinhada a 8 bytes; padding previsto pela especificacao).
+        pos += aligned
+    # 9) A soma dos avancos deve coincidir exatamente com o tamanho da tabela.
     if pos != end:
         raise PEError("Certificate Table: soma final (%d) != tamanho declarado (%d)"
                       % (pos - cert_off, cert_size))
@@ -229,14 +255,19 @@ def inspect(data):
     result["machine_value"] = "0x%04x" % machine
     result["machine"] = MACHINE.get(machine, "OTHER")
     # 8) NumberOfSections.
-    result["number_of_sections"] = _u16(data, coff + COFF_NUMBER_OF_SECTIONS)
+    num_sections = _u16(data, coff + COFF_NUMBER_OF_SECTIONS)
+    result["number_of_sections"] = num_sections
     # 9) TimeDateStamp (metadado NAO confiavel).
     result["timedatestamp_raw"] = _u32(data, coff + COFF_TIMEDATESTAMP)
     result["timedatestamp_is_trusted"] = False
     # 10) SizeOfOptionalHeader lido do CAMPO CORRETO do COFF (coff+16), NAO do magic.
     size_opt = _u16(data, coff + COFF_SIZE_OF_OPTIONAL_HEADER)
     result["size_of_optional_header"] = size_opt
-    result["characteristics"] = "0x%04x" % _u16(data, coff + COFF_CHARACTERISTICS)
+    characteristics = _u16(data, coff + COFF_CHARACTERISTICS)
+    result["characteristics"] = "0x%04x" % characteristics
+    result["characteristics_value"] = characteristics
+    exec_flag = bool(characteristics & IMAGE_FILE_EXECUTABLE_IMAGE)
+    result["executable_image_flag_present"] = exec_flag
 
     # 11) Inicio do Optional Header calculado SEPARADAMENTE.
     opt = coff + COFF_SIZE
@@ -300,18 +331,69 @@ def inspect(data):
     if dd_start + dd_bytes > n:
         raise PEError("Data Directory ultrapassa o fim do arquivo")
 
-    # 21/22/23) Certificate Table (IMAGE_DIRECTORY_ENTRY_SECURITY): parsing estrutural
-    #           limitado ao GATE 3. O primeiro campo do Data Directory e um FILE OFFSET
-    #           (nao RVA). Percorre os WIN_CERTIFICATE sem interpretar o PKCS#7
-    #           (bCertificate) e emite apenas metadados estruturais.
+    # 20b) Metadados de alinhamento (estruturais). SectionAlignment/FileAlignment/
+    #      SizeOfHeaders tem o mesmo offset em PE32 e PE32+.
+    opt_field_bounds(OPT_SECTION_ALIGNMENT, 4, "SectionAlignment")
+    section_alignment = _u32(data, opt + OPT_SECTION_ALIGNMENT)
+    result["section_alignment"] = section_alignment
+    opt_field_bounds(OPT_FILE_ALIGNMENT, 4, "FileAlignment")
+    file_alignment = _u32(data, opt + OPT_FILE_ALIGNMENT)
+    result["file_alignment"] = file_alignment
+    opt_field_bounds(OPT_SIZE_OF_HEADERS, 4, "SizeOfHeaders")
+    size_of_headers = _u32(data, opt + OPT_SIZE_OF_HEADERS)
+    result["size_of_headers"] = size_of_headers
+
+    # 20c) NumberOfSections e flag de imagem executavel (2P-E-C3-R3). A flag NAO prova
+    #      seguranca nem executabilidade operacional; apenas classifica a estrutura.
+    if not exec_flag:
+        raise PEError("IMAGE_FILE_EXECUTABLE_IMAGE ausente (nao e imagem executavel)")
+    if num_sections < 1:
+        raise PEError("NumberOfSections < 1 (imagem executavel exige ao menos 1 secao)")
+    if num_sections > MAX_IMAGE_SECTIONS:
+        raise PEError("NumberOfSections (%d) > %d" % (num_sections, MAX_IMAGE_SECTIONS))
+
+    # 20d) Section Table: comeca imediatamente apos o Optional Header; todas as entradas
+    #      declaradas devem caber fisicamente no arquivo. Conteudo NAO inspecionado.
+    section_table_offset = opt + size_opt
+    section_table_size = num_sections * SECTION_HEADER_SIZE
+    section_table_end = section_table_offset + section_table_size
+    if section_table_offset > n:
+        raise PEError("Section Table: offset fora do arquivo")
+    if section_table_end > n:
+        raise PEError("Section Table ultrapassa o fim do arquivo (truncada)")
+    result["section_table"] = {
+        "offset": section_table_offset,
+        "entry_size": SECTION_HEADER_SIZE,
+        "declared_entry_count": num_sections,
+        "total_size": section_table_size,
+        "end_offset": section_table_end,
+        "within_file": True,
+        "contents_inspected": False,
+    }
+
+    # 20e) SizeOfHeaders coerente com a Section Table e o arquivo.
+    if size_of_headers < section_table_end:
+        raise PEError("SizeOfHeaders (%d) < fim da Section Table (%d)"
+                      % (size_of_headers, section_table_end))
+    if size_of_headers > n:
+        raise PEError("SizeOfHeaders (%d) > tamanho do arquivo (%d)" % (size_of_headers, n))
+    if file_alignment != 0 and size_of_headers % file_alignment != 0:
+        raise PEError("SizeOfHeaders nao alinhado a FileAlignment")
+
+    # 21/22/23) Certificate Table: deve vir DEPOIS dos cabecalhos (>= SizeOfHeaders).
     result["certificate_table"] = _parse_certificate_table(
-        data, n, dd_start, num_rva)
+        data, n, dd_start, num_rva, size_of_headers)
 
     # Informacoes de versao: NAO decodificadas por este parser revisavel (recurso).
     result["version_info_status"] = "NOT_DETERMINED_BY_REVIEWED_PARSER"
 
-    # Identidade estrutural consistente ate aqui.
-    result["pe_valid"] = True
+    # Resultado SEM overclaim: os cabecalhos examinados sao coerentes e a Section Table
+    # declarada cabe no arquivo. NAO houve validacao integral de dados das secoes, nem
+    # execucao, nem avaliacao de seguranca.
+    result["pe_headers_structurally_parseable"] = True
+    result["full_pe_validation_performed"] = False
+    result["section_contents_validated"] = False
+    result["security_evaluation_performed"] = False
     result["file_read_for_static_inspection"] = True
     result["launched"] = False
     result["executed"] = False
