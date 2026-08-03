@@ -63,6 +63,20 @@ OPT_DATADIR_PE32_PLUS = 112
 DATADIR_ENTRY_SIZE = 8
 CERT_TABLE_INDEX = 4  # IMAGE_DIRECTORY_ENTRY_SECURITY
 
+# Tipos de WIN_CERTIFICATE (wCertificateType). Apenas metadado estrutural; o
+# conteudo (bCertificate / PKCS#7) NAO e interpretado nem emitido.
+WIN_CERT_TYPE = {
+    0x0001: "WIN_CERT_TYPE_X509",
+    0x0002: "WIN_CERT_TYPE_PKCS_SIGNED_DATA",
+    0x0003: "WIN_CERT_TYPE_RESERVED_1",
+    0x0004: "WIN_CERT_TYPE_TS_STACK_SIGNED",
+}
+
+
+def align8(value):
+    """Arredonda para o proximo multiplo de 8 (alinhamento do WIN_CERTIFICATE)."""
+    return (value + 7) & ~7
+
 
 class PEError(Exception):
     """Erro de PE truncado, invalido ou inconsistente."""
@@ -78,6 +92,104 @@ def _u32(data, off):
     if off < 0 or off + 4 > len(data):
         raise PEError(f"leitura u32 fora do arquivo no offset {off}")
     return struct.unpack_from("<I", data, off)[0]
+
+
+def _parse_certificate_table(data, n, dd_start, num_rva):
+    """Parsing ESTRUTURAL da Certificate Table (WIN_CERTIFICATE), sem interpretar o
+    PKCS#7. Retorna apenas metadados. 'structurally_parseable' significa que a
+    presenca/ausencia foi determinada de forma estrutural coerente — NAO que existe
+    uma assinatura valida. Levanta PEError em inconsistencia estrutural.
+
+    Regras (2P-E-C3-R2):
+      * a entrada so existe quando NumberOfRvaAndSizes > 4;
+      * o primeiro campo e file offset (nao RVA);
+      * offset e tamanho devem ser ambos zero ou ambos != zero (par parcial e rejeitado);
+      * quando presente: offset/tamanho dentro do arquivo, soma sem overflow, inicio
+        alinhado a 8 bytes, tamanho >= 8 (ao menos um cabecalho WIN_CERTIFICATE);
+      * percorre entradas: >=8 bytes restantes, dwLength>=8, dwLength dentro da tabela,
+        avanco por align8(dwLength) > 0 (sem loop), soma final == tamanho da tabela.
+    """
+    cert = {
+        "index": CERT_TABLE_INDEX,
+        "first_field_is_file_offset_not_rva": True,
+        "present": False,
+        "structurally_parseable": True,
+        "file_offset": 0,
+        "size": 0,
+        "entry_count": 0,
+        "entries": [],
+    }
+    # 1) A entrada so existe quando NumberOfRvaAndSizes > 4.
+    if num_rva <= CERT_TABLE_INDEX:
+        cert["security_directory_entry_present"] = False
+        return cert
+    cert["security_directory_entry_present"] = True
+
+    entry = dd_start + CERT_TABLE_INDEX * DATADIR_ENTRY_SIZE
+    cert_off = _u32(data, entry)
+    cert_size = _u32(data, entry + 4)
+    cert["file_offset"] = cert_off
+    cert["size"] = cert_size
+
+    # 3/4) Ambos zero => ausente; par parcialmente zerado => inconsistente.
+    if cert_off == 0 and cert_size == 0:
+        return cert  # present=False, structurally_parseable=True, entry_count=0
+    if (cert_off == 0) != (cert_size == 0):
+        raise PEError("Certificate Table com par offset/tamanho parcialmente zerado")
+
+    # 5) Presente: bounds, overflow, alinhamento e tamanho minimo.
+    if cert_off < 0 or cert_size < 0:
+        raise PEError("Certificate Table com offset/tamanho negativo")
+    if cert_off > n or cert_size > n:
+        raise PEError("Certificate Table: offset/tamanho fora do arquivo")
+    if cert_off + cert_size > n:  # soma sem overflow (Python: inteiros exatos)
+        raise PEError("Certificate Table ultrapassa o fim do arquivo")
+    if cert_off % 8 != 0:
+        raise PEError("Certificate Table: inicio nao alinhado a 8 bytes")
+    if cert_size < 8:
+        raise PEError("Certificate Table: tamanho < 8 (sem cabecalho WIN_CERTIFICATE)")
+
+    # 6..9) Percorre WIN_CERTIFICATE sem interpretar bCertificate.
+    end = cert_off + cert_size
+    pos = cert_off
+    entries = []
+    guard = 0
+    while pos < end:
+        guard += 1
+        if guard > 4096:
+            raise PEError("Certificate Table: numero de entradas implausivel (loop?)")
+        remaining = end - pos
+        if remaining < 8:
+            raise PEError("Certificate Table: bytes restantes (%d) < cabecalho "
+                          "WIN_CERTIFICATE; soma final incompativel" % remaining)
+        dw_length = _u32(data, pos)
+        w_revision = _u16(data, pos + 4)
+        w_cert_type = _u16(data, pos + 6)
+        if dw_length < 8:
+            raise PEError("WIN_CERTIFICATE dwLength (%d) < 8" % dw_length)
+        if pos + dw_length > end:
+            raise PEError("WIN_CERTIFICATE dwLength ultrapassa a tabela")
+        entries.append({
+            "dw_length": dw_length,
+            "revision": "0x%04x" % w_revision,
+            "certificate_type": "0x%04x" % w_cert_type,
+            "certificate_type_name": WIN_CERT_TYPE.get(w_cert_type, "OTHER"),
+        })
+        step = align8(dw_length)
+        if step <= 0:
+            raise PEError("WIN_CERTIFICATE avanco nao positivo")
+        pos += step
+    # 9) A soma dos avancos deve coincidir exatamente com o tamanho da tabela
+    #    (cada entrada e alinhada a 8 bytes; padding previsto pela especificacao).
+    if pos != end:
+        raise PEError("Certificate Table: soma final (%d) != tamanho declarado (%d)"
+                      % (pos - cert_off, cert_size))
+
+    cert["present"] = True
+    cert["within_file"] = True
+    cert["entry_count"] = len(entries)
+    cert["entries"] = entries
+    return cert
 
 
 def inspect(data):
@@ -150,13 +262,12 @@ def inspect(data):
     else:
         raise PEError(f"magic desconhecido no Optional Header: 0x%04x" % magic)
 
-    # Coerencia D2: SizeOfOptionalHeader NAO pode ser igual ao magic (indicio de
-    # leitura do campo errado, ex.: 0x010b == 267).
-    result["size_of_optional_header_equals_magic"] = (size_opt == magic)
-    if size_opt == magic:
-        raise PEError(
-            "SizeOfOptionalHeader igual ao magic (0x%04x); indicio de offset "
-            "incorreto na leitura do campo" % magic)
+    # OBSERVACAO (NAO e regra de invalidade): registra apenas se, por coincidencia
+    # numerica, SizeOfOptionalHeader e Magic sao iguais. A igualdade NAO viola o
+    # formato PE (ex.: soh 267 e um valor legitimo). A garantia contra o bug de offset
+    # (2P-E-C3-R1) e ler soh de coff+16 e Magic do inicio do Optional Header, campos
+    # SEPARADOS, exercitados por testes de regressao — nao rejeitar por igualdade.
+    result["size_of_optional_header_equals_magic_observation"] = (size_opt == magic)
 
     # 16) Campos acessados devem caber em SizeOfOptionalHeader e no arquivo.
     def opt_field_bounds(field_off, width, name):
@@ -189,24 +300,12 @@ def inspect(data):
     if dd_start + dd_bytes > n:
         raise PEError("Data Directory ultrapassa o fim do arquivo")
 
-    # 21/22/23) Certificate Table no indice correto; primeiro campo e FILE OFFSET
-    #           (nao RVA); offset e tamanho nao podem ultrapassar o arquivo.
-    cert = {"present": False, "index": CERT_TABLE_INDEX,
-            "first_field_is_file_offset_not_rva": True}
-    if num_rva > CERT_TABLE_INDEX:
-        entry = dd_start + CERT_TABLE_INDEX * DATADIR_ENTRY_SIZE
-        cert_off = _u32(data, entry)
-        cert_size = _u32(data, entry + 4)
-        cert["file_offset"] = cert_off
-        cert["size"] = cert_size
-        if cert_size > 0 and cert_off > 0:
-            if cert_off + cert_size > n:
-                raise PEError("Certificate Table ultrapassa o fim do arquivo")
-            cert["present"] = True
-            cert["within_file"] = True
-        else:
-            cert["within_file"] = True
-    result["certificate_table"] = cert
+    # 21/22/23) Certificate Table (IMAGE_DIRECTORY_ENTRY_SECURITY): parsing estrutural
+    #           limitado ao GATE 3. O primeiro campo do Data Directory e um FILE OFFSET
+    #           (nao RVA). Percorre os WIN_CERTIFICATE sem interpretar o PKCS#7
+    #           (bCertificate) e emite apenas metadados estruturais.
+    result["certificate_table"] = _parse_certificate_table(
+        data, n, dd_start, num_rva)
 
     # Informacoes de versao: NAO decodificadas por este parser revisavel (recurso).
     result["version_info_status"] = "NOT_DETERMINED_BY_REVIEWED_PARSER"

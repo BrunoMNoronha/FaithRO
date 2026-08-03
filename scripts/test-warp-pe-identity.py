@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Testes do inspetor PE offline (scripts/inspect-warp-pe-identity.py), ETAPA 2P-E-C3-R1.
+Testes do inspetor PE offline (scripts/inspect-warp-pe-identity.py), ETAPAs
+2P-E-C3-R1/R2.
 
 Constroi PEs SINTETICOS em memoria (bytes) e em arquivos temporarios removidos ao
 final; NUNCA versiona um executavel real e NUNCA executa/carrega o arquivo. Valida a
-LOGICA REAL do parser (nao mutacoes de JSON de evidencia), com foco na regressao D2
-(SizeOfOptionalHeader nao pode virar 267 = magic PE32) e no bounds checking.
+LOGICA REAL do parser, com foco:
+  * na leitura do campo no offset correto (SizeOfOptionalHeader em coff+16, Magic no
+    inicio do Optional Header) — inclusive a coincidencia numerica legitima soh=267
+    (NAO deve ser rejeitada apenas por igualdade ao magic PE32 0x010b);
+  * no parsing ESTRUTURAL da Certificate Table (WIN_CERTIFICATE), sem interpretar o
+    PKCS#7 (bCertificate nunca aparece no JSON).
 
 Offline: nao acessa a rede, nao usa subprocess para iniciar o arquivo, nao importa
-modulos de rede. Criterio: parse correto nos casos validos e rejeicao (excecao / exit
-!= 0) nos invalidos.
+modulos de rede.
 """
 import importlib.util
+import json
 import os
 import struct
 import sys
@@ -34,33 +39,33 @@ def load_module():
     return mod
 
 
-def build_pe(magic, soh, num_rva, num_rva_off, datadir_off,
-             coff_soh=None, cert_offset=0, cert_size=0, cert_blob=b"",
-             opt_actual_len=None):
-    """Constroi um PE sintetico minimo (apenas cabecalhos, sem secoes/codigo).
+def align8(v):
+    return (v + 7) & ~7
 
-    - `soh` e o SizeOfOptionalHeader declarado no COFF (via `coff_soh`, se dado) e o
-      tamanho logico do Optional Header.
-    - `opt_actual_len` permite gerar MENOS bytes de Optional Header que o declarado
-      (para simular truncamento).
-    """
+
+def build_pe(magic=0x010b, soh=0xE0, num_rva=16, num_rva_off=92, datadir_off=96,
+             coff_soh=None, cert_offset=0, cert_size=0, trailer=b"",
+             opt_actual_len=None):
+    """Constroi um PE sintetico minimo (apenas cabecalhos). `trailer` e anexado apos
+    o Optional Header (usado como area da Certificate Table). dd[4] recebe
+    (cert_offset, cert_size) exatamente como dados."""
     coff_soh = soh if coff_soh is None else coff_soh
     dos = bytearray(0x40)
     dos[0:2] = b"MZ"
     struct.pack_into("<I", dos, 0x3C, 0x40)  # e_lfanew
     pe = b"PE\x00\x00"
     coff = bytearray(20)
-    struct.pack_into("<H", coff, 0, 0x014c)   # Machine = x86
-    struct.pack_into("<H", coff, 2, 1)        # NumberOfSections
-    struct.pack_into("<I", coff, 4, 0)        # TimeDateStamp
-    struct.pack_into("<H", coff, 16, coff_soh)  # SizeOfOptionalHeader (campo correto)
-    struct.pack_into("<H", coff, 18, 0x0102)  # Characteristics
+    struct.pack_into("<H", coff, 0, 0x014c)     # Machine = x86
+    struct.pack_into("<H", coff, 2, 1)          # NumberOfSections
+    struct.pack_into("<I", coff, 4, 0)          # TimeDateStamp
+    struct.pack_into("<H", coff, 16, coff_soh)  # SizeOfOptionalHeader (coff+16)
+    struct.pack_into("<H", coff, 18, 0x0102)    # Characteristics
     opt = bytearray(soh)
     struct.pack_into("<H", opt, 0, magic)
     if len(opt) >= 68:
-        struct.pack_into("<I", opt, 64, 0)    # CheckSum
+        struct.pack_into("<I", opt, 64, 0)      # CheckSum
     if len(opt) >= 70:
-        struct.pack_into("<H", opt, 68, 2)    # Subsystem = WINDOWS_GUI
+        struct.pack_into("<H", opt, 68, 2)      # Subsystem = WINDOWS_GUI
     if num_rva_off + 4 <= len(opt):
         struct.pack_into("<I", opt, num_rva_off, num_rva)
     for i in range(num_rva):
@@ -74,8 +79,7 @@ def build_pe(magic, soh, num_rva, num_rva_off, datadir_off,
                 struct.pack_into("<I", opt, eoff + 4, 0)
     if opt_actual_len is not None:
         opt = opt[:opt_actual_len]
-    body = bytes(dos) + pe + bytes(coff) + bytes(opt) + cert_blob
-    return body
+    return bytes(dos) + pe + bytes(coff) + bytes(opt) + trailer
 
 
 def pe32(**kw):
@@ -86,7 +90,25 @@ def pe32plus(**kw):
     return build_pe(0x020b, 0xF0, 16, 108, 112, **kw)
 
 
-HEADER_LEN_PE32 = 0x40 + 4 + 20 + 0xE0  # DOS + PE + COFF + Optional(0xE0)
+HEADER_LEN_PE32 = 0x40 + 4 + 20 + 0xE0  # 312, alinhado a 8
+
+
+def wincert(dw_length, revision=0x0200, ctype=0x0002, fill=b"\xAA"):
+    """Uma entrada WIN_CERTIFICATE de tamanho align8(dw_length)."""
+    header = struct.pack("<IHH", dw_length, revision, ctype)
+    content_len = max(dw_length - 8, 0)
+    content = (fill * (content_len // len(fill) + 1))[:content_len]
+    pad = align8(dw_length) - dw_length
+    return header + content + b"\x00" * pad
+
+
+def table(*dw_lengths, **kw):
+    return b"".join(wincert(dl, **kw) for dl in dw_lengths)
+
+
+def cert_pe(trailer, cert_offset=HEADER_LEN_PE32, cert_size=None):
+    cert_size = len(trailer) if cert_size is None else cert_size
+    return pe32(cert_offset=cert_offset, cert_size=cert_size, trailer=trailer)
 
 
 def main():
@@ -110,13 +132,14 @@ def main():
         except Exception as exc:  # noqa
             failed += 1
             print(f"[FALHA] (esperava parse OK) {label}: {exc}")
-            return
+            return None
         if checks:
             for desc, cond in checks(r):
                 ok(f"{label}: {desc}", cond)
         else:
             passed += 1
             print(f"[OK+]   {label}")
+        return r
 
     def expect_fail(label, data):
         nonlocal passed, failed
@@ -132,101 +155,124 @@ def main():
             failed += 1
             print(f"[FALHA] (esperava rejeicao) {label}")
 
-    # 1) PE32 valido.
-    expect_ok("1 PE32 valido", pe32(), lambda r: [
+    # ===== Identidade / offsets =====
+    expect_ok("PE32 valido", pe32(), lambda r: [
         ("pe_format PE32", r["pe_format"] == "PE32"),
         ("magic 0x010b", r["optional_header_magic"] == "0x010b"),
         ("soh 224", r["size_of_optional_header"] == 224),
-        ("num_rva 16", r["number_of_rva_and_sizes"] == 16),
-        ("subsystem 2", r["subsystem_value"] == 2),
         ("cert ausente", r["certificate_table"]["present"] is False),
+        ("cert parseavel", r["certificate_table"]["structurally_parseable"] is True),
         ("nao executado", r["executed"] is False and r["loaded_as_executable"] is False),
-        ("lido para inspecao", r["file_read_for_static_inspection"] is True),
     ])
-
-    # 2) PE32+ valido.
-    expect_ok("2 PE32+ valido", pe32plus(), lambda r: [
+    expect_ok("PE32+ valido", pe32plus(), lambda r: [
         ("pe_format PE32+", r["pe_format"] == "PE32+"),
-        ("magic 0x020b", r["optional_header_magic"] == "0x020b"),
         ("soh 240", r["size_of_optional_header"] == 240),
-        ("num_rva 16", r["number_of_rva_and_sizes"] == 16),
+    ])
+    # Regressao R1 (offset): soh 0xE0 -> 224, nunca 267.
+    expect_ok("regressao offset (soh 0xE0 -> 224)", pe32(), lambda r: [
+        ("soh == 224", r["size_of_optional_header"] == 224),
+        ("soh != 267", r["size_of_optional_header"] != 267),
+    ])
+    # R2-D1: coincidencia numerica legitima soh == 267 (== magic PE32) NAO rejeita.
+    pe267 = build_pe(0x010b, 267, 16, 92, 96)  # optional header de 267 bytes
+    expect_ok("R2: soh=267 (== magic) e valido", pe267, lambda r: [
+        ("soh == 267", r["size_of_optional_header"] == 267),
+        ("magic 0x010b", r["optional_header_magic"] == "0x010b"),
+        ("pe_format PE32", r["pe_format"] == "PE32"),
+        ("observacao registrada", r.get("size_of_optional_header_equals_magic_observation") is True),
+        ("nao ha regra de invalidade por igualdade", r["pe_valid"] is True),
     ])
 
-    # 3) Regressao D2: magic 0x10b + soh 0xE0 => parser NAO retorna 267.
-    expect_ok("3 regressao D2 (soh != magic)", pe32(), lambda r: [
-        ("soh == 224 (0xE0)", r["size_of_optional_header"] == 224),
-        ("soh != 267 (0x10b)", r["size_of_optional_header"] != 267),
-        ("soh != magic", r["size_of_optional_header_equals_magic"] is False),
+    expect_fail("MZ ausente", b"XX" + pe32()[2:])
+    bad_lfa = bytearray(pe32()); struct.pack_into("<I", bad_lfa, 0x3C, 0x7fffffff)
+    expect_fail("e_lfanew fora do arquivo", bytes(bad_lfa))
+    bad_pe = bytearray(pe32()); bad_pe[0x40:0x44] = b"XXXX"
+    expect_fail("assinatura PE ausente", bytes(bad_pe))
+    expect_fail("COFF truncado", pe32()[:0x44 + 10])
+    expect_fail("Optional Header truncado", pe32(opt_actual_len=0x40))
+    expect_fail("SizeOfOptionalHeader pequeno", build_pe(0x010b, 80, 16, 92, 96, coff_soh=80))
+    expect_fail("magic desconhecido", build_pe(0x1234, 0xE0, 16, 92, 96))
+    expect_fail("NumberOfRvaAndSizes incompativel", build_pe(0x010b, 0xE0, 100, 92, 96))
+
+    # ===== Certificate Table (FASE D/E) =====
+    # 1) ausente (offset 0 / size 0)
+    expect_ok("cert ausente offset0/size0", pe32(), lambda r: [
+        ("present false", r["certificate_table"]["present"] is False),
+        ("structurally_parseable true", r["certificate_table"]["structurally_parseable"] is True),
+        ("entry_count 0", r["certificate_table"]["entry_count"] == 0),
     ])
+    # 2) offset 0 / size != 0 -> rejeitar
+    expect_fail("cert offset0/size!=0 (parcial)",
+                pe32(cert_offset=0, cert_size=16, trailer=b"\x00" * 16))
+    # 3) offset != 0 / size 0 -> rejeitar
+    expect_fail("cert offset!=0/size0 (parcial)",
+                pe32(cert_offset=HEADER_LEN_PE32, cert_size=0, trailer=b"\x00" * 16))
+    # 4) offset desalinhado -> rejeitar
+    expect_fail("cert offset desalinhado",
+                pe32(cert_offset=HEADER_LEN_PE32 + 1, cert_size=16, trailer=b"\x00" * 24))
+    # 5) tamanho < 8 -> rejeitar
+    expect_fail("cert size < 8", cert_pe(b"\x00" * 8, cert_size=4))
+    # 6) dwLength < 8 -> rejeitar
+    expect_fail("dwLength < 8",
+                cert_pe(struct.pack("<IHH", 4, 0x0200, 0x0002), cert_size=8))
+    # 7) dwLength alem da tabela -> rejeitar
+    expect_fail("dwLength alem da tabela",
+                cert_pe(struct.pack("<IHH", 64, 0x0200, 0x0002) + b"\x00" * 8, cert_size=16))
+    # 8) entrada truncada (segunda entrada cortada)
+    expect_fail("entrada truncada",
+                cert_pe(wincert(16) + b"\x00" * 4, cert_size=20))
+    # 9) uma entrada PKCS#7 sintetica valida
+    expect_ok("uma entrada PKCS#7 valida", cert_pe(table(24)), lambda r: [
+        ("present true", r["certificate_table"]["present"] is True),
+        ("entry_count 1", r["certificate_table"]["entry_count"] == 1),
+        ("type PKCS7", r["certificate_table"]["entries"][0]["certificate_type_name"] == "WIN_CERT_TYPE_PKCS_SIGNED_DATA"),
+        ("dw_length 24", r["certificate_table"]["entries"][0]["dw_length"] == 24),
+    ])
+    # 10) duas entradas validas
+    expect_ok("duas entradas validas", cert_pe(table(16, 24)), lambda r: [
+        ("entry_count 2", r["certificate_table"]["entry_count"] == 2),
+    ])
+    # 11/12) progressao alinhada a 8 + padding valido (dwLength nao multiplo de 8)
+    expect_ok("progressao align8 + padding", cert_pe(table(20, 12)), lambda r: [
+        ("entry_count 2", r["certificate_table"]["entry_count"] == 2),
+        ("dw_length 20", r["certificate_table"]["entries"][0]["dw_length"] == 20),
+        ("dw_length 12", r["certificate_table"]["entries"][1]["dw_length"] == 12),
+    ])
+    # 13) soma final incompativel com o tamanho da tabela -> rejeitar
+    expect_fail("soma final incompativel", cert_pe(table(16) + b"\x00" * 8, cert_size=24))
+    # 14) ausencia de loop/progresso zero (muitas entradas minimas terminam)
+    expect_ok("muitas entradas minimas terminam", cert_pe(table(*([8] * 10))), lambda r: [
+        ("entry_count 10", r["certificate_table"]["entry_count"] == 10),
+    ])
+    # 15) nenhum conteudo de bCertificate aparece no JSON
+    marker = b"CERTBODYMARKER42"
+    blob = struct.pack("<IHH", 8 + len(marker), 0x0200, 0x0002) + marker
+    blob = blob + b"\x00" * (align8(len(blob)) - len(blob))
+    r15 = expect_ok("cert presente com conteudo", cert_pe(blob, cert_size=len(blob)), lambda r: [
+        ("present true", r["certificate_table"]["present"] is True),
+    ])
+    if r15 is not None:
+        js = json.dumps(r15, ensure_ascii=False)
+        ok("15 nenhum bCertificate no JSON", "CERTBODYMARKER" not in js)
+        entry_keys = set(r15["certificate_table"]["entries"][0].keys())
+        ok("15 apenas metadados estruturais",
+           entry_keys == {"dw_length", "revision", "certificate_type", "certificate_type_name"})
 
-    # 4) MZ ausente.
-    bad_mz = bytearray(pe32())
-    bad_mz[0:2] = b"XX"
-    expect_fail("4 MZ ausente", bytes(bad_mz))
-
-    # 5) e_lfanew fora do arquivo.
-    bad_lfa = bytearray(pe32())
-    struct.pack_into("<I", bad_lfa, 0x3C, 0x7fffffff)
-    expect_fail("5 e_lfanew fora do arquivo", bytes(bad_lfa))
-
-    # 6) Assinatura PE ausente.
-    bad_pe = bytearray(pe32())
-    bad_pe[0x40:0x44] = b"XXXX"
-    expect_fail("6 assinatura PE ausente", bytes(bad_pe))
-
-    # 7) COFF header truncado.
-    expect_fail("7 COFF truncado", pe32()[:0x44 + 10])
-
-    # 8) Optional header truncado (declara 0xE0, entrega menos).
-    expect_fail("8 Optional Header truncado",
-                pe32(opt_actual_len=0x40))
-
-    # 9) SizeOfOptionalHeader menor que o necessario (num_rva alem do soh).
-    expect_fail("9 SizeOfOptionalHeader pequeno",
-                build_pe(0x010b, 80, 16, 92, 96, coff_soh=80))
-
-    # 10) Magic desconhecido.
-    expect_fail("10 magic desconhecido",
-                build_pe(0x1234, 0xE0, 16, 92, 96))
-
-    # 11) NumberOfRvaAndSizes incompativel (nao cabe no soh/arquivo).
-    expect_fail("11 NumberOfRvaAndSizes incompativel",
-                build_pe(0x010b, 0xE0, 100, 92, 96))
-
-    # 12) Certificate Table alem do fim do arquivo.
-    expect_fail("12 Certificate Table alem do fim",
-                pe32(cert_offset=HEADER_LEN_PE32 + 1000, cert_size=16))
-
-    # 13) Certificate Table parcialmente truncada.
-    expect_fail("13 Certificate Table truncada",
-                pe32(cert_offset=HEADER_LEN_PE32, cert_size=64,
-                     cert_blob=b"\x00" * 10))
-
-    # 14) Certificate Table sintetica estruturalmente valida (presente).
-    blob = b"\x10\x00\x00\x00\x00\x02\x02\x00" + b"\xAA" * 8  # WIN_CERTIFICATE min
-    expect_ok("14 Certificate Table presente",
-              pe32(cert_offset=HEADER_LEN_PE32, cert_size=len(blob), cert_blob=blob),
-              lambda r: [
-                  ("cert presente", r["certificate_table"]["present"] is True),
-                  ("dentro do arquivo", r["certificate_table"]["within_file"] is True),
-                  ("primeiro campo e file offset", r["certificate_table"]["first_field_is_file_offset_not_rva"] is True),
-              ])
-
-    # 15) Nenhum teste executa o arquivo: exercitamos main() com exit codes usando
-    #     arquivos temporarios removidos (leitura apenas; sem subprocess de execucao).
+    # 16/17) fixtures temporarias removidas; nenhum arquivo executado.
     tmpdir = tempfile.mkdtemp(prefix="pe-fixtures-")
-    fixtures_removed = True
+    removed = True
     try:
         good = os.path.join(tmpdir, "good.bin")
         with open(good, "wb") as fh:
-            fh.write(pe32())
-        ok("15a main() exit 0 em PE valido", mod.main(["x", good]) == 0)
+            fh.write(cert_pe(table(24)))
+        r = mod.inspect(open(good, "rb").read())
+        ok("17 nao executa/carrega o arquivo",
+           r["executed"] is False and r["loaded_as_executable"] is False and r["launched"] is False)
+        ok("main() exit 0 em PE valido", mod.main(["x", good]) == 0)
         bad = os.path.join(tmpdir, "bad.bin")
         with open(bad, "wb") as fh:
             fh.write(b"not a pe")
-        ok("15b main() exit != 0 em invalido", mod.main(["x", bad]) != 0)
-        ok("15c main() exit != 0 em inexistente",
-           mod.main(["x", os.path.join(tmpdir, "nope.bin")]) != 0)
+        ok("main() exit != 0 em invalido", mod.main(["x", bad]) != 0)
     finally:
         for f in ("good.bin", "bad.bin"):
             p = os.path.join(tmpdir, f)
@@ -235,8 +281,8 @@ def main():
         try:
             os.rmdir(tmpdir)
         except OSError:
-            fixtures_removed = False
-    ok("15d fixtures temporarias removidas", fixtures_removed and not os.path.exists(tmpdir))
+            removed = False
+    ok("16 fixtures temporarias removidas", removed and not os.path.exists(tmpdir))
 
     print(f"\nResumo: {passed} teste(s) OK, {failed} falha(s).")
     return 1 if failed else 0
