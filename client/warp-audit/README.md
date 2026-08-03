@@ -42,7 +42,7 @@ auditoria. O relatório completo está em
 | [`evidence/binary-audit-gate-02-integrity-evidence-2026-08-01.json`](evidence/binary-audit-gate-02-integrity-evidence-2026-08-01.json) | (2P-E-C2-A) Evidência **real** do GATE 2: `COMPLETED_PASS`; **1** blob materializado fora do repo, tamanho `1137152` e Git blob OID **iguais** aos esperados; SHA-256 local registrado (≠ Git OID); arquivo **removido**; nenhuma execução/inspeção/sandbox/distribuição; **binário não versionado**. |
 | [`decisions/binary-audit-gate-03-decision-record-2026-08-03.json`](decisions/binary-audit-gate-03-decision-record-2026-08-03.json) | (2P-E-C3) Registro **real** da autorização humana **exclusiva do GATE 3** (identidade e assinatura estática offline): `AUTHORIZE_GATE_3`; `gate_3_authorized=true`, materialização temporária + hashing + inspeção de identidade/Authenticode `true`; **GATE 4 não autorizado**. |
 | [`evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json`](evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json) | (2P-E-C3 / **revisão 2P-E-C3-R1**) Evidência **real** do GATE 3, agora `EVIDENCE_INVALIDATED_PENDING_REPEAT`: o `COMPLETED_PASS` foi **suspenso** (D1-D4). Fatos do GATE 2 (blob OID/tamanho/SHA-256) **preservados**; identidade PE (`size_of_optional_header=267` == magic PE32) e assinatura **pendentes de reconfirmação**; leitura estática explícita (sem `opened` ambíguo); OpenSSL `invoked=false`/`exit_code=null`; **nenhuma nova materialização**; **binário não versionado**. |
-| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json`, `binary-audit-gate-00-decision-record-real.schema.json`, `binary-audit-gate-00-provenance-evidence.schema.json`, `binary-audit-gate-01-decision-record-real.schema.json`, `binary-audit-gate-02-decision-record-real.schema.json`, `binary-audit-gate-02-integrity-evidence.schema.json`, `binary-audit-gate-03-decision-record-real.schema.json` e `binary-audit-gate-03-identity-signature-evidence.schema.json`. |
+| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json`, `binary-audit-gate-00-decision-record-real.schema.json`, `binary-audit-gate-00-provenance-evidence.schema.json`, `binary-audit-gate-01-decision-record-real.schema.json`, `binary-audit-gate-02-decision-record-real.schema.json`, `binary-audit-gate-02-integrity-evidence.schema.json`, `binary-audit-gate-03-decision-record-real.schema.json`, `binary-audit-gate-03-identity-signature-evidence.schema.json` e (convenção da repetição corretiva, sem registros reais) `binary-audit-gate-03-corrective-repeat-decision-record-real.schema.json` e `binary-audit-gate-03-corrective-repeat-evidence.schema.json`. |
 
 ## Garantias desta etapa
 
@@ -201,6 +201,20 @@ o inspetor revisável **não** foi executado sobre o `WARP.exe`. O **GATE 4 perm
 não autorizado**; a repetição corretiva do GATE 3 exige **nova decisão humana**
 (proposta: `AUTHORIZE_CORRECTIVE_REPEAT_GATE_3` / `STOP_PATH`). Os testes positivos e
 negativos estão em [`scripts/test-warp-audit-gate-03.py`](../../scripts/test-warp-audit-gate-03.py).
+
+**Endurecimento 2P-E-C3-R2:** o inspetor [`scripts/inspect-warp-pe-identity.py`](../../scripts/inspect-warp-pe-identity.py)
+**removeu** a falsa regra universal `SizeOfOptionalHeader == Magic` (a igualdade não
+viola o PE; `soh=267` é legítimo) e passou a fazer **parsing estrutural da Certificate
+Table** (`WIN_CERTIFICATE`: bounds, alinhamento a 8 bytes, `dwLength`, progressão sem
+loop, soma coincidente), emitindo **apenas metadados** — nunca o `bCertificate`. As
+fixtures em [`scripts/test-warp-pe-identity.py`](../../scripts/test-warp-pe-identity.py)
+foram ampliadas (soh=267 válido + 17 cenários da tabela). A **cadeia da repetição
+corretiva** foi preparada como **convenção** (schemas
+`binary-audit-gate-03-corrective-repeat-*`), **sem** criar decisão ou evidência reais:
+a futura decisão referenciará a decisão original, a evidência invalidada, a revisão R1,
+o commit exato e os Git blob OIDs do parser e dos testes, o blob imutável do WARP e o
+escopo de **exatamente uma** repetição; a evidência invalidada **nunca** volta a
+`COMPLETED_PASS`.
 
 ## Propriedade intelectual
 

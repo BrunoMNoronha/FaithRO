@@ -44,6 +44,46 @@ nesta etapa, os campos produzidos pelo parser não versionado (identidade PE e e
 da assinatura) foram marcados como **pendentes de reconfirmação**; **não** foram
 remedidos nem estimados.
 
+## 0.1 Endurecimento e cadeia da repetição (2P-E-C3-R2)
+
+Uma segunda revisão endureceu o inspetor e preparou a cadeia da repetição corretiva —
+**sem** repetir a materialização e **sem** executar o parser sobre o `WARP.exe`:
+
+- **Regra falsa removida.** O inspetor **não** rejeita mais um PE apenas porque
+  `SizeOfOptionalHeader == Magic`. Essa igualdade numérica **não** viola o formato PE
+  (`soh = 267` é um valor legítimo). A garantia contra o bug de offset (R1) é ler
+  `SizeOfOptionalHeader` de `coff+16` e `Magic` do início do Optional Header — campos
+  **separados** — exercitado por testes de regressão. Uma fixture sintética **válida**
+  com `Magic=0x010b` e `SizeOfOptionalHeader=267` é aceita; a fixture `0xE0`→`224`
+  continua provando que os offsets não se confundem. No validador, a exigência de
+  reconfirmação do valor `267` passou a depender da **proveniência**
+  (`produced_by=UNVERSIONED_SCRATCHPAD_PARSER`), **não** de uma regra geral.
+- **Certificate Table estrutural.** O inspetor agora percorre a Certificate Table
+  (`WIN_CERTIFICATE`) validando: índice só quando `NumberOfRvaAndSizes > 4`; primeiro
+  campo é **file offset** (não RVA); par offset/tamanho ambos zero ou ambos não-zero
+  (parcial → rejeitado); presença exige bounds, alinhamento a 8 bytes, tamanho ≥ 8 e
+  ao menos um cabeçalho; percorre entradas por `align8(dwLength)` com `dwLength ≥ 8`,
+  sem loop, com soma final coincidente. Emite **apenas metadados estruturais**
+  (`dwLength`, `revision`, `certificate_type`); **nunca** o conteúdo `bCertificate`.
+- **Fixtures ampliadas.** 17 novos cenários de Certificate Table (ausente, par parcial,
+  desalinhado, `size<8`, `dwLength<8`, além da tabela, truncada, uma/duas entradas
+  válidas, progressão alinhada, padding, soma incompatível, ausência de conteúdo no
+  JSON, sem execução, fixtures removidas).
+- **Cadeia da repetição preparada** (convenção, **sem** registros reais): schemas
+  `binary-audit-gate-03-corrective-repeat-decision-record-real.schema.json` e
+  `binary-audit-gate-03-corrective-repeat-evidence.schema.json`. A futura decisão
+  referenciará a decisão original, a **evidência invalidada** (que permanece
+  histórica), a revisão R1, o **commit exato** e os **Git blob OIDs** do parser e dos
+  testes, o blob imutável do WARP e o escopo de **exatamente uma** repetição. A futura
+  evidência preservará `original_invalidated_evidence_ref`,
+  `corrective_repeat_decision_ref`, `reviewed_parser_ref`,
+  `reviewed_parser_git_blob_oid` e `reviewed_parser_test_ref`. O validador impede que a
+  evidência histórica invalidada volte a `COMPLETED_PASS`.
+
+**Nenhuma materialização** ocorreu; o parser revisado **ainda não foi executado sobre
+o WARP.exe**; a evidência invalidada **permanece histórica**; a repetição produzirá
+**decisão e evidência separadas**; o **GATE 4 permanece não autorizado**.
+
 ## 1. Objetivo
 
 Executar exclusivamente o `GATE 3 — IDENTITY_AND_SIGNATURE`: reconfirmar a identidade
@@ -175,8 +215,10 @@ O inspetor revisável **não** foi executado sobre o `WARP.exe` (`run_on_warp_ex
 
 | Arquivo | Tipo | Motivo |
 | --- | --- | --- |
-| `scripts/inspect-warp-pe-identity.py` | novo | inspetor PE offline revisável (D3) |
-| `scripts/test-warp-pe-identity.py` | novo | testes de fixtures sintéticas (D2/D3) |
+| `scripts/inspect-warp-pe-identity.py` | novo/edição | inspetor PE offline revisável (D3); R2: regra `soh==magic` removida + Certificate Table estrutural |
+| `scripts/test-warp-pe-identity.py` | novo/edição | fixtures sintéticas (D2/D3); R2: `soh=267` válido + 17 cenários da Certificate Table |
+| `client/warp-audit/schemas/binary-audit-gate-03-corrective-repeat-decision-record-real.schema.json` | novo | R2: schema da futura decisão da repetição |
+| `client/warp-audit/schemas/binary-audit-gate-03-corrective-repeat-evidence.schema.json` | novo | R2: schema da futura evidência da repetição |
 | `client/warp-audit/evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json` | edição | invalidação + D1/D2/D4 |
 | `client/warp-audit/schemas/binary-audit-gate-03-identity-signature-evidence.schema.json` | edição | novo estado e semântica |
 | `scripts/validate-warp-audit.py` | edição | validação da evidência invalidada |
