@@ -40,7 +40,9 @@ auditoria. O relatório completo está em
 | [`decisions/binary-audit-gate-01-decision-record-2026-08-01.json`](decisions/binary-audit-gate-01-decision-record-2026-08-01.json) | (2P-E-C1-A) Registro **real** da autorização humana **exclusiva do GATE 1** (autorização para materialização): `AUTHORIZE_MATERIALIZATION`; **decisão-humana-apenas** (nada materializado/baixado/hasheado/executado); escopo fechado ao blob fixado; `materialization_authorized=true`; **GATE 2 não autorizado**. |
 | [`decisions/binary-audit-gate-02-decision-record-2026-08-01.json`](decisions/binary-audit-gate-02-decision-record-2026-08-01.json) | (2P-E-C2-A) Registro **real** da autorização humana **exclusiva do GATE 2** (materialização e integridade local): `AUTHORIZE_GATE_2`; `gate_2_authorized=true`, `hashing_authorized=true`; **GATE 3 não autorizado**. |
 | [`evidence/binary-audit-gate-02-integrity-evidence-2026-08-01.json`](evidence/binary-audit-gate-02-integrity-evidence-2026-08-01.json) | (2P-E-C2-A) Evidência **real** do GATE 2: `COMPLETED_PASS`; **1** blob materializado fora do repo, tamanho `1137152` e Git blob OID **iguais** aos esperados; SHA-256 local registrado (≠ Git OID); arquivo **removido**; nenhuma execução/inspeção/sandbox/distribuição; **binário não versionado**. |
-| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json`, `binary-audit-gate-00-decision-record-real.schema.json`, `binary-audit-gate-00-provenance-evidence.schema.json`, `binary-audit-gate-01-decision-record-real.schema.json`, `binary-audit-gate-02-decision-record-real.schema.json` e `binary-audit-gate-02-integrity-evidence.schema.json`. |
+| [`decisions/binary-audit-gate-03-decision-record-2026-08-03.json`](decisions/binary-audit-gate-03-decision-record-2026-08-03.json) | (2P-E-C3) Registro **real** da autorização humana **exclusiva do GATE 3** (identidade e assinatura estática offline): `AUTHORIZE_GATE_3`; `gate_3_authorized=true`, materialização temporária + hashing + inspeção de identidade/Authenticode `true`; **GATE 4 não autorizado**. |
+| [`evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json`](evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json) | (2P-E-C3) Evidência **real** do GATE 3: `COMPLETED_PASS`; identidade **igual** ao GATE 2 (tamanho/Git OID/SHA-256), **PE32 x86** válido, `OriginalFilename` `WARP.exe`, **Certificate Table ausente** (assinatura Authenticode **ausente** — achado material, **não** malware); separação presença × validade × confiança × segurança; arquivo **removido**; **binário não versionado**. |
+| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json`, `binary-audit-gate-00-decision-record-real.schema.json`, `binary-audit-gate-00-provenance-evidence.schema.json`, `binary-audit-gate-01-decision-record-real.schema.json`, `binary-audit-gate-02-decision-record-real.schema.json`, `binary-audit-gate-02-integrity-evidence.schema.json`, `binary-audit-gate-03-decision-record-real.schema.json` e `binary-audit-gate-03-identity-signature-evidence.schema.json`. |
 
 ## Garantias desta etapa
 
@@ -167,6 +169,26 @@ executado. O `git_blob_oid` é o identificador do objeto Git informado pelo upst
 avanço exige **nova decisão humana** (`AUTHORIZE_GATE_1` / `REPEAT_GATE_0` /
 `STOP_PATH`).
 
+## Resultado do GATE 3 (2P-E-C3)
+
+O GATE 3 foi **executado por inspeção estática offline** — decisão em
+[`decisions/binary-audit-gate-03-decision-record-2026-08-03.json`](decisions/binary-audit-gate-03-decision-record-2026-08-03.json),
+evidência em
+[`evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json`](evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json)
+e em [docs/39](../../docs/39-resultado-gate-3-identidade-assinatura-warp.md):
+resultado `COMPLETED_PASS` (`GATE 3 CONCLUÍDO — IDENTIDADE CONFIRMADA E ASSINATURA
+DETERMINADA (AUSENTE)`). O blob fixado foi **rematerializado temporariamente** fora do
+repositório; a **identidade** (tamanho `1137152`, Git blob OID `c853da42…`, SHA-256
+`345f3464…`) é **igual** à do GATE 2; o **PE** é válido (**PE32**, x86, subsystem
+`WINDOWS_GUI`, `OriginalFilename` `WARP.exe`); a **Certificate Table está ausente** —
+portanto **não há assinatura Authenticode**. A ausência é um **achado material** e
+**não** um veredito de malware; assinatura presente **não** significaria arquivo
+seguro. O arquivo temporário foi **removido**; **nenhuma** execução, carga, análise
+dinâmica, sandbox, inspeção ampla (GATE 4), acesso ao cliente/`Ragexe`/VPS, patch ou
+distribuição ocorreu. O **GATE 4 permanece não autorizado**: qualquer avanço exige
+**nova decisão humana** (`AUTHORIZE_GATE_4` / `STOP_PATH`). Os testes positivos e
+negativos estão em [`scripts/test-warp-audit-gate-03.py`](../../scripts/test-warp-audit-gate-03.py).
+
 ## Propriedade intelectual
 
 WARP é **GPL-3.0** (uso apenas local; binário não versionado no FaithRO). `Ragexe`,
@@ -183,4 +205,5 @@ empacotar ou compartilhar (ver [docs/16](../../docs/16-politica-distribuicao-cli
 - [docs/33](../../docs/33-plano-auditoria-binaria-offline-warp.md) — plano da auditoria binária offline.
 - [docs/34](../../docs/34-registro-autorizacao-gate-0-proveniencia-warp.md) — autorização do GATE 0.
 - [docs/35](../../docs/35-resultado-gate-0-proveniencia-warp.md) — resultado do GATE 0 (metadados).
+- [docs/39](../../docs/39-resultado-gate-3-identidade-assinatura-warp.md) — resultado do GATE 3 (identidade e assinatura).
 - [docs/16](../../docs/16-politica-distribuicao-cliente.md) — política de distribuição.
