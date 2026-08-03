@@ -320,6 +320,76 @@ def _sha256_hex(data):
     import hashlib as _hashlib
     return _hashlib.sha256(data).hexdigest()
 
+
+def _reject_duplicate_keys(pairs):
+    seen = {}
+    for k, v in pairs:
+        if k in seen:
+            raise ValueError("chave JSON duplicada: %r" % k)
+        seen[k] = v
+    return seen
+
+
+# Padroes proibidos na saida direta do parser (defesa em profundidade).
+_PARSER_OUTPUT_BASE64_RE = re.compile(r"[A-Za-z0-9+/]{40,}={0,2}")
+_PARSER_OUTPUT_BCERT_RE = re.compile(r"(?i)bcertificate|-----BEGIN")
+
+
+def validate_parser_output_raw(raw_bytes, declared_sha256, filename, errors):
+    """Prende a saida do parser aos BYTES EXATOS versionados (2P-E-C3-R4).
+
+    Calcula o SHA-256 diretamente sobre `raw_bytes`; rejeita BOM, CRLF, ausencia/excesso
+    de newline final e dados apos o newline; carrega o JSON rejeitando chaves duplicadas;
+    exige raw_bytes == forma canonica (indent=2, sort_keys); valida contra o schema
+    FECHADO; e aplica varreduras de seguranca. Retorna o dict parseado (ou None em erro).
+    """
+    if not isinstance(raw_bytes, (bytes, bytearray)):
+        errors.append(f"{filename}: saida do parser ausente (bytes esperados)")
+        return None
+    raw = bytes(raw_bytes)
+    if not isinstance(declared_sha256, str) or not HEX64_RE.match(declared_sha256):
+        errors.append(f"{filename}: reviewed_parser_output_sha256 deve ter 64 hex")
+    else:
+        actual = _sha256_hex(raw)
+        if actual != declared_sha256:
+            errors.append(f"{filename}: SHA-256 dos bytes reais da saida nao confere com o registrado")
+    # BOM / CRLF / newline final unico / sem dados apos o newline.
+    if raw.startswith(b"\xef\xbb\xbf"):
+        errors.append(f"{filename}: saida do parser com BOM UTF-8 proibido")
+    if b"\r\n" in raw or b"\r" in raw:
+        errors.append(f"{filename}: saida do parser com CRLF proibido")
+    if not raw.endswith(b"\n"):
+        errors.append(f"{filename}: saida do parser sem newline final")
+    elif raw.endswith(b"\n\n"):
+        errors.append(f"{filename}: saida do parser com newline final duplicado / dados apos o newline")
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        errors.append(f"{filename}: saida do parser nao e UTF-8 estrito")
+        return None
+    try:
+        parsed = json.loads(text, object_pairs_hook=_reject_duplicate_keys)
+    except ValueError as exc:
+        errors.append(f"{filename}: saida do parser com JSON invalido/duplicado: {exc}")
+        return None
+    expected = _canonical_parser_output_bytes(parsed)
+    if raw != expected:
+        errors.append(f"{filename}: bytes da saida != forma deterministica (ordenacao/indentacao/encoding)")
+    # Schema fechado + seguranca.
+    try:
+        po_schema = load_json(os.path.join(SCHEMA_DIR, GATE3_REPEAT_PARSER_OUTPUT_SCHEMA))
+        validate_node(parsed, po_schema, "parser-output", errors)
+    except Fail as exc:
+        errors.append(str(exc))
+    security_scan(parsed, errors)
+    planning_content_scan(parsed, filename, errors)
+    for where, s in iter_strings(parsed):
+        if _PARSER_OUTPUT_BCERT_RE.search(s):
+            errors.append(f"{filename}{where}: conteudo semelhante a bCertificate/PEM proibido na saida")
+        if _PARSER_OUTPUT_BASE64_RE.search(s):
+            errors.append(f"{filename}{where}: bloco base64/binario proibido na saida do parser")
+    return parsed
+
 # --- Regras de seguranca (valores, nao prosa) ---
 IPV4_RE = re.compile(r"(?<!\d)(?:\d{1,3}\.){3}\d{1,3}(?!\d)")
 DRIVE_PATH_RE = re.compile(r"(?<![A-Za-z])[A-Za-z]:[\\/]")
@@ -2220,14 +2290,22 @@ def validate_gate3(errors):
                     print(f"[OK]    evidence/{name}")
 
 
-def validate_gate3_repeat_decision(record, schema, filename, errors):
-    """Valida a FUTURA decisao humana da repeticao corretiva do GATE 3 (importavel).
+def _recompute_and_compare_oid(field, path, registered, filename, errors):
+    """Recalcula o Git blob OID do arquivo `path` e compara com `registered`.
+    _git_blob_oid_of_repo_file()==None e ERRO (nunca validacao omitida)."""
+    actual = _git_blob_oid_of_repo_file(path)
+    if actual is None:
+        errors.append(f"{filename}: {field}: arquivo {path} ausente para recalcular o Git blob OID")
+        return
+    if not isinstance(registered, str) or not HEX40_RE.match(registered):
+        errors.append(f"{filename}: {field} deve ser Git object ID de 40 hex")
+        return
+    if registered != actual:
+        errors.append(f"{filename}: {field} nao confere com o conteudo atual de {path} (esperado {actual})")
 
-    Exige: decisao AUTHORIZE_CORRECTIVE_REPEAT_GATE_3; escopo fechado ao blob fixado;
-    EXATAMENTE uma repeticao; referencias A decisao original, A evidencia invalidada, A
-    revisao R1, ao parser revisado e aos testes; PROVENIENCIA amarrada ao conteudo real
-    (Git blob OID recalculado dos arquivos da worktree); gate_4_authorized=false.
-    """
+
+def validate_gate3_repeat_decision(record, schema, filename, errors):
+    """Valida a FUTURA decisao humana da repeticao corretiva do GATE 3 (importavel)."""
     kv = []
     schema_keyword_violations(schema, "gate-03-repeat-decision.schema", kv)
     errors.extend(kv)
@@ -2280,19 +2358,13 @@ def validate_gate3_repeat_decision(record, schema, filename, errors):
     if isinstance(oi, dict) and oi.get("path") and not oi["path"].endswith(GATE3_HISTORICAL_INVALIDATED_EVIDENCE):
         errors.append(f"{filename}: original_invalidated_evidence_ref deve apontar para a evidencia invalidada do GATE 3")
 
-    # Proveniencia amarrada ao CONTEUDO REAL: recalcula o Git blob OID dos arquivos.
-    for field, path in (("reviewed_parser_git_blob_oid", REVIEWED_PARSER_PATH),
-                        ("reviewed_parser_test_git_blob_oid", REVIEWED_PARSER_TEST_PATH)):
-        v = record.get(field)
-        if not isinstance(v, str) or not HEX40_RE.match(v):
-            errors.append(f"{filename}: {field} deve ser Git object ID de 40 hex")
-            continue
-        actual = _git_blob_oid_of_repo_file(path)
-        if actual is not None and v != actual:
-            errors.append(f"{filename}: {field} nao confere com o conteudo atual de {path} "
-                          f"(esperado {actual})")
+    # Proveniencia amarrada ao CONTEUDO REAL (parser e testes).
+    _recompute_and_compare_oid("reviewed_parser_git_blob_oid", REVIEWED_PARSER_PATH,
+                               record.get("reviewed_parser_git_blob_oid"), filename, errors)
+    _recompute_and_compare_oid("reviewed_parser_test_git_blob_oid", REVIEWED_PARSER_TEST_PATH,
+                               record.get("reviewed_parser_test_git_blob_oid"), filename, errors)
     if not isinstance(record.get("reviewed_parser_commit"), str) or not HEX40_RE.match(record.get("reviewed_parser_commit", "")):
-        errors.append(f"{filename}: reviewed_parser_commit deve ter 40 hex (confirmado pelo gate Git externo)")
+        errors.append(f"{filename}: reviewed_parser_commit deve ter 40 hex (confirmado pelo gate Git externo; a relacao commit->arvore NAO e verificada pelo validador offline)")
     return errors
 
 
@@ -2304,15 +2376,25 @@ def _repeat_evidence_schema_for(outcome):
     }.get(outcome)
 
 
+# Campos da saida do parser que a evidencia PASS duplica e que devem ser IDENTICOS.
+_PASS_CROSSCHECK_FIELDS = (
+    "file_size", "mz_present", "pe_signature_present", "pe_format", "optional_header_magic",
+    "machine", "machine_value", "subsystem", "subsystem_value", "number_of_sections",
+    "size_of_optional_header", "size_of_headers", "section_alignment", "file_alignment",
+    "executable_image_flag_present", "section_table", "certificate_table",
+    "pe_headers_structurally_parseable", "full_pe_validation_performed",
+    "section_contents_validated", "security_evaluation_performed", "executed",
+    "loaded_as_executable", "launched",
+)
+
+
 def validate_gate3_repeat_evidence(ev, schema, repeat_decision, filename, errors,
-                                   parser_output=None):
+                                   parser_output_raw=None, parser_output_path=None,
+                                   present_output_name=None):
     """Valida a FUTURA evidencia da repeticao (PASS/FAIL/STOPPED) — importavel.
 
-    O `schema` deve ser o schema do outcome declarado. Regras comuns: gate_4=false;
-    referencia A evidencia invalidada e A decisao; proveniencia do parser coincidente com
-    a decisao. No caminho PASS: identidade IGUAL ao GATE 2, cabecalhos parseaveis e a
-    saida EXATA do parser amarrada por SHA-256 (parser_output). FAIL nao exige identidade;
-    STOPPED nao exige conclusao/campos completos.
+    parser_output_raw sao os BYTES EXATOS do arquivo de saida (ou None). A ligacao
+    (referencia, hash, bytes) e verificada aqui conforme o outcome.
     """
     kv = []
     schema_keyword_violations(schema, "gate-03-repeat-evidence.schema", kv)
@@ -2328,8 +2410,6 @@ def validate_gate3_repeat_evidence(ev, schema, repeat_decision, filename, errors
     outcome = ev.get("outcome")
     if ev.get("status") != outcome:
         errors.append(f"{filename}: status deve ser igual a outcome")
-    if outcome not in ("COMPLETED_PASS", "COMPLETED_FAIL", "STOPPED"):
-        errors.append(f"{filename}: outcome fora do conjunto permitido")
 
     sa = ev.get("security_assertions") or {}
     if sa.get("gate_4_authorized") is not False:
@@ -2339,24 +2419,30 @@ def validate_gate3_repeat_evidence(ev, schema, repeat_decision, filename, errors
         if sa.get(k) is not True:
             errors.append(f"{filename}: security_assertions.{k} deve ser true")
 
-    for field in ("original_invalidated_evidence_ref", "corrective_repeat_decision_ref",
-                  "reviewed_parser_ref", "reviewed_parser_test_ref"):
-        ref = ev.get(field)
+    # corrective_repeat_decision_ref e verificado por IGUALDADE EXATA no orquestrador
+    # (aponta para a decisao real presente); os demais apontam para arquivos estaveis.
+    for field in ("original_invalidated_evidence_ref", "reviewed_parser_ref",
+                  "reviewed_parser_test_ref"):
         if field in ev:
+            ref = ev.get(field)
             _ref_ok(ref.get("path") if isinstance(ref, dict) else None, field, filename, errors)
 
-    # Cross-check com a decisao da repeticao.
+    # Cross-check com a decisao (mesmo commit e mesmos OIDs).
     if isinstance(repeat_decision, dict):
         if repeat_decision.get("decision") != "AUTHORIZE_CORRECTIVE_REPEAT_GATE_3":
             errors.append(f"{filename}: repeticao sem decisao AUTHORIZE_CORRECTIVE_REPEAT_GATE_3")
-        dec_oid = repeat_decision.get("reviewed_parser_git_blob_oid")
-        ev_oid = ev.get("reviewed_parser_git_blob_oid")
-        if ev_oid is not None and dec_oid is not None and ev_oid != dec_oid:
-            errors.append(f"{filename}: Git blob OID do parser diverge da decisao da repeticao")
+        for k in ("reviewed_parser_git_blob_oid", "reviewed_parser_test_git_blob_oid",
+                  "reviewed_parser_commit"):
+            if k in ev and ev.get(k) != repeat_decision.get(k):
+                errors.append(f"{filename}: {k} diverge da decisao da repeticao")
     else:
         errors.append(f"{filename}: decisao da repeticao ausente/invalida")
 
+    pex = ev.get("parser_execution") or {}
+
     if outcome == "COMPLETED_PASS":
+        if pex.get("parser_invoked") is not True or pex.get("parser_completed") is not True or pex.get("parser_output_produced") is not True:
+            errors.append(f"{filename}: PASS exige parser_execution invoked/completed/output_produced=true")
         pe = ev.get("pe_identity") or {}
         if pe.get("produced_by") != "REVIEWED_VERSIONED_PARSER":
             errors.append(f"{filename}: pe_identity.produced_by deve ser REVIEWED_VERSIONED_PARSER")
@@ -2370,50 +2456,75 @@ def validate_gate3_repeat_evidence(ev, schema, repeat_decision, filename, errors
             errors.append(f"{filename}: PASS exige identidade IGUAL ao GATE 2")
         if ir.get("executed") is not False or ir.get("loaded_as_executable") is not False:
             errors.append(f"{filename}: PASS: executado/carregado devem ser false")
-        # Saida EXATA do parser amarrada por SHA-256.
-        declared = ev.get("reviewed_parser_output_sha256")
-        if not isinstance(declared, str) or not HEX64_RE.match(declared):
-            errors.append(f"{filename}: reviewed_parser_output_sha256 deve ter 64 hex")
-        elif isinstance(parser_output, dict):
-            po_errors = []
-            try:
-                po_schema = load_json(os.path.join(SCHEMA_DIR, GATE3_REPEAT_PARSER_OUTPUT_SCHEMA))
-                validate_node(parser_output, po_schema, "parser-output", po_errors)
-            except Fail as exc:
-                po_errors.append(str(exc))
-            errors.extend(po_errors)
-            computed = _sha256_hex(_canonical_parser_output_bytes(parser_output))
-            if computed != declared:
-                errors.append(f"{filename}: reviewed_parser_output_sha256 nao confere com a saida do parser")
-            # Cruza campos da evidencia com a saida real do parser.
-            if parser_output.get("pe_format") != pe.get("pe_format"):
-                errors.append(f"{filename}: pe_format da evidencia diverge da saida do parser")
-            if parser_output.get("size_of_optional_header") != pe.get("size_of_optional_header"):
-                errors.append(f"{filename}: size_of_optional_header diverge da saida do parser")
-            if parser_output.get("size_of_headers") != pe.get("size_of_headers"):
-                errors.append(f"{filename}: size_of_headers diverge da saida do parser")
+        # Proveniencia dos OIDs contra o conteudo real.
+        _recompute_and_compare_oid("reviewed_parser_git_blob_oid", REVIEWED_PARSER_PATH,
+                                   ev.get("reviewed_parser_git_blob_oid"), filename, errors)
+        _recompute_and_compare_oid("reviewed_parser_test_git_blob_oid", REVIEWED_PARSER_TEST_PATH,
+                                   ev.get("reviewed_parser_test_git_blob_oid"), filename, errors)
+        # A saida EXATA do parser e OBRIGATORIA no PASS.
+        if parser_output_raw is None:
+            errors.append(f"{filename}: PASS exige a saida real do parser (parser_output ausente)")
+        else:
+            po = validate_parser_output_raw(parser_output_raw, ev.get("reviewed_parser_output_sha256"),
+                                            filename, errors)
+            # Referencia deve apontar EXATAMENTE para o arquivo presente.
+            ref = (ev.get("reviewed_parser_output_ref") or {}).get("path")
+            if present_output_name is not None and ref is not None and not ref.endswith("/" + present_output_name):
+                errors.append(f"{filename}: reviewed_parser_output_ref nao aponta para a saida presente ({present_output_name})")
+            if parser_output_path is not None and ref != parser_output_path:
+                errors.append(f"{filename}: reviewed_parser_output_ref.path != caminho real da saida")
+            # Cross-check integral de todos os campos duplicados.
+            if isinstance(po, dict):
+                for f in _PASS_CROSSCHECK_FIELDS:
+                    if f in pe and pe.get(f) != po.get(f):
+                        errors.append(f"{filename}: pe_identity.{f} diverge da saida do parser")
+                ct = ev.get("certificate_table")
+                if isinstance(ct, dict):
+                    poct = po.get("certificate_table") or {}
+                    for f in ("present", "structurally_parseable", "entry_count", "first_field_is_file_offset_not_rva"):
+                        if f in ct and ct.get(f) != poct.get(f):
+                            errors.append(f"{filename}: certificate_table.{f} diverge da saida do parser")
     elif outcome == "COMPLETED_FAIL":
         fail = ev.get("failure") or {}
         if not fail.get("reason") or not fail.get("category"):
             errors.append(f"{filename}: COMPLETED_FAIL exige failure.category e failure.reason")
         if fail.get("cleanup_attempted") is not True:
             errors.append(f"{filename}: COMPLETED_FAIL exige cleanup_attempted=true")
+        produced = pex.get("parser_output_produced")
+        if produced is True:
+            if parser_output_raw is None:
+                errors.append(f"{filename}: FAIL com parser_output_produced=true exige a saida real")
+            else:
+                validate_parser_output_raw(parser_output_raw, ev.get("reviewed_parser_output_sha256"), filename, errors)
+                if "reviewed_parser_output_ref" not in ev:
+                    errors.append(f"{filename}: FAIL com saida exige reviewed_parser_output_ref")
+        else:
+            if "reviewed_parser_output_ref" in ev or "reviewed_parser_output_sha256" in ev:
+                errors.append(f"{filename}: FAIL sem saida NAO pode ter reviewed_parser_output_ref/sha256")
+            if parser_output_raw is not None:
+                errors.append(f"{filename}: FAIL sem parser_output_produced nao pode ter saida presente")
+        _recompute_and_compare_oid("reviewed_parser_git_blob_oid", REVIEWED_PARSER_PATH,
+                                   ev.get("reviewed_parser_git_blob_oid"), filename, errors)
+        _recompute_and_compare_oid("reviewed_parser_test_git_blob_oid", REVIEWED_PARSER_TEST_PATH,
+                                   ev.get("reviewed_parser_test_git_blob_oid"), filename, errors)
     elif outcome == "STOPPED":
         stop = ev.get("stop") or {}
         if not stop.get("reason") or not stop.get("category"):
             errors.append(f"{filename}: STOPPED exige stop.category e stop.reason")
         if stop.get("gate_3_repeat_completed") is not False:
             errors.append(f"{filename}: STOPPED exige gate_3_repeat_completed=false")
+        if stop.get("parser_output_produced") is not False:
+            errors.append(f"{filename}: STOPPED exige parser_output_produced=false")
+        if parser_output_raw is not None:
+            errors.append(f"{filename}: STOPPED nao pode ter saida do parser presente")
+    else:
+        errors.append(f"{filename}: outcome fora do conjunto permitido")
     return errors
 
 
 def validate_gate3_repeat(errors):
-    """Orquestra a validacao da repeticao corretiva do GATE 3, impedindo duplicacoes.
-
-    Nesta etapa NAO deve existir registro real; roda apenas se arquivos aparecerem.
-    Reafirma que a evidencia historica permanece invalidada (nunca COMPLETED_PASS) e
-    exige no maximo 1 decisao, 1 evidencia e 1 saida do parser, com referencias casadas.
-    """
+    """Orquestra a maquina de estados da repeticao corretiva (atomica), impedindo
+    artefatos orfaos e duplicados. Nesta etapa NAO deve existir registro real."""
     hist = os.path.join(EVIDENCE_DIR, GATE3_HISTORICAL_INVALIDATED_EVIDENCE)
     if os.path.isfile(hist):
         try:
@@ -2427,55 +2538,72 @@ def validate_gate3_repeat(errors):
         return
     dec_names = sorted(f for f in os.listdir(DECISIONS_DIR)
                        if f.startswith(GATE3_REPEAT_DECISION_PREFIX) and f.endswith(".json"))
-    ev_names = []
-    po_names = []
+    ev_names, po_names = [], []
     if os.path.isdir(EVIDENCE_DIR):
         ev_names = sorted(f for f in os.listdir(EVIDENCE_DIR)
                           if f.startswith(GATE3_REPEAT_EVIDENCE_PREFIX) and f.endswith(".json"))
         po_names = sorted(f for f in os.listdir(EVIDENCE_DIR)
                           if f.startswith(GATE3_REPEAT_PARSER_OUTPUT_PREFIX) and f.endswith(".json"))
-    # Sem duplicacoes.
+
+    # Duplicacao: no maximo um de cada.
     if len(dec_names) > 1:
-        errors.append(f"repeticao: mais de uma decisao real de repeticao ({dec_names})")
+        errors.append(f"repeticao: mais de uma decisao real ({dec_names})")
     if len(ev_names) > 1:
-        errors.append(f"repeticao: mais de uma evidencia real de repeticao ({ev_names})")
+        errors.append(f"repeticao: mais de uma evidencia real ({ev_names})")
     if len(po_names) > 1:
         errors.append(f"repeticao: mais de uma saida real do parser ({po_names})")
-    if not dec_names:
-        return  # nenhuma repeticao autorizada ainda (estado esperado nesta etapa)
 
+    # ---- Maquina de estados (atomica) ----
+    # Sem decisao: NAO pode haver evidencia nem saida (artefato orfao).
+    if not dec_names:
+        if ev_names:
+            errors.append(f"repeticao: evidencia sem decisao (orfa): {ev_names}")
+        if po_names:
+            errors.append(f"repeticao: saida do parser sem decisao (orfa): {po_names}")
+        return
+
+    # Decisao presente: validar.
     repeat_decision = {}
     try:
         dschema = load_json(os.path.join(SCHEMA_DIR, GATE3_REPEAT_DECISION_SCHEMA))
     except Fail as exc:
-        errors.append(str(exc))
-        dschema = None
-    name = dec_names[0]
+        errors.append(str(exc)); dschema = None
+    dname = dec_names[0]
     derr = []
     try:
-        repeat_decision = load_json(os.path.join(DECISIONS_DIR, name))
+        repeat_decision = load_json(os.path.join(DECISIONS_DIR, dname))
         if dschema is not None:
-            validate_gate3_repeat_decision(repeat_decision, dschema, name, derr)
+            validate_gate3_repeat_decision(repeat_decision, dschema, dname, derr)
     except Fail as exc:
         derr.append(str(exc))
     if derr:
         errors.extend(derr)
-        print(f"[FALHA] decisions/{name}: {len(derr)} problema(s)")
+        print(f"[FALHA] decisions/{dname}: {len(derr)} problema(s)")
         for e in derr:
             print(f"    - {e}")
     else:
-        print(f"[OK]    decisions/{name}")
+        print(f"[OK]    decisions/{dname}")
 
+    # Decisao sem evidencia: saida orfa e proibida (autorizado, ainda nao executado).
     if not ev_names:
+        if po_names:
+            errors.append(f"repeticao: saida do parser sem evidencia (orfa): {po_names}")
         return
+
+    # Evidencia presente: dispatch por outcome; ligar bytes exatos da saida.
     ev_name = ev_names[0]
-    everr = []
-    parser_output = None
-    if po_names:
+    po_name = po_names[0] if po_names else None
+    parser_output_raw = None
+    parser_output_path = None
+    if po_name is not None:
+        parser_output_path = "client/warp-audit/evidence/" + po_name
         try:
-            parser_output = load_json(os.path.join(EVIDENCE_DIR, po_names[0]))
-        except Fail:
-            parser_output = None
+            with open(os.path.join(EVIDENCE_DIR, po_name), "rb") as fh:
+                parser_output_raw = fh.read()
+        except OSError as exc:
+            errors.append(f"repeticao: falha ao ler a saida do parser: {exc}")
+
+    everr = []
     try:
         ev = load_json(os.path.join(EVIDENCE_DIR, ev_name))
         eschema_name = _repeat_evidence_schema_for(ev.get("outcome"))
@@ -2483,12 +2611,14 @@ def validate_gate3_repeat(errors):
             everr.append(f"{ev_name}: outcome sem schema correspondente")
         else:
             eschema = load_json(os.path.join(SCHEMA_DIR, eschema_name))
-            # Evidencia deve referenciar exatamente a decisao real presente.
-            crd = ev.get("corrective_repeat_decision_ref") or {}
-            if isinstance(crd, dict) and crd.get("path") and not crd["path"].endswith(name):
-                everr.append(f"{ev_name}: corrective_repeat_decision_ref nao aponta para a decisao presente ({name})")
+            crd = (ev.get("corrective_repeat_decision_ref") or {}).get("path")
+            expected_dec = "client/warp-audit/decisions/" + dname
+            if crd != expected_dec:
+                everr.append(f"{ev_name}: corrective_repeat_decision_ref deve ser exatamente {expected_dec}")
             validate_gate3_repeat_evidence(ev, eschema, repeat_decision, ev_name, everr,
-                                           parser_output=parser_output)
+                                           parser_output_raw=parser_output_raw,
+                                           parser_output_path=parser_output_path,
+                                           present_output_name=po_name)
     except Fail as exc:
         everr.append(str(exc))
     if everr:
