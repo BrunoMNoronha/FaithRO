@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:warp-audit/binary-audit-gate-03-corrective-repeat-stopped-evidence",
+  "title": "WARP GATE 3 corrective-repeat evidence — STOPPED (real, future)",
+  "description": "CONVENCAO (2P-E-C3-R3) para a FUTURA evidencia da repeticao corretiva do GATE 3 no caminho STOPPED (antes ou durante a operacao: autorizacao/precondicao invalida, ferramenta indisponivel, destino nao isolado, tentativa de rede inesperada, condicao de interrupcao, ou STOP_PATH pelo operador). NAO exige gate_3_repeat_completed=true, execution_state=COMPLETED, pe_identity nem certificate_table completos; exige um motivo de interrupcao. Nenhum registro real nesta etapa. gate_4_authorized const:false; sem execucao.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "project", "stage", "record_type", "status", "outcome", "gate",
+    "original_invalidated_evidence_ref", "corrective_repeat_decision_ref",
+    "reviewed_parser_ref", "reviewed_parser_test_ref", "integration_ref", "stop",
+    "reviewed_parser", "security_assertions", "findings", "limitations", "rollback", "notes"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "project": { "type": "string", "const": "WARP" },
+    "stage": { "type": "string", "const": "2P-E-C3-REPEAT" },
+    "record_type": { "type": "string", "const": "binary-audit-gate-03-corrective-repeat-stopped-evidence-real" },
+    "status": { "type": "string", "const": "STOPPED" },
+    "outcome": { "type": "string", "const": "STOPPED" },
+    "gate": {
+      "type": "object", "additionalProperties": false, "required": ["id", "name"],
+      "properties": { "id": { "type": "integer", "const": 3 }, "name": { "type": "string", "const": "IDENTITY_AND_SIGNATURE" } }
+    },
+    "original_invalidated_evidence_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "const": "client/warp-audit/evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json" } } },
+    "corrective_repeat_decision_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "minLength": 1 } } },
+    "reviewed_parser_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "const": "scripts/inspect-warp-pe-identity.py" } } },
+    "reviewed_parser_test_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "const": "scripts/test-warp-pe-identity.py" } } },
+    "integration_ref": {
+      "type": "object", "additionalProperties": false, "required": ["pr", "squash_commit", "base_branch"],
+      "properties": { "pr": { "type": "integer", "const": 50 }, "squash_commit": { "type": "string", "const": "6ab37b2a7ae65fd6b4fdf184759b345cf9ce4bd6" }, "base_branch": { "type": "string", "const": "dev" } }
+    },
+    "stop": {
+      "type": "object", "additionalProperties": false,
+      "required": ["category", "reason", "stage_when_stopped", "gate_3_repeat_completed"],
+      "properties": {
+        "category": { "type": "string", "enum": ["INVALID_AUTHORIZATION", "INVALID_PRECONDITION", "TOOL_UNAVAILABLE", "DESTINATION_NOT_ISOLATED", "UNEXPECTED_NETWORK_ATTEMPT", "STOP_CONDITION", "OPERATOR_STOP_PATH"] },
+        "reason": { "type": "string", "minLength": 1 },
+        "stage_when_stopped": { "type": "string", "enum": ["BEFORE_MATERIALIZATION", "DURING_MATERIALIZATION", "BEFORE_INSPECTION", "DURING_INSPECTION"] },
+        "gate_3_repeat_completed": { "type": "boolean", "const": false }
+      }
+    },
+    "reviewed_parser": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "run_on_warp_exe"],
+      "properties": {
+        "path": { "type": "string", "const": "scripts/inspect-warp-pe-identity.py" },
+        "run_on_warp_exe": { "type": "boolean" }
+      }
+    },
+    "security_assertions": {
+      "type": "object", "additionalProperties": false,
+      "required": ["no_execution_performed", "no_gate4_inspection_performed", "no_ragexe_access", "no_vps_access", "binary_versioned", "gate_4_authorized"],
+      "properties": {
+        "no_execution_performed": { "type": "boolean", "const": true },
+        "no_gate4_inspection_performed": { "type": "boolean", "const": true },
+        "no_ragexe_access": { "type": "boolean", "const": true },
+        "no_vps_access": { "type": "boolean", "const": true },
+        "binary_versioned": { "type": "boolean", "const": false },
+        "gate_4_authorized": { "type": "boolean", "const": false }
+      }
+    },
+    "findings": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "limitations": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "rollback": { "type": "string", "minLength": 1 },
+    "notes": { "type": "string", "minLength": 1 }
+  }
+}

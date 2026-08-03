@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:warp-audit/binary-audit-gate-03-corrective-repeat-pass-evidence",
+  "title": "WARP GATE 3 corrective-repeat evidence — COMPLETED_PASS (real, future)",
+  "description": "CONVENCAO (2P-E-C3-R3) para a FUTURA evidencia da repeticao corretiva do GATE 3 no caminho COMPLETED_PASS. Exige identidade IGUAL ao GATE 2, cabecalhos estruturalmente parseaveis (Section Table + SizeOfHeaders), Certificate Table determinada, limpeza confirmada, saida exata do parser amarrada por SHA-256 e proveniencia do parser/testes. Nenhum registro real nesta etapa. gate_4_authorized const:false.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "project", "stage", "record_type", "status", "outcome", "gate",
+    "original_invalidated_evidence_ref", "corrective_repeat_decision_ref",
+    "reviewed_parser_ref", "reviewed_parser_git_blob_oid", "reviewed_parser_test_ref",
+    "reviewed_parser_output_ref", "reviewed_parser_output_sha256", "integration_ref",
+    "execution", "upstream_expected", "identity_reconfirmation", "pe_identity",
+    "certificate_table", "signature_semantics", "reviewed_parser", "security_assertions",
+    "preserved_gate_2_facts", "findings", "limitations", "rollback", "notes"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "project": { "type": "string", "const": "WARP" },
+    "stage": { "type": "string", "const": "2P-E-C3-REPEAT" },
+    "record_type": { "type": "string", "const": "binary-audit-gate-03-corrective-repeat-pass-evidence-real" },
+    "status": { "type": "string", "const": "COMPLETED_PASS" },
+    "outcome": { "type": "string", "const": "COMPLETED_PASS" },
+    "gate": {
+      "type": "object", "additionalProperties": false, "required": ["id", "name"],
+      "properties": { "id": { "type": "integer", "const": 3 }, "name": { "type": "string", "const": "IDENTITY_AND_SIGNATURE" } }
+    },
+    "original_invalidated_evidence_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "const": "client/warp-audit/evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json" } } },
+    "corrective_repeat_decision_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "minLength": 1 } } },
+    "reviewed_parser_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "const": "scripts/inspect-warp-pe-identity.py" } } },
+    "reviewed_parser_git_blob_oid": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "reviewed_parser_test_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "const": "scripts/test-warp-pe-identity.py" } } },
+    "reviewed_parser_output_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "minLength": 1 } } },
+    "reviewed_parser_output_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "integration_ref": {
+      "type": "object", "additionalProperties": false, "required": ["pr", "squash_commit", "base_branch"],
+      "properties": { "pr": { "type": "integer", "const": 50 }, "squash_commit": { "type": "string", "const": "6ab37b2a7ae65fd6b4fdf184759b345cf9ce4bd6" }, "base_branch": { "type": "string", "const": "dev" } }
+    },
+    "execution": {
+      "type": "object", "additionalProperties": false,
+      "required": ["gate_3_repeat_started", "gate_3_repeat_completed", "execution_state", "started_at", "finished_at", "cleanup_at", "operator", "method", "network_scope", "timestamps_precision"],
+      "properties": {
+        "gate_3_repeat_started": { "type": "boolean", "const": true },
+        "gate_3_repeat_completed": { "type": "boolean", "const": true },
+        "execution_state": { "type": "string", "const": "COMPLETED" },
+        "started_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}" },
+        "finished_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}" },
+        "cleanup_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}" },
+        "operator": { "type": "string", "minLength": 2 },
+        "method": { "type": "string", "const": "GITHUB_OFFICIAL_GIT_DATA_API_BLOB_BY_OID" },
+        "network_scope": { "type": "string", "const": "GITHUB_OFFICIAL_ONLY" },
+        "timestamps_precision": { "type": "string", "minLength": 1 }
+      }
+    },
+    "upstream_expected": {
+      "type": "object", "additionalProperties": false,
+      "required": ["repository_full_name", "expected_branch", "commit_oid", "tree_oid", "artifact_path", "artifact_blob_oid", "artifact_blob_size"],
+      "properties": {
+        "repository_full_name": { "type": "string", "const": "Neo-Mind/WARP" },
+        "expected_branch": { "type": "string", "const": "rock_win32" },
+        "commit_oid": { "type": "string", "const": "9b1173e9e4e135c68e150704f01186ab5e763acd" },
+        "tree_oid": { "type": "string", "const": "1aebae06d5c71a145afc35cc72fcf5c210a08758" },
+        "artifact_path": { "type": "string", "const": "win32/WARP.exe" },
+        "artifact_blob_oid": { "type": "string", "const": "c853da42d18dfe090b4e941b435d989311faf3dc" },
+        "artifact_blob_size": { "type": "integer", "const": 1137152 }
+      }
+    },
+    "identity_reconfirmation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["materialized_file_count", "temporary_dir_outside_repo", "size_bytes_observed", "size_match", "git_blob_oid_computed", "git_blob_oid_match", "sha256_local", "sha256_match", "identity_matches_gate_2", "file_read_for_static_inspection", "launched", "executed", "loaded_as_executable"],
+      "properties": {
+        "materialized_file_count": { "type": "integer", "const": 1 },
+        "temporary_dir_outside_repo": { "type": "boolean", "const": true },
+        "size_bytes_observed": { "type": "integer", "const": 1137152 },
+        "size_match": { "type": "boolean", "const": true },
+        "git_blob_oid_computed": { "type": "string", "const": "c853da42d18dfe090b4e941b435d989311faf3dc" },
+        "git_blob_oid_match": { "type": "boolean", "const": true },
+        "sha256_local": { "type": "string", "const": "345f3464ee72a60afc97bde0773410f47348a00d8629182fe52741c5f1a42874" },
+        "sha256_match": { "type": "boolean", "const": true },
+        "identity_matches_gate_2": { "type": "boolean", "const": true },
+        "file_read_for_static_inspection": { "type": "boolean", "const": true },
+        "launched": { "type": "boolean", "const": false },
+        "executed": { "type": "boolean", "const": false },
+        "loaded_as_executable": { "type": "boolean", "const": false }
+      }
+    },
+    "pe_identity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["produced_by", "pe_format", "size_of_optional_header", "number_of_sections", "size_of_headers", "executable_image_flag_present", "pe_headers_structurally_parseable", "full_pe_validation_performed"],
+      "properties": {
+        "produced_by": { "type": "string", "const": "REVIEWED_VERSIONED_PARSER" },
+        "pe_format": { "type": "string", "enum": ["PE32", "PE32+"] },
+        "size_of_optional_header": { "type": "integer", "minimum": 0 },
+        "number_of_sections": { "type": "integer", "minimum": 1 },
+        "size_of_headers": { "type": "integer", "minimum": 0 },
+        "executable_image_flag_present": { "type": "boolean", "const": true },
+        "pe_headers_structurally_parseable": { "type": "boolean", "const": true },
+        "full_pe_validation_performed": { "type": "boolean", "const": false }
+      }
+    },
+    "certificate_table": {
+      "type": "object", "additionalProperties": false,
+      "required": ["produced_by", "present", "structurally_parseable", "entry_count", "first_field_is_file_offset_not_rva"],
+      "properties": {
+        "produced_by": { "type": "string", "const": "REVIEWED_VERSIONED_PARSER" },
+        "present": { "type": "boolean" },
+        "structurally_parseable": { "type": "boolean", "const": true },
+        "entry_count": { "type": "integer", "minimum": 0 },
+        "first_field_is_file_offset_not_rva": { "type": "boolean", "const": true }
+      }
+    },
+    "signature_semantics": {
+      "type": "object", "additionalProperties": false,
+      "required": ["signature_present_means_present_only", "presence_not_equal_valid", "valid_not_equal_trusted", "trusted_not_equal_current_certificate", "timestamp_not_trusted", "not_equal_file_safe", "absence_not_equal_malware"],
+      "properties": {
+        "signature_present_means_present_only": { "type": "boolean", "const": true },
+        "presence_not_equal_valid": { "type": "boolean", "const": true },
+        "valid_not_equal_trusted": { "type": "boolean", "const": true },
+        "trusted_not_equal_current_certificate": { "type": "boolean", "const": true },
+        "timestamp_not_trusted": { "type": "boolean", "const": true },
+        "not_equal_file_safe": { "type": "boolean", "const": true },
+        "absence_not_equal_malware": { "type": "boolean", "const": true }
+      }
+    },
+    "reviewed_parser": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "test_path", "git_blob_oid", "stdlib_only", "network_access", "executes_or_loads_pe", "run_on_warp_exe"],
+      "properties": {
+        "path": { "type": "string", "const": "scripts/inspect-warp-pe-identity.py" },
+        "test_path": { "type": "string", "const": "scripts/test-warp-pe-identity.py" },
+        "git_blob_oid": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "stdlib_only": { "type": "boolean", "const": true },
+        "network_access": { "type": "boolean", "const": false },
+        "executes_or_loads_pe": { "type": "boolean", "const": false },
+        "run_on_warp_exe": { "type": "boolean", "const": true }
+      }
+    },
+    "security_assertions": {
+      "type": "object", "additionalProperties": false,
+      "required": ["no_execution_performed", "no_dynamic_analysis_performed", "no_sandbox_created", "no_wine_or_vm_load", "no_network_after_fetch", "no_external_service_upload", "no_gate4_inspection_performed", "no_ragexe_access", "no_vps_access", "temporary_file_removed", "temporary_dir_removed", "binary_versioned", "gate_4_authorized"],
+      "properties": {
+        "no_execution_performed": { "type": "boolean", "const": true },
+        "no_dynamic_analysis_performed": { "type": "boolean", "const": true },
+        "no_sandbox_created": { "type": "boolean", "const": true },
+        "no_wine_or_vm_load": { "type": "boolean", "const": true },
+        "no_network_after_fetch": { "type": "boolean", "const": true },
+        "no_external_service_upload": { "type": "boolean", "const": true },
+        "no_gate4_inspection_performed": { "type": "boolean", "const": true },
+        "no_ragexe_access": { "type": "boolean", "const": true },
+        "no_vps_access": { "type": "boolean", "const": true },
+        "temporary_file_removed": { "type": "boolean", "const": true },
+        "temporary_dir_removed": { "type": "boolean", "const": true },
+        "binary_versioned": { "type": "boolean", "const": false },
+        "gate_4_authorized": { "type": "boolean", "const": false }
+      }
+    },
+    "preserved_gate_2_facts": {
+      "type": "object", "additionalProperties": false,
+      "required": ["artifact_blob_oid", "artifact_blob_size", "artifact_sha256"],
+      "properties": {
+        "artifact_blob_oid": { "type": "string", "const": "c853da42d18dfe090b4e941b435d989311faf3dc" },
+        "artifact_blob_size": { "type": "integer", "const": 1137152 },
+        "artifact_sha256": { "type": "string", "const": "345f3464ee72a60afc97bde0773410f47348a00d8629182fe52741c5f1a42874" }
+      }
+    },
+    "findings": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "limitations": { "type": "array", "minItems": 3, "items": { "type": "string", "minLength": 1 } },
+    "rollback": { "type": "string", "minLength": 1 },
+    "notes": { "type": "string", "minLength": 1 }
+  }
+}

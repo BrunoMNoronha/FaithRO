@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:warp-audit/binary-audit-gate-03-corrective-repeat-parser-output",
+  "title": "WARP GATE 3 corrective-repeat reviewed-parser output (real, future)",
+  "description": "CONVENCAO (2P-E-C3-R3) para a saida textual EXATA e SANITIZADA do inspetor PE revisado (scripts/inspect-warp-pe-identity.py) na futura repeticao. Somente metadados estruturais: SEM conteudo binario, SEM bCertificate, SEM caminho pessoal, segredo ou endpoint. Nenhum arquivo real nesta etapa. O SHA-256 da forma canonica e amarrado na evidencia principal (reviewed_parser_output_sha256).",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "file_size", "mz_present", "pe_signature_present", "pe_format",
+    "size_of_optional_header", "number_of_sections", "size_of_headers",
+    "executable_image_flag_present", "section_table", "certificate_table",
+    "pe_headers_structurally_parseable", "executed", "loaded_as_executable"
+  ],
+  "properties": {
+    "file_size": { "type": "integer", "minimum": 0 },
+    "mz_present": { "type": "boolean", "const": true },
+    "pe_signature_present": { "type": "boolean", "const": true },
+    "pe_format": { "type": "string", "enum": ["PE32", "PE32+"] },
+    "size_of_optional_header": { "type": "integer", "minimum": 0 },
+    "number_of_sections": { "type": "integer", "minimum": 1 },
+    "size_of_headers": { "type": "integer", "minimum": 0 },
+    "executable_image_flag_present": { "type": "boolean", "const": true },
+    "section_table": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["offset", "entry_size", "declared_entry_count", "end_offset", "within_file", "contents_inspected"],
+      "properties": {
+        "offset": { "type": "integer", "minimum": 0 },
+        "entry_size": { "type": "integer", "const": 40 },
+        "declared_entry_count": { "type": "integer", "minimum": 1 },
+        "end_offset": { "type": "integer", "minimum": 0 },
+        "within_file": { "type": "boolean", "const": true },
+        "contents_inspected": { "type": "boolean", "const": false }
+      }
+    },
+    "certificate_table": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["present", "structurally_parseable", "entry_count", "first_field_is_file_offset_not_rva"],
+      "properties": {
+        "present": { "type": "boolean" },
+        "structurally_parseable": { "type": "boolean" },
+        "entry_count": { "type": "integer", "minimum": 0 },
+        "first_field_is_file_offset_not_rva": { "type": "boolean", "const": true }
+      }
+    },
+    "pe_headers_structurally_parseable": { "type": "boolean", "const": true },
+    "executed": { "type": "boolean", "const": false },
+    "loaded_as_executable": { "type": "boolean", "const": false }
+  }
+}
