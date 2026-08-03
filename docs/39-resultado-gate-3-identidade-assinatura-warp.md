@@ -1,49 +1,72 @@
 # Resultado do GATE 3 — identidade e assinatura estática offline do WARP
 
-> **Estado atual:** `GATE 3 CONCLUÍDO — IDENTIDADE CONFIRMADA E ASSINATURA
-> DETERMINADA (AUSENTE)` (ETAPA 2P-E-C3).
-> **Data da execução:** 2026-08-03.
-> **Escopo:** rematerialização temporária de **exatamente um** blob Git fixado, em
-> área isolada **fora** do repositório; reconfirmação de identidade (tamanho, Git
-> object ID e SHA-256 **iguais** aos do GATE 2); inspeção estática offline limitada
-> à **identidade do PE** e à **assinatura Authenticode**; e **remoção** do arquivo.
-> **Nenhuma** execução, carga, análise dinâmica, sandbox, inspeção ampla (seções,
-> imports, exports, strings, entropia — GATE 4), acesso ao cliente/`Ragexe`/VPS,
-> patch ou distribuição. **GATE 4 não autorizado.**
+> **Estado atual:** `GATE 3 — EVIDÊNCIA INVALIDADA, PENDENTE DE REPETIÇÃO
+> CONTROLADA` (revisão corretiva **2P-E-C3-R1**).
+> **Data da execução original:** 2026-08-03 · **Data da revisão corretiva:** 2026-08-03.
+> **Escopo desta correção:** revisar os artefatos já versionados, corrigir schemas,
+> validador, testes, documentação e semântica dos registros, e **versionar um parser
+> PE offline revisável e testável** — **sem** repetir a materialização do `WARP.exe`.
+> **Nenhuma nova materialização** ocorreu; **WARP não executado**; **`Ragexe`
+> intocado**; **GATE 4 não autorizado**.
 > Continua [37](37-resultado-gate-2-materializacao-integridade-warp.md); observa
 > [33](33-plano-auditoria-binaria-offline-warp.md),
 > [35](35-resultado-gate-0-proveniencia-warp.md) e
 > [16](16-politica-distribuicao-cliente.md).
 
+## 0. Revisão corretiva independente (2P-E-C3-R1)
+
+Uma revisão independente do PR #52 encontrou problemas de **auditabilidade** na
+evidência inicial e o resultado `COMPLETED_PASS` foi **suspenso**:
+
+- **D1 — semântica ambígua de abertura.** A evidência registrava `opened=false`,
+  embora o conteúdo **tenha sido lido** para SHA-256, Git object ID, parse do PE,
+  busca de versão e inspeção da Certificate Table. Substituído por campos
+  inequívocos: `file_read_for_static_inspection=true`, `launched=false`,
+  `executed=false`, `loaded_as_executable=false`.
+- **D2 — `size_of_optional_header=267`.** O valor `267` equivale a `0x010B`, que é o
+  **magic de PE32**. Isso é **forte indício** de leitura do **campo no offset
+  incorreto** (o parser de scratchpad lia `coff+20`, o início do Optional Header /
+  Magic, em vez de `coff+16`). **Não** é conclusão definitiva; a medição foi marcada
+  como `MEASUREMENT_REQUIRES_RECONFIRMATION` e **não** foi alterada por suposição
+  (não vira `224`/`0xE0`).
+- **D3 — parser não versionado.** O parser que produziu a evidência rodou em
+  scratchpad e não estava disponível para revisão. Foi **versionado** um inspetor PE
+  offline revisável, com _bounds checking_
+  ([`scripts/inspect-warp-pe-identity.py`](../scripts/inspect-warp-pe-identity.py)),
+  coberto por testes de **fixtures sintéticas**
+  ([`scripts/test-warp-pe-identity.py`](../scripts/test-warp-pe-identity.py)).
+- **D4 — OpenSSL não invocado.** A evidência registrava OpenSSL com `exit_code=-1`
+  mesmo **sem** ter sido invocado. Corrigido: `available`/`invoked`/`completed`
+  distintos e `exit_code=null` quando `invoked=false`.
+
+Como o `WARP.exe` foi removido e **uma nova materialização não está autorizada**
+nesta etapa, os campos produzidos pelo parser não versionado (identidade PE e estado
+da assinatura) foram marcados como **pendentes de reconfirmação**; **não** foram
+remedidos nem estimados.
+
 ## 1. Objetivo
 
-Executar exclusivamente o `GATE 3 — IDENTITY_AND_SIGNATURE` do plano da auditoria
-binária offline: **reconfirmar a identidade** do artefato e **determinar o estado da
-assinatura Authenticode** por inspeção estática, **sem executar** nem carregar o
-conteúdo e **sem** inventário amplo (reservado ao GATE 4).
+Executar exclusivamente o `GATE 3 — IDENTITY_AND_SIGNATURE`: reconfirmar a identidade
+do artefato e determinar o estado da assinatura Authenticode por inspeção estática,
+sem executar nem carregar o conteúdo. Esta revisão **corrige a auditabilidade** do
+registro sem repetir a materialização.
 
 ## 2. Decisão e autorização de origem
 
 Decisão humana `AUTHORIZE_GATE_3`
 ([`binary-audit-gate-03-decision-record-2026-08-03.json`](../client/warp-audit/decisions/binary-audit-gate-03-decision-record-2026-08-03.json)):
-`gate_3_authorized=true`, `temporary_materialization_authorized=true`,
-`local_hashing_authorized=true`, `static_identity_inspection_authorized=true`,
-`authenticode_inspection_authorized=true`; `gate_4_authorized=false` e demais
-autorizações operacionais `false`. Sucede o **PR #50** (squash
-`6ab37b2a7ae65fd6b4fdf184759b345cf9ce4bd6`, base `dev`), que integrou a
-decisão/evidência do GATE 2 (`COMPLETED_PASS`).
+`gate_3_authorized=true`; `gate_4_authorized=false`. Sucede o **PR #50** (squash
+`6ab37b2a7ae65fd6b4fdf184759b345cf9ce4bd6`, base `dev`). Esta correção (2P-E-C3-R1)
+**não** cria um novo registro humano de autorização para repetição.
 
 ## 3. Escopo exato
 
-Rematerializar e inspecionar estaticamente **um** objeto: o blob Git fixado no
-caminho `win32/WARP.exe`. A inspeção limita-se a: assinaturas `MZ`/`PE`, formato PE,
-arquitetura, PE32/PE32+, subsystem, timestamp de cabeçalho (metadado **não
-confiável**), checksum declarado, informação de versão/`OriginalFilename`; e à
-existência/estado da Certificate Table e da assinatura Authenticode. **Fora do
-escopo** (GATE 4): seções, imports, exports, strings, entropia, TLS callbacks,
-relocations, recursos não relacionados à identidade, empacotamento e comportamento.
+Reconfirmar a identidade (tamanho, Git OID, SHA-256) — **fatos preservados do GATE 2**
+— e determinar o estado da assinatura. A inspeção limita-se à identidade do PE e à
+assinatura Authenticode; seções, imports, exports, strings, entropia e comportamento
+pertencem ao **GATE 4** e não estão autorizados.
 
-## 4. Identificadores do artefato
+## 4. Identificadores do artefato (preservados do GATE 2)
 
 | Item | Valor |
 | --- | --- |
@@ -55,209 +78,173 @@ relocations, recursos não relacionados à identidade, empacotamento e comportam
 | Tamanho | `1137152` bytes |
 | SHA-256 (conteúdo) | `345f3464ee72a60afc97bde0773410f47348a00d8629182fe52741c5f1a42874` |
 
-## 5. Método de materialização
+Estes valores foram confirmados por `git hash-object`/`hashlib` (não pelo parser PE) e
+**batem** com o GATE 2. Permanecem **válidos**.
 
-GitHub oficial, **Git Data API — objeto blob por OID**
-(`network_scope=GITHUB_OFFICIAL_ONLY`). A obtenção ficou **presa ao objeto Git
-imutável** (blob OID), não ao topo da branch. **Sem** clone, fetch, pull, archive,
-release asset, mirror ou fonte de terceiros; **sem** materializar qualquer outro
-arquivo; **sem** acesso de rede **após** a obtenção.
+## 5. Método de materialização (execução original)
+
+GitHub oficial, **Git Data API — objeto blob por OID** (`GITHUB_OFFICIAL_ONLY`),
+preso ao objeto imutável; sem clone/fetch/archive/mirror/terceiros; sem rede após a
+obtenção. **Esta correção não executou nova materialização.**
 
 ## 6. Isolamento
 
-Arquivo materializado em **área temporária isolada fora do repositório FaithRO**
-(caminho lógico redigido: `<scratchpad>/warp-gate3/WARP.exe`), validado
-programaticamente como fora da worktree, com destino inicialmente vazio e
-`materialized_file_count=1`.
+Arquivo materializado (na execução original) em **área temporária fora do
+repositório** (`<scratchpad>/warp-gate3/WARP.exe`), `materialized_file_count=1`, e
+**removido**.
 
 ## 7. Ferramentas e versões
 
-| Ferramenta | Versão | Uso (comando sanitizado) | Saída | Limitação |
-| --- | --- | --- | --- | --- |
-| `gh` | 2.96.0 | Git Data API: objeto blob por OID → `.content` | blob obtido e decodificado (1137152 B) | só o objeto fixado; não valida segurança |
-| `git` | 2.55.0 | `git hash-object` do arquivo | Git OID `c853da42…` (igual) | é identidade do objeto Git, não SHA-256 |
-| `python` | 3.14.6 | stdlib: parse de cabeçalho PE + SHA-256 + `VS_VERSION_INFO`/`OriginalFilename` | PE32 x86; sem Certificate Table | só identidade do PE; não inventaria seções (GATE 4) |
-| `openssl` | 3.5.7 | `pkcs7 -inform DER -print_certs -noout` (**não executado**) | não aplicável (sem assinatura) | sem assinatura embutida, não há PKCS#7 a parsear |
+| Ferramenta | Versão | Disponível | Invocada | Exit | Observação |
+| --- | --- | :-: | :-: | :-: | --- |
+| `gh` | 2.96.0 | sim | sim | 0 | obtenção do blob (execução original) |
+| `git` | 2.55.0 | sim | sim | 0 | Git OID = `c853da42…` (fato do GATE 2) |
+| parser de scratchpad | 3.14.6 (**não versionado**) | sim | sim | 0 | produziu `soh=267` (== magic); **substituído** |
+| `openssl` | 3.5.7 | sim | **não** | `null` | não havia assinatura a parsear (D4 corrigido) |
+| `inspect-warp-pe-identity.py` | stdlib | sim | **não** sobre o WARP.exe | — | inspetor revisável versionado (D3) |
 
-Nenhuma ferramenta **executou** ou **carregou** o binário.
+## 8. Identidade PE observada (pendente de reconfirmação)
 
-## 8. Identidade PE observada
+Valores **observados pelo parser não versionado**, registrados como observações
+históricas — **não** como medições confirmadas (`reconfirmation_required=true`,
+`pe_valid_status=PENDING_RECONFIRMATION`):
 
-- Assinaturas **`MZ`** e **`PE`** presentes; formato **PE32** (magic `0x010b`).
-- Arquitetura/machine: **`0x014c`** (`IMAGE_FILE_MACHINE_I386`, x86).
-- Subsystem: **`WINDOWS_GUI`** (`2`); número de seções: **5**;
-  `NumberOfRvaAndSizes`: `16`.
-- **Timestamp de cabeçalho:** `0` (`1970-01-01T00:00:00Z`) — **metadado NÃO
-  confiável**, provavelmente zerado na geração; **não** tratado como data confiável.
-- **Checksum declarado:** `0x00000000` (metadado; não recalculado nem usado como
-  juízo).
-- **Informações de versão:** `VS_VERSION_INFO` presente; **`OriginalFilename` =
-  `WARP.exe`**, consistente com a identidade esperada.
-- **PE válido/parseável:** sim.
+- `MZ`/`PE` observados presentes; magic observado `0x010b` (PE32).
+- machine observado `0x014c` (x86); subsystem observado `WINDOWS_GUI`.
+- **`size_of_optional_header` observado `267` → `MEASUREMENT_REQUIRES_RECONFIRMATION`**
+  (coincide com o magic `0x010B`; forte indício de offset incorreto — ver D2).
+- timestamp de cabeçalho observado `0` (metadado **não confiável**); checksum
+  observado `0x00000000`.
+- **Informações de versão / `OriginalFilename`:** `NOT_DETERMINED_BY_REVIEWED_PARSER`
+  (o método original foi busca textual UTF-16 não reproduzível; **não** preservado
+  como fato).
 
-## 9. Assinatura Authenticode observada
+## 9. Assinatura Authenticode observada (pendente de reconfirmação)
 
-- **Certificate Table (data directory 4):** **AUSENTE**.
-- **Assinatura Authenticode:** **AUSENTE** (não há PKCS#7 embutido).
-- Estruturalmente parseável: **não aplicável** (nada a parsear).
-- Algoritmo de digest / subject / issuer / serial: **não aplicável** (ausência).
-- Timestamp/countersignature: **ausente**.
-- Verificação criptográfica: `NOT_APPLICABLE_NO_SIGNATURE`.
-- Estado da cadeia de confiança: `NOT_APPLICABLE_NO_SIGNATURE`.
-
-> A ausência de assinatura é um **achado material** registrado — **não** é, por si só,
-> veredito de arquivo malicioso.
+- Certificate Table observada como **ausente** pelo parser não versionado
+  (`determination_status=PENDING_RECONFIRMATION`).
+- A ausência observada **não** é veredito de malware; uma eventual presença **não**
+  seria prova de segurança. A determinação será reconfirmada pelo inspetor revisável
+  numa repetição controlada, se autorizada.
 
 ## 10. Separação entre presença, validade, confiança e segurança
 
-Distinga expressamente:
-
-- **assinatura presente** ≠ **assinatura criptograficamente válida**;
-- **assinatura válida** ≠ **cadeia confiável**;
-- **cadeia confiável** ≠ **certificado vigente**;
-- **timestamp presente** ≠ **timestamp confiável**;
-- qualquer um dos acima ≠ **arquivo seguro**;
-- **assinatura ausente** ≠ **arquivo malicioso**.
-
-Neste artefato a assinatura está **ausente**: não há o que validar; a ausência
-**não** classifica o arquivo como inseguro nem como malicioso. Da mesma forma, uma
-assinatura presente **não** significaria arquivo seguro.
+**assinatura presente** ≠ **válida** ≠ **cadeia confiável** ≠ **certificado vigente**;
+**timestamp presente** ≠ **confiável**; nada disso ≠ **arquivo seguro**; **assinatura
+ausente** ≠ **arquivo malicioso**. Estas asserções semânticas permanecem válidas.
 
 ## 11. Limitações
 
-- Sem Certificate Table, **não há assinatura** a validar; a ausência **não** implica
-  malware, insegurança nem confiança.
-- **Nenhuma** verificação criptográfica de cadeia, **OCSP**, **CRL** ou **timestamp**
-  foi feita: inspeção **offline**, sem trust store adequado e **sem rede** após a
-  obtenção do blob.
-- A inspeção limitou-se à **identidade do PE** e à **assinatura**; seções, imports,
-  exports, strings, entropia e comportamento **não** foram inspecionados (GATE 4).
-- **Git object ID** e **SHA-256** têm finalidades diferentes; a correspondência de
-  identidade prova **apenas** identidade do conteúdo, **não** segurança, benignidade,
-  licença de redistribuição nem adequação ao cliente.
-- Timestamp e checksum de cabeçalho são **metadados**; `0` não é data/estado confiável.
-- Retrato pontual de **2026-08-03**.
+- Como o `WARP.exe` foi removido e **nova materialização não está autorizada**, os
+  campos de identidade PE/assinatura **não** foram remedidos; permanecem pendentes.
+- Os valores do parser não versionado são **observações históricas**, não medições
+  confirmadas.
+- Nenhuma verificação de cadeia/OCSP/CRL/timestamp; a determinação de assinatura fica
+  pendente.
+- Git OID e SHA-256 têm finalidades diferentes; identidade (preservada do GATE 2)
+  **não** prova segurança.
 
 ## 12. Resultado
 
 ```text
-COMPLETED_PASS
+EVIDENCE_INVALIDATED_PENDING_REPEAT
 ```
 
-Significa **apenas**:
-
-```text
-A identidade do conteúdo é igual à do GATE 2, o PE é válido/parseável e o estado da
-assinatura Authenticode foi determinado com precisão (AUSENTE).
-```
-
-**Não** significa segurança, benignidade, confiança, licença de redistribuição nem
-adequação ao cliente.
+O `COMPLETED_PASS` original foi **suspenso**. Motivo: a evidência de identidade PE e do
+estado da assinatura foi produzida por parser **não versionado** com **indício de
+offset incorreto** (D2) e semântica ambígua (D1); nenhuma nova medição pôde ser feita
+sem repetir a materialização (não autorizada).
 
 ## 13. Limpeza
 
-O arquivo materializado e o diretório temporário foram **removidos**; nenhum
-`WARP.exe` permanece no disco de trabalho; **nenhum** binário na worktree ou no Git.
-`temporary_file_removed=true`, `temporary_dir_removed=true`; confirmação:
-`target_exists=false`, `workdir_exists=false`. Horários reais: início
-`2026-08-03T15:16:14.406Z`, fim `2026-08-03T15:16:15.244Z`, limpeza
-`2026-08-03T15:16:15.290Z` (não representativos).
+Na execução original o arquivo temporário e o diretório foram **removidos**
+(`temporary_file_removed=true`, `temporary_dir_removed=true`). Os fixtures sintéticos
+dos testes do parser são criados e **removidos** durante o teste. Nenhum `WARP.exe` ou
+binário permanece na worktree ou no Git.
 
 ## 14. Confirmações negativas
 
+`no_new_materialization_performed=true`, `no_new_execution_performed=true`,
 `no_execution_performed=true`, `no_dynamic_analysis_performed=true`,
 `no_sandbox_created=true`, `no_wine_or_vm_load=true`, `no_network_after_fetch=true`,
-`no_external_service_upload=true`, `no_additional_file_materialized=true`,
-`no_gate4_inspection_performed=true`, `no_client_access=true`, `no_ragexe_access=true`,
-`no_patch_selected_or_applied=true`, `no_clientinfo_modified=true`,
-`no_vps_access=true`, `binary_versioned=false`, `raw_signature_versioned=false`,
-`gate_4_authorized=false`.
+`no_ragexe_access=true`, `no_client_access=true`, `no_gate4_inspection_performed=true`,
+`binary_versioned=false`, `raw_signature_versioned=false`, `gate_4_authorized=false`.
+O inspetor revisável **não** foi executado sobre o `WARP.exe` (`run_on_warp_exe=false`).
 
 ## 15. Arquivos afetados
 
 | Arquivo | Tipo | Motivo |
 | --- | --- | --- |
-| `client/warp-audit/decisions/binary-audit-gate-03-decision-record-2026-08-03.json` | novo | registro real da decisão `AUTHORIZE_GATE_3` |
-| `client/warp-audit/evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json` | novo | evidência real de identidade e assinatura |
-| `client/warp-audit/schemas/binary-audit-gate-03-decision-record-real.schema.json` | novo | schema da decisão do GATE 3 |
-| `client/warp-audit/schemas/binary-audit-gate-03-identity-signature-evidence.schema.json` | novo | schema da evidência do GATE 3 |
-| `scripts/validate-warp-audit.py` | edição | validação do GATE 3 (decisão + evidência) |
-| `scripts/test-warp-audit-gate-03.py` | novo | testes positivos e negativos do GATE 3 |
-| `docs/39-resultado-gate-3-identidade-assinatura-warp.md` | novo | este registro |
-| `docs/README.md` | edição pontual | índice do documento 39 |
-| `client/warp-audit/README.md` | edição pontual | entradas do GATE 3 |
-| `.github/workflows/validate-warp-audit.yml` | edição pontual | executar o teste do GATE 3 |
+| `scripts/inspect-warp-pe-identity.py` | novo | inspetor PE offline revisável (D3) |
+| `scripts/test-warp-pe-identity.py` | novo | testes de fixtures sintéticas (D2/D3) |
+| `client/warp-audit/evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json` | edição | invalidação + D1/D2/D4 |
+| `client/warp-audit/schemas/binary-audit-gate-03-identity-signature-evidence.schema.json` | edição | novo estado e semântica |
+| `scripts/validate-warp-audit.py` | edição | validação da evidência invalidada |
+| `scripts/test-warp-audit-gate-03.py` | edição | negativos D1-D4 |
+| `docs/39-*.md` | edição | este registro |
+| `docs/README.md`, `client/warp-audit/README.md` | edição pontual | estado atualizado |
+| `.github/workflows/validate-warp-audit.yml` | edição pontual | executar o teste do parser |
 
-Nenhum binário, GRF, DLL ou asset foi adicionado. Nada em `conf/import`, `db/import`,
-`npc/custom`, core, VPS ou cliente foi tocado.
+Nada em `conf/import`, `db/import`, `npc/custom`, `src/`, core, VPS, MariaDB, firewall,
+serviços, cliente, `Ragexe` ou progressão foi tocado. Nenhum binário adicionado.
 
 ## 16. Testes
 
-- `git diff --check` (sem conflito/whitespace ruim).
-- Validador: [`scripts/validate-warp-audit.py`](../scripts/validate-warp-audit.py)
-  (`validate_gate3_decision`/`validate_gate3_evidence`; offline; cross-checks com o
-  plano, a decisão e a evidência do GATE 2 e com o squash do PR #50).
-- Testes: [`scripts/test-warp-audit-gate-03.py`](../scripts/test-warp-audit-gate-03.py)
-  (positivos + 15 negativos obrigatórios; executados no CI
-  [`validate-warp-audit.yml`](../.github/workflows/validate-warp-audit.yml)).
-- Testes anteriores (GATE 1 e GATE 2) continuam verdes; validações existentes **não**
-  foram enfraquecidas.
+- `git diff --check`; `validate-warp-audit.py`; `test-warp-audit-gate-01/02/03.py`;
+  `test-warp-pe-identity.py` (32 casos, inclui a regressão D2: `soh` de `0xE0` **não**
+  vira `267`); `validate-client-assets.py`. Testes dos GATEs anteriores **não** foram
+  enfraquecidos.
 
 ## 17. Riscos
 
-R1 confusão entre identidade e segurança; R2 assinatura ausente lida como malware; R3
-assinatura presente lida como confiança; R4 cadeia não validável offline; R5 timestamp
-PE tratado como data confiável; R6 parsing parcial tratado como validação completa; R7
-ferramenta carregando/executando o PE; R8 tentativa de consulta de rede; R9 avanço
-indevido ao GATE 4; R10 binário permanecer em disco; R11 executável no Git; R12
-exposição de certificado/caminho/dado pessoal; R13 alteração de schemas anteriores;
-R14 falso `COMPLETED_PASS`. **Mitigações:** separação explícita presença × validade ×
-confiança × segurança; ausência registrada como achado sem veredito; timestamp
-rotulado como metadado não confiável; parse apenas de cabeçalho + detecção estrutural;
-nenhuma ferramenta que carregue o PE; `network_scope=GITHUB_OFFICIAL_ONLY` e
-`no_network_after_fetch=true`; `gate_4_authorized=false`; remoção obrigatória +
-verificação; `.gitignore`/validador de assets; caminho lógico redigido e sem
-certificado completo; schemas anteriores intocados; `COMPLETED_PASS` exige identidade
-igual ao GATE 2 + PE válido + assinatura determinada.
+Confusão identidade × segurança; assinatura ausente lida como malware; assinatura
+presente lida como confiança; cadeia não validável offline; timestamp PE tratado como
+data confiável; **parsing parcial/offset incorreto tratado como medição válida**;
+ferramenta carregando/executando o PE; tentativa de rede; avanço indevido ao GATE 4;
+binário permanecer em disco/entrar no Git; exposição de certificado/caminho/dado
+pessoal; **falso `COMPLETED_PASS`** (mitigado por esta invalidação). Mitigações:
+inspetor revisável com _bounds checking_ + fixtures; `MEASUREMENT_REQUIRES_RECONFIRMATION`;
+distinção disponível/invocada; `run_on_warp_exe=false`; `gate_4_authorized=false`.
 
 ## 18. Rollback
 
-Antes do merge: corrigir por novo commit; manter draft; fechar o PR; sem force; sem
-reescrever `dev`. Após integração: branch de `dev`, reverter o squash, validar, abrir
-PR de reversão. O revert **não** apaga a identidade/assinatura já observadas, **não**
-autoriza nova materialização/execução/inspeção ampla/distribuição, **não** inicia o
-GATE 4 e **não** substitui nova decisão humana. Nenhum binário foi versionado; o
-arquivo temporário foi removido.
+Antes do merge: corrigir por commits; manter draft; fechar o PR se inválido; preservar
+a branch/evidências. Após merge futuro: branch de `dev`, `git revert` do squash,
+validação completa, PR de reversão. O revert **não** apaga os fatos preservados do
+GATE 2 nem autoriza repetir a materialização. Sem `reset --hard`, sem `git clean`, sem
+force push.
 
 ## 19. Estado atual
 
 ```text
-GATE 3 CONCLUÍDO — IDENTIDADE CONFIRMADA E ASSINATURA DETERMINADA (AUSENTE)
+GATE 3 — EVIDÊNCIA INVALIDADA, PENDENTE DE REPETIÇÃO CONTROLADA
 ```
 
-## 20. Próxima decisão humana
+## 20. Próxima decisão humana (proposta)
+
+O GATE 3 precisa de **repetição controlada** para remedir a identidade PE e reconfirmar
+o estado da assinatura com o inspetor revisável. Como **proposta** (nomes ainda não
+canônicos; **nenhuma** opção selecionada):
+
+```text
+AUTHORIZE_CORRECTIVE_REPEAT_GATE_3
+STOP_PATH
+```
 
 ```text
 GATE 4 NÃO AUTORIZADO
 ```
 
-Somente após revisão e integração deste resultado poderá ser solicitada uma nova
-decisão humana sobre o **GATE 4** (inventário PE estático):
-
-```text
-AUTHORIZE_GATE_4
-STOP_PATH
-```
-
-Nenhuma dessas opções está selecionada. Um `COMPLETED_PASS` no GATE 3 **não**
-seleciona `AUTHORIZE_GATE_4` automaticamente.
+Um estado invalidado **não** seleciona a repetição automaticamente, e a repetição
+**não** avança para o GATE 4.
 
 ## Estado de verificação
 
-- **Fato:** um blob rematerializado fora do repo; tamanho, Git blob OID e SHA-256
-  **iguais** aos do GATE 2; PE32 x86 válido; `OriginalFilename` `WARP.exe`;
-  Certificate Table **ausente**; arquivo removido.
-- **Inferência/decisão:** `COMPLETED_PASS` — identidade confirmada e assinatura
-  **ausente** determinada; **não** é juízo de segurança.
-- **Pendência:** revisão/integração e, depois, decisão humana sobre o GATE 4.
+- **Fato (preservado do GATE 2):** blob OID, tamanho e SHA-256; materialização e
+  limpeza anteriores; ausência de execução; binário não versionado.
+- **Invalidado/pendente:** identidade PE (incl. `size_of_optional_header=267`) e
+  estado da assinatura — produzidos por parser não versionado; aguardam reconfirmação.
+- **Correção:** semântica de leitura (D1), medição (D2), parser versionado (D3),
+  ferramenta invocada (D4); `COMPLETED_PASS` suspenso.
+- **Pendência:** decisão humana sobre repetição corretiva do GATE 3.
 - **Nota:** decisão técnica e de conformidade do projeto, **não** parecer jurídico.

@@ -41,7 +41,7 @@ auditoria. O relatório completo está em
 | [`decisions/binary-audit-gate-02-decision-record-2026-08-01.json`](decisions/binary-audit-gate-02-decision-record-2026-08-01.json) | (2P-E-C2-A) Registro **real** da autorização humana **exclusiva do GATE 2** (materialização e integridade local): `AUTHORIZE_GATE_2`; `gate_2_authorized=true`, `hashing_authorized=true`; **GATE 3 não autorizado**. |
 | [`evidence/binary-audit-gate-02-integrity-evidence-2026-08-01.json`](evidence/binary-audit-gate-02-integrity-evidence-2026-08-01.json) | (2P-E-C2-A) Evidência **real** do GATE 2: `COMPLETED_PASS`; **1** blob materializado fora do repo, tamanho `1137152` e Git blob OID **iguais** aos esperados; SHA-256 local registrado (≠ Git OID); arquivo **removido**; nenhuma execução/inspeção/sandbox/distribuição; **binário não versionado**. |
 | [`decisions/binary-audit-gate-03-decision-record-2026-08-03.json`](decisions/binary-audit-gate-03-decision-record-2026-08-03.json) | (2P-E-C3) Registro **real** da autorização humana **exclusiva do GATE 3** (identidade e assinatura estática offline): `AUTHORIZE_GATE_3`; `gate_3_authorized=true`, materialização temporária + hashing + inspeção de identidade/Authenticode `true`; **GATE 4 não autorizado**. |
-| [`evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json`](evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json) | (2P-E-C3) Evidência **real** do GATE 3: `COMPLETED_PASS`; identidade **igual** ao GATE 2 (tamanho/Git OID/SHA-256), **PE32 x86** válido, `OriginalFilename` `WARP.exe`, **Certificate Table ausente** (assinatura Authenticode **ausente** — achado material, **não** malware); separação presença × validade × confiança × segurança; arquivo **removido**; **binário não versionado**. |
+| [`evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json`](evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json) | (2P-E-C3 / **revisão 2P-E-C3-R1**) Evidência **real** do GATE 3, agora `EVIDENCE_INVALIDATED_PENDING_REPEAT`: o `COMPLETED_PASS` foi **suspenso** (D1-D4). Fatos do GATE 2 (blob OID/tamanho/SHA-256) **preservados**; identidade PE (`size_of_optional_header=267` == magic PE32) e assinatura **pendentes de reconfirmação**; leitura estática explícita (sem `opened` ambíguo); OpenSSL `invoked=false`/`exit_code=null`; **nenhuma nova materialização**; **binário não versionado**. |
 | [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json`, `binary-audit-gate-00-decision-record-real.schema.json`, `binary-audit-gate-00-provenance-evidence.schema.json`, `binary-audit-gate-01-decision-record-real.schema.json`, `binary-audit-gate-02-decision-record-real.schema.json`, `binary-audit-gate-02-integrity-evidence.schema.json`, `binary-audit-gate-03-decision-record-real.schema.json` e `binary-audit-gate-03-identity-signature-evidence.schema.json`. |
 
 ## Garantias desta etapa
@@ -169,24 +169,37 @@ executado. O `git_blob_oid` é o identificador do objeto Git informado pelo upst
 avanço exige **nova decisão humana** (`AUTHORIZE_GATE_1` / `REPEAT_GATE_0` /
 `STOP_PATH`).
 
-## Resultado do GATE 3 (2P-E-C3)
+## Resultado do GATE 3 (2P-E-C3) e revisão corretiva (2P-E-C3-R1)
 
-O GATE 3 foi **executado por inspeção estática offline** — decisão em
+O GATE 3 foi executado por inspeção estática offline — decisão em
 [`decisions/binary-audit-gate-03-decision-record-2026-08-03.json`](decisions/binary-audit-gate-03-decision-record-2026-08-03.json),
 evidência em
 [`evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json`](evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json)
-e em [docs/39](../../docs/39-resultado-gate-3-identidade-assinatura-warp.md):
-resultado `COMPLETED_PASS` (`GATE 3 CONCLUÍDO — IDENTIDADE CONFIRMADA E ASSINATURA
-DETERMINADA (AUSENTE)`). O blob fixado foi **rematerializado temporariamente** fora do
-repositório; a **identidade** (tamanho `1137152`, Git blob OID `c853da42…`, SHA-256
-`345f3464…`) é **igual** à do GATE 2; o **PE** é válido (**PE32**, x86, subsystem
-`WINDOWS_GUI`, `OriginalFilename` `WARP.exe`); a **Certificate Table está ausente** —
-portanto **não há assinatura Authenticode**. A ausência é um **achado material** e
-**não** um veredito de malware; assinatura presente **não** significaria arquivo
-seguro. O arquivo temporário foi **removido**; **nenhuma** execução, carga, análise
-dinâmica, sandbox, inspeção ampla (GATE 4), acesso ao cliente/`Ragexe`/VPS, patch ou
-distribuição ocorreu. O **GATE 4 permanece não autorizado**: qualquer avanço exige
-**nova decisão humana** (`AUTHORIZE_GATE_4` / `STOP_PATH`). Os testes positivos e
+e em [docs/39](../../docs/39-resultado-gate-3-identidade-assinatura-warp.md).
+
+Uma **revisão corretiva independente (2P-E-C3-R1)** **suspendeu** o `COMPLETED_PASS`
+original e o estado da evidência passou a `EVIDENCE_INVALIDATED_PENDING_REPEAT`:
+
+- **D1** — `opened=false` era ambíguo (o conteúdo foi lido para inspeção estática);
+  substituído por `file_read_for_static_inspection=true` + `launched`/`executed`/
+  `loaded_as_executable=false`.
+- **D2** — `size_of_optional_header=267` (== magic PE32 `0x010B`): forte indício de
+  leitura de campo no offset incorreto; marcado `MEASUREMENT_REQUIRES_RECONFIRMATION`
+  (não alterado por suposição).
+- **D3** — o parser era de scratchpad, não versionado; foi versionado o inspetor
+  revisável [`scripts/inspect-warp-pe-identity.py`](../../scripts/inspect-warp-pe-identity.py)
+  (offline, _bounds checking_) com fixtures sintéticas em
+  [`scripts/test-warp-pe-identity.py`](../../scripts/test-warp-pe-identity.py).
+- **D4** — OpenSSL registrava `exit_code=-1` sem ter sido invocado; corrigido para
+  `invoked=false` / `exit_code=null`.
+
+Os **fatos do GATE 2** (blob OID `c853da42…`, tamanho `1137152`, SHA-256 `345f3464…`,
+materialização e limpeza anteriores, ausência de execução, binário não versionado)
+são **preservados**. A identidade PE e o estado da assinatura ficam **pendentes de
+reconfirmação** por **repetição controlada**. **Nenhuma nova materialização** ocorreu;
+o inspetor revisável **não** foi executado sobre o `WARP.exe`. O **GATE 4 permanece
+não autorizado**; a repetição corretiva do GATE 3 exige **nova decisão humana**
+(proposta: `AUTHORIZE_CORRECTIVE_REPEAT_GATE_3` / `STOP_PATH`). Os testes positivos e
 negativos estão em [`scripts/test-warp-audit-gate-03.py`](../../scripts/test-warp-audit-gate-03.py).
 
 ## Propriedade intelectual

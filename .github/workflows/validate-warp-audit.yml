@@ -14,6 +14,8 @@ on:
       - scripts/test-warp-audit-gate-01.py
       - scripts/test-warp-audit-gate-02.py
       - scripts/test-warp-audit-gate-03.py
+      - scripts/inspect-warp-pe-identity.py
+      - scripts/test-warp-pe-identity.py
       - .github/workflows/validate-warp-audit.yml
   workflow_dispatch:
 
@@ -46,3 +48,6 @@ jobs:
 
       - name: Run WARP audit GATE 3 tests
         run: python scripts/test-warp-audit-gate-03.py
+
+      - name: Run WARP PE identity inspector tests
+        run: python scripts/test-warp-pe-identity.py
