@@ -53,6 +53,7 @@ apenas os organiza por categoria e registra estado e dependências.
 | [33-plano-auditoria-binaria-offline-warp.md](33-plano-auditoria-binaria-offline-warp.md) | Plano (2P-E-B-PREBUILT) da auditoria binária **offline** do prebuilt em 17 gates independentes com decisão humana e `STOP_PATH`: `PLANO CRIADO — NENHUMA MATERIALIZAÇÃO AUTORIZADA`; nada baixado/materializado/executado; todas as autorizações operacionais `false`; merge não autoriza o GATE 1 | Cliente/build/segurança | validado | não iniciado (só planejamento) | 16, 30, 31, 32 | 2026-07-31 |
 | [34-registro-autorizacao-gate-0-proveniencia-warp.md](34-registro-autorizacao-gate-0-proveniencia-warp.md) | Registro (2P-E-C0-A) da autorização humana **exclusiva do GATE 0** (reconfirmação de proveniência por metadados): `GATE 0 AUTORIZADO — AINDA NÃO INICIADO`; só `provenance_reconfirmation_authorized=true`; nenhuma consulta upstream nesta etapa; nada materializado; GATE 1 proibido; merge não executa o GATE 0 | Cliente/build/segurança | validado | autorizado, não iniciado | 16, 30, 32, 33 | 2026-07-31 |
 | [35-resultado-gate-0-proveniencia-warp.md](35-resultado-gate-0-proveniencia-warp.md) | Resultado (2P-E-C0-B) da execução do GATE 0 **por metadados oficiais**: `GATE 0 CONCLUÍDO — APROVADO POR METADADOS` (`COMPLETED_PASS`); proveniência declarada consistente com os metadados (repo/commit/árvore/caminho/blob OID/tamanho/licença); **nenhum** conteúdo de blob acessado, nada baixado/materializado/executado; Git object ID ≠ SHA-256 local; GATE 1 ainda proibido, exige nova decisão humana | Cliente/build/segurança | validado | concluído (aprovado por metadados) | 16, 30, 33, 34 | 2026-08-01 |
+| [38-auditoria-prontidao-primeiro-acesso.md](38-auditoria-prontidao-primeiro-acesso.md) | Registro consolidado da auditoria de prontidão do primeiro acesso (somente leitura, 2026-08-03): reconfirma runtime do servidor e `PACKETVER=20211103` sem override; registra `new_account: no` como decisão de segurança + procedimento planejado de conta de homologação; reconcilia a cadeia WARP (GATE 2 concluído, GATE 3 não autorizado); decisão `BLOQUEADO PARA HOMOLOGAÇÃO` | Cliente/protocolo | validado | não iniciado (bloqueado) | 04, 09, 11, 12, 13, 28, 29, 37 | 2026-08-03 |
 | [99-checklists.md](99-checklists.md) | Checklists de PR, deploy, balanceamento | Todos | validado | não aplicável | — | 2026-07-10 |
 
 [^1]: No documento 03, "parcialmente implantado" significa apenas que a
@@ -79,7 +80,11 @@ apenas os organiza por categoria e registra estado e dependências.
 - **Cliente e protocolo:** [09](09-cliente-baseline-protocolo.md),
   [12](12-configuracao-packetver.md),
   [29](29-compatibilidade-cliente-2021-11-05-packetver.md) (cliente 2021-11-05 ×
-  `PACKETVER=20211103`, compatibilidade `PROVÁVEL`, sem rebuild).
+  `PACKETVER=20211103`, compatibilidade `PROVÁVEL`, sem rebuild),
+  [38](38-auditoria-prontidao-primeiro-acesso.md) (registro consolidado da
+  auditoria de prontidão do primeiro acesso; runtime reconfirmado; `new_account:
+  no` como decisão de segurança; cadeia WARP no GATE 2; `BLOQUEADO PARA
+  HOMOLOGAÇÃO`).
 - **Preparação do executável do cliente:**
   [28](28-decisao-ferramenta-preparacao-cliente.md) (decisão da ferramenta de
   hex: WARP aprovado com restrições; NEMO atual rejeitado por licença ausente;
