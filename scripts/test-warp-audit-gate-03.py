@@ -1,24 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Testes positivos e negativos dos artefatos do GATE 3 (ETAPA 2P-E-C3):
-registro de decisao (AUTHORIZE_GATE_3) e evidencia real de identidade do PE e
-assinatura Authenticode (inspecao estatica offline) do artefato WARP.
+Testes positivos e negativos dos artefatos do GATE 3 apos a revisao corretiva
+2P-E-C3-R1: registro de decisao (AUTHORIZE_GATE_3, inalterado) e evidencia
+INVALIDADA/pendente de repeticao (EVIDENCE_INVALIDATED_PENDING_REPEAT).
 
 Offline e sem dependencias externas: importa scripts/validate-warp-audit.py e exercita
-validate_gate3_decision/validate_gate3_evidence contra os artefatos reais e contra
-mutacoes invalidas. Nao acessa a rede, nao materializa binario, nao executa o WARP e
-nao escreve arquivos. Criterio primario: rejeicao correta.
+validate_gate3_decision/validate_gate3_evidence contra os artefatos reais e mutacoes
+invalidas. Nao acessa a rede, nao materializa binario e nao executa o WARP.
 
-Cobre, no minimo (FASE J do prompt 2P-E-C3):
-  * positivos: decisao real e evidencia real;
-  * negativos (15 obrigatorios): blob OID incorreto; SHA-256 incorreto; tamanho
-    incorreto; gate_3_authorized=false com evidencia concluida; gate_4_authorized=true;
-    execution_authorized=true; external_reputation_upload_authorized=true; afirmacao de
-    'assinatura valida' sem evidencia da ferramenta; afirmacao de 'arquivo seguro'
-    derivada apenas da assinatura; limpeza nao confirmada; mais de um arquivo
-    materializado; caminho dentro da worktree; tentativa de rede; enum/condicao fora do
-    conjunto fechado; divergencia com os identificadores do GATE 2.
+Cobre, alem do PASS, os negativos das FASEs E/F (D1-D4), incluindo o caso especifico
+pe_format=PE32 + magic 0x010b + size_of_optional_header=267 apresentado como medicao
+confirmada (deve reprovar), semantica ambigua 'opened', ferramenta invoked=false com
+exit_code nao nulo, e divergencia de identificadores do GATE 2.
 """
 import copy
 import importlib.util
@@ -109,7 +103,7 @@ def main():
         if errs:
             failed += 1
             print(f"[FALHA] (esperava OK) {label}: {len(errs)} erro(s)")
-            for e in errs[:5]:
+            for e in errs[:6]:
                 print("    -", e)
         else:
             passed += 1
@@ -136,131 +130,131 @@ def main():
 
     # ---------- Positivos ----------
     ok("decisao real integra", run_dec(copy.deepcopy(base_dec)))
-    ok("evidencia real integra", run_ev(copy.deepcopy(base_ev)))
+    ok("evidencia real (invalidada) integra", run_ev(copy.deepcopy(base_ev)))
 
-    # ---------- Negativos: DECISAO ----------
+    # ---------- Negativos: DECISAO (inalterada) ----------
     dec_fail("decisao incorreta", setpath(["decision"], "AUTHORIZE_GATE_2"))
     dec_fail("gate.id incorreto", setpath(["gate", "id"], 4))
-    dec_fail("gate.name incorreto", setpath(["gate", "name"], "PE_STATIC_INVENTORY"))
-    dec_fail("status incorreto", setpath(["status"], "GATE_PASSED"))
-    dec_fail("execution_state incorreto", setpath(["execution_state"], "COMPLETED"))
-    dec_fail("squash do PR #50 incorreto",
-             setpath(["integration_ref", "squash_commit"], "0" * 40))
-    dec_fail("pr incorreto", setpath(["integration_ref", "pr"], 49))
-    # (4) gate_3_authorized=false
     dec_fail("gate_3_authorized=false", setpath(["authorizations", "gate_3_authorized"], False))
-    # (5) gate_4_authorized=true
     dec_fail("gate_4_authorized=true", setpath(["authorizations", "gate_4_authorized"], True))
-    # (6) execution_authorized=true
     dec_fail("execution_authorized=true", setpath(["authorizations", "execution_authorized"], True))
-    # (7) external_reputation_upload_authorized=true
     dec_fail("external_reputation_upload_authorized=true",
              setpath(["authorizations", "external_reputation_upload_authorized"], True))
-    dec_fail("dynamic_analysis_authorized=true",
-             setpath(["authorizations", "dynamic_analysis_authorized"], True))
-    dec_fail("network_validation_authorized=true",
-             setpath(["authorizations", "network_validation_authorized"], True))
-    dec_fail("vps_access_authorized=true", setpath(["authorizations", "vps_access_authorized"], True))
-    # (1/3 no escopo) commit/blob/max_files divergentes
-    dec_fail("commit divergente (escopo)", setpath(["materialization_scope", "commit_oid"], "1" * 40))
-    dec_fail("blob OID divergente (escopo)", setpath(["materialization_scope", "artifact_blob_oid"], "2" * 40))
-    dec_fail("max_files != 1 (escopo)", setpath(["materialization_scope", "max_files"], 2))
+    dec_fail("squash do PR #50 incorreto",
+             setpath(["integration_ref", "squash_commit"], "0" * 40))
     dec_fail("precondition.gate_2_outcome != PASS", setpath(["precondition", "gate_2_outcome"], "STOPPED"))
     dec_fail("conditions insuficientes", lambda r: r.__setitem__("conditions", r["conditions"][:5]))
     dec_fail("propriedade inesperada", lambda r: r.__setitem__("x", 1))
-    dec_fail("plan_ref inexistente", setpath(["plan_ref", "path"], "client/warp-audit/nao-existe.json"))
-    # cross-check: GATE 2 nao autoriza materializacao / nao PASS
-    g2d_bad = copy.deepcopy(gate2_decision)
-    g2d_bad["authorizations"]["gate_2_authorized"] = False
-    dec_fail("GATE 2 nao autoriza materializacao", lambda r: None, g2d=g2d_bad)
-    g2e_bad = copy.deepcopy(gate2_evidence)
-    g2e_bad["outcome"] = "STOPPED"
-    dec_fail("GATE 2 nao esta COMPLETED_PASS", lambda r: None, g2e=g2e_bad)
 
-    # ---------- Negativos: EVIDENCIA ----------
-    ev_fail("outcome != COMPLETED_PASS", setpath(["outcome"], "COMPLETED_FAIL"))
-    ev_fail("status != outcome", setpath(["status"], "STOPPED"))
+    # ---------- Negativos: EVIDENCIA (estrutura invalidada) ----------
+    ev_fail("outcome != EVIDENCE_INVALIDATED_PENDING_REPEAT", setpath(["outcome"], "COMPLETED_PASS"))
+    ev_fail("status != outcome", setpath(["status"], "COMPLETED_PASS"))
     ev_fail("gate.id incorreto", setpath(["gate", "id"], 4))
-    # (1) blob OID incorreto
+
+    # (1) blob OID incorreto; (2) SHA-256 incorreto; (3) tamanho incorreto
     ev_fail("blob OID (git hash-object) incorreto",
             setpath(["identity_reconfirmation", "git_blob_oid_git_hash_object"], "4" * 40))
-    ev_fail("blob OID (independente) incorreto",
-            setpath(["identity_reconfirmation", "git_blob_oid_independent"], "5" * 40))
-    ev_fail("git_blob_oid_match=false", setpath(["identity_reconfirmation", "git_blob_oid_match"], False))
-    # (2) SHA-256 incorreto
     ev_fail("SHA-256 divergente do GATE 2",
             setpath(["identity_reconfirmation", "sha256_local"], "a" * 64))
-    ev_fail("SHA-256 ausente", delpath(["identity_reconfirmation", "sha256_local"]))
-    ev_fail("SHA-256 malformado", setpath(["identity_reconfirmation", "sha256_local"], "xyz"))
     ev_fail("SHA-256 = Git OID (confusao)",
             setpath(["identity_reconfirmation", "sha256_local"], "c853da42d18dfe090b4e941b435d989311faf3dc"))
-    # (3) tamanho incorreto
     ev_fail("tamanho observado divergente",
             setpath(["identity_reconfirmation", "size_bytes_observed"], 999))
-    ev_fail("size_match=false", setpath(["identity_reconfirmation", "size_match"], False))
-    ev_fail("identity_matches_gate_2=false",
-            setpath(["identity_reconfirmation", "identity_matches_gate_2"], False))
-    # (11) mais de um arquivo materializado
-    ev_fail("mais de um arquivo materializado",
-            setpath(["identity_reconfirmation", "materialized_file_count"], 2))
-    ev_fail("zero arquivos materializados",
-            setpath(["identity_reconfirmation", "materialized_file_count"], 0))
-    # (12) caminho dentro da worktree
-    ev_fail("caminho dentro da worktree",
+
+    # D1 — semantica de leitura estatica
+    ev_fail("campo ambiguo 'opened' presente",
+            setpath(["identity_reconfirmation", "opened"], False))
+    ev_fail("file_read_for_static_inspection=false",
+            setpath(["identity_reconfirmation", "file_read_for_static_inspection"], False))
+    ev_fail("launched=true", setpath(["identity_reconfirmation", "launched"], True))
+    ev_fail("executed=true", setpath(["identity_reconfirmation", "executed"], True))
+    ev_fail("loaded_as_executable=true", setpath(["identity_reconfirmation", "loaded_as_executable"], True))
+    ev_fail("materialized_file_count=2", setpath(["identity_reconfirmation", "materialized_file_count"], 2))
+    ev_fail("temporary_dir_outside_repo=false",
             setpath(["identity_reconfirmation", "temporary_dir_outside_repo"], False))
-    ev_fail("arquivo aberto", setpath(["identity_reconfirmation", "opened"], True))
-    ev_fail("arquivo executado", setpath(["identity_reconfirmation", "executed"], True))
-    # PE
-    ev_fail("PE invalido", setpath(["pe_identity", "pe_valid"], False))
-    ev_fail("PE sem MZ", setpath(["pe_identity", "mz_present"], False))
-    ev_fail("PE formato invalido", setpath(["pe_identity", "pe_format"], "ELF"))
-    # (8) 'assinatura valida' sem evidencia da ferramenta (overclaim)
-    def overclaim_valid(ev):
-        ev["authenticode"]["authenticode_signature_present"] = True
-        ev["authenticode"]["certificate_table_present"] = True
-        ev["authenticode"]["cryptographic_verification"] = "PERFORMED_VALID"
-        ev["authenticode"]["structurally_parseable"] = False
-    ev_fail("assinatura 'valida' sem parse estrutural (overclaim)", overclaim_valid)
-    # (9) 'arquivo seguro' derivado apenas da assinatura
+
+    # D2 — size_of_optional_header == magic apresentado como medicao confirmada
+    ev_fail("soh=267 apresentado como medicao confirmada (D2)",
+            setpath(["pe_identity_observed", "size_of_optional_header_status"], "MEASURED_CONFIRMED"))
+    ev_fail("pe_valid_status afirmado (nao pendente)",
+            setpath(["pe_identity_observed", "pe_valid_status"], "VALID"))
+    ev_fail("pe_valid afirmado como fato",
+            setpath(["pe_identity_observed", "pe_valid"], True))
+    ev_fail("produced_by incorreto",
+            setpath(["pe_identity_observed", "produced_by"], "REVIEWED_PARSER"))
+    ev_fail("version_info_status afirmado",
+            setpath(["pe_identity_observed", "version_info_status"], "PRESENT"))
+    ev_fail("original_filename preservado como fato",
+            setpath(["pe_identity_observed", "original_filename"], "WARP.exe"))
+    ev_fail("reconfirmation_required=false (PE)",
+            setpath(["pe_identity_observed", "reconfirmation_required"], False))
+
+    # Assinatura observada
+    ev_fail("authenticode determination_status afirmado",
+            setpath(["authenticode_observed", "determination_status"], "ABSENT_CONFIRMED"))
+    ev_fail("authenticode reconfirmation_required=false",
+            setpath(["authenticode_observed", "reconfirmation_required"], False))
+    ev_fail("cryptographic_verification fora do enum",
+            setpath(["authenticode_observed", "cryptographic_verification"], "MAGICAMENTE_VALIDA"))
+
+    # Semantica presenca/validade/confianca/seguranca
     ev_fail("afirmacao de arquivo seguro (semantica)",
             setpath(["signature_semantics", "not_equal_file_safe"], False))
     ev_fail("assinatura ausente = malware (semantica)",
             setpath(["signature_semantics", "absence_not_equal_malware"], False))
     ev_fail("timestamp tratado como confiavel (semantica)",
             setpath(["signature_semantics", "timestamp_not_trusted"], False))
-    # (14) enum fora do conjunto fechado
-    ev_fail("cryptographic_verification fora do enum",
-            setpath(["authenticode", "cryptographic_verification"], "MAGICAMENTE_VALIDA"))
-    ev_fail("chain_trust_state fora do enum",
-            setpath(["authenticode", "chain_trust_state"], "TRUSTED_SOMEHOW"))
-    # coerencia assinatura ausente
-    ev_fail("assinatura ausente com signatario preenchido",
-            setpath(["authenticode", "signer_subject"], "CN=Fabricante"))
-    # (10) limpeza nao confirmada
-    ev_fail("temporary_file_removed=false", setpath(["security_assertions", "temporary_file_removed"], False))
-    ev_fail("temporary_dir_removed=false", setpath(["security_assertions", "temporary_dir_removed"], False))
-    # (13) tentativa de rede
-    ev_fail("no_network_after_fetch=false", setpath(["security_assertions", "no_network_after_fetch"], False))
-    ev_fail("no_execution_performed=false", setpath(["security_assertions", "no_execution_performed"], False))
-    ev_fail("no_dynamic_analysis_performed=false", setpath(["security_assertions", "no_dynamic_analysis_performed"], False))
-    ev_fail("no_sandbox_created=false (Wine/sandbox)", setpath(["security_assertions", "no_sandbox_created"], False))
-    ev_fail("no_gate4_inspection_performed=false", setpath(["security_assertions", "no_gate4_inspection_performed"], False))
-    ev_fail("no_ragexe_access=false", setpath(["security_assertions", "no_ragexe_access"], False))
-    ev_fail("no_external_service_upload=false", setpath(["security_assertions", "no_external_service_upload"], False))
-    ev_fail("binary_versioned=true", setpath(["security_assertions", "binary_versioned"], True))
-    # gate_4_authorized=true (evidencia)
-    ev_fail("gate_4_authorized=true (evidencia)", setpath(["security_assertions", "gate_4_authorized"], True))
-    ev_fail("method fora do conjunto", setpath(["execution", "method"], "git clone"))
-    ev_fail("network_scope invalido", setpath(["execution", "network_scope"], "ANY"))
+
+    # Inspetor revisavel
+    ev_fail("reviewed_parser executado sobre o WARP.exe",
+            setpath(["reviewed_parser", "run_on_warp_exe"], True))
+    ev_fail("reviewed_parser executa/carrega PE",
+            setpath(["reviewed_parser", "executes_or_loads_pe"], True))
+
+    # D4 — ferramenta disponivel x invocada
+    ev_fail("openssl invoked=false com exit_code nao nulo",
+            setpath(["tools", 3, "exit_code"], 0))
+    ev_fail("gh invoked=true com exit_code null",
+            setpath(["tools", 0, "exit_code"], None))
+    ev_fail("openssl invoked=false com completed=true",
+            setpath(["tools", 3, "completed"], True))
+
+    # Revisao corretiva / execucao original
+    ev_fail("nova materializacao declarada",
+            setpath(["corrective_review", "new_materialization_performed"], True))
+    ev_fail("nova execucao declarada",
+            setpath(["corrective_review", "new_execution_performed"], True))
+    ev_fail("reuso de timestamps como nova execucao",
+            setpath(["corrective_review", "reused_prior_timestamps_as_new_run"], True))
+    ev_fail("finding D2 removido",
+            lambda e: e["corrective_review"].__setitem__(
+                "findings", [f for f in e["corrective_review"]["findings"] if f["id"] != "D2"]))
+    ev_fail("original_execution nao marcado como superseded",
+            setpath(["original_execution", "superseded_by_corrective_review"], False))
     ev_fail("timestamp fora de ordem (start>finish)",
-            setpath(["execution", "started_at"], "2026-08-03T23:59:59Z"))
-    ev_fail("limpeza antes do fim (finish>cleanup)",
-            setpath(["execution", "cleanup_at"], "2026-08-03T00:00:00Z"))
-    ev_fail("propriedade inesperada", lambda e: e.__setitem__("x", 1))
+            setpath(["original_execution", "started_at"], "2026-08-03T23:59:59Z"))
+
+    # Seguranca / fatos preservados
+    ev_fail("temporary_file_removed=false", setpath(["security_assertions", "temporary_file_removed"], False))
+    ev_fail("no_network_after_fetch=false", setpath(["security_assertions", "no_network_after_fetch"], False))
+    ev_fail("no_new_execution_performed=false", setpath(["security_assertions", "no_new_execution_performed"], False))
+    ev_fail("no_ragexe_access=false", setpath(["security_assertions", "no_ragexe_access"], False))
+    ev_fail("gate_4_authorized=true (evidencia)", setpath(["security_assertions", "gate_4_authorized"], True))
+    ev_fail("binary_versioned=true", setpath(["security_assertions", "binary_versioned"], True))
+    ev_fail("preserved sha256 do GATE 2 incorreto",
+            setpath(["preserved_gate_2_facts", "artifact_sha256"], "b" * 64))
+    ev_fail("preserved blob OID incorreto",
+            setpath(["preserved_gate_2_facts", "artifact_blob_oid"], "c" * 40))
+
+    # Refs / integracao / extras
+    ev_fail("reviewed_parser_ref inexistente",
+            setpath(["reviewed_parser_ref", "path"], "scripts/nao-existe.py"))
     ev_fail("gate_2_evidence_ref inexistente",
             setpath(["gate_2_evidence_ref", "path"], "client/warp-audit/evidence/nao-existe.json"))
     ev_fail("integration_ref squash incorreto",
             setpath(["integration_ref", "squash_commit"], "0" * 40))
+    ev_fail("upstream commit divergente", setpath(["upstream_expected", "commit_oid"], "1" * 40))
+    ev_fail("propriedade inesperada", lambda e: e.__setitem__("x", 1))
 
     def add_download(ev):
         ev["notes"] = ev["notes"] + " curl https://x/WARP.exe"
@@ -273,7 +267,6 @@ def main():
     g2e_diff = copy.deepcopy(gate2_evidence)
     g2e_diff["integrity"]["sha256_local"] = "b" * 64
     ev_fail("SHA-256 diverge do GATE 2 (cross-check)", lambda e: None, g2e=g2e_diff)
-    ev_fail("upstream commit divergente", setpath(["upstream_expected", "commit_oid"], "1" * 40))
     # cross-check: decisao do GATE 3 nao autoriza
     g3_bad = copy.deepcopy(base_dec)
     g3_bad["authorizations"]["gate_3_authorized"] = False

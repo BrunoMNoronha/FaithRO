@@ -1810,15 +1810,30 @@ def validate_gate3_decision(record, schema, plan, gate2_decision, gate2_evidence
     return errors
 
 
+def _magic_str_to_int(magic_str):
+    """Converte '0x010b' -> 267; retorna None se nao parseavel."""
+    if isinstance(magic_str, str):
+        try:
+            return int(magic_str, 16)
+        except ValueError:
+            return None
+    return None
+
+
 def validate_gate3_evidence(ev, schema, gate3_decision, gate2_evidence,
                             filename, errors):
-    """Valida a evidencia REAL da execucao do GATE 3 (offline, importavel).
+    """Valida a evidencia REAL do GATE 3 apos a revisao corretiva 2P-E-C3-R1.
 
-    A evidencia registra legitimamente o SHA-256 (como a do GATE 2); a varredura de
-    conteudo NAO aplica a regra generica de 64-hex, mas ainda proibe download/execucao/
-    URLs de binario. Exige identidade IGUAL A do GATE 2, PE valido, estado da assinatura
-    determinado com precisao (sem overclaim), separacao presenca/validade/confianca/
-    seguranca, limpeza confirmada e gate_4_authorized=false.
+    O COMPLETED_PASS original foi SUSPENSO. A evidencia agora esta em
+    EVIDENCE_INVALIDATED_PENDING_REPEAT e deve: (a) corrigir a semantica de leitura
+    estatica (sem 'opened' ambiguo; file_read_for_static_inspection=true e
+    launched/executed/loaded_as_executable=false); (b) marcar
+    size_of_optional_header como MEASUREMENT_REQUIRES_RECONFIRMATION quando coincide
+    com o magic (D2) e nunca aceitar um valor confirmado igual ao magic; (c) referenciar
+    o inspetor PE versionado (nao executado sobre o WARP.exe); (d) distinguir
+    ferramenta disponivel de invocada, com exit_code=null quando invoked=false;
+    (e) preservar os fatos do GATE 2; e (f) manter gate_4_authorized=false e nenhuma
+    nova materializacao/execucao.
     """
     kv = []
     schema_keyword_violations(schema, "gate-03-evidence.schema", kv)
@@ -1833,27 +1848,46 @@ def validate_gate3_evidence(ev, schema, gate3_decision, gate2_evidence,
 
     if ev.get("status") != ev.get("outcome"):
         errors.append(f"{filename}: status deve ser igual a outcome")
-    if ev.get("outcome") != "COMPLETED_PASS":
-        errors.append(f"{filename}: outcome deve ser COMPLETED_PASS")
+    if ev.get("outcome") != "EVIDENCE_INVALIDATED_PENDING_REPEAT":
+        errors.append(f"{filename}: outcome deve ser EVIDENCE_INVALIDATED_PENDING_REPEAT (COMPLETED_PASS suspenso)")
     g = ev.get("gate")
     if not isinstance(g, dict) or g.get("id") != 3 or g.get("name") != "IDENTITY_AND_SIGNATURE":
         errors.append(f"{filename}: gate deve ser id=3 name=IDENTITY_AND_SIGNATURE")
 
-    # Execucao: iniciada, concluida, tempos ordenados e reais.
-    ex = ev.get("execution") or {}
-    if ex.get("gate_3_started") is not True or ex.get("gate_3_completed") is not True:
-        errors.append(f"{filename}: execution deve ter gate_3_started e gate_3_completed true")
-    if ex.get("execution_state") != "COMPLETED":
-        errors.append(f"{filename}: execution_state deve ser COMPLETED")
-    st, ft, cl = ex.get("started_at"), ex.get("finished_at"), ex.get("cleanup_at")
+    # Execucao ORIGINAL (superseded): tempos reais ordenados; sem nova execucao.
+    ox = ev.get("original_execution") or {}
+    if ox.get("gate_3_started") is not True or ox.get("gate_3_completed") is not True:
+        errors.append(f"{filename}: original_execution deve ter gate_3_started/completed true")
+    if ox.get("execution_state") != "COMPLETED":
+        errors.append(f"{filename}: original_execution.execution_state deve ser COMPLETED")
+    st, ft, cl = ox.get("started_at"), ox.get("finished_at"), ox.get("cleanup_at")
     if isinstance(st, str) and isinstance(ft, str) and st > ft:
         errors.append(f"{filename}: started_at posterior a finished_at")
     if isinstance(ft, str) and isinstance(cl, str) and ft > cl:
-        errors.append(f"{filename}: finished_at posterior a cleanup_at (limpeza deve ser depois)")
-    if ex.get("method") != "GITHUB_OFFICIAL_GIT_DATA_API_BLOB_BY_OID":
-        errors.append(f"{filename}: method fora do conjunto autorizado")
-    if ex.get("network_scope") != "GITHUB_OFFICIAL_ONLY":
-        errors.append(f"{filename}: network_scope deve ser GITHUB_OFFICIAL_ONLY")
+        errors.append(f"{filename}: finished_at posterior a cleanup_at")
+    if ox.get("method") != "GITHUB_OFFICIAL_GIT_DATA_API_BLOB_BY_OID":
+        errors.append(f"{filename}: original_execution.method fora do conjunto autorizado")
+    if ox.get("network_scope") != "GITHUB_OFFICIAL_ONLY":
+        errors.append(f"{filename}: original_execution.network_scope deve ser GITHUB_OFFICIAL_ONLY")
+    if ox.get("superseded_by_corrective_review") is not True:
+        errors.append(f"{filename}: original_execution deve marcar superseded_by_corrective_review=true")
+
+    # Revisao corretiva: sem nova materializacao/execucao; D1-D4 registrados.
+    cr = ev.get("corrective_review") or {}
+    if cr.get("stage") != "2P-E-C3-R1":
+        errors.append(f"{filename}: corrective_review.stage deve ser 2P-E-C3-R1")
+    for k in ("new_materialization_performed", "new_execution_performed",
+              "reused_prior_timestamps_as_new_run"):
+        if cr.get(k) is not False:
+            errors.append(f"{filename}: corrective_review.{k} deve ser false")
+    cr_findings = cr.get("findings")
+    if not isinstance(cr_findings, list) or len(cr_findings) < 4:
+        errors.append(f"{filename}: corrective_review.findings deve registrar ao menos D1-D4")
+        cr_findings = cr_findings if isinstance(cr_findings, list) else []
+    ids = {f.get("id") for f in cr_findings if isinstance(f, dict)}
+    for req in ("D1", "D2", "D3", "D4"):
+        if req not in ids:
+            errors.append(f"{filename}: corrective_review.findings deve conter {req}")
 
     # Identificadores esperados == canonicos.
     up = ev.get("upstream_expected") or {}
@@ -1866,14 +1900,20 @@ def validate_gate3_evidence(ev, schema, gate3_decision, gate2_evidence,
         if up.get(k) != exp:
             errors.append(f"{filename}: upstream_expected.{k} deve ser {exp!r}")
 
-    # Reconfirmacao de identidade: IGUAL A do GATE 2 (tamanho, Git OID, SHA-256).
+    # Reconfirmacao de identidade (fatos do GATE 2 preservados) + D1 (leitura estatica).
     ir = ev.get("identity_reconfirmation") or {}
     if ir.get("materialized_file_count") != 1:
         errors.append(f"{filename}: identity_reconfirmation.materialized_file_count deve ser 1")
     if ir.get("temporary_dir_outside_repo") is not True:
         errors.append(f"{filename}: temporary_dir_outside_repo deve ser true")
-    if ir.get("opened") is not False or ir.get("executed") is not False:
-        errors.append(f"{filename}: identity_reconfirmation.opened/executed devem ser false")
+    # D1: leitura estatica explicita; SEM 'opened' ambiguo.
+    if "opened" in ir:
+        errors.append(f"{filename}: campo ambiguo 'opened' nao pode existir (use file_read_for_static_inspection)")
+    if ir.get("file_read_for_static_inspection") is not True:
+        errors.append(f"{filename}: file_read_for_static_inspection deve ser true (o conteudo foi lido)")
+    for k in ("launched", "executed", "loaded_as_executable"):
+        if ir.get(k) is not False:
+            errors.append(f"{filename}: identity_reconfirmation.{k} deve ser false")
     if ir.get("size_bytes_observed") != EXPECTED_ARTIFACT_SIZE or ir.get("size_match") is not True:
         errors.append(f"{filename}: tamanho reconfirmado deve ser {EXPECTED_ARTIFACT_SIZE} e size_match=true")
     if ir.get("git_blob_oid_algorithm") != "GIT_OBJECT_ID":
@@ -1899,48 +1939,51 @@ def validate_gate3_evidence(ev, schema, gate3_decision, gate2_evidence,
     if ir.get("identity_matches_gate_2") is not True:
         errors.append(f"{filename}: identity_matches_gate_2 deve ser true")
 
-    # Identidade PE: valida e consistente.
-    pe = ev.get("pe_identity") or {}
-    if pe.get("mz_present") is not True or pe.get("pe_signature_present") is not True:
-        errors.append(f"{filename}: pe_identity deve confirmar MZ e assinatura PE")
-    if pe.get("pe_valid") is not True:
-        errors.append(f"{filename}: pe_identity.pe_valid deve ser true")
-    if pe.get("pe_format") not in ("PE32", "PE32+"):
-        errors.append(f"{filename}: pe_identity.pe_format deve ser PE32 ou PE32+")
+    # Identidade PE OBSERVADA (parser nao versionado): pendente de reconfirmacao.
+    pe = ev.get("pe_identity_observed") or {}
+    if pe.get("produced_by") != "UNVERSIONED_SCRATCHPAD_PARSER":
+        errors.append(f"{filename}: pe_identity_observed.produced_by deve ser UNVERSIONED_SCRATCHPAD_PARSER")
+    if pe.get("reconfirmation_required") is not True:
+        errors.append(f"{filename}: pe_identity_observed.reconfirmation_required deve ser true")
+    # D2: pe_valid nao pode ser afirmado como true; deve ser um status pendente.
+    if pe.get("pe_valid_status") != "PENDING_RECONFIRMATION":
+        errors.append(f"{filename}: pe_valid_status deve ser PENDING_RECONFIRMATION (nao aceitar pe_valid=true por afirmacao)")
+    if "pe_valid" in pe:
+        errors.append(f"{filename}: pe_identity_observed nao pode afirmar 'pe_valid' (use pe_valid_status)")
+    if pe.get("size_of_optional_header_status") != "MEASUREMENT_REQUIRES_RECONFIRMATION":
+        errors.append(f"{filename}: size_of_optional_header_status deve ser MEASUREMENT_REQUIRES_RECONFIRMATION")
+    # D2: rejeitar SizeOfOptionalHeader confirmado igual ao magic (ex.: 267 == 0x010b).
+    soh = pe.get("size_of_optional_header_observed")
+    magic_int = _magic_str_to_int(pe.get("optional_header_magic_observed"))
+    if isinstance(soh, int) and magic_int is not None and soh == magic_int:
+        if pe.get("size_of_optional_header_status") != "MEASUREMENT_REQUIRES_RECONFIRMATION":
+            errors.append(f"{filename}: size_of_optional_header ({soh}) == magic ({magic_int}); "
+                          f"nao pode ser apresentado como medicao confirmada")
+    # D2-especifico: PE32 + magic 0x010b + soh 267 exige status de reconfirmacao.
+    if (pe.get("pe_format_observed") == "PE32"
+            and pe.get("optional_header_magic_observed") == "0x010b"
+            and soh == 267
+            and pe.get("size_of_optional_header_status") != "MEASUREMENT_REQUIRES_RECONFIRMATION"):
+        errors.append(f"{filename}: PE32/0x010b/soh=267 exige MEASUREMENT_REQUIRES_RECONFIRMATION")
+    if pe.get("version_info_status") != "NOT_DETERMINED_BY_REVIEWED_PARSER":
+        errors.append(f"{filename}: version_info_status deve ser NOT_DETERMINED_BY_REVIEWED_PARSER")
+    if pe.get("original_filename_status") != "NOT_DETERMINED_BY_REVIEWED_PARSER":
+        errors.append(f"{filename}: original_filename_status deve ser NOT_DETERMINED_BY_REVIEWED_PARSER")
+    if "original_filename" in pe:
+        errors.append(f"{filename}: nao preservar OriginalFilename como fato (use original_filename_status)")
 
-    # Assinatura Authenticode: estado determinado com precisao, SEM overclaim.
-    au = ev.get("authenticode") or {}
-    present = au.get("authenticode_signature_present")
-    cert_present = au.get("certificate_table_present")
-    if not isinstance(present, bool) or not isinstance(cert_present, bool):
-        errors.append(f"{filename}: authenticode presence flags devem ser booleanas")
+    # Assinatura Authenticode OBSERVADA: pendente de reconfirmacao.
+    au = ev.get("authenticode_observed") or {}
+    if au.get("produced_by") != "UNVERSIONED_SCRATCHPAD_PARSER":
+        errors.append(f"{filename}: authenticode_observed.produced_by deve ser UNVERSIONED_SCRATCHPAD_PARSER")
+    if au.get("reconfirmation_required") is not True:
+        errors.append(f"{filename}: authenticode_observed.reconfirmation_required deve ser true")
+    if au.get("determination_status") != "PENDING_RECONFIRMATION":
+        errors.append(f"{filename}: authenticode_observed.determination_status deve ser PENDING_RECONFIRMATION")
     if au.get("cryptographic_verification") not in GATE3_CRYPTO_VERIF_STATES:
         errors.append(f"{filename}: cryptographic_verification fora do conjunto fechado")
     if au.get("chain_trust_state") not in GATE3_CHAIN_TRUST_STATES:
         errors.append(f"{filename}: chain_trust_state fora do conjunto fechado")
-    # Coerencia presenca x campos e SEM afirmacao de validade sem evidencia.
-    if present is False:
-        # Assinatura ausente: nada de signatario/algoritmo/validade; nao e malware.
-        for k in ("win_cert_type", "signer_subject", "signer_issuer", "signer_serial"):
-            if au.get(k) is not None:
-                errors.append(f"{filename}: assinatura ausente exige authenticode.{k}=null")
-        if au.get("digest_algorithms_declared"):
-            errors.append(f"{filename}: assinatura ausente exige digest_algorithms_declared vazio")
-        if au.get("timestamp_or_countersignature_present") is not False:
-            errors.append(f"{filename}: assinatura ausente exige timestamp_or_countersignature_present=false")
-        if au.get("structurally_parseable") is not False:
-            errors.append(f"{filename}: assinatura ausente exige structurally_parseable=false")
-        if au.get("cryptographic_verification") != "NOT_APPLICABLE_NO_SIGNATURE":
-            errors.append(f"{filename}: assinatura ausente exige cryptographic_verification=NOT_APPLICABLE_NO_SIGNATURE")
-        if au.get("chain_trust_state") != "NOT_APPLICABLE_NO_SIGNATURE":
-            errors.append(f"{filename}: assinatura ausente exige chain_trust_state=NOT_APPLICABLE_NO_SIGNATURE")
-    elif present is True:
-        # Assinatura presente: NAO pode afirmar validade/confianca sem evidencia da
-        # ferramenta. 'PERFORMED_VALID' exige parse estrutural bem-sucedido.
-        if au.get("cryptographic_verification") == "PERFORMED_VALID" and au.get("structurally_parseable") is not True:
-            errors.append(f"{filename}: 'assinatura valida' sem parse estrutural bem-sucedido (overclaim)")
-        if au.get("chain_trust_state") == "NOT_APPLICABLE_NO_SIGNATURE":
-            errors.append(f"{filename}: assinatura presente nao pode usar estado 'NO_SIGNATURE' de cadeia")
 
     # Semantica de assinatura: separacao presenca/validade/confianca/seguranca.
     ss = ev.get("signature_semantics") or {}
@@ -1950,13 +1993,43 @@ def validate_gate3_evidence(ev, schema, gate3_decision, gate2_evidence,
         if ss.get(k) is not True:
             errors.append(f"{filename}: signature_semantics.{k} deve ser true")
 
-    # Invariantes de seguranca.
+    # Inspetor PE revisavel: versionado, offline, NAO executado sobre o WARP.exe.
+    rp = ev.get("reviewed_parser") or {}
+    if rp.get("stdlib_only") is not True or rp.get("network_access") is not False:
+        errors.append(f"{filename}: reviewed_parser deve ser stdlib_only e sem rede")
+    if rp.get("executes_or_loads_pe") is not False:
+        errors.append(f"{filename}: reviewed_parser.executes_or_loads_pe deve ser false")
+    if rp.get("run_on_warp_exe") is not False:
+        errors.append(f"{filename}: reviewed_parser.run_on_warp_exe deve ser false (nova materializacao nao autorizada)")
+
+    # D4: ferramenta disponivel x invocada; exit_code=null quando invoked=false.
+    tools = ev.get("tools")
+    if not isinstance(tools, list) or not tools:
+        errors.append(f"{filename}: 'tools' deve registrar ao menos uma ferramenta")
+    else:
+        for i, t in enumerate(tools):
+            if not isinstance(t, dict):
+                continue
+            invoked = t.get("invoked")
+            completed = t.get("completed")
+            ec = t.get("exit_code")
+            if invoked is False:
+                if ec is not None:
+                    errors.append(f"{filename}: tools[{i}] invoked=false exige exit_code=null")
+                if completed is not False:
+                    errors.append(f"{filename}: tools[{i}] invoked=false exige completed=false")
+            elif invoked is True:
+                if not isinstance(ec, int):
+                    errors.append(f"{filename}: tools[{i}] invoked=true exige exit_code inteiro")
+            else:
+                errors.append(f"{filename}: tools[{i}].invoked deve ser booleano")
+
+    # Invariantes de seguranca (inclui: sem nova materializacao/execucao).
     sa = ev.get("security_assertions") or {}
     for k in ("blob_content_accessed", "binary_materialized",
-              "static_identity_inspection_performed", "authenticode_inspection_performed"):
-        if sa.get(k) is not True:
-            errors.append(f"{filename}: security_assertions.{k} deve ser true (contexto GATE 3)")
-    for k in ("no_execution_performed", "no_dynamic_analysis_performed",
+              "static_identity_inspection_performed", "authenticode_inspection_performed",
+              "no_new_materialization_performed", "no_new_execution_performed",
+              "no_execution_performed", "no_dynamic_analysis_performed",
               "no_sandbox_created", "no_wine_or_vm_load", "no_network_after_fetch",
               "no_external_service_upload", "no_additional_file_materialized",
               "no_gate4_inspection_performed", "no_client_access", "no_ragexe_access",
@@ -1968,16 +2041,28 @@ def validate_gate3_evidence(ev, schema, gate3_decision, gate2_evidence,
         if sa.get(k) is not False:
             errors.append(f"{filename}: security_assertions.{k} deve ser false")
 
-    tools = ev.get("tools")
-    if not isinstance(tools, list) or not tools:
-        errors.append(f"{filename}: 'tools' deve registrar ao menos uma ferramenta")
+    # Fatos preservados do GATE 2.
+    pf = ev.get("preserved_gate_2_facts") or {}
+    if pf.get("artifact_blob_oid") != EXPECTED_ARTIFACT_BLOB:
+        errors.append(f"{filename}: preserved_gate_2_facts.artifact_blob_oid deve ser {EXPECTED_ARTIFACT_BLOB}")
+    if pf.get("artifact_blob_size") != EXPECTED_ARTIFACT_SIZE:
+        errors.append(f"{filename}: preserved_gate_2_facts.artifact_blob_size deve ser {EXPECTED_ARTIFACT_SIZE}")
+    if pf.get("artifact_sha256") != EXPECTED_ARTIFACT_SHA256:
+        errors.append(f"{filename}: preserved_gate_2_facts.artifact_sha256 deve ser o SHA-256 do GATE 2")
+    for k in ("prior_materialization_performed", "prior_cleanup_performed",
+              "no_execution", "binary_not_versioned"):
+        if pf.get(k) is not True:
+            errors.append(f"{filename}: preserved_gate_2_facts.{k} deve ser true")
+
+    if not ev.get("pending_reconfirmation"):
+        errors.append(f"{filename}: pending_reconfirmation obrigatorio ausente")
     if not ev.get("findings"):
         errors.append(f"{filename}: findings obrigatorios ausentes")
     if not ev.get("limitations") or len(ev.get("limitations")) < 4:
         errors.append(f"{filename}: limitations obrigatorias (>=4) ausentes")
 
     for field in ("authorization_ref", "plan_ref", "gate_2_decision_ref",
-                  "gate_2_evidence_ref"):
+                  "gate_2_evidence_ref", "reviewed_parser_ref", "reviewed_parser_test_ref"):
         ref = ev.get(field)
         _ref_ok(ref.get("path") if isinstance(ref, dict) else None, field, filename, errors)
     ir2 = ev.get("integration_ref")
@@ -1993,7 +2078,7 @@ def validate_gate3_evidence(ev, schema, gate3_decision, gate2_evidence,
             errors.append(f"{filename}: decisao do GATE 3 nao pode autorizar o GATE 4")
     else:
         errors.append(f"{filename}: decisao do GATE 3 ausente/invalida")
-    # Cross-check: evidencia do GATE 2 esta COMPLETED_PASS (identidade base).
+    # Cross-check: evidencia do GATE 2 esta COMPLETED_PASS (identidade base preservada).
     if isinstance(gate2_evidence, dict):
         if gate2_evidence.get("outcome") != "COMPLETED_PASS":
             errors.append(f"{filename}: evidencia do GATE 2 nao esta COMPLETED_PASS")
