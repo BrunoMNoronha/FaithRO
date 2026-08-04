@@ -255,6 +255,28 @@ carregar o binário:
 > concluída — **não** segurança, confiança, validade de assinatura, nem autorização de
 > uso no cliente, distribuição ou GATE 4.
 
+## 0.6 Hardening cross-platform (LF) pós-integração (2P-E-C3-LF)
+
+- **PR #52 integrado por squash** `7e4478845ea9c9cdd1a9f1732aca3caf119a664a` em `dev`.
+- O **conteúdo Git integrado estava correto e em LF** (o blob da saída do parser tem
+  SHA-256 `932968…f816` e Git OID `c1e66885…`; parser/testes com OIDs `3442ddfc…` /
+  `6d7cab1b…`).
+- Um checkout **Windows com `core.autocrlf=true`** convertia os arquivos da **worktree**
+  de LF para CRLF. Isso fazia o validador local **rejeitar corretamente** os bytes
+  divergentes (SHA-256 e Git blob OIDs recalculados diferentes; CRLF proibido) — ou
+  seja, o problema era do **checkout**, **não** corrupção do blob Git nem das medições.
+- O `.gitattributes` passou a **proteger somente os três artefatos byte-sensíveis** com
+  `text eol=lf`: a saída do parser (`…-corrective-repeat-parser-output-*.json`),
+  `scripts/inspect-warp-pe-identity.py` e `scripts/test-warp-pe-identity.py`. Nenhuma
+  regra genérica (`* text=…` ou `client/**`) foi aplicada.
+- Adicionou-se [`scripts/test-warp-audit-eol.py`](../scripts/test-warp-audit-eol.py)
+  (consulta `git check-attr` **e** lê os bytes da worktree, recalculando SHA-256/OIDs) e
+  uma **etapa de regressão** no workflow que clona localmente com `core.autocrlf=true` e
+  prova que `eol=lf` prevalece.
+- **Não houve alteração** de bytes, hashes, medições, evidências, parser ou testes do
+  parser. **Nenhuma nova materialização** e **nenhuma segunda repetição** ocorreram; o
+  **GATE 4 continua não autorizado**. O resultado técnico do GATE 3 permanece intacto.
+
 ## 1. Objetivo
 
 Executar exclusivamente o `GATE 3 — IDENTITY_AND_SIGNATURE`: reconfirmar a identidade

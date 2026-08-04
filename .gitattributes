@@ -44,3 +44,10 @@ client/patcher/beam-audit/first-build-authorization-request.example.json text eo
 client/patcher/beam-audit/first-build-plan.example.json text eol=lf
 client/patcher/beam-audit/first-build-human-decision-package.example.json text eol=lf
 client/patcher/beam-audit/first-build-human-decision-record.example.json text eol=lf
+
+# Artefatos da auditoria WARP cuja proveniência ou integridade é validada
+# byte a byte. Devem permanecer em LF inclusive em checkouts Windows com
+# core.autocrlf=true.
+client/warp-audit/evidence/binary-audit-gate-03-corrective-repeat-parser-output-*.json text eol=lf
+scripts/inspect-warp-pe-identity.py text eol=lf
+scripts/test-warp-pe-identity.py text eol=lf
