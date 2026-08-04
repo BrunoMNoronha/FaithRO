@@ -16,6 +16,8 @@ on:
       - scripts/test-warp-audit-gate-03.py
       - scripts/inspect-warp-pe-identity.py
       - scripts/test-warp-pe-identity.py
+      - scripts/test-warp-audit-eol.py
+      - .gitattributes
       - .github/workflows/validate-warp-audit.yml
   workflow_dispatch:
 
@@ -51,3 +53,24 @@ jobs:
 
       - name: Run WARP PE identity inspector tests
         run: python scripts/test-warp-pe-identity.py
+
+      - name: Run WARP audit EOL invariants
+        run: python scripts/test-warp-audit-eol.py
+
+      - name: Regression - validate byte-pinned artifacts under core.autocrlf=true
+        # Prova que as regras `eol=lf` do .gitattributes prevalecem sobre um checkout
+        # com core.autocrlf=true (que, sem elas, converteria LF->CRLF e quebraria a
+        # verificacao byte a byte). Clone LOCAL, sem rede; clone temporario removido
+        # sempre (trap), inclusive em falha.
+        run: |
+          set -euo pipefail
+          TMP="$(mktemp -d)"
+          trap 'rm -rf "$TMP"' EXIT
+          git clone --no-checkout --local . "$TMP/clone"
+          cd "$TMP/clone"
+          git config core.autocrlf true
+          git -c advice.detachedHead=false checkout --detach "$GITHUB_SHA"
+          python scripts/test-warp-audit-eol.py
+          python scripts/validate-warp-audit.py
+          python scripts/test-warp-audit-gate-03.py
+          python scripts/test-warp-pe-identity.py
