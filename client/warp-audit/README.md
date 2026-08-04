@@ -42,7 +42,7 @@ auditoria. O relatório completo está em
 | [`evidence/binary-audit-gate-02-integrity-evidence-2026-08-01.json`](evidence/binary-audit-gate-02-integrity-evidence-2026-08-01.json) | (2P-E-C2-A) Evidência **real** do GATE 2: `COMPLETED_PASS`; **1** blob materializado fora do repo, tamanho `1137152` e Git blob OID **iguais** aos esperados; SHA-256 local registrado (≠ Git OID); arquivo **removido**; nenhuma execução/inspeção/sandbox/distribuição; **binário não versionado**. |
 | [`decisions/binary-audit-gate-03-decision-record-2026-08-03.json`](decisions/binary-audit-gate-03-decision-record-2026-08-03.json) | (2P-E-C3) Registro **real** da autorização humana **exclusiva do GATE 3** (identidade e assinatura estática offline): `AUTHORIZE_GATE_3`; `gate_3_authorized=true`, materialização temporária + hashing + inspeção de identidade/Authenticode `true`; **GATE 4 não autorizado**. |
 | [`evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json`](evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json) | (2P-E-C3 / **revisão 2P-E-C3-R1**) Evidência **real** do GATE 3, agora `EVIDENCE_INVALIDATED_PENDING_REPEAT`: o `COMPLETED_PASS` foi **suspenso** (D1-D4). Fatos do GATE 2 (blob OID/tamanho/SHA-256) **preservados**; identidade PE (`size_of_optional_header=267` == magic PE32) e assinatura **pendentes de reconfirmação**; leitura estática explícita (sem `opened` ambíguo); OpenSSL `invoked=false`/`exit_code=null`; **nenhuma nova materialização**; **binário não versionado**. |
-| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json`, `binary-audit-gate-00-decision-record-real.schema.json`, `binary-audit-gate-00-provenance-evidence.schema.json`, `binary-audit-gate-01-decision-record-real.schema.json`, `binary-audit-gate-02-decision-record-real.schema.json`, `binary-audit-gate-02-integrity-evidence.schema.json`, `binary-audit-gate-03-decision-record-real.schema.json`, `binary-audit-gate-03-identity-signature-evidence.schema.json` e (convenção da repetição corretiva, sem registros reais) `binary-audit-gate-03-corrective-repeat-decision-record-real.schema.json`, `binary-audit-gate-03-corrective-repeat-pass-evidence.schema.json`, `binary-audit-gate-03-corrective-repeat-fail-evidence.schema.json`, `binary-audit-gate-03-corrective-repeat-stopped-evidence.schema.json` e `binary-audit-gate-03-corrective-repeat-parser-output.schema.json`. |
+| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json`, `binary-audit-gate-00-decision-record-real.schema.json`, `binary-audit-gate-00-provenance-evidence.schema.json`, `binary-audit-gate-01-decision-record-real.schema.json`, `binary-audit-gate-02-decision-record-real.schema.json`, `binary-audit-gate-02-integrity-evidence.schema.json`, `binary-audit-gate-03-decision-record-real.schema.json`, `binary-audit-gate-03-identity-signature-evidence.schema.json` e (convenção da repetição corretiva, sem registros reais) `binary-audit-gate-03-corrective-repeat-decision-record-real.schema.json`, `binary-audit-gate-03-corrective-repeat-pass-evidence.schema.json`, `binary-audit-gate-03-corrective-repeat-fail-evidence.schema.json`, `binary-audit-gate-03-corrective-repeat-stopped-evidence.schema.json` e `binary-audit-gate-03-corrective-repeat-parser-output.schema.json`; e (convenção da **preparação do GATE 4**, sem registros reais) `binary-audit-gate-04-decision-record-real.schema.json`, `binary-audit-gate-04-pass-evidence.schema.json`, `binary-audit-gate-04-fail-evidence.schema.json`, `binary-audit-gate-04-stopped-evidence.schema.json` e `binary-audit-gate-04-static-inventory-output.schema.json`. |
 
 ## Garantias desta etapa
 
@@ -277,6 +277,37 @@ Binário temporário removido; **não** executado/carregado; sem cliente/`Ragexe
 e segunda repetição **não** autorizados; evidência histórica invalidada **preservada**.
 PASS significa **apenas** que a repetição controlada do GATE 3 foi concluída.
 
+## Preparação do GATE 4 (2P-E-C4-PREP)
+
+A **ferramenta** do futuro GATE 4 (inventário PE **estático offline**) foi preparada,
+testada e documentada — **sem** executar o GATE 4 e **sem** materializar/inspecionar o
+`WARP.exe` (ver [docs/40](../../docs/40-preparacao-gate-4-inventario-pe-estatico-warp.md)):
+
+- **Analisador** [`scripts/inspect-warp-pe-static.py`](../../scripts/inspect-warp-pe-static.py):
+  stdlib apenas, leitura binária, _bounds checking_, **fail-closed**, saída JSON
+  determinística (UTF-8 sem BOM, LF, `indent=2`, `sort_keys`, newline único) que **separa**
+  fatos estruturais, heurísticas e limitações; **nunca** emite bytes brutos, `bCertificate`,
+  base64, dump integral, segredos ou caminhos pessoais; strings **sanitizadas e limitadas**;
+  classificação de imports por **tabela fechada**. É **separado** do inspetor do GATE 3
+  (OIDs `3442ddfc…`/`6d7cab1b…` **inalterados**).
+- **Testes com fixtures sintéticas** [`scripts/test-warp-pe-static.py`](../../scripts/test-warp-pe-static.py)
+  (removidas ao final, inclusive após falha) e testes do validador
+  [`scripts/test-warp-audit-gate-04.py`](../../scripts/test-warp-audit-gate-04.py).
+- **Schemas fechados** (`additionalProperties=false`): saída do inventário, decisão real
+  (`AUTHORIZE_GATE_4_EXECUTION`) e evidência **PASS/FAIL/STOPPED** — todos com
+  `gate_5_authorized const:false`. **Nenhum** registro real do GATE 4 existe nesta etapa.
+- **Validador** (`gate-04-prep` em [`scripts/validate-warp-audit.py`](../../scripts/validate-warp-audit.py)):
+  confirma a convenção e a máquina de estados atômica (reprova decisão/evidência/saída
+  prematura, órfãos, duplicação, autorização transitiva do GATE 5, saída com
+  BOM/CRLF/base64/bytes brutos e estados impossíveis do analisador); exige
+  `gate_4_real_decision_count=0`, `gate_4_real_evidence_count=0`,
+  `gate_4_real_output_count=0`, `gate_4_authorized=false`, `gate_4_execution_authorized=false`.
+
+A execução operacional do GATE 4 exige **nova decisão humana** em **PR separado**
+(proposta: `AUTHORIZE_GATE_4_EXECUTION` / `STOP_PATH`), referenciando o squash integrado
+desta preparação e os Git blob OIDs exatos do analisador e dos testes. O **GATE 5
+permanece não autorizado**.
+
 ## Propriedade intelectual
 
 WARP é **GPL-3.0** (uso apenas local; binário não versionado no FaithRO). `Ragexe`,
@@ -294,4 +325,5 @@ empacotar ou compartilhar (ver [docs/16](../../docs/16-politica-distribuicao-cli
 - [docs/34](../../docs/34-registro-autorizacao-gate-0-proveniencia-warp.md) — autorização do GATE 0.
 - [docs/35](../../docs/35-resultado-gate-0-proveniencia-warp.md) — resultado do GATE 0 (metadados).
 - [docs/39](../../docs/39-resultado-gate-3-identidade-assinatura-warp.md) — resultado do GATE 3 (identidade e assinatura).
+- [docs/40](../../docs/40-preparacao-gate-4-inventario-pe-estatico-warp.md) — preparação do GATE 4 (inventário PE estático).
 - [docs/16](../../docs/16-politica-distribuicao-cliente.md) — política de distribuição.
