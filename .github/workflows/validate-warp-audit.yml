@@ -14,8 +14,11 @@ on:
       - scripts/test-warp-audit-gate-01.py
       - scripts/test-warp-audit-gate-02.py
       - scripts/test-warp-audit-gate-03.py
+      - scripts/test-warp-audit-gate-04.py
       - scripts/inspect-warp-pe-identity.py
       - scripts/test-warp-pe-identity.py
+      - scripts/inspect-warp-pe-static.py
+      - scripts/test-warp-pe-static.py
       - scripts/test-warp-audit-eol.py
       - .gitattributes
       - .github/workflows/validate-warp-audit.yml
@@ -51,8 +54,14 @@ jobs:
       - name: Run WARP audit GATE 3 tests
         run: python scripts/test-warp-audit-gate-03.py
 
+      - name: Run WARP audit GATE 4 preparation tests
+        run: python scripts/test-warp-audit-gate-04.py
+
       - name: Run WARP PE identity inspector tests
         run: python scripts/test-warp-pe-identity.py
+
+      - name: Run WARP PE static inventory tests
+        run: python scripts/test-warp-pe-static.py
 
       - name: Run WARP audit EOL invariants
         run: python scripts/test-warp-audit-eol.py
@@ -73,4 +82,6 @@ jobs:
           python scripts/test-warp-audit-eol.py
           python scripts/validate-warp-audit.py
           python scripts/test-warp-audit-gate-03.py
+          python scripts/test-warp-audit-gate-04.py
           python scripts/test-warp-pe-identity.py
+          python scripts/test-warp-pe-static.py
