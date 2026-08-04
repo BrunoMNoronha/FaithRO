@@ -40,7 +40,9 @@ auditoria. O relatório completo está em
 | [`decisions/binary-audit-gate-01-decision-record-2026-08-01.json`](decisions/binary-audit-gate-01-decision-record-2026-08-01.json) | (2P-E-C1-A) Registro **real** da autorização humana **exclusiva do GATE 1** (autorização para materialização): `AUTHORIZE_MATERIALIZATION`; **decisão-humana-apenas** (nada materializado/baixado/hasheado/executado); escopo fechado ao blob fixado; `materialization_authorized=true`; **GATE 2 não autorizado**. |
 | [`decisions/binary-audit-gate-02-decision-record-2026-08-01.json`](decisions/binary-audit-gate-02-decision-record-2026-08-01.json) | (2P-E-C2-A) Registro **real** da autorização humana **exclusiva do GATE 2** (materialização e integridade local): `AUTHORIZE_GATE_2`; `gate_2_authorized=true`, `hashing_authorized=true`; **GATE 3 não autorizado**. |
 | [`evidence/binary-audit-gate-02-integrity-evidence-2026-08-01.json`](evidence/binary-audit-gate-02-integrity-evidence-2026-08-01.json) | (2P-E-C2-A) Evidência **real** do GATE 2: `COMPLETED_PASS`; **1** blob materializado fora do repo, tamanho `1137152` e Git blob OID **iguais** aos esperados; SHA-256 local registrado (≠ Git OID); arquivo **removido**; nenhuma execução/inspeção/sandbox/distribuição; **binário não versionado**. |
-| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json`, `binary-audit-gate-00-decision-record-real.schema.json`, `binary-audit-gate-00-provenance-evidence.schema.json`, `binary-audit-gate-01-decision-record-real.schema.json`, `binary-audit-gate-02-decision-record-real.schema.json` e `binary-audit-gate-02-integrity-evidence.schema.json`. |
+| [`decisions/binary-audit-gate-03-decision-record-2026-08-03.json`](decisions/binary-audit-gate-03-decision-record-2026-08-03.json) | (2P-E-C3) Registro **real** da autorização humana **exclusiva do GATE 3** (identidade e assinatura estática offline): `AUTHORIZE_GATE_3`; `gate_3_authorized=true`, materialização temporária + hashing + inspeção de identidade/Authenticode `true`; **GATE 4 não autorizado**. |
+| [`evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json`](evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json) | (2P-E-C3 / **revisão 2P-E-C3-R1**) Evidência **real** do GATE 3, agora `EVIDENCE_INVALIDATED_PENDING_REPEAT`: o `COMPLETED_PASS` foi **suspenso** (D1-D4). Fatos do GATE 2 (blob OID/tamanho/SHA-256) **preservados**; identidade PE (`size_of_optional_header=267` == magic PE32) e assinatura **pendentes de reconfirmação**; leitura estática explícita (sem `opened` ambíguo); OpenSSL `invoked=false`/`exit_code=null`; **nenhuma nova materialização**; **binário não versionado**. |
+| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json`, `binary-audit-gate-00-decision-record-real.schema.json`, `binary-audit-gate-00-provenance-evidence.schema.json`, `binary-audit-gate-01-decision-record-real.schema.json`, `binary-audit-gate-02-decision-record-real.schema.json`, `binary-audit-gate-02-integrity-evidence.schema.json`, `binary-audit-gate-03-decision-record-real.schema.json`, `binary-audit-gate-03-identity-signature-evidence.schema.json` e (convenção da repetição corretiva, sem registros reais) `binary-audit-gate-03-corrective-repeat-decision-record-real.schema.json`, `binary-audit-gate-03-corrective-repeat-pass-evidence.schema.json`, `binary-audit-gate-03-corrective-repeat-fail-evidence.schema.json`, `binary-audit-gate-03-corrective-repeat-stopped-evidence.schema.json` e `binary-audit-gate-03-corrective-repeat-parser-output.schema.json`. |
 
 ## Garantias desta etapa
 
@@ -167,6 +169,114 @@ executado. O `git_blob_oid` é o identificador do objeto Git informado pelo upst
 avanço exige **nova decisão humana** (`AUTHORIZE_GATE_1` / `REPEAT_GATE_0` /
 `STOP_PATH`).
 
+## Resultado do GATE 3 (2P-E-C3) e revisões corretivas (2P-E-C3-R1 … R4.1)
+
+O GATE 3 foi executado por inspeção estática offline — decisão em
+[`decisions/binary-audit-gate-03-decision-record-2026-08-03.json`](decisions/binary-audit-gate-03-decision-record-2026-08-03.json),
+evidência em
+[`evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json`](evidence/binary-audit-gate-03-identity-signature-evidence-2026-08-03.json)
+e em [docs/39](../../docs/39-resultado-gate-3-identidade-assinatura-warp.md).
+
+Uma **revisão corretiva independente (2P-E-C3-R1)** **suspendeu** o `COMPLETED_PASS`
+original e o estado da evidência passou a `EVIDENCE_INVALIDATED_PENDING_REPEAT`:
+
+- **D1** — `opened=false` era ambíguo (o conteúdo foi lido para inspeção estática);
+  substituído por `file_read_for_static_inspection=true` + `launched`/`executed`/
+  `loaded_as_executable=false`.
+- **D2** — `size_of_optional_header=267` (== magic PE32 `0x010B`): forte indício de
+  leitura de campo no offset incorreto; marcado `MEASUREMENT_REQUIRES_RECONFIRMATION`
+  (não alterado por suposição).
+- **D3** — o parser era de scratchpad, não versionado; foi versionado o inspetor
+  revisável [`scripts/inspect-warp-pe-identity.py`](../../scripts/inspect-warp-pe-identity.py)
+  (offline, _bounds checking_) com fixtures sintéticas em
+  [`scripts/test-warp-pe-identity.py`](../../scripts/test-warp-pe-identity.py).
+- **D4** — OpenSSL registrava `exit_code=-1` sem ter sido invocado; corrigido para
+  `invoked=false` / `exit_code=null`.
+
+Os **fatos do GATE 2** (blob OID `c853da42…`, tamanho `1137152`, SHA-256 `345f3464…`,
+materialização e limpeza anteriores, ausência de execução, binário não versionado)
+são **preservados**. A identidade PE e o estado da assinatura ficam **pendentes de
+reconfirmação** por **repetição controlada**. **Nenhuma nova materialização** ocorreu;
+o inspetor revisável **não** foi executado sobre o `WARP.exe`. O **GATE 4 permanece
+não autorizado**; a repetição corretiva do GATE 3 exige **nova decisão humana**
+(proposta: `AUTHORIZE_CORRECTIVE_REPEAT_GATE_3` / `STOP_PATH`). Os testes positivos e
+negativos estão em [`scripts/test-warp-audit-gate-03.py`](../../scripts/test-warp-audit-gate-03.py).
+
+**Endurecimento 2P-E-C3-R2:** o inspetor [`scripts/inspect-warp-pe-identity.py`](../../scripts/inspect-warp-pe-identity.py)
+**removeu** a falsa regra universal `SizeOfOptionalHeader == Magic` (a igualdade não
+viola o PE; `soh=267` é legítimo) e passou a fazer **parsing estrutural da Certificate
+Table** (`WIN_CERTIFICATE`: bounds, alinhamento a 8 bytes, `dwLength`, progressão sem
+loop, soma coincidente), emitindo **apenas metadados** — nunca o `bCertificate`. As
+fixtures em [`scripts/test-warp-pe-identity.py`](../../scripts/test-warp-pe-identity.py)
+foram ampliadas (soh=267 válido + 17 cenários da tabela). A **cadeia da repetição
+corretiva** foi preparada como **convenção** (schemas
+`binary-audit-gate-03-corrective-repeat-*`), **sem** criar decisão ou evidência reais:
+a futura decisão referenciará a decisão original, a evidência invalidada, a revisão R1,
+o commit exato e os Git blob OIDs do parser e dos testes, o blob imutável do WARP e o
+escopo de **exatamente uma** repetição; a evidência invalidada **nunca** volta a
+`COMPLETED_PASS`.
+
+**Endurecimento 2P-E-C3-R3:** o inspetor passou a validar a **Section Table**
+(`NumberOfSections` 1–96 + flag `IMAGE_FILE_EXECUTABLE_IMAGE`; offset/tamanho/fim;
+`within_file`), `SizeOfHeaders` (coerente com o fim da tabela, o arquivo e o
+`FileAlignment`) e `SectionAlignment`/`FileAlignment`, sem inspecionar o conteúdo das
+seções; `pe_valid` foi substituído por `pe_headers_structurally_parseable` (sem
+overclaim). A Certificate Table exige `offset >= SizeOfHeaders` (nunca sobreposta aos
+cabeçalhos) e registra `declared_dw_length`/`aligned_span`/`padding_length`/
+`padding_zero_filled` (padding só-zero), reconhecendo `0x0009` (`WIN_CERT_TYPE_PKCS1_SIGN`).
+As fixtures foram reconstruídas com Section Table válida. O modelo de resultado da
+repetição virou **três schemas** (`...-{pass,fail,stopped}-evidence`) — FAIL não exige
+`identity_matches_gate_2`, STOPPED não exige conclusão. A **proveniência** é amarrada ao
+conteúdo real: o validador recalcula o Git blob OID do parser e dos testes
+(`SHA-1("blob <size>\0"+content)`, offline) e a saída exata do parser é um artefato
+textual separado (`...-parser-output-*.json`) referenciado por SHA-256. O orquestrador
+reprova duplicações (≤1 decisão, ≤1 evidência, ≤1 saída) e segunda repetição. **Nenhum
+registro real** existe nesta etapa.
+
+**Atomicidade 2P-E-C3-R4:** o orquestrador trata `decisão → evidência → saída do
+parser` como unidade transacional e **reprova órfãos** (evidência/saída sem decisão;
+saída sem evidência). A saída do parser é presa aos **bytes exatos** (SHA-256 sobre os
+bytes reais; sem BOM/CRLF; newline final único; sem chaves duplicadas; `raw == forma
+determinística`) e o seu schema é **fechado** (`additionalProperties=false` em todos os
+níveis, com `security_scan` e proibição de `bCertificate`/base64). As referências de
+saída/decisão exigem **igualdade exata** de caminho. A **proveniência** do parser **e
+dos testes** é recalculada offline (`git_blob_oid_for_bytes`) e conferida contra a
+decisão **e** a evidência, exigindo o mesmo commit; `None` é erro. Os campos duplicados
+na evidência PASS devem ser **idênticos** à saída real (fonte primária). PASS/FAIL/
+STOPPED têm schemas distintos e o parser emite `certificate_table.within_file` sempre,
+permitindo fechar o schema da saída.
+
+**Referência do FAIL e invariantes 2P-E-C3-R4.1:** o caminho `COMPLETED_FAIL` passou a
+prender a saída com a **mesma igualdade exata** do PASS — quando
+`parser_output_produced=true`, exige `parser_output_raw`/`present_output_name`/
+`parser_output_path` não nulos, `reviewed_parser_output_ref.path` **igual** ao caminho
+canônico do único arquivo (não basta `endswith`) e SHA-256 dos bytes reais. Uma função
+comum (`validate_parser_execution_state`) aplica em Python os invariantes de
+`parser_invoked`/`parser_completed`/`parser_output_produced` para PASS/FAIL/STOPPED:
+FAIL admite **apenas** `PRE_PARSER_FAIL` (`false/false/false`),
+`PARSER_ERROR_WITHOUT_OUTPUT` (`true/false/false`) e `POST_OUTPUT_FAIL`
+(`true/true/true`) — qualquer outra combinação é reprovada. STOPPED não modela
+`parser_completed` (limitação documentada); o campo não foi inventado. O **parser e os
+testes do parser não mudaram** (blob OIDs inalterados) e **nada** foi materializado,
+executado ou registrado como repetição real; a evidência histórica permanece
+`EVIDENCE_INVALIDATED_PENDING_REPEAT` e o **GATE 4 continua não autorizado**.
+
+**Repetição corretiva executada (2P-E-C3-REPEAT) — COMPLETED_PASS:** sob a decisão
+humana real `AUTHORIZE_CORRECTIVE_REPEAT_GATE_3`
+([registro](decisions/binary-audit-gate-03-corrective-repeat-decision-record-2026-08-03.json)),
+executou-se **uma** repetição controlada: materialização única do blob `c853da42…` pela
+API oficial Git Data do GitHub (por object ID) em diretório temporário fora do repo,
+identidade reconfirmada **igual** ao GATE 2 (`1137152` / `c853da42…` / `sha256 345f3464…`),
+e **apenas** o parser revisado executado para leitura estática. Resultado: `PE32`,
+5 seções, **`SizeOfOptionalHeader=224`** e magic `0x010b` separados (reconfirmando o
+achado D2 da R1), Certificate Table `present=false` (assinatura ausente ≠ malware). A
+[saída do parser](evidence/binary-audit-gate-03-corrective-repeat-parser-output-2026-08-03.json)
+foi versionada e presa por bytes/referência à
+[evidência `COMPLETED_PASS`](evidence/binary-audit-gate-03-corrective-repeat-evidence-2026-08-03.json).
+Binário temporário removido; **não** executado/carregado; sem cliente/`Ragexe`/VPS; GATE 4
+e segunda repetição **não** autorizados; evidência histórica invalidada **preservada**.
+PASS significa **apenas** que a repetição controlada do GATE 3 foi concluída.
+
 ## Propriedade intelectual
 
 WARP é **GPL-3.0** (uso apenas local; binário não versionado no FaithRO). `Ragexe`,
@@ -183,4 +293,5 @@ empacotar ou compartilhar (ver [docs/16](../../docs/16-politica-distribuicao-cli
 - [docs/33](../../docs/33-plano-auditoria-binaria-offline-warp.md) — plano da auditoria binária offline.
 - [docs/34](../../docs/34-registro-autorizacao-gate-0-proveniencia-warp.md) — autorização do GATE 0.
 - [docs/35](../../docs/35-resultado-gate-0-proveniencia-warp.md) — resultado do GATE 0 (metadados).
+- [docs/39](../../docs/39-resultado-gate-3-identidade-assinatura-warp.md) — resultado do GATE 3 (identidade e assinatura).
 - [docs/16](../../docs/16-politica-distribuicao-cliente.md) — política de distribuição.
