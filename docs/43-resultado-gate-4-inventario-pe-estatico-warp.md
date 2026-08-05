@@ -95,33 +95,45 @@ binário e diretório removidos; nenhuma ação proibida.
   `.rsrc` (R--, ~7.63), `.reloc` (R--, ~6.75). **Nenhuma seção W+X.**
 - **15 DLLs importadas** (Qt5Core/Gui/Qml/Quick, KERNEL32, MSVCP140, VCRUNTIME140,
   SHELL32, `api-ms-win-crt-*`, e as próprias `GATE.dll` e `YAML.dll`); **sem exports**.
-- **Manifest** presente, `requested_execution_level=asInvoker` (não exige admin).
-- **Certificate Table ausente** (não assinado). Overlay ausente. Sem TLS callbacks.
+- **Manifest** presente, `requested_execution_level=asInvoker` (o manifest **não
+  solicita** elevação administrativa).
+- **Certificate Table ausente** (sem assinatura Authenticode embutida detectada;
+  ausência de assinatura **não** prova malware). Overlay ausente. Sem TLS callbacks.
   Relocations presentes (76 blocos). Debug directory presente (POGO, sem CodeView).
 
 ## 12. Heurísticas
 
-Único indicador: `HIGH_ENTROPY_SECTION` em `.rsrc` (entropia ~7.63, típica de
-recursos comprimidos). Sem W+X, sem seção executável virtual-only, sem overlay, sem
-"poucas DLLs". Entropia alta isolada **não** prova empacotamento nem malware.
+A seção `.rsrc` apresentou entropia aproximadamente 7,63 e foi classificada pelo
+analisador como `HIGH_ENTROPY_SECTION`. **O inventário não determina a causa dessa
+entropia.** O achado, isoladamente, **não** prova compressão, empacotamento ou
+malware. Sem W+X, sem seção executável virtual-only, sem overlay, sem "poucas DLLs".
 
 ## 13. Indicadores textuais
 
-Sanitizados e limitados: 6 URLs (licença GNU e convites Discord), 5 domínios, 58
-caminhos relativos de recursos Qt, 0 mutex/serviço/registro, 0 indicadores de
+Sanitizados e limitados. **6 strings classificadas como URLs** (incluindo
+`gnu.org/licenses`, `github.com/Neo-Mind/WARP`, `ko-fi.com` e convites de chat).
+**5 strings classificadas como semelhantes a domínios** — a lista inclui valores
+que podem ser identificadores internos ou falsos positivos (por exemplo `Item.Top`
+e `console.info`). **58 strings classificadas como caminhos embutidos** — a maioria
+é compatível com referências QML/Qt, mas a lista contém valores ambíguos ou
+possíveis falsos positivos. **URL, domínio ou caminho embutido não provam acesso,
+comunicação de rede ou uso de arquivo.** 0 mutex/serviço/registro, 0 indicadores de
 empacotamento; **16 strings redigidas** por política. Sem bytes brutos,
 `bCertificate`, base64, hexdump, segredo, IP literal ou caminho pessoal na saída.
 
 ## 14. Interpretação contextual
 
-Perfil consistente com uma **aplicação desktop Qt5/C++** (patcher WARP), sem
-assinatura Authenticode, executando com privilégio de usuário comum (`asInvoker`).
-A classificação de imports mostra `debug_anti_debug` (IsDebuggerPresent,
-QueryPerformanceCounter), `library_loading` (GetModuleHandleW, GetProcAddress) e
-`process` (TerminateProcess) — **nenhum** import classificado de rede, injeção,
-memória remota, cripto, serviço ou registro. Estes são **achados** que exigem
-interpretação humana; **não** constituem veredito de segurança. A alta entropia de
-`.rsrc` é esperada para recursos. **Nada aqui declara o arquivo seguro ou malicioso.**
+As DLLs importadas incluem Qt5 (Qt5Core/Gui/Qml/Quick), **compatíveis** com uma
+aplicação Qt/C++ — mas **imports são dependências declaradas, não comportamento
+observado**. O manifest declara `asInvoker` (não solicita elevação administrativa).
+A classificação de imports (por **tabela fechada**) apontou `debug_anti_debug`
+(IsDebuggerPresent, QueryPerformanceCounter), `library_loading` (GetModuleHandleW,
+GetProcAddress) e `process` (TerminateProcess); **nenhum import foi classificado**
+como rede, injeção, memória remota, cripto, serviço ou registro — o que **não** nega
+comportamento em tempo de execução (a análise é estática). A causa da alta entropia
+de `.rsrc` **não** é determinada pelo inventário. Estes são **achados** que exigem
+interpretação humana e **não** constituem veredito de segurança. **Nada aqui declara
+o arquivo seguro ou malicioso.**
 
 ## 15. Limitações
 

@@ -37,7 +37,7 @@
     "started_at": "2026-08-05T18:05:16Z",
     "finished_at": "2026-08-05T18:05:17Z",
     "cleanup_at": "2026-08-05T18:05:19Z",
-    "operator": "Operador tecnico FaithRO (ETAPA 2P-E-C4-EXEC)",
+    "operator": "Claude Code, operando sob autorizacao de BrunoMNoronha (ETAPA 2P-E-C4-EXEC)",
     "method": "GITHUB_OFFICIAL_GIT_DATA_API_BLOB_BY_OID",
     "network_scope": "GITHUB_OFFICIAL_ONLY"
   },
@@ -118,9 +118,9 @@
     "PE32 (x86), subsistema Windows GUI, 5 secoes; aplicacao baseada em Qt5 (Qt5Core/Gui/Qml/Quick) com dependencias proprias GATE.dll e YAML.dll.",
     "15 DLLs importadas; sem exports; manifest presente com requested_execution_level=asInvoker (NAO exige privilegio de administrador).",
     "Certificate Table ausente (nao assinado), consistente com o GATE 3; ausencia de assinatura NAO prova malware.",
-    "Nenhuma secao gravavel-e-executavel (W+X); unica heuristica: HIGH_ENTROPY_SECTION em .rsrc (entropia aproximadamente 7.63, tipica de recursos comprimidos; NAO prova empacotamento).",
+    "Nenhuma secao gravavel-e-executavel (W+X); unica heuristica: HIGH_ENTROPY_SECTION em .rsrc (entropia aproximadamente 7.63). O inventario NAO determina a causa dessa entropia; isoladamente NAO prova compressao, empacotamento nem malware.",
     "Classificacao de imports: debug_anti_debug (IsDebuggerPresent, QueryPerformanceCounter), library_loading (GetModuleHandleW, GetProcAddress) e process (TerminateProcess); NENHUM import classificado de rede, injecao, memoria remota, cripto, servico ou registro.",
-    "Indicadores textuais sanitizados: 6 URLs (licenca GNU e convites Discord), 5 dominios, 58 caminhos relativos de recursos Qt; 16 strings redigidas por politica; nenhum bCertificate, base64, segredo, IP literal ou caminho pessoal na saida.",
+    "Indicadores textuais sanitizados: 6 strings classificadas como URLs (incluindo gnu.org/licenses, github.com/Neo-Mind/WARP, ko-fi.com e convites de chat); 5 strings classificadas como semelhantes a dominios, incluindo valores que podem ser identificadores internos ou falsos positivos (por exemplo Item.Top e console.info); 58 strings classificadas como caminhos embutidos, a maioria compativel com referencias QML/Qt mas com valores ambiguos ou possiveis falsos positivos. URL, dominio ou caminho embutido NAO provam acesso, comunicacao de rede ou uso de arquivo. 16 strings redigidas por politica; nenhum bCertificate, base64, segredo, IP literal ou caminho pessoal na saida.",
     "Overlay ausente; sem TLS callbacks; relocations presentes (76 blocos); debug directory presente (POGO, sem CodeView)."
   ],
   "limitations": [
