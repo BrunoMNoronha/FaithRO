@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "project": "WARP",
+  "stage": "2P-E-C4",
+  "record_type": "binary-audit-gate-04-pass-evidence-real",
+  "status": "COMPLETED_PASS",
+  "outcome": "COMPLETED_PASS",
+  "gate": {
+    "id": 4,
+    "name": "STATIC_PE_INVENTORY"
+  },
+  "gate_4_decision_ref": {
+    "path": "client/warp-audit/decisions/binary-audit-gate-04-decision-record-2026-08-05.json"
+  },
+  "reviewed_analyzer_ref": {
+    "path": "scripts/inspect-warp-pe-static.py"
+  },
+  "reviewed_analyzer_commit": "a5843c306288fb27d8e1bd1741f6ca75d810defa",
+  "reviewed_analyzer_git_blob_oid": "f223ae7b50048aa493a47dcb95ead9ad5716e3cc",
+  "reviewed_analyzer_test_ref": {
+    "path": "scripts/test-warp-pe-static.py"
+  },
+  "reviewed_analyzer_test_git_blob_oid": "fdc79947a8f7c151dcee240e6317f87e36d80961",
+  "reviewed_analyzer_output_ref": {
+    "path": "client/warp-audit/evidence/binary-audit-gate-04-static-inventory-output-2026-08-05.json"
+  },
+  "reviewed_analyzer_output_sha256": "84c3c49a770b475fdf25c43467498e014b2f8950ef172384bb8ea48bbe17f584",
+  "parser_execution": {
+    "analyzer_invoked": true,
+    "analyzer_completed": true,
+    "analyzer_output_produced": true
+  },
+  "execution": {
+    "gate_4_started": true,
+    "gate_4_completed": true,
+    "execution_state": "COMPLETED",
+    "started_at": "2026-08-05T18:05:16Z",
+    "finished_at": "2026-08-05T18:05:17Z",
+    "cleanup_at": "2026-08-05T18:05:19Z",
+    "operator": "Operador tecnico FaithRO (ETAPA 2P-E-C4-EXEC)",
+    "method": "GITHUB_OFFICIAL_GIT_DATA_API_BLOB_BY_OID",
+    "network_scope": "GITHUB_OFFICIAL_ONLY"
+  },
+  "upstream_expected": {
+    "repository_full_name": "Neo-Mind/WARP",
+    "expected_branch": "rock_win32",
+    "commit_oid": "9b1173e9e4e135c68e150704f01186ab5e763acd",
+    "tree_oid": "1aebae06d5c71a145afc35cc72fcf5c210a08758",
+    "artifact_path": "win32/WARP.exe",
+    "artifact_blob_oid": "c853da42d18dfe090b4e941b435d989311faf3dc",
+    "artifact_blob_size": 1137152
+  },
+  "identity_reconfirmation": {
+    "materialized_file_count": 1,
+    "temporary_dir_outside_repo": true,
+    "size_bytes_observed": 1137152,
+    "size_match": true,
+    "git_blob_oid_computed": "c853da42d18dfe090b4e941b435d989311faf3dc",
+    "git_blob_oid_match": true,
+    "sha256_local": "345f3464ee72a60afc97bde0773410f47348a00d8629182fe52741c5f1a42874",
+    "sha256_match": true,
+    "identity_matches_gate_2": true,
+    "file_read_for_static_inspection": true,
+    "launched": false,
+    "executed": false,
+    "loaded_as_executable": false
+  },
+  "static_inventory_summary": {
+    "produced_by": "REVIEWED_VERSIONED_ANALYZER",
+    "pe_format": "PE32",
+    "section_count": 5,
+    "import_dll_count": 15,
+    "export_present": false,
+    "manifest_present": true,
+    "requested_execution_level": "asInvoker",
+    "signature_present": false,
+    "overlay_present": false,
+    "tls_callbacks_present": false,
+    "relocations_present": true,
+    "debug_directory_present": true
+  },
+  "reviewed_analyzer": {
+    "path": "scripts/inspect-warp-pe-static.py",
+    "test_path": "scripts/test-warp-pe-static.py",
+    "git_blob_oid": "f223ae7b50048aa493a47dcb95ead9ad5716e3cc",
+    "stdlib_only": true,
+    "network_access": false,
+    "executes_or_loads_pe": false,
+    "emulates_pe": false,
+    "unpacks_dynamically": false,
+    "run_on_warp_exe": true
+  },
+  "security_assertions": {
+    "no_execution_performed": true,
+    "no_dynamic_analysis_performed": true,
+    "no_emulation_performed": true,
+    "no_unpacking_performed": true,
+    "no_sandbox_created": true,
+    "no_wine_or_vm_load": true,
+    "no_network_after_fetch": true,
+    "no_external_service_upload": true,
+    "no_gate5_inspection_performed": true,
+    "no_ragexe_access": true,
+    "no_client_access": true,
+    "no_vps_access": true,
+    "temporary_file_removed": true,
+    "temporary_dir_removed": true,
+    "binary_versioned": false,
+    "raw_bytes_versioned": false,
+    "gate_5_authorized": false
+  },
+  "preserved_gate_3_facts": {
+    "artifact_blob_oid": "c853da42d18dfe090b4e941b435d989311faf3dc",
+    "artifact_blob_size": 1137152,
+    "artifact_sha256": "345f3464ee72a60afc97bde0773410f47348a00d8629182fe52741c5f1a42874"
+  },
+  "findings": [
+    "PE32 (x86), subsistema Windows GUI, 5 secoes; aplicacao baseada em Qt5 (Qt5Core/Gui/Qml/Quick) com dependencias proprias GATE.dll e YAML.dll.",
+    "15 DLLs importadas; sem exports; manifest presente com requested_execution_level=asInvoker (NAO exige privilegio de administrador).",
+    "Certificate Table ausente (nao assinado), consistente com o GATE 3; ausencia de assinatura NAO prova malware.",
+    "Nenhuma secao gravavel-e-executavel (W+X); unica heuristica: HIGH_ENTROPY_SECTION em .rsrc (entropia aproximadamente 7.63, tipica de recursos comprimidos; NAO prova empacotamento).",
+    "Classificacao de imports: debug_anti_debug (IsDebuggerPresent, QueryPerformanceCounter), library_loading (GetModuleHandleW, GetProcAddress) e process (TerminateProcess); NENHUM import classificado de rede, injecao, memoria remota, cripto, servico ou registro.",
+    "Indicadores textuais sanitizados: 6 URLs (licenca GNU e convites Discord), 5 dominios, 58 caminhos relativos de recursos Qt; 16 strings redigidas por politica; nenhum bCertificate, base64, segredo, IP literal ou caminho pessoal na saida.",
+    "Overlay ausente; sem TLS callbacks; relocations presentes (76 blocos); debug directory presente (POGO, sem CodeView)."
+  ],
+  "limitations": [
+    "Analise SOMENTE estatica; nenhuma execucao, carga como modulo, emulacao ou desempacotamento dinamico.",
+    "Import NAO prova uso; string NAO prova comportamento.",
+    "Entropia alta isolada NAO prova empacotamento nem malware.",
+    "Ausencia de indicador NAO prova seguranca; ausencia de assinatura NAO prova malware.",
+    "Identidade confere com o GATE 2/3, mas identidade NAO prova seguranca.",
+    "Nenhuma analise dinamica, reputacao externa ou validacao de comportamento; GATE 5 NAO executado.",
+    "Achados exigem interpretacao contextual e humana; nenhuma conclusao depende de uma unica metrica."
+  ],
+  "rollback": "Antes do merge: corrigir por commit normal, manter draft ou fechar o PR. Depois de eventual integracao: corrigir ou revogar por novo PR sem reescrever a evidencia historica; nunca reexecutar o analisador sobre o blob real, nunca autorizar uma segunda execucao nem o GATE 5, nunca reintroduzir o binario no Git. Nunca usar reset destrutivo ou force push.",
+  "notes": "COMPLETED_PASS significa que a auditoria estatica foi executada conforme o contrato; NAO significa que o executavel e seguro, benigno, malicioso ou aprovado para uso no cliente. A saida do inventario esta presa por SHA-256. O binario foi materializado temporariamente por object ID (GitHub oficial), reconfirmado e removido; nenhum binario foi versionado. GATE 5 e uso no cliente permanecem nao autorizados."
+}
