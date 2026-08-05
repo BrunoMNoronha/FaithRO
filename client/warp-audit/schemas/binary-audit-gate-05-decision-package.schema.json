@@ -1,0 +1,141 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "binary-audit-gate-05-decision-package.schema.json",
+  "title": "Pacote de preparacao da decisao humana do GATE 5 (WARP)",
+  "description": "CONVENCAO (2P-E-C5-PREP) para o PACOTE de preparacao da FUTURA decisao humana sobre o GATE 5 (verificacoes locais de seguranca) da auditoria binaria offline do WARP. Este pacote NAO concede autorizacao, NAO seleciona opcao e NAO executa nada. Estado obrigatorio: PENDING_HUMAN_DECISION. gate_5_authorized const:false; execution_authorized const:false; client_preparation_authorized const:false. Segue a convencao do pacote de decisao do caminho do nucleo (core-path-decision-package). O merge do PR desta preparacao NAO constitui decisao humana e NAO autoriza o GATE 5.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "project",
+    "stage",
+    "record_type",
+    "purpose",
+    "classification",
+    "non_authorization_notice",
+    "reference_hash_method",
+    "gate_4_reference",
+    "gate_5_definition",
+    "gaps",
+    "decision_options",
+    "state",
+    "decision_status",
+    "human_decision_required",
+    "human_decision_received",
+    "decision_received",
+    "option_selected",
+    "gate_5_authorized",
+    "execution_authorized",
+    "client_preparation_authorized",
+    "materialization_authorized",
+    "gate_4_reexecution_authorized",
+    "local_security_scan_authorized",
+    "external_reputation_upload_authorized",
+    "vps_access_authorized",
+    "distribution_authorized"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "project": { "type": "string", "const": "WARP" },
+    "stage": { "type": "string", "const": "2P-E-C5-PREP" },
+    "record_type": { "type": "string", "const": "gate-5-decision-preparation-package" },
+    "purpose": { "type": "string", "minLength": 1 },
+    "classification": { "type": "string", "enum": ["D1", "D2", "D3"] },
+    "non_authorization_notice": { "type": "string", "minLength": 1 },
+    "reference_hash_method": { "type": "string", "minLength": 1 },
+    "gate_4_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "integrated_squash",
+        "pull_request",
+        "outcome",
+        "output_path",
+        "output_sha256",
+        "pass_evidence_path",
+        "decision_record_path",
+        "outcome_is_security_approval"
+      ],
+      "properties": {
+        "integrated_squash": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+        "pull_request": { "type": "integer", "minimum": 1 },
+        "outcome": { "type": "string", "const": "COMPLETED_PASS" },
+        "output_path": { "type": "string", "minLength": 1 },
+        "output_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "pass_evidence_path": { "type": "string", "minLength": 1 },
+        "decision_record_path": { "type": "string", "minLength": 1 },
+        "outcome_is_security_approval": { "type": "boolean", "const": false }
+      }
+    },
+    "gate_5_definition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gate_id",
+        "gate_name",
+        "nature",
+        "source_plan_doc",
+        "source_plan_example",
+        "objective",
+        "planned_actions",
+        "does_not_authorize",
+        "must_remain_false"
+      ],
+      "properties": {
+        "gate_id": { "type": "integer", "const": 5 },
+        "gate_name": { "type": "string", "const": "Verificacoes locais de seguranca" },
+        "nature": { "type": "string", "minLength": 1 },
+        "source_plan_doc": { "type": "string", "minLength": 1 },
+        "source_plan_example": { "type": "string", "minLength": 1 },
+        "objective": { "type": "string", "minLength": 1 },
+        "planned_actions": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "does_not_authorize": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "must_remain_false": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "gaps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["element", "status", "note"],
+        "properties": {
+          "element": { "type": "string", "minLength": 1 },
+          "status": { "type": "string", "enum": ["definido", "ambiguo", "ausente"] },
+          "note": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "decision_options": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label", "selected", "authorizes_execution"],
+        "properties": {
+          "id": { "type": "string", "enum": ["A", "B", "C", "D"] },
+          "label": { "type": "string", "minLength": 1 },
+          "selected": { "type": "boolean", "const": false },
+          "authorizes_execution": { "type": "boolean" }
+        }
+      }
+    },
+    "state": { "type": "string", "const": "PENDING_HUMAN_DECISION" },
+    "decision_status": { "type": "string", "const": "PENDING_HUMAN_DECISION" },
+    "human_decision_required": { "type": "boolean", "const": true },
+    "human_decision_received": { "type": "boolean", "const": false },
+    "decision_received": { "type": "boolean", "const": false },
+    "option_selected": { "type": "boolean", "const": false },
+    "gate_5_authorized": { "type": "boolean", "const": false },
+    "execution_authorized": { "type": "boolean", "const": false },
+    "client_preparation_authorized": { "type": "boolean", "const": false },
+    "materialization_authorized": { "type": "boolean", "const": false },
+    "gate_4_reexecution_authorized": { "type": "boolean", "const": false },
+    "local_security_scan_authorized": { "type": "boolean", "const": false },
+    "external_reputation_upload_authorized": { "type": "boolean", "const": false },
+    "vps_access_authorized": { "type": "boolean", "const": false },
+    "distribution_authorized": { "type": "boolean", "const": false }
+  }
+}

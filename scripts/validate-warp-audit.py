@@ -53,6 +53,11 @@ ARTIFACTS = [
     ("patch-selection.example.json", "patch-selection.schema.json"),
     ("core-path-decision-package.example.json", "core-path-decision-package.schema.json"),
     ("core-path-decision-record.example.json", "core-path-decision-record.schema.json"),
+    # ETAPA 2P-E-C5-PREP: pacote de PREPARACAO da decisao humana do GATE 5.
+    # Validado pelas mesmas regras genericas (schema fechado + security_scan +
+    # forbidden_flags). NAO concede autorizacao: state=PENDING_HUMAN_DECISION,
+    # gate_5_authorized/execution_authorized/client_preparation_authorized const:false.
+    ("binary-audit-gate-05-decision-package.example.json", "binary-audit-gate-05-decision-package.schema.json"),
 ]
 
 # ETAPA 2P-E-A2: registro REAL da decisao humana (preenchido, fora do template).
