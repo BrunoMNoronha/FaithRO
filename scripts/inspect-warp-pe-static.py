@@ -410,7 +410,8 @@ def compute_overlay(sections, file_size):
 
 def parse_imports(data, sections, dd, file_size, is_plus):
     """IMAGE_IMPORT_DESCRIPTOR array. Emite DLLs, APIs por nome e ordinais.
-    Fail-open estrutural: uma DLL truncada interrompe a coleta com truncated=true."""
+    Fail-closed: descritor/thunk/nome truncado ou RVA nao mapeavel levanta PEError;
+    exceder os limites de coleta apenas marca truncated=true (sem perder o fechamento)."""
     result = {
         "present": False,
         "dll_count": 0,
