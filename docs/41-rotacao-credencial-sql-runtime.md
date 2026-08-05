@@ -2,8 +2,9 @@
 
 > **Escopo:** operação de segurança **com escrita controlada** na VPS (rotação de
 > credencial) e documentação sanitizada no repositório. Nenhum segredo é
-> versionado. Nenhum dado de jogador foi lido ou alterado. Nenhuma conta foi
-> criada. Complementa [13-credenciais-sql-rathena.md](13-credenciais-sql-rathena.md)
+> versionado. Nenhum dado individual, pessoal ou conteúdo de jogador foi lido ou
+> alterado; somente contagens agregadas foram consultadas para validação. Nenhuma
+> conta foi criada. Complementa [13-credenciais-sql-rathena.md](13-credenciais-sql-rathena.md)
 > e [38-auditoria-prontidao-primeiro-acesso.md](38-auditoria-prontidao-primeiro-acesso.md).
 
 ## 1. Objetivo
@@ -47,11 +48,14 @@ comprometida** e foi rotacionada.
   IDENTIFIED BY ...`, plugin `mysql_native_password` preservado). Grants
   inalterados.
 
-Arquivos deliberadamente **não** alterados: base `conf/inter_athena.conf` (usa
-outro usuário, valores default), `passwd` inter-servidor de char/map (não é SQL),
-`channels.conf` (senha de canal de chat), repositório clonado
-`/opt/faithro/faithro-repo` (`.env.example`/docs — não lidos pelo runtime),
-backups históricos.
+Arquivos deliberadamente **não** alterados **durante a 2O-B1 original**: base
+`conf/inter_athena.conf` (usa outro usuário, valores default), `passwd`
+inter-servidor de char/map (não é SQL), `channels.conf` (senha de canal de chat),
+repositório clonado `/opt/faithro/faithro-repo` (`.env.example`/docs — não lidos
+pelo runtime). Os **backups históricos** de rotações anteriores não foram
+alterados na 2O-B1 original, mas foram **posteriormente aposentados** na
+2O-B1-R1 (ver §15) — portanto **não** permaneceram intocados ao longo de toda a
+cadeia.
 
 ## 6. Estado anterior (baseline)
 
@@ -71,17 +75,26 @@ backups históricos.
    fechada (um único arquivo de runtime + o usuário no banco).
 4. **Backup + rollback:** backup do arquivo alterado com checksum SHA-256, modo
    `600`, em diretório protegido `700` sob `/opt/faithro/backups/config/`;
-   script de rollback preparado e validado **antes** da escrita.
-5. **Geração da credencial:** nova senha criptograficamente aleatória (48
-   caracteres alfanuméricos) gerada **na VPS**, em arquivo protegido em `/run`
-   (`root:600`), nunca impressa, nunca transmitida, nunca copiada para fora.
-6. **Rotação coordenada:** atualização das seis referências no config, seguida
-   de `ALTER USER` no MariaDB, com **saída totalmente suprimida**.
+   script de rollback preparado e validado **antes** da escrita (esse rollback e
+   o backup em texto claro foram **posteriormente aposentados** na 2O-B1-R1 — §15).
+5. **Geração da credencial:** a credencial **definitiva** (48 caracteres
+   alfanuméricos, criptograficamente aleatória) foi gerada **na VPS**, em arquivo
+   protegido em `/run` (`root:600`), e **não foi impressa, transmitida nem
+   copiada para fora**. Uma tentativa **anterior** gerou uma senha **candidata**
+   que foi exibida por um erro de sintaxe e imediatamente descartada — ver §10;
+   essa candidata **nunca** se tornou credencial ativa.
+6. **Rotação coordenada:** atualização das seis referências no config, seguida do
+   `ALTER USER` no MariaDB. A **primeira** tentativa de `ALTER USER` usou sintaxe
+   incompatível com o MariaDB, falhou e exibiu a senha candidata (§10); o
+   `ALTER USER` **definitivo e bem-sucedido** foi executado com **saída
+   suprimida**.
 7. **Reinício ordenado:** `login → char → map`, com validação a cada passo.
 8. **Validação e observação:** testes de autenticação e janela de observação de
    60 segundos.
-9. **Limpeza:** todos os temporários secretos triturados (`shred`) e removidos;
-   backup de rollback preservado.
+9. **Limpeza:** todos os temporários secretos triturados (`shred`) e removidos.
+   **Ao final da 2O-B1 original**, o backup de rollback havia sido **preservado**;
+   a revisão 2O-B1-R1 identificou que ele continha a credencial anterior em texto
+   claro e o **aposentou** (§15) — o backup sensível **não** existe mais.
 
 A senha foi gerada com classe **alfanumérica** por decisão de compatibilidade:
 garante interpretação correta pelo parser de linha do rAthena e pelo literal SQL,
