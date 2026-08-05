@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "project": "WARP",
+  "stage": "2P-E-C4",
+  "record_type": "binary-audit-gate-04-decision-record-real",
+  "status": "AUTHORIZED_FOR_SINGLE_GATE",
+  "gate": {
+    "id": 4,
+    "name": "STATIC_PE_INVENTORY"
+  },
+  "decision": "AUTHORIZE_GATE_4_EXECUTION",
+  "execution_state": "AUTHORIZED_NOT_STARTED",
+  "decider": "BrunoMNoronha",
+  "role": "Responsavel tecnico e mantenedor do projeto FaithRO - Laos Deos",
+  "authority": "Responsavel tecnico e mantenedor do projeto FaithRO - Laos Deos",
+  "channel": "Decisao humana delegada ao consultor tecnico FaithRO nesta conversa",
+  "date": "2026-08-05",
+  "justification": "O GATE 3 terminou COMPLETED_PASS. A ferramenta do GATE 4 foi preparada em PR separado (#54) e passou por revisao independente (2P-E-C4-REVIEW). O analisador scripts/inspect-warp-pe-static.py e estritamente estatico (somente leitura de bytes; sem subprocess, ctypes, rede ou shell) e fail-closed; os testes usam exclusivamente fixtures sinteticas; a saida e deterministica, sanitizada e fechada por schema. A materializacao futura fica limitada a um unico blob Git imutavel (win32 do WARP, blob c853da42..., 1137152 bytes) obtido apenas do GitHub oficial, fora do repositorio FaithRO. A inspecao estatica e necessaria para avancar na avaliacao do WARP. Esta autorizacao NAO constitui aprovacao de seguranca do executavel nem conclusao da avaliacao; achados de import, string ou entropia NAO serao tratados isoladamente como veredito, exigindo interpretacao contextual e humana. Os caminhos STOPPED e COMPLETED_FAIL permanecem disponiveis. Nenhuma autorizacao transitiva e concedida: gate_5_authorized=false e execution_authorized=false.",
+  "conditions": [
+    { "n": 1, "text": "A autorizacao vale para uma unica execucao do GATE 4." },
+    { "n": 2, "text": "O squash integrado da ferramenta deve ser exatamente a5843c306288fb27d8e1bd1741f6ca75d810defa." },
+    { "n": 3, "text": "O blob do analisador deve ser exatamente f223ae7b50048aa493a47dcb95ead9ad5716e3cc." },
+    { "n": 4, "text": "O blob dos testes deve ser exatamente fdc79947a8f7c151dcee240e6317f87e36d80961." },
+    { "n": 5, "text": "Exatamente um arquivo binario pode ser materializado." },
+    { "n": 6, "text": "O arquivo materializado deve ser exatamente o blob c853da42d18dfe090b4e941b435d989311faf3dc." },
+    { "n": 7, "text": "A unica origem de rede permitida e o GitHub oficial." },
+    { "n": 8, "text": "Sao proibidos clone, pull, fetch de branch, releases, mirrors e fontes de terceiros para obter o executavel." },
+    { "n": 9, "text": "A materializacao deve ocorrer fora do repositorio FaithRO." },
+    { "n": 10, "text": "A area temporaria deve usar permissoes restritas e umask 077, quando suportado." },
+    { "n": 11, "text": "Tamanho, Git blob OID e SHA-256 devem ser reconfirmados antes do analisador." },
+    { "n": 12, "text": "Qualquer divergencia de identidade deve gerar limpeza e COMPLETED_FAIL." },
+    { "n": 13, "text": "Apos obter o blob, nenhum acesso de rede e permitido." },
+    { "n": 14, "text": "Somente o analisador preso ao blob revisado pode processar o arquivo." },
+    { "n": 15, "text": "O analisador pode somente ler bytes de forma estatica." },
+    { "n": 16, "text": "O PE nao pode ser executado, carregado como modulo, emulado ou aberto por shell. A leitura estatica da tabela de imports pelo analisador revisado permanece autorizada." },
+    { "n": 17, "text": "Wine, Proton, maquina virtual, sandbox e analise dinamica sao proibidos." },
+    { "n": 18, "text": "Desempacotamento dinamico e modificacao do binario sao proibidos." },
+    { "n": 19, "text": "Servicos externos de reputacao sao proibidos." },
+    { "n": 20, "text": "A saida permitida e somente JSON deterministico e sanitizado conforme o schema." },
+    { "n": 21, "text": "Bytes brutos, conteudo de certificado, base64, hexdumps, dumps integrais, segredos e caminhos pessoais nao podem entrar na saida." },
+    { "n": 22, "text": "Imports, strings, APIs e entropia sao indicadores, nao vereditos isolados." },
+    { "n": 23, "text": "A interpretacao dos achados deve permanecer contextual e humana." },
+    { "n": 24, "text": "O binario temporario deve ser removido em PASS, FAIL ou STOPPED." },
+    { "n": 25, "text": "Nenhum binario pode ser adicionado ao Git, PR, artefato de CI ou release." },
+    { "n": 26, "text": "Nenhum acesso ao cliente ou ao Ragexe e permitido." },
+    { "n": 27, "text": "Nenhum patch, clientinfo ou preparacao do cliente e autorizado." },
+    { "n": 28, "text": "Nenhuma conta de homologacao ou primeiro login e autorizado." },
+    { "n": 29, "text": "Nenhum acesso a VPS e autorizado." },
+    { "n": 30, "text": "O GATE 5 permanece nao autorizado." },
+    { "n": 31, "text": "A distribuicao permanece nao autorizada." },
+    { "n": 32, "text": "A decisao e a execucao devem ocorrer em PRs separados." },
+    { "n": 33, "text": "Este PR nao pode criar saida ou evidencia real do GATE 4." },
+    { "n": 34, "text": "Caso o ambiente ou a ferramenta nao satisfacam o contrato, registrar STOPPED sem improvisar." },
+    { "n": 35, "text": "Nenhuma instalacao de ferramenta adicional e autorizada durante a execucao sem nova decisao." }
+  ],
+  "authorizations": {
+    "human_decision_required": true,
+    "human_decision_received": true,
+    "gate_selected": true,
+    "gate_3_completed": true,
+    "temporary_materialization_authorized": true,
+    "local_hashing_authorized": true,
+    "static_inventory_authorized": true,
+    "gate_4_authorized": true,
+    "gate_4_execution_authorized": true,
+    "gate_5_authorized": false,
+    "dynamic_analysis_authorized": false,
+    "emulation_authorized": false,
+    "unpacking_authorized": false,
+    "execution_authorized": false,
+    "external_reputation_upload_authorized": false,
+    "network_validation_authorized": false,
+    "sandbox_creation_authorized": false,
+    "client_copy_provision_authorized": false,
+    "client_modification_authorized": false,
+    "patch_review_authorized": false,
+    "patch_application_authorized": false,
+    "client_preparation_authorized": false,
+    "test_account_authorized": false,
+    "first_login_authorized": false,
+    "vps_access_authorized": false,
+    "distribution_authorized": false
+  },
+  "materialization_scope": {
+    "repository_full_name": "Neo-Mind/WARP",
+    "commit_oid": "9b1173e9e4e135c68e150704f01186ab5e763acd",
+    "tree_oid": "1aebae06d5c71a145afc35cc72fcf5c210a08758",
+    "artifact_path": "win32/WARP.exe",
+    "artifact_blob_oid": "c853da42d18dfe090b4e941b435d989311faf3dc",
+    "artifact_blob_oid_algorithm": "GIT_OBJECT_ID",
+    "artifact_blob_size": 1137152,
+    "max_files": 1,
+    "network_scope": "GITHUB_OFFICIAL_ONLY"
+  },
+  "precondition": {
+    "gate_3_completed": true,
+    "gate_3_outcome": "COMPLETED_PASS"
+  },
+  "integration_ref": {
+    "pr": 54,
+    "squash_commit": "a5843c306288fb27d8e1bd1741f6ca75d810defa",
+    "base_branch": "dev"
+  },
+  "plan_ref": {
+    "path": "client/warp-audit/binary-audit-plan.example.json"
+  },
+  "source_decision_ref": {
+    "path": "client/warp-audit/decisions/core-path-decision-record-2026-07-31.json"
+  },
+  "prior_gate_decision_ref": {
+    "path": "client/warp-audit/decisions/binary-audit-gate-03-corrective-repeat-decision-record-2026-08-03.json"
+  },
+  "gate_3_evidence_ref": {
+    "path": "client/warp-audit/evidence/binary-audit-gate-03-corrective-repeat-evidence-2026-08-03.json"
+  },
+  "reviewed_analyzer_ref": {
+    "path": "scripts/inspect-warp-pe-static.py"
+  },
+  "reviewed_analyzer_commit": "a5843c306288fb27d8e1bd1741f6ca75d810defa",
+  "reviewed_analyzer_git_blob_oid": "f223ae7b50048aa493a47dcb95ead9ad5716e3cc",
+  "reviewed_analyzer_test_ref": {
+    "path": "scripts/test-warp-pe-static.py"
+  },
+  "reviewed_analyzer_test_git_blob_oid": "fdc79947a8f7c151dcee240e6317f87e36d80961",
+  "rollback": "Antes do merge: corrigir por novo commit normal ou fechar o PR. Depois do merge: revogar por novo registro e novo PR; a reversao Git nao apaga a decisao historica. Nenhuma reversao pode executar o PE, autorizar uma segunda execucao, autorizar o GATE 5 ou restaurar/introduzir binario no Git. Se a execucao futura ja tiver comecado, interromper, limpar a area temporaria e registrar STOPPED ou COMPLETED_FAIL conforme o estado. Nunca usar reset destrutivo nem force push.",
+  "notes": "A autorizacao e restrita ao GATE 4 (inventario PE estatico offline). A execucao do PE permanece proibida (execution_authorized=false). A futura evidencia PASS/FAIL/STOPPED sera registrada em PR separado. GATE 5 e preparacao do cliente permanecem proibidos. Nenhuma autorizacao transitiva existe."
+}
