@@ -37,6 +37,15 @@ PARSER_TEST = "scripts/test-warp-pe-identity.py"
 
 PROTECTED = [PARSER_OUTPUT, PARSER, PARSER_TEST]
 
+# ETAPA 2P-E-C4-PREP: analisador PE estatico do GATE 4 e seus testes. Ainda NAO ha
+# saida real do GATE 4; por isso valida-se apenas os atributos Git efetivos e os bytes
+# (sem BOM/CR) destes scripts, SEM fixar um SHA-256 de saida inexistente. Os artefatos
+# byte-fixados do GATE 3 (acima) permanecem inalterados.
+GATE4_SCRIPTS = [
+    "scripts/inspect-warp-pe-static.py",
+    "scripts/test-warp-pe-static.py",
+]
+
 EXPECTED = {
     "output_sha256": "932968244170200b303dfd9674215ea1358a549b3e71f8034a7fb5ba4ce0f816",
     "output_git_blob_oid": "c1e66885850811a49395a5cae613c20cf4abb7a3",
@@ -137,6 +146,27 @@ def main():
             ok(f"{key} == {EXPECTED[key]}")
         else:
             bad(f"{key}", f"obtido {actual}, esperado {EXPECTED[key]}")
+
+    # 4) GATE 4 (2P-E-C4-PREP): atributos LF + bytes (sem BOM/CR), sem fixar hash.
+    for rel in GATE4_SCRIPTS:
+        text, eol, err = check_attr(rel)
+        if err:
+            bad(f"check-attr {rel}", err)
+        elif text == "set" and eol == "lf":
+            ok(f"atributos LF (text=set, eol=lf): {rel}")
+        else:
+            bad(f"atributos de {rel}", f"text={text!r} eol={eol!r} (esperado set/lf)")
+        try:
+            data = read_bytes(rel)
+        except OSError as exc:
+            bad(f"leitura de {rel}", str(exc))
+            continue
+        if data.startswith(b"\xef\xbb\xbf"):
+            bad(f"{rel}: BOM UTF-8 proibido")
+        elif b"\r" in data:
+            bad(f"{rel}: byte CR proibido (checkout converteu LF->CRLF?)")
+        else:
+            ok(f"sem BOM e sem CR: {rel}")
 
     print(f"\nResumo: {passed} OK, {failed} falha(s).")
     return 1 if failed else 0

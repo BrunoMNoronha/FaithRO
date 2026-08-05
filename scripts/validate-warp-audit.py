@@ -159,9 +159,14 @@ GATE3_EVIDENCE_PREFIX = "binary-audit-gate-03-identity-signature-evidence-"
 GATE3_REPEAT_EVIDENCE_PREFIX = "binary-audit-gate-03-corrective-repeat-evidence-"
 GATE3_REPEAT_PARSER_OUTPUT_PREFIX = "binary-audit-gate-03-corrective-repeat-parser-output-"
 # Prefixos aceitos em evidence/ (o orquestrador de cada gate filtra o seu proprio).
+# GATE4_* sao aceitos como CONVENCAO (futuros); nesta preparacao nenhum arquivo real existe.
 EVIDENCE_FILE_PREFIXES = (GATE0_EVIDENCE_PREFIX, GATE2_EVIDENCE_PREFIX,
                           GATE3_EVIDENCE_PREFIX, GATE3_REPEAT_EVIDENCE_PREFIX,
-                          GATE3_REPEAT_PARSER_OUTPUT_PREFIX)
+                          GATE3_REPEAT_PARSER_OUTPUT_PREFIX,
+                          "binary-audit-gate-04-pass-evidence-",
+                          "binary-audit-gate-04-fail-evidence-",
+                          "binary-audit-gate-04-stopped-evidence-",
+                          "binary-audit-gate-04-static-inventory-output-")
 # Valores canonicos esperados (dos artefatos internos das etapas anteriores).
 EXPECTED_ARTIFACT_PATH = "win32/WARP.exe"
 EXPECTED_ARTIFACT_BLOB = "c853da42d18dfe090b4e941b435d989311faf3dc"
@@ -286,6 +291,57 @@ GATE3_REPEAT_DECISION_PREFIX = "binary-audit-gate-03-corrective-repeat-decision-
 GATE3_HISTORICAL_INVALIDATED_EVIDENCE = "binary-audit-gate-03-identity-signature-evidence-2026-08-03.json"
 REVIEWED_PARSER_PATH = "scripts/inspect-warp-pe-identity.py"
 REVIEWED_PARSER_TEST_PATH = "scripts/test-warp-pe-identity.py"
+
+# --- ETAPA 2P-E-C4-PREP: GATE 4 (inventario PE estatico offline) ---
+# PREPARACAO APENAS: cria e valida a CONVENCAO (schemas + ferramenta) do futuro GATE 4.
+# Nesta etapa NAO existe decisao/evidencia/saida real do GATE 4 (contagens = 0). A futura
+# autorizacao operacional ocorrera em PR separado, referenciando o squash integrado desta
+# preparacao e os Git blob OIDs exatos do analisador e dos testes revisados. O validador
+# reprova criacao prematura, orfaos, duplicacao, autorizacao transitiva do GATE 5, saida
+# com conteudo proibido e estados impossiveis do analisador.
+GATE4_DECISION_SCHEMA = "binary-audit-gate-04-decision-record-real.schema.json"
+GATE4_PASS_EVIDENCE_SCHEMA = "binary-audit-gate-04-pass-evidence.schema.json"
+GATE4_FAIL_EVIDENCE_SCHEMA = "binary-audit-gate-04-fail-evidence.schema.json"
+GATE4_STOPPED_EVIDENCE_SCHEMA = "binary-audit-gate-04-stopped-evidence.schema.json"
+GATE4_OUTPUT_SCHEMA = "binary-audit-gate-04-static-inventory-output.schema.json"
+GATE4_ALL_SCHEMAS = (
+    GATE4_DECISION_SCHEMA, GATE4_PASS_EVIDENCE_SCHEMA, GATE4_FAIL_EVIDENCE_SCHEMA,
+    GATE4_STOPPED_EVIDENCE_SCHEMA, GATE4_OUTPUT_SCHEMA,
+)
+GATE4_DECISION_PREFIX = "binary-audit-gate-04-decision-record-"
+GATE4_PASS_EVIDENCE_PREFIX = "binary-audit-gate-04-pass-evidence-"
+GATE4_FAIL_EVIDENCE_PREFIX = "binary-audit-gate-04-fail-evidence-"
+GATE4_STOPPED_EVIDENCE_PREFIX = "binary-audit-gate-04-stopped-evidence-"
+GATE4_OUTPUT_PREFIX = "binary-audit-gate-04-static-inventory-output-"
+GATE4_EVIDENCE_PREFIXES = (GATE4_PASS_EVIDENCE_PREFIX, GATE4_FAIL_EVIDENCE_PREFIX,
+                           GATE4_STOPPED_EVIDENCE_PREFIX)
+REVIEWED_ANALYZER_PATH = "scripts/inspect-warp-pe-static.py"
+REVIEWED_ANALYZER_TEST_PATH = "scripts/test-warp-pe-static.py"
+GATE3_REPEAT_PASS_EVIDENCE = "binary-audit-gate-03-corrective-repeat-evidence-2026-08-03.json"
+# Flags true no registro de decisao do GATE 4 (decisao + pre-condicao + grants do gate).
+GATE4_DECISION_TRUE_FLAGS = {
+    "human_decision_required", "human_decision_received", "gate_selected",
+    "gate_3_completed", "temporary_materialization_authorized",
+    "local_hashing_authorized", "static_inventory_authorized",
+    "gate_4_authorized", "gate_4_execution_authorized",
+}
+# Pontos criticos que DEVEM permanecer false no GATE 4 (sem autorizacao transitiva).
+GATE4_CRITICAL_FALSE = {
+    "gate_5_authorized", "dynamic_analysis_authorized", "emulation_authorized",
+    "unpacking_authorized", "execution_authorized",
+    "external_reputation_upload_authorized", "network_validation_authorized",
+    "sandbox_creation_authorized", "client_copy_provision_authorized",
+    "client_modification_authorized", "patch_review_authorized",
+    "patch_application_authorized", "client_preparation_authorized",
+    "test_account_authorized", "first_login_authorized", "vps_access_authorized",
+    "distribution_authorized",
+}
+# Estados FECHADOS validos da tri-flag analyzer_invoked/completed/output_produced no FAIL.
+GATE4_FAIL_ANALYZER_STATES = {
+    (False, False, False),  # PRE_ANALYZER_FAIL
+    (True, False, False),   # ANALYZER_ERROR_WITHOUT_OUTPUT
+    (True, True, True),     # POST_OUTPUT_FAIL
+}
 
 
 def git_blob_oid_for_bytes(data):
@@ -2697,6 +2753,415 @@ def validate_gate3_repeat(errors):
         print(f"[OK]    evidence/{ev_name}")
 
 
+# --- ETAPA 2P-E-C4-PREP: validacao da CONVENCAO e da maquina de estados do GATE 4 ---
+# Regex de conteudo proibido na saida do inventario (defesa em profundidade). NAO se
+# aplica planning_content_scan aqui: o inventario legitimamente registra URLs/dominios/
+# caminhos como INDICADORES textuais; a proibicao e de bytes brutos, bCertificate e base64.
+_GATE4_OUTPUT_BASE64_RE = _PARSER_OUTPUT_BASE64_RE
+_GATE4_OUTPUT_BCERT_RE = _PARSER_OUTPUT_BCERT_RE
+
+
+def validate_gate4_output_raw(raw_bytes, declared_sha256, filename, errors):
+    """Prende a saida do inventario aos BYTES EXATOS versionados (2P-E-C4-PREP).
+
+    SHA-256 sobre os bytes reais; rejeita BOM/CRLF/newline duplicado/dados apos newline;
+    chaves duplicadas; exige forma canonica (indent=2, sort_keys); valida contra o schema
+    FECHADO da saida; aplica security_scan e proibe bCertificate/base64/bytes brutos.
+    Retorna o dict parseado (ou None em erro)."""
+    if not isinstance(raw_bytes, (bytes, bytearray)):
+        errors.append(f"{filename}: saida do inventario ausente (bytes esperados)")
+        return None
+    raw = bytes(raw_bytes)
+    if not isinstance(declared_sha256, str) or not HEX64_RE.match(declared_sha256):
+        errors.append(f"{filename}: reviewed_analyzer_output_sha256 deve ter 64 hex")
+    else:
+        if _sha256_hex(raw) != declared_sha256:
+            errors.append(f"{filename}: SHA-256 dos bytes reais da saida nao confere com o registrado")
+    if raw.startswith(b"\xef\xbb\xbf"):
+        errors.append(f"{filename}: saida do inventario com BOM UTF-8 proibido")
+    if b"\r\n" in raw or b"\r" in raw:
+        errors.append(f"{filename}: saida do inventario com CRLF proibido")
+    if not raw.endswith(b"\n"):
+        errors.append(f"{filename}: saida do inventario sem newline final")
+    elif raw.endswith(b"\n\n"):
+        errors.append(f"{filename}: saida do inventario com newline final duplicado / dados apos o newline")
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        errors.append(f"{filename}: saida do inventario nao e UTF-8 estrito")
+        return None
+    try:
+        parsed = json.loads(text, object_pairs_hook=_reject_duplicate_keys)
+    except ValueError as exc:
+        errors.append(f"{filename}: saida do inventario com JSON invalido/duplicado: {exc}")
+        return None
+    if raw != _canonical_parser_output_bytes(parsed):
+        errors.append(f"{filename}: bytes da saida != forma deterministica (ordenacao/indentacao/encoding)")
+    try:
+        po_schema = load_json(os.path.join(SCHEMA_DIR, GATE4_OUTPUT_SCHEMA))
+        validate_node(parsed, po_schema, "gate-04-output", errors)
+    except Fail as exc:
+        errors.append(str(exc))
+    security_scan(parsed, errors)
+    for where, s in iter_strings(parsed):
+        if _GATE4_OUTPUT_BCERT_RE.search(s):
+            errors.append(f"{filename}{where}: conteudo semelhante a bCertificate/PEM proibido na saida")
+        if _GATE4_OUTPUT_BASE64_RE.search(s):
+            errors.append(f"{filename}{where}: bloco base64/binario proibido na saida do inventario")
+    return parsed
+
+
+def validate_gate4_decision(record, schema, filename, errors):
+    """Valida a FUTURA decisao humana do GATE 4 (AUTHORIZE_GATE_4_EXECUTION). Importavel.
+
+    Exige: decisao/gate corretos; identidade/data/condicoes numeradas 1..N; SOMENTE os
+    grants do GATE 4 em true; gate_5_authorized e demais pontos criticos em false;
+    escopo fechado ao blob canonico; pre-condicao GATE 3 = COMPLETED_PASS; proveniencia
+    do analisador e dos testes recalculada contra o conteudo real da worktree."""
+    kv = []
+    schema_keyword_violations(schema, "gate-04-decision.schema", kv)
+    errors.extend(kv)
+    validate_node(record, schema, filename, errors)
+    security_scan(record, errors)
+    planning_content_scan(record, filename, errors)
+
+    if not isinstance(record, dict):
+        errors.append(f"{filename}: registro nao e objeto")
+        return errors
+
+    if record.get("status") != "AUTHORIZED_FOR_SINGLE_GATE":
+        errors.append(f"{filename}: status deve ser AUTHORIZED_FOR_SINGLE_GATE")
+    g = record.get("gate")
+    if not isinstance(g, dict) or g.get("id") != 4 or g.get("name") != "STATIC_PE_INVENTORY":
+        errors.append(f"{filename}: gate deve ser id=4 name=STATIC_PE_INVENTORY")
+    if record.get("decision") != "AUTHORIZE_GATE_4_EXECUTION":
+        errors.append(f"{filename}: decision deve ser AUTHORIZE_GATE_4_EXECUTION")
+    if record.get("execution_state") != "AUTHORIZED_NOT_STARTED":
+        errors.append(f"{filename}: execution_state deve ser AUTHORIZED_NOT_STARTED")
+
+    for field in ("decider", "role", "authority", "channel"):
+        val = record.get(field)
+        if not isinstance(val, str) or not val.strip():
+            errors.append(f"{filename}: campo '{field}' vazio")
+        elif PLACEHOLDER_RE.search(val):
+            errors.append(f"{filename}: campo '{field}' parece placeholder (categoria: placeholder)")
+    if not valid_iso_date(record.get("date")):
+        errors.append(f"{filename}: campo 'date' nao e uma data ISO valida")
+
+    conds = record.get("conditions")
+    if not isinstance(conds, list) or len(conds) < 15:
+        errors.append(f"{filename}: 'conditions' deve ter ao menos 15 itens")
+        conds = conds if isinstance(conds, list) else []
+    ns = [c.get("n") for c in conds if isinstance(c, dict)]
+    if ns != list(range(1, len(conds) + 1)):
+        errors.append(f"{filename}: conditions devem ser numeradas 1..N em ordem, sem lacuna/repeticao")
+    for i, c in enumerate(conds):
+        if not isinstance(c, dict) or not str(c.get("text", "")).strip():
+            errors.append(f"{filename}: conditions[{i}] sem texto")
+
+    auth = record.get("authorizations")
+    if not isinstance(auth, dict):
+        errors.append(f"{filename}: 'authorizations' ausente")
+    else:
+        for k, v in auth.items():
+            if k in GATE4_DECISION_TRUE_FLAGS:
+                if v is not True:
+                    errors.append(f"{filename}: authorizations.{k} deve ser true")
+            elif v is not False:
+                errors.append(f"{filename}: authorizations.{k} deve ser false (grants do GATE 4 sao limitados)")
+        if auth.get("gate_4_execution_authorized") is not True:
+            errors.append(f"{filename}: authorizations.gate_4_execution_authorized deve ser true (grant do GATE 4)")
+        for k in GATE4_CRITICAL_FALSE:
+            if auth.get(k) is not False:
+                errors.append(f"{filename}: authorizations.{k} deve ser false (sem autorizacao transitiva)")
+
+    _check_materialization_scope(record.get("materialization_scope"), filename, errors)
+
+    pc = record.get("precondition")
+    if not isinstance(pc, dict):
+        errors.append(f"{filename}: 'precondition' ausente")
+    else:
+        if pc.get("gate_3_completed") is not True:
+            errors.append(f"{filename}: precondition.gate_3_completed deve ser true")
+        if pc.get("gate_3_outcome") != "COMPLETED_PASS":
+            errors.append(f"{filename}: precondition.gate_3_outcome deve ser COMPLETED_PASS")
+
+    ir = record.get("integration_ref")
+    if not isinstance(ir, dict) or ir.get("base_branch") != "dev":
+        errors.append(f"{filename}: integration_ref.base_branch deve ser dev (squash da preparacao integrada)")
+
+    for field in ("plan_ref", "source_decision_ref", "prior_gate_decision_ref",
+                  "gate_3_evidence_ref", "reviewed_analyzer_ref", "reviewed_analyzer_test_ref"):
+        ref = record.get(field)
+        _ref_ok(ref.get("path") if isinstance(ref, dict) else None, field, filename, errors)
+
+    _recompute_and_compare_oid("reviewed_analyzer_git_blob_oid", REVIEWED_ANALYZER_PATH,
+                               record.get("reviewed_analyzer_git_blob_oid"), filename, errors)
+    _recompute_and_compare_oid("reviewed_analyzer_test_git_blob_oid", REVIEWED_ANALYZER_TEST_PATH,
+                               record.get("reviewed_analyzer_test_git_blob_oid"), filename, errors)
+    if not isinstance(record.get("reviewed_analyzer_commit"), str) or not HEX40_RE.match(record.get("reviewed_analyzer_commit", "")):
+        errors.append(f"{filename}: reviewed_analyzer_commit deve ter 40 hex (confirmado pelo gate Git externo)")
+    return errors
+
+
+def validate_gate4_evidence(ev, schema, decision, filename, errors,
+                            output_raw=None, output_path=None, present_output_name=None):
+    """Valida a FUTURA evidencia do GATE 4 (PASS/FAIL/STOPPED). Importavel.
+
+    Dispatch por outcome; a saida do inventario (quando exigida) e presa por bytes e por
+    referencia exata. gate_5_authorized DEVE ser false. Sem autorizacao transitiva."""
+    kv = []
+    schema_keyword_violations(schema, "gate-04-evidence.schema", kv)
+    errors.extend(kv)
+    validate_node(ev, schema, filename, errors)
+    security_scan(ev, errors)
+    _content_scan_allow_hashes(ev, filename, errors)
+
+    if not isinstance(ev, dict):
+        errors.append(f"{filename}: evidencia nao e objeto")
+        return errors
+
+    outcome = ev.get("outcome")
+    if ev.get("status") != outcome:
+        errors.append(f"{filename}: status deve ser igual a outcome")
+    g = ev.get("gate")
+    if not isinstance(g, dict) or g.get("id") != 4 or g.get("name") != "STATIC_PE_INVENTORY":
+        errors.append(f"{filename}: gate deve ser id=4 name=STATIC_PE_INVENTORY")
+
+    sa = ev.get("security_assertions") or {}
+    if sa.get("gate_5_authorized") is not False:
+        errors.append(f"{filename}: security_assertions.gate_5_authorized deve ser false")
+    for k in ("no_execution_performed", "no_gate5_inspection_performed",
+              "no_ragexe_access", "no_vps_access"):
+        if sa.get(k) is not True:
+            errors.append(f"{filename}: security_assertions.{k} deve ser true")
+
+    if isinstance(decision, dict):
+        a = decision.get("authorizations", {})
+        if decision.get("decision") != "AUTHORIZE_GATE_4_EXECUTION" or a.get("gate_4_execution_authorized") is not True:
+            errors.append(f"{filename}: decisao do GATE 4 nao autoriza a execucao")
+        if a.get("gate_5_authorized") is not False:
+            errors.append(f"{filename}: decisao do GATE 4 nao pode autorizar o GATE 5")
+    else:
+        errors.append(f"{filename}: decisao do GATE 4 ausente/invalida")
+
+    _recompute_and_compare_oid("reviewed_analyzer_git_blob_oid", REVIEWED_ANALYZER_PATH,
+                               ev.get("reviewed_analyzer_git_blob_oid"), filename, errors)
+    _recompute_and_compare_oid("reviewed_analyzer_test_git_blob_oid", REVIEWED_ANALYZER_TEST_PATH,
+                               ev.get("reviewed_analyzer_test_git_blob_oid"), filename, errors)
+
+    pex = ev.get("parser_execution") or {}
+    inv = pex.get("analyzer_invoked")
+    comp = pex.get("analyzer_completed")
+    prod = pex.get("analyzer_output_produced")
+
+    if outcome == "COMPLETED_PASS":
+        validate_parser_execution_state(inv, comp, prod, outcome, filename, errors)
+        summ = ev.get("static_inventory_summary") or {}
+        if summ.get("produced_by") != "REVIEWED_VERSIONED_ANALYZER":
+            errors.append(f"{filename}: static_inventory_summary.produced_by deve ser REVIEWED_VERSIONED_ANALYZER")
+        ra = ev.get("reviewed_analyzer") or {}
+        if ra.get("run_on_warp_exe") is not True or ra.get("executes_or_loads_pe") is not False:
+            errors.append(f"{filename}: PASS exige reviewed_analyzer.run_on_warp_exe=true e executes_or_loads_pe=false")
+        if ra.get("emulates_pe") is not False or ra.get("unpacks_dynamically") is not False:
+            errors.append(f"{filename}: PASS exige reviewed_analyzer sem emulacao/descompactacao")
+        ir = ev.get("identity_reconfirmation") or {}
+        if ir.get("sha256_local") != EXPECTED_ARTIFACT_SHA256 or ir.get("identity_matches_gate_2") is not True:
+            errors.append(f"{filename}: PASS exige identidade IGUAL ao GATE 2")
+        if ir.get("executed") is not False or ir.get("loaded_as_executable") is not False:
+            errors.append(f"{filename}: PASS: executado/carregado devem ser false")
+        pf = ev.get("preserved_gate_3_facts") or {}
+        if pf.get("artifact_sha256") != EXPECTED_ARTIFACT_SHA256 or pf.get("artifact_blob_oid") != EXPECTED_ARTIFACT_BLOB:
+            errors.append(f"{filename}: preserved_gate_3_facts deve preservar os fatos do GATE 2/3")
+        if output_raw is None:
+            errors.append(f"{filename}: PASS exige a saida real do inventario (output ausente)")
+        else:
+            validate_gate4_output_raw(output_raw, ev.get("reviewed_analyzer_output_sha256"), filename, errors)
+            ref = (ev.get("reviewed_analyzer_output_ref") or {}).get("path")
+            if present_output_name is not None and (ref is None or not ref.endswith("/" + present_output_name)):
+                errors.append(f"{filename}: reviewed_analyzer_output_ref nao aponta para a saida presente ({present_output_name})")
+            if output_path is not None and ref != output_path:
+                errors.append(f"{filename}: reviewed_analyzer_output_ref.path != caminho real da saida")
+    elif outcome == "COMPLETED_FAIL":
+        validate_parser_execution_state(inv, comp, prod, outcome, filename, errors)
+        if (inv, comp, prod) not in GATE4_FAIL_ANALYZER_STATES:
+            errors.append(f"{filename}: COMPLETED_FAIL exige estado fechado de parser_execution "
+                          f"[PRE_ANALYZER_FAIL/ANALYZER_ERROR_WITHOUT_OUTPUT/POST_OUTPUT_FAIL]")
+        fail = ev.get("failure") or {}
+        if not fail.get("reason") or not fail.get("category"):
+            errors.append(f"{filename}: COMPLETED_FAIL exige failure.category e failure.reason")
+        if fail.get("cleanup_attempted") is not True:
+            errors.append(f"{filename}: COMPLETED_FAIL exige cleanup_attempted=true")
+        if prod is True:
+            if output_raw is None or present_output_name is None or output_path is None:
+                errors.append(f"{filename}: FAIL com saida exige a saida real (execute pelo orquestrador)")
+            else:
+                validate_gate4_output_raw(output_raw, ev.get("reviewed_analyzer_output_sha256"), filename, errors)
+                ref = (ev.get("reviewed_analyzer_output_ref") or {}).get("path")
+                if "reviewed_analyzer_output_ref" not in ev or ref is None:
+                    errors.append(f"{filename}: FAIL com saida exige reviewed_analyzer_output_ref")
+                elif not ref.endswith("/" + present_output_name) or ref != output_path:
+                    errors.append(f"{filename}: reviewed_analyzer_output_ref nao aponta para a saida presente")
+        else:
+            if "reviewed_analyzer_output_ref" in ev or "reviewed_analyzer_output_sha256" in ev:
+                errors.append(f"{filename}: FAIL sem saida NAO pode ter reviewed_analyzer_output_ref/sha256")
+            if output_raw is not None:
+                errors.append(f"{filename}: FAIL sem analyzer_output_produced nao pode ter saida presente")
+    elif outcome == "STOPPED":
+        stop = ev.get("stop") or {}
+        validate_parser_execution_state(
+            stop.get("analyzer_invoked"), None, stop.get("analyzer_output_produced"),
+            outcome, filename, errors, has_completed=False)
+        if not stop.get("reason") or not stop.get("category"):
+            errors.append(f"{filename}: STOPPED exige stop.category e stop.reason")
+        if stop.get("gate_4_completed") is not False:
+            errors.append(f"{filename}: STOPPED exige gate_4_completed=false")
+        if output_raw is not None:
+            errors.append(f"{filename}: STOPPED nao pode ter saida do inventario presente")
+    else:
+        errors.append(f"{filename}: outcome fora do conjunto permitido")
+    return errors
+
+
+def _gate4_evidence_schema_for(outcome):
+    return {
+        "COMPLETED_PASS": GATE4_PASS_EVIDENCE_SCHEMA,
+        "COMPLETED_FAIL": GATE4_FAIL_EVIDENCE_SCHEMA,
+        "STOPPED": GATE4_STOPPED_EVIDENCE_SCHEMA,
+    }.get(outcome)
+
+
+def validate_gate4_prep(errors):
+    """Orquestra a preparacao do GATE 4 (2P-E-C4-PREP) e a maquina de estados atomica.
+
+    Confirma a CONVENCAO (5 schemas + analisador + testes versionados) e impede
+    criacao prematura, orfaos e duplicacao. Nesta preparacao NAO deve existir decisao/
+    evidencia/saida real do GATE 4 (contagens = 0); a autorizacao operacional ocorrera
+    em PR separado. Imprime a confirmacao semantica exigida pela etapa."""
+    # 1) Convencao presente e keyword-clean.
+    prep_ok = True
+    for sname in GATE4_ALL_SCHEMAS:
+        spath = os.path.join(SCHEMA_DIR, sname)
+        if not os.path.isfile(spath):
+            errors.append(f"gate-04-prep: schema ausente: {sname}")
+            prep_ok = False
+            continue
+        try:
+            sch = load_json(spath)
+        except Fail as exc:
+            errors.append(str(exc)); prep_ok = False; continue
+        kv = []
+        schema_keyword_violations(sch, sname, kv)
+        if kv:
+            errors.extend(kv); prep_ok = False
+    for tool in (REVIEWED_ANALYZER_PATH, REVIEWED_ANALYZER_TEST_PATH):
+        if not os.path.isfile(os.path.join(REPO_ROOT, tool)):
+            errors.append(f"gate-04-prep: ferramenta ausente: {tool}")
+            prep_ok = False
+
+    # 2) Contagem de artefatos reais do GATE 4.
+    dec_names, ev_names, po_names = [], [], []
+    if os.path.isdir(DECISIONS_DIR):
+        dec_names = sorted(f for f in os.listdir(DECISIONS_DIR)
+                           if f.startswith(GATE4_DECISION_PREFIX) and f.endswith(".json"))
+    if os.path.isdir(EVIDENCE_DIR):
+        ev_names = sorted(f for f in os.listdir(EVIDENCE_DIR)
+                          if f.startswith(GATE4_EVIDENCE_PREFIXES) and f.endswith(".json"))
+        po_names = sorted(f for f in os.listdir(EVIDENCE_DIR)
+                          if f.startswith(GATE4_OUTPUT_PREFIX) and f.endswith(".json"))
+
+    # 3) Duplicacao: no maximo um de cada.
+    if len(dec_names) > 1:
+        errors.append(f"gate-04: mais de uma decisao real ({dec_names})")
+    if len(ev_names) > 1:
+        errors.append(f"gate-04: mais de uma evidencia real ({ev_names})")
+    if len(po_names) > 1:
+        errors.append(f"gate-04: mais de uma saida real do inventario ({po_names})")
+
+    # 4) Maquina de estados atomica (decisao -> evidencia -> saida).
+    gate_4_authorized = False
+    gate_4_execution_authorized = False
+    if not dec_names:
+        if ev_names:
+            errors.append(f"gate-04: evidencia sem decisao (orfa): {ev_names}")
+        if po_names:
+            errors.append(f"gate-04: saida sem decisao (orfa): {po_names}")
+    else:
+        decision = {}
+        try:
+            dschema = load_json(os.path.join(SCHEMA_DIR, GATE4_DECISION_SCHEMA))
+        except Fail as exc:
+            errors.append(str(exc)); dschema = None
+        dname = dec_names[0]
+        derr = []
+        try:
+            decision = load_json(os.path.join(DECISIONS_DIR, dname))
+            if dschema is not None:
+                validate_gate4_decision(decision, dschema, dname, derr)
+        except Fail as exc:
+            derr.append(str(exc))
+        if derr:
+            errors.extend(derr)
+            print(f"[FALHA] decisions/{dname}: {len(derr)} problema(s)")
+            for e in derr:
+                print(f"    - {e}")
+        else:
+            print(f"[OK]    decisions/{dname}")
+        if isinstance(decision, dict) and not derr:
+            a = decision.get("authorizations", {})
+            gate_4_authorized = a.get("gate_4_authorized") is True
+            gate_4_execution_authorized = a.get("gate_4_execution_authorized") is True
+
+        if not ev_names:
+            if po_names:
+                errors.append(f"gate-04: saida sem evidencia (orfa): {po_names}")
+        else:
+            ev_name = ev_names[0]
+            po_name = po_names[0] if po_names else None
+            output_raw = None
+            output_path = None
+            if po_name is not None:
+                output_path = "client/warp-audit/evidence/" + po_name
+                try:
+                    with open(os.path.join(EVIDENCE_DIR, po_name), "rb") as fh:
+                        output_raw = fh.read()
+                except OSError as exc:
+                    errors.append(f"gate-04: falha ao ler a saida do inventario: {exc}")
+            everr = []
+            try:
+                ev = load_json(os.path.join(EVIDENCE_DIR, ev_name))
+                eschema_name = _gate4_evidence_schema_for(ev.get("outcome"))
+                if eschema_name is None:
+                    everr.append(f"{ev_name}: outcome sem schema correspondente")
+                else:
+                    eschema = load_json(os.path.join(SCHEMA_DIR, eschema_name))
+                    dref = (ev.get("gate_4_decision_ref") or {}).get("path")
+                    expected_dec = "client/warp-audit/decisions/" + dec_names[0]
+                    if dref != expected_dec:
+                        everr.append(f"{ev_name}: gate_4_decision_ref deve ser exatamente {expected_dec}")
+                    validate_gate4_evidence(ev, eschema, decision, ev_name, everr,
+                                            output_raw=output_raw, output_path=output_path,
+                                            present_output_name=po_name)
+            except Fail as exc:
+                everr.append(str(exc))
+            if everr:
+                errors.extend(everr)
+                print(f"[FALHA] evidence/{ev_name}: {len(everr)} problema(s)")
+                for e in everr:
+                    print(f"    - {e}")
+            else:
+                print(f"[OK]    evidence/{ev_name}")
+
+    # 5) Confirmacao semantica exigida por 2P-E-C4-PREP.
+    print("[OK]    gate-04-prep (2P-E-C4-PREP): "
+          f"gate_4_preparation_completed={str(prep_ok).lower()} "
+          f"gate_4_authorized={str(gate_4_authorized).lower()} "
+          f"gate_4_execution_authorized={str(gate_4_execution_authorized).lower()} "
+          f"gate_4_real_decision_count={len(dec_names)} "
+          f"gate_4_real_evidence_count={len(ev_names)} "
+          f"gate_4_real_output_count={len(po_names)} gate_5_authorized=false")
+
+
 def main():
     all_errors = []
     for artifact, schema_name in ARTIFACTS:
@@ -2764,14 +3229,19 @@ def main():
     validate_gate3_repeat(gate3_repeat_errors)
     all_errors.extend(gate3_repeat_errors)
 
+    gate4_prep_errors = []
+    validate_gate4_prep(gate4_prep_errors)
+    all_errors.extend(gate4_prep_errors)
+
     if all_errors:
         print(f"\nValidacao FALHOU com {len(all_errors)} problema(s).")
         return 1
     print(f"\nValidacao OK: {len(ARTIFACTS)} artefatos, schemas, regras de seguranca, "
           f"cross-checks, registros reais de decisao, plano da auditoria binaria, "
           f"autorizacao do GATE 0, evidencia do GATE 0, autorizacao do GATE 1, "
-          f"decisao/evidencia do GATE 2, decisao/evidencia do GATE 3 e "
-          f"convencao da repeticao corretiva (sem registros reais).")
+          f"decisao/evidencia do GATE 2, decisao/evidencia do GATE 3, "
+          f"convencao da repeticao corretiva (sem registros reais) e "
+          f"preparacao do GATE 4 (2P-E-C4-PREP; sem registros reais).")
     return 0
 
 

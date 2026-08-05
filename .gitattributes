@@ -51,3 +51,11 @@ client/patcher/beam-audit/first-build-human-decision-record.example.json text eo
 client/warp-audit/evidence/binary-audit-gate-03-corrective-repeat-parser-output-*.json text eol=lf
 scripts/inspect-warp-pe-identity.py text eol=lf
 scripts/test-warp-pe-identity.py text eol=lf
+
+# Ferramenta do GATE 4 (2P-E-C4-PREP): o analisador PE estatico e seus testes, alem da
+# FUTURA saida do inventario (cujo SHA-256 sera fixado na evidencia real), DEVEM
+# permanecer em LF inclusive em checkouts Windows com core.autocrlf=true, para que os
+# Git blob OIDs e hashes sejam reproduziveis. Ver docs/40.
+scripts/inspect-warp-pe-static.py text eol=lf
+scripts/test-warp-pe-static.py text eol=lf
+client/warp-audit/evidence/binary-audit-gate-04-static-inventory-output-*.json text eol=lf
