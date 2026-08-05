@@ -45,7 +45,8 @@ auditoria. O relatório completo está em
 | [`decisions/binary-audit-gate-04-decision-record-2026-08-05.json`](decisions/binary-audit-gate-04-decision-record-2026-08-05.json) | (2P-E-C4-AUTH) Registro **real** da autorização humana **exclusiva do GATE 4** (inventário PE estático offline): `AUTHORIZE_GATE_4_EXECUTION` (decisor `BrunoMNoronha`); `gate_4_authorized=true`, `gate_4_execution_authorized=true`, `static_inventory_authorized=true`; **DECISÃO AUTORIZADA — EXECUÇÃO NÃO INICIADA** (`execution_state=AUTHORIZED_NOT_STARTED`); presa ao squash `a5843c3` (PR #54) e aos blobs `f223ae7b`/`fdc79947`; `execution_authorized=false`, `gate_5_authorized=false`; **GATE 5 não autorizado**. Execução em PR separado. |
 | [`evidence/binary-audit-gate-04-pass-evidence-2026-08-05.json`](evidence/binary-audit-gate-04-pass-evidence-2026-08-05.json) | (2P-E-C4-EXEC) Evidência **real** da execução do GATE 4: **`COMPLETED_PASS`**. Identidade reconfirmada igual ao GATE 2/3 (blob `c853da42…`, 1137152 bytes, SHA-256 `345f3464…`); analisador revisado (`f223ae7b`) invocado **uma vez** (só-leitura; `executed/loaded=false`); saída presa por SHA-256 `84c3c49a…`; binário/diretório removidos; `binary_versioned=false`, `gate_5_authorized=false`. `COMPLETED_PASS` **não** aprova o binário. |
 | [`evidence/binary-audit-gate-04-static-inventory-output-2026-08-05.json`](evidence/binary-audit-gate-04-static-inventory-output-2026-08-05.json) | (2P-E-C4-EXEC) Saída **byte-fixada** (UTF-8/LF, SHA-256 `84c3c49a…`) do inventário PE estático do WARP produzida pelo analisador revisado: fatos estruturais, heurísticas e indicadores textuais **sanitizados** (sem bytes brutos, `bCertificate`, base64, segredo, IP ou caminho pessoal). Achados **não** são veredito. |
-| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json`, `binary-audit-gate-00-decision-record-real.schema.json`, `binary-audit-gate-00-provenance-evidence.schema.json`, `binary-audit-gate-01-decision-record-real.schema.json`, `binary-audit-gate-02-decision-record-real.schema.json`, `binary-audit-gate-02-integrity-evidence.schema.json`, `binary-audit-gate-03-decision-record-real.schema.json`, `binary-audit-gate-03-identity-signature-evidence.schema.json` e (convenção da repetição corretiva, sem registros reais) `binary-audit-gate-03-corrective-repeat-decision-record-real.schema.json`, `binary-audit-gate-03-corrective-repeat-pass-evidence.schema.json`, `binary-audit-gate-03-corrective-repeat-fail-evidence.schema.json`, `binary-audit-gate-03-corrective-repeat-stopped-evidence.schema.json` e `binary-audit-gate-03-corrective-repeat-parser-output.schema.json`; e (convenção da **preparação do GATE 4**, sem registros reais) `binary-audit-gate-04-decision-record-real.schema.json`, `binary-audit-gate-04-pass-evidence.schema.json`, `binary-audit-gate-04-fail-evidence.schema.json`, `binary-audit-gate-04-stopped-evidence.schema.json` e `binary-audit-gate-04-static-inventory-output.schema.json`. |
+| [`binary-audit-gate-05-decision-package.example.json`](binary-audit-gate-05-decision-package.example.json) | (2P-E-C5-PREP) Pacote de **preparação** da futura decisão humana do **GATE 5** (verificações locais de segurança): referencia o GATE 4 integrado (squash `03348d7`, output SHA-256 `84c3c49a…`), a definição canônica do GATE 5, as lacunas e as opções A–D. `state=PENDING_HUMAN_DECISION`; **não** concede autorização (`gate_5_authorized=false`, `execution_authorized=false`, `client_preparation_authorized=false`). Ver [docs/44](../../docs/44-gate-5-decisao-e-plano.md). |
+| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json`, `binary-audit-gate-00-decision-record-real.schema.json`, `binary-audit-gate-00-provenance-evidence.schema.json`, `binary-audit-gate-01-decision-record-real.schema.json`, `binary-audit-gate-02-decision-record-real.schema.json`, `binary-audit-gate-02-integrity-evidence.schema.json`, `binary-audit-gate-03-decision-record-real.schema.json`, `binary-audit-gate-03-identity-signature-evidence.schema.json` e (convenção da repetição corretiva, sem registros reais) `binary-audit-gate-03-corrective-repeat-decision-record-real.schema.json`, `binary-audit-gate-03-corrective-repeat-pass-evidence.schema.json`, `binary-audit-gate-03-corrective-repeat-fail-evidence.schema.json`, `binary-audit-gate-03-corrective-repeat-stopped-evidence.schema.json` e `binary-audit-gate-03-corrective-repeat-parser-output.schema.json`; (convenção da **preparação do GATE 4**, sem registros reais) `binary-audit-gate-04-decision-record-real.schema.json`, `binary-audit-gate-04-pass-evidence.schema.json`, `binary-audit-gate-04-fail-evidence.schema.json`, `binary-audit-gate-04-stopped-evidence.schema.json` e `binary-audit-gate-04-static-inventory-output.schema.json`; e (convenção da **preparação da decisão do GATE 5**, sem registros reais) `binary-audit-gate-05-decision-package.schema.json`. |
 
 ## Garantias desta etapa
 
@@ -310,6 +311,24 @@ A execução operacional do GATE 4 exige **nova decisão humana** em **PR separa
 (proposta: `AUTHORIZE_GATE_4_EXECUTION` / `STOP_PATH`), referenciando o squash integrado
 desta preparação e os Git blob OIDs exatos do analisador e dos testes. O **GATE 5
 permanece não autorizado**.
+
+## Preparação da decisão do GATE 5 (2P-E-C5-PREP)
+
+O GATE 4 foi executado e integrado (`COMPLETED_PASS`, squash `03348d7`, PR #57). Esta
+etapa **apenas prepara** a futura decisão humana do **GATE 5** (verificações locais de
+segurança) — ver [docs/44](../../docs/44-gate-5-decisao-e-plano.md). Classificação
+**D2**: o GATE 5 está nomeado/definido em alto nível na cadeia (doc 33 §11; plano
+`gate_id=5`), mas a preparação operacional (ferramenta/schemas/evidência) **ainda não
+existe**. O pacote estruturado correspondente é
+[`binary-audit-gate-05-decision-package.example.json`](binary-audit-gate-05-decision-package.example.json)
+(`state=PENDING_HUMAN_DECISION`), validado pelas regras genéricas do validador
+(schema fechado + `security_scan` + `forbidden_flags`).
+
+Esta etapa **não** executa o GATE 5, **não** repete o GATE 4, **não** altera a
+saída/evidência do GATE 4, **não** materializa nem executa qualquer PE, **não** prepara
+o cliente e **não** acessa a VPS. `gate_5_authorized=false`,
+`execution_authorized=false`, `client_preparation_authorized=false`. Qualquer avanço
+exige **nova decisão humana** em **PR separado**.
 
 ## Propriedade intelectual
 
