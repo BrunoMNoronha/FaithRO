@@ -32,7 +32,7 @@
     { "n": 13, "text": "Apos obter o blob, nenhum acesso de rede e permitido." },
     { "n": 14, "text": "Somente o analisador preso ao blob revisado pode processar o arquivo." },
     { "n": 15, "text": "O analisador pode somente ler bytes de forma estatica." },
-    { "n": 16, "text": "O PE nao pode ser executado, carregado, importado, emulado ou aberto por shell." },
+    { "n": 16, "text": "O PE nao pode ser executado, carregado como modulo, emulado ou aberto por shell. A leitura estatica da tabela de imports pelo analisador revisado permanece autorizada." },
     { "n": 17, "text": "Wine, Proton, maquina virtual, sandbox e analise dinamica sao proibidos." },
     { "n": 18, "text": "Desempacotamento dinamico e modificacao do binario sao proibidos." },
     { "n": 19, "text": "Servicos externos de reputacao sao proibidos." },

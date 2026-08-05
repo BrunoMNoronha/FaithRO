@@ -152,7 +152,9 @@ gate_4_real_evidence_count = 0
 gate_4_real_output_count = 0
 ```
 
-Nenhuma decisão, saída ou evidência de execução foi fabricada.
+A única decisão criada nesta etapa é a autorização humana registrada neste
+documento. Nenhum resultado, output ou evidência da execução do GATE 4 foi criado
+ou fabricado.
 
 ## 15. Próxima etapa
 
