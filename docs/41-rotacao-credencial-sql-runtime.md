@@ -114,7 +114,9 @@ sem caracteres de escape/aspas.
   port 6121`; `Map-Server 0 connected: 1265 maps ... port 5121`;
   `Using packet version: 20211103`; `Packet Obfuscation: Enabled. Keys:
   0x00000000, 0x00000000, 0x00000000`.
-- Backup: `inter_conf.txt.bak` + `.sha256`, modo `600` em diretório `700`.
+- Backup original: `inter_conf.txt.bak` + `.sha256` em diretório `700`. **Este
+  backup continha a credencial anterior em texto claro** e foi **aposentado** na
+  ETAPA 2O-B1-R1 (ver §15).
 - Endereços IP exibidos apenas de forma sanitizada.
 
 ## 10. Nota de incidente (contido)
@@ -124,28 +126,52 @@ Na primeira tentativa de `ALTER USER` foi usada sintaxe do MySQL
 erro e uma senha **candidata** apareceu transitoriamente. Contenção: essa
 tentativa **falhou** (a senha candidata **nunca** se tornou credencial ativa no
 banco), a candidata foi **descartada**, e uma senha nova foi gerada e aplicada
-com a sintaxe correta e **saída suprimida**. Nenhum valor secreto foi
-persistido no servidor (config reescrito, arquivos temporários triturados) nem
-versionado.
+com a sintaxe correta e **saída suprimida**.
+
+> **Correção (2O-B1-R1).** A versão inicial deste documento afirmava que "nenhum
+> valor secreto permaneceu persistido no servidor". Isso estava **incorreto**: o
+> backup de rollback preservava a credencial **anterior** em texto claro, e um
+> script era capaz de reativá-la. A afirmação absoluta foi removida; a
+> retenção foi tratada na §15. Nenhum segredo foi **versionado** no Git — isso
+> permanece verdadeiro e distinto da retenção no servidor.
 
 ## 11. Riscos remanescentes
 
 - **Usuário SQL único** compartilhado pelas seis conexões (sem segregação por
   serviço) — fora do escopo desta etapa; segregação continua como melhoria futura.
-- **Histórico de shell** (`~/.bash_history`) pode conter credenciais de rotações
-  manuais anteriores; após esta rotação, qualquer senha antiga ali é inválida.
-  Recomenda-se revisão em etapa futura.
-- **`.env.example`** no repositório clonado da VPS referencia a chave de senha
-  (placeholder); revisar para garantir ausência de valor real, em etapa futura.
+- **Histórico de shell** (`~/.bash_history` de `faithro`): 6 linhas sensíveis de
+  rotações manuais anteriores foram **removidas** na 2O-B1-R1 (§15); histórico do
+  `root` não continha linhas sensíveis.
+- **`.env.example`** no repositório clonado da VPS: revisado na 2O-B1-R1 e
+  classificado como **placeholder** (≠ credencial ativa e ≠ antiga); não alterado.
+- **Remoção é melhor esforço:** `shred` atua apenas no filesystem visível; **não
+  há garantia** sobre snapshots, camadas copy-on-write, backups do provedor,
+  journald externo ou o transcript do agente.
 - **Divergência de build** (fonte com `RENEWAL` ativo × binário Pré-Renewal)
   permanece **pendente**; não faz parte desta etapa.
 
-## 12. Rollback disponível
+## 12. Modelo de recuperação (substitui o rollback inseguro)
 
-Script `rollback.sh` preservado no diretório de backup protegido restaura o
-arquivo de config (verificando checksum), restabelece a senha anterior no
-MariaDB (derivada do backup, sem impressão), reinicia os serviços na ordem
-segura e valida `login → char → map`. O backup **não** foi removido nesta etapa.
+> O `rollback.sh` original e o backup em texto claro foram **aposentados** na
+> ETAPA 2O-B1-R1 (§15). A credencial anterior é considerada **comprometida** e
+> **não deve ser restaurada** em hipótese alguma.
+
+**Falha de autenticação futura** — recuperar por **nova rotação com credencial
+fresca**, nunca restaurando a senha antiga:
+
+1. gerar uma nova credencial aleatória **na VPS** (em `/run`, `root:600`, nunca
+   impressa);
+2. atualizar o arquivo de import e o MariaDB de forma coordenada, com saída de
+   comandos SQL suprimida;
+3. testar a nova autenticação (nos dois bancos) **antes** do restart;
+4. reiniciar `login → char → map`;
+5. validar por pelo menos 60 segundos;
+6. remover os temporários (`shred`, melhor esforço);
+7. **não** restaurar credenciais antigas.
+
+**Falha apenas de configuração não sensível** — usar Git, a configuração-base
+conhecida ou um registro sanitizado. **Nenhum backup persistente em texto claro**
+deve ser usado como caminho de rollback de credencial.
 
 ## 13. Registros explícitos
 
@@ -162,6 +188,49 @@ segura e valida `login → char → map`. O backup **não** foi removido nesta e
 
 - Segregação de usuários SQL por serviço (etapa futura, fora deste escopo).
 - Reconciliação da divergência de build (Renewal × Pré-Renewal).
-- Revisão de `~/.bash_history` e `.env.example` do repositório clonado na VPS.
 - Próximo marco funcional: preparação do cliente e teste de login controlado
   (não faz parte desta etapa).
+
+## 15. Correção pós-rotação (ETAPA 2O-B1-R1)
+
+**Data:** 2026-08-05 (UTC). **Motivação:** revisão independente identificou que o
+rollback preparado na rotação preservava a **credencial anterior em texto claro**
+(`inter_conf.txt.bak`) e um `rollback.sh` capaz de **reativá-la** — o que
+deixaria de ser um rollback seguro, já que a credencial anterior é tratada como
+**comprometida**. A documentação original também afirmava, de forma incorreta,
+que nenhum segredo permanecera no servidor.
+
+**Decisão de segurança:** a credencial anterior **não** pode voltar a ser ativada;
+o caminho de recuperação passa a ser **nova rotação com credencial fresca** (§12).
+
+**Ações executadas (escrita controlada na VPS, sem expor segredos):**
+
+- Confirmado que a **credencial ativa autentica** em `faithro` e `faithro_log`
+  antes de qualquer remoção; a credencial antiga **não** foi lida nem testada.
+- **Aposentados** (remoção de melhor esforço via `shred` no filesystem visível):
+  - no diretório desta rotação: o backup de config em texto claro, seu checksum
+    e o script restaurador;
+  - em diretórios de rotações anteriores (`rotacao-2pb-20260727`,
+    `rotacao-sql-20260711`) e no backup avulso de `20260710`: backups de config
+    em texto claro, checksums e artefatos de autenticação antigos.
+- **Higienização de histórico:** 6 linhas sensíveis removidas do
+  `~/.bash_history` de `faithro` (dono/permissões `600` preservados; sem sessão
+  interativa concorrente); histórico do `root` já estava livre.
+- **`.env.example`:** revisado em memória e classificado como **placeholder**
+  (≠ ativa, ≠ antiga); **não** alterado.
+- **`/run`, `/tmp`, journald e checkouts da VPS:** sem temporários da etapa; sem
+  padrões sensíveis na janela da rotação; working trees limpos.
+- **Registro sanitizado** `RETIREMENT.txt` (modo `600`, sem segredo) criado no
+  diretório da rotação; `baseline.txt` (sem conteúdo sensível) preservado.
+
+**Limitações declaradas honestamente:** a remoção é de **melhor esforço** e não
+garante eliminação em snapshots, camadas copy-on-write, backups do provedor,
+journald externo ou no transcript do agente. O transcript do agente **não** pode
+ser apagado por comandos na VPS.
+
+**Validação pós-higienização:** credencial ativa autentica; três serviços
+`active/running` com `NRestarts` estável e sem `Access denied`; `login → char →
+map` funcional; 1265 mapas; `PACKETVER=20211103` e Pré-Renewal inalterados;
+portas inalteradas; MariaDB local; contagem agregada inalterada; janela de 60s
+estável; nenhum backup em texto claro, rollback inseguro ou temporário
+remanescente.
