@@ -15,6 +15,8 @@ on:
       - scripts/test-warp-audit-gate-02.py
       - scripts/test-warp-audit-gate-03.py
       - scripts/test-warp-audit-gate-04.py
+      - scripts/warp-audit-gate-05.py
+      - scripts/test-warp-audit-gate-05.py
       - scripts/inspect-warp-pe-identity.py
       - scripts/test-warp-pe-identity.py
       - scripts/inspect-warp-pe-static.py
@@ -57,6 +59,9 @@ jobs:
       - name: Run WARP audit GATE 4 preparation tests
         run: python scripts/test-warp-audit-gate-04.py
 
+      - name: Run WARP audit GATE 5 tooling tests (synthetic fixtures only)
+        run: python scripts/test-warp-audit-gate-05.py
+
       - name: Run WARP PE identity inspector tests
         run: python scripts/test-warp-pe-identity.py
 
@@ -83,5 +88,6 @@ jobs:
           python scripts/validate-warp-audit.py
           python scripts/test-warp-audit-gate-03.py
           python scripts/test-warp-audit-gate-04.py
+          python scripts/test-warp-audit-gate-05.py
           python scripts/test-warp-pe-identity.py
           python scripts/test-warp-pe-static.py

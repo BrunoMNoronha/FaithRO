@@ -1,0 +1,62 @@
+{
+  "adapter_results": [
+    {
+      "adapter": "synthetic-local",
+      "availability": "simulated",
+      "classification": "PASS",
+      "command_id": "synthetic:analyze_bytes",
+      "duration_ms": 0,
+      "exit_code": 0,
+      "limitations": [
+        "Resultado sintetico; NAO reflete o WARP real."
+      ],
+      "stderr_sanitized": "",
+      "stdout_sanitized": "nenhuma correspondencia sintetica",
+      "timeout_seconds": 30
+    }
+  ],
+  "artifact_executed": false,
+  "authorization_flags": {
+    "client_preparation_authorized": false,
+    "execution_authorized": false,
+    "external_reputation_upload_authorized": false,
+    "gate_5_authorized": false,
+    "local_security_scan_authorized": false
+  },
+  "environment": {
+    "adapters_enabled": [
+      "synthetic-local"
+    ],
+    "logical_working_directory": "<repo>",
+    "network_policy": "blocked",
+    "os_family": "nt",
+    "python_version": "3.14.6",
+    "timeout_seconds": 30
+  },
+  "gate_id": 5,
+  "gate_name": "Verificacoes locais de seguranca",
+  "identity": {
+    "finished_utc": "2026-08-05T23:30:00Z",
+    "logical_path": "fixtures/synthetic/gate-05-synthetic-pass.bin",
+    "sha256": "1aaa509eaa37bfd319036d0f9a64d43926aedda6786ad9d3788cae533301a1d3",
+    "size_bytes": 62,
+    "started_utc": "2026-08-05T23:30:00Z"
+  },
+  "limitations": [
+    "Resultado de fixture sintetica; NAO reflete o WARP real.",
+    "Um resultado local NAO prova que o binario e seguro, benigno ou malicioso.",
+    "Ausencia de deteccao NAO prova seguranca.",
+    "Nenhuma conclusao depende de uma unica metrica.",
+    "O GATE 5 NAO foi executado sobre o artefato real; execucao real exige nova decisao humana."
+  ],
+  "mode": "fixture",
+  "network_access": false,
+  "outcome": "FIXTURE_VALIDATION_PASS",
+  "procedural_classification": "FIXTURE_VALIDATION_PASS",
+  "record_type": "warp-audit-gate-05-evidence",
+  "schema_version": 1,
+  "tool": {
+    "id": "warp-audit-gate-05",
+    "version": "0.1.0-prep"
+  }
+}
