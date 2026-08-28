@@ -8,7 +8,7 @@
 ## Objetivo
 
 Registrar, de forma rastreável, o cliente-alvo e o protocolo adotados pelo
-FaithRO - Laos Deos, deixando explícita a diferença entre conceitos que são
+FaithRO - Laus Deo, deixando explícita a diferença entre conceitos que são
 frequentemente confundidos na comunidade (`Ragexe`, `PACKETVER_RE`, Renewal e
 Pre-Renewal) e definindo o processo de validação de compatibilidade
 cliente-servidor.

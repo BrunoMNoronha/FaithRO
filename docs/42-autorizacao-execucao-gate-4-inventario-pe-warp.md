@@ -21,7 +21,7 @@ inventário PE **estático e offline** do WARP. A execução operacional ocorrer
 | --- | --- |
 | Decisão | `AUTHORIZE_GATE_4_EXECUTION` |
 | Decisor | `BrunoMNoronha` |
-| Papel/Autoridade | Responsável técnico e mantenedor do projeto FaithRO — Laos Deos |
+| Papel/Autoridade | Responsável técnico e mantenedor do projeto FaithRO — Laus Deo |
 | Canal | Decisão humana delegada ao consultor técnico FaithRO nesta conversa |
 | Data | 2026-08-05 |
 | `status` | `AUTHORIZED_FOR_SINGLE_GATE` |

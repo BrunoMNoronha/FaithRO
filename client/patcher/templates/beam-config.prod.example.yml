@@ -13,16 +13,16 @@
 # =====================================================================
 
 app:
-  name: "FaithRO - Laos Deos"
+  name: "FaithRO - Laus Deo"
   version: "<VERSAO_CONFIG_PATCHER>"
-  window_title: "FaithRO - Laos Deos"
+  window_title: "FaithRO - Laus Deo"
   # null = pasta atual do patcher; NÃO fixar caminho pessoal aqui.
   game_directory: null
   client_exe: "<NOME_EXECUTAVEL_CLIENTE>"   # ex.: FaithRO.exe (não versionar o real)
   setup_exe: "<NOME_EXECUTAVEL_SETUP>"      # configurador homologado (ver docs/16)
   bgm_autoplay: false
   bgm_file: null
-  server_name: "FaithRO - Laos Deos"
+  server_name: "FaithRO - Laus Deo"
   video_background_enabled: false
   video_background_file: null
   grid_images: null

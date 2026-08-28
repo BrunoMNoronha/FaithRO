@@ -9,7 +9,7 @@
 ## Objetivo
 
 Definir formalmente a **referência mecânica** (Pre-Renewal ou Renewal) que
-servirá de base para as próximas configurações do FaithRO - Laos Deos,
+servirá de base para as próximas configurações do FaithRO - Laus Deo,
 separando explicitamente seis conceitos que a comunidade costuma tratar como
 equivalentes:
 
@@ -28,7 +28,7 @@ commit upstream de referência `7f080871c8b3bbe7a79027194633201c63422ee1`
 
 ## Identidade
 
-- Nome: FaithRO - Laos Deos
+- Nome: FaithRO - Laus Deo
 - Estilo: old school/high rate
 - Estado-alvo de 3ª classes: bloqueadas por política; validação operacional
   na issue #9 (ver seção [Classes](#classes))
