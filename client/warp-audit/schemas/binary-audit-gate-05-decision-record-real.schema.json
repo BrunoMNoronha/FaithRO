@@ -1,0 +1,187 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "binary-audit-gate-05-decision-record-real.schema.json",
+  "title": "Registro real da decisao humana do GATE 5 (WARP)",
+  "description": "CONVENCAO (2P-E-C5-REAL-AUTH-DECISION) para o registro REAL da decisao humana de autorizar a futura execucao controlada do GATE 5 (verificacoes locais de seguranca). Este registro NAO executa o GATE 5; a execucao ocorre em PR separado. gate_5_authorized e local_security_scan_authorized sao true porque a decisao humana foi recebida. execution_authorized (do PE), client_preparation_authorized, external_reputation_upload_authorized, vps_access_authorized e distribution_authorized permanecem const:false. O merge deste registro NAO habilita o tooling automaticamente: o orquestrador mantem o modo real bloqueado e o input schema nao inclui mode=real.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "project", "stage", "record_type", "status", "gate",
+    "decision", "execution_state", "decider", "role", "authority", "channel",
+    "date", "justification", "conditions", "authorizations",
+    "materialization_scope", "allowed_scanners", "environment_requirements",
+    "result_criteria", "precondition", "tooling_ref",
+    "prior_gate_decision_ref", "gate_4_evidence_ref", "gate_4_output_ref",
+    "decision_package_ref", "plan_ref", "doc_ref",
+    "rollback", "notes"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "project": { "type": "string", "const": "WARP" },
+    "stage": { "type": "string", "const": "2P-E-C5-REAL-AUTH-DECISION" },
+    "record_type": { "type": "string", "const": "binary-audit-gate-05-decision-record-real" },
+    "status": { "type": "string", "const": "AUTHORIZED_FOR_SINGLE_GATE" },
+    "gate": {
+      "type": "object", "additionalProperties": false, "required": ["id", "name"],
+      "properties": {
+        "id": { "type": "integer", "const": 5 },
+        "name": { "type": "string", "const": "LOCAL_SECURITY_CHECKS" }
+      }
+    },
+    "decision": { "type": "string", "const": "AUTHORIZE_GATE_5_LOCAL_EXECUTION" },
+    "execution_state": { "type": "string", "const": "AUTHORIZED_NOT_STARTED" },
+    "decider": { "type": "string", "minLength": 2 },
+    "role": { "type": "string", "minLength": 2 },
+    "authority": { "type": "string", "minLength": 2 },
+    "channel": { "type": "string", "minLength": 2 },
+    "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "justification": { "type": "string", "minLength": 1 },
+    "conditions": {
+      "type": "array", "minItems": 20,
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["n", "text"],
+        "properties": {
+          "n": { "type": "integer", "minimum": 1 },
+          "text": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "authorizations": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "human_decision_required", "human_decision_received", "gate_selected",
+        "gate_4_completed", "temporary_materialization_authorized",
+        "local_hashing_authorized", "local_security_scan_authorized",
+        "gate_5_authorized",
+        "dynamic_analysis_authorized", "emulation_authorized", "unpacking_authorized",
+        "execution_authorized", "external_reputation_upload_authorized",
+        "network_validation_authorized", "sandbox_creation_authorized",
+        "client_copy_provision_authorized", "client_modification_authorized",
+        "patch_review_authorized", "patch_application_authorized",
+        "client_preparation_authorized", "test_account_authorized",
+        "first_login_authorized", "vps_access_authorized", "distribution_authorized"
+      ],
+      "properties": {
+        "human_decision_required": { "type": "boolean", "const": true },
+        "human_decision_received": { "type": "boolean", "const": true },
+        "gate_selected": { "type": "boolean", "const": true },
+        "gate_4_completed": { "type": "boolean", "const": true },
+        "temporary_materialization_authorized": { "type": "boolean", "const": true },
+        "local_hashing_authorized": { "type": "boolean", "const": true },
+        "local_security_scan_authorized": { "type": "boolean", "const": true },
+        "gate_5_authorized": { "type": "boolean", "const": true },
+        "dynamic_analysis_authorized": { "type": "boolean", "const": false },
+        "emulation_authorized": { "type": "boolean", "const": false },
+        "unpacking_authorized": { "type": "boolean", "const": false },
+        "execution_authorized": { "type": "boolean", "const": false },
+        "external_reputation_upload_authorized": { "type": "boolean", "const": false },
+        "network_validation_authorized": { "type": "boolean", "const": false },
+        "sandbox_creation_authorized": { "type": "boolean", "const": false },
+        "client_copy_provision_authorized": { "type": "boolean", "const": false },
+        "client_modification_authorized": { "type": "boolean", "const": false },
+        "patch_review_authorized": { "type": "boolean", "const": false },
+        "patch_application_authorized": { "type": "boolean", "const": false },
+        "client_preparation_authorized": { "type": "boolean", "const": false },
+        "test_account_authorized": { "type": "boolean", "const": false },
+        "first_login_authorized": { "type": "boolean", "const": false },
+        "vps_access_authorized": { "type": "boolean", "const": false },
+        "distribution_authorized": { "type": "boolean", "const": false }
+      }
+    },
+    "materialization_scope": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "repository_full_name", "commit_oid", "tree_oid", "artifact_path",
+        "artifact_blob_oid", "artifact_blob_oid_algorithm", "artifact_blob_size",
+        "artifact_sha256", "max_files", "network_scope"
+      ],
+      "properties": {
+        "repository_full_name": { "type": "string", "const": "Neo-Mind/WARP" },
+        "commit_oid": { "type": "string", "const": "9b1173e9e4e135c68e150704f01186ab5e763acd" },
+        "tree_oid": { "type": "string", "const": "1aebae06d5c71a145afc35cc72fcf5c210a08758" },
+        "artifact_path": { "type": "string", "const": "win32/WARP.exe" },
+        "artifact_blob_oid": { "type": "string", "const": "c853da42d18dfe090b4e941b435d989311faf3dc" },
+        "artifact_blob_oid_algorithm": { "type": "string", "const": "GIT_OBJECT_ID" },
+        "artifact_blob_size": { "type": "integer", "const": 1137152 },
+        "artifact_sha256": { "type": "string", "const": "345f3464ee72a60afc97bde0773410f47348a00d8629182fe52741c5f1a42874" },
+        "max_files": { "type": "integer", "const": 1 },
+        "network_scope": { "type": "string", "const": "GITHUB_OFFICIAL_ONLY" }
+      }
+    },
+    "allowed_scanners": {
+      "type": "array", "minItems": 2,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "executable", "expected_locations", "identity_policy", "version_policy", "network_behavior", "file_as_argument", "never_as_executable"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "executable": { "type": "string", "minLength": 1 },
+          "expected_locations": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "identity_policy": { "type": "string", "minLength": 1 },
+          "version_policy": { "type": "string", "minLength": 1 },
+          "network_behavior": { "type": "string", "minLength": 1 },
+          "file_as_argument": { "type": "string", "minLength": 1 },
+          "never_as_executable": { "type": "boolean", "const": true }
+        }
+      }
+    },
+    "environment_requirements": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "type", "network_egress", "isolation_verification",
+        "defender_cloud_dependency", "permanent_host_changes",
+        "vps_access", "faithro_credentials", "player_data"
+      ],
+      "properties": {
+        "type": { "type": "string", "const": "disposable_vm_or_equivalent" },
+        "network_egress": { "type": "string", "const": "blocked_by_external_mechanism" },
+        "isolation_verification": { "type": "string", "minLength": 1 },
+        "defender_cloud_dependency": { "type": "string", "const": "prohibited" },
+        "permanent_host_changes": { "type": "string", "const": "prohibited" },
+        "vps_access": { "type": "string", "const": "prohibited" },
+        "faithro_credentials": { "type": "string", "const": "must_not_be_present" },
+        "player_data": { "type": "string", "const": "must_not_be_present" }
+      }
+    },
+    "result_criteria": {
+      "type": "object", "additionalProperties": false,
+      "required": ["PASS", "FINDING", "ERROR", "TIMEOUT", "BLOCKED"],
+      "properties": {
+        "PASS": { "type": "string", "minLength": 1 },
+        "FINDING": { "type": "string", "minLength": 1 },
+        "ERROR": { "type": "string", "minLength": 1 },
+        "TIMEOUT": { "type": "string", "minLength": 1 },
+        "BLOCKED": { "type": "string", "minLength": 1 }
+      }
+    },
+    "precondition": {
+      "type": "object", "additionalProperties": false,
+      "required": ["gate_4_completed", "gate_4_outcome", "gate_4_output_sha256"],
+      "properties": {
+        "gate_4_completed": { "type": "boolean", "const": true },
+        "gate_4_outcome": { "type": "string", "const": "COMPLETED_PASS" },
+        "gate_4_output_sha256": { "type": "string", "const": "84c3c49a770b475fdf25c43467498e014b2f8950ef172384bb8ea48bbe17f584" }
+      }
+    },
+    "tooling_ref": {
+      "type": "object", "additionalProperties": false,
+      "required": ["tooling_squash", "tooling_pr", "tool_path", "tool_git_blob_oid", "test_path", "test_git_blob_oid"],
+      "properties": {
+        "tooling_squash": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "tooling_pr": { "type": "integer", "minimum": 1 },
+        "tool_path": { "type": "string", "const": "scripts/warp-audit-gate-05.py" },
+        "tool_git_blob_oid": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "test_path": { "type": "string", "const": "scripts/test-warp-audit-gate-05.py" },
+        "test_git_blob_oid": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+      }
+    },
+    "prior_gate_decision_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "minLength": 1 } } },
+    "gate_4_evidence_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "minLength": 1 } } },
+    "gate_4_output_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "minLength": 1 } } },
+    "decision_package_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "minLength": 1 } } },
+    "plan_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "minLength": 1 } } },
+    "doc_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "minLength": 1 } } },
+    "rollback": { "type": "string", "minLength": 1 },
+    "notes": { "type": "string", "minLength": 1 }
+  }
+}

@@ -354,6 +354,27 @@ GATE4_FAIL_ANALYZER_STATES = {
     (True, True, True),     # POST_OUTPUT_FAIL
 }
 
+# --- ETAPA 2P-E-C5-REAL-AUTH-DECISION: decisao real do GATE 5 ---
+GATE5_DECISION_SCHEMA = "binary-audit-gate-05-decision-record-real.schema.json"
+GATE5_DECISION_PREFIX = "binary-audit-gate-05-decision-record-"
+GATE5_TOOL_PATH = "scripts/warp-audit-gate-05.py"
+GATE5_TEST_PATH = "scripts/test-warp-audit-gate-05.py"
+GATE5_DECISION_TRUE_FLAGS = {
+    "human_decision_required", "human_decision_received", "gate_selected",
+    "gate_4_completed", "temporary_materialization_authorized",
+    "local_hashing_authorized", "local_security_scan_authorized",
+    "gate_5_authorized",
+}
+GATE5_CRITICAL_FALSE = {
+    "dynamic_analysis_authorized", "emulation_authorized", "unpacking_authorized",
+    "execution_authorized", "external_reputation_upload_authorized",
+    "network_validation_authorized", "sandbox_creation_authorized",
+    "client_copy_provision_authorized", "client_modification_authorized",
+    "patch_review_authorized", "patch_application_authorized",
+    "client_preparation_authorized", "test_account_authorized",
+    "first_login_authorized", "vps_access_authorized", "distribution_authorized",
+}
+
 
 def git_blob_oid_for_bytes(data):
     """Recalcula o Git object ID (blob) localmente: SHA-1('blob <size>\\0' + content).
@@ -3173,6 +3194,122 @@ def validate_gate4_prep(errors):
           f"gate_4_real_output_count={len(po_names)} gate_5_authorized=false")
 
 
+def validate_gate5_decision(record, schema, filename, errors):
+    """Valida a decisao humana real do GATE 5 (AUTHORIZE_GATE_5_LOCAL_EXECUTION)."""
+    kv = []
+    schema_keyword_violations(schema, "gate-05-decision.schema", kv)
+    errors.extend(kv)
+    validate_node(record, schema, filename, errors)
+    security_scan(record, errors)
+
+    if not isinstance(record, dict):
+        errors.append(f"{filename}: registro nao e objeto")
+        return errors
+
+    if record.get("status") != "AUTHORIZED_FOR_SINGLE_GATE":
+        errors.append(f"{filename}: status deve ser AUTHORIZED_FOR_SINGLE_GATE")
+    g = record.get("gate")
+    if not isinstance(g, dict) or g.get("id") != 5 or g.get("name") != "LOCAL_SECURITY_CHECKS":
+        errors.append(f"{filename}: gate deve ser id=5 name=LOCAL_SECURITY_CHECKS")
+    if record.get("decision") != "AUTHORIZE_GATE_5_LOCAL_EXECUTION":
+        errors.append(f"{filename}: decision deve ser AUTHORIZE_GATE_5_LOCAL_EXECUTION")
+    if record.get("execution_state") != "AUTHORIZED_NOT_STARTED":
+        errors.append(f"{filename}: execution_state deve ser AUTHORIZED_NOT_STARTED")
+
+    for field in ("decider", "role", "authority", "channel"):
+        val = record.get(field)
+        if not isinstance(val, str) or not val.strip():
+            errors.append(f"{filename}: campo '{field}' vazio")
+        elif PLACEHOLDER_RE.search(val):
+            errors.append(f"{filename}: campo '{field}' parece placeholder (categoria: placeholder)")
+    if not valid_iso_date(record.get("date")):
+        errors.append(f"{filename}: campo 'date' nao e uma data ISO valida")
+
+    conds = record.get("conditions")
+    if not isinstance(conds, list) or len(conds) < 20:
+        errors.append(f"{filename}: 'conditions' deve ter ao menos 20 itens")
+        conds = conds if isinstance(conds, list) else []
+    ns = [c.get("n") for c in conds if isinstance(c, dict)]
+    if ns != list(range(1, len(conds) + 1)):
+        errors.append(f"{filename}: conditions devem ser numeradas 1..N em ordem, sem lacuna/repeticao")
+    for i, c in enumerate(conds):
+        if not isinstance(c, dict) or not str(c.get("text", "")).strip():
+            errors.append(f"{filename}: conditions[{i}] sem texto")
+
+    auth = record.get("authorizations")
+    if not isinstance(auth, dict):
+        errors.append(f"{filename}: 'authorizations' ausente")
+    else:
+        for k, v in auth.items():
+            if k in GATE5_DECISION_TRUE_FLAGS:
+                if v is not True:
+                    errors.append(f"{filename}: authorizations.{k} deve ser true")
+            elif v is not False:
+                errors.append(f"{filename}: authorizations.{k} deve ser false (grants do GATE 5 sao limitados)")
+        for k in GATE5_CRITICAL_FALSE:
+            if auth.get(k) is not False:
+                errors.append(f"{filename}: authorizations.{k} deve ser false (sem autorizacao transitiva)")
+
+    _check_materialization_scope(record.get("materialization_scope"), filename, errors)
+
+    pc = record.get("precondition")
+    if not isinstance(pc, dict):
+        errors.append(f"{filename}: 'precondition' ausente")
+    else:
+        if pc.get("gate_4_completed") is not True:
+            errors.append(f"{filename}: precondition.gate_4_completed deve ser true")
+        if pc.get("gate_4_outcome") != "COMPLETED_PASS":
+            errors.append(f"{filename}: precondition.gate_4_outcome deve ser COMPLETED_PASS")
+        if pc.get("gate_4_output_sha256") != "84c3c49a770b475fdf25c43467498e014b2f8950ef172384bb8ea48bbe17f584":
+            errors.append(f"{filename}: precondition.gate_4_output_sha256 deve ser 84c3c49a...")
+
+    for field in ("prior_gate_decision_ref", "gate_4_evidence_ref", "gate_4_output_ref",
+                  "decision_package_ref", "plan_ref", "doc_ref"):
+        ref = record.get(field)
+        _ref_ok(ref.get("path") if isinstance(ref, dict) else None, field, filename, errors)
+
+    tref = record.get("tooling_ref")
+    if isinstance(tref, dict):
+        _recompute_and_compare_oid("tool_git_blob_oid", GATE5_TOOL_PATH,
+                                   tref.get("tool_git_blob_oid"), filename, errors)
+        _recompute_and_compare_oid("test_git_blob_oid", GATE5_TEST_PATH,
+                                   tref.get("test_git_blob_oid"), filename, errors)
+    else:
+        errors.append(f"{filename}: tooling_ref ausente")
+
+    return errors
+
+
+def validate_gate5(errors):
+    """Orquestra a validacao dos registros reais de decisao do GATE 5."""
+    if not os.path.isdir(DECISIONS_DIR):
+        return
+    dec_names = sorted(f for f in os.listdir(DECISIONS_DIR)
+                       if f.startswith(GATE5_DECISION_PREFIX) and f.endswith(".json"))
+    if not dec_names:
+        return
+    try:
+        schema = load_json(os.path.join(SCHEMA_DIR, GATE5_DECISION_SCHEMA))
+    except Fail as exc:
+        errors.append(str(exc))
+        return
+
+    for name in dec_names:
+        derr = []
+        try:
+            record = load_json(os.path.join(DECISIONS_DIR, name))
+            validate_gate5_decision(record, schema, name, derr)
+        except Fail as exc:
+            derr.append(str(exc))
+        if derr:
+            errors.extend(derr)
+            print(f"[FALHA] decisions/{name}: {len(derr)} problema(s)")
+            for e in derr:
+                print(f"    - {e}")
+        else:
+            print(f"[OK]    decisions/{name}")
+
+
 def main():
     all_errors = []
     for artifact, schema_name in ARTIFACTS:
@@ -3244,6 +3381,10 @@ def main():
     validate_gate4_prep(gate4_prep_errors)
     all_errors.extend(gate4_prep_errors)
 
+    gate5_errors = []
+    validate_gate5(gate5_errors)
+    all_errors.extend(gate5_errors)
+
     if all_errors:
         print(f"\nValidacao FALHOU com {len(all_errors)} problema(s).")
         return 1
@@ -3251,8 +3392,9 @@ def main():
           f"cross-checks, registros reais de decisao, plano da auditoria binaria, "
           f"autorizacao do GATE 0, evidencia do GATE 0, autorizacao do GATE 1, "
           f"decisao/evidencia do GATE 2, decisao/evidencia do GATE 3, "
-          f"convencao da repeticao corretiva (sem registros reais) e "
-          f"preparacao do GATE 4 (2P-E-C4-PREP; sem registros reais).")
+          f"convencao da repeticao corretiva (sem registros reais), "
+          f"preparacao do GATE 4 (2P-E-C4-PREP; sem registros reais) e "
+          f"decisao real do GATE 5 (2P-E-C5-REAL-AUTH-DECISION).")
     return 0
 
 
