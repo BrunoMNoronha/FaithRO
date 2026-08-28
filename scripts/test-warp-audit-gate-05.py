@@ -344,6 +344,127 @@ def main():
           "binary-audit-gate-05-evidence.example.json" in registered)
 
     # ------------------------------------------------------------------ #
+    # J5 — regressoes de hardening (D1..D4)
+    # ------------------------------------------------------------------ #
+
+    # D1: client_preparation_authorized=true deve ser rejeitada pelo runtime
+    with tempfile.TemporaryDirectory() as tmp:
+        cwd = os.getcwd(); os.chdir(tmp)
+        try:
+            make_fixture(tmp)
+            cfg = base_config(tmp)
+            cfg["authorization_flags"]["client_preparation_authorized"] = True
+            expect_error("J5-D1 client_preparation_authorized=true rejeitada",
+                         lambda c=cfg: g5.run(c, clock=lambda: FIXED))
+        finally:
+            os.chdir(cwd)
+
+    # D2: modification_policy divergente
+    with tempfile.TemporaryDirectory() as tmp:
+        cwd = os.getcwd(); os.chdir(tmp)
+        try:
+            make_fixture(tmp)
+            expect_error("J5-D2 modification_policy divergente",
+                         lambda: g5.run(base_config(tmp, modification_policy="allow"),
+                                        clock=lambda: FIXED))
+        finally:
+            os.chdir(cwd)
+
+    # D2: gate_name divergente
+    with tempfile.TemporaryDirectory() as tmp:
+        cwd = os.getcwd(); os.chdir(tmp)
+        try:
+            make_fixture(tmp)
+            expect_error("J5-D2 gate_name divergente",
+                         lambda: g5.run(base_config(tmp, gate_name="Wrong name"),
+                                        clock=lambda: FIXED))
+        finally:
+            os.chdir(cwd)
+
+    # D2: campo extra no top-level do config
+    with tempfile.TemporaryDirectory() as tmp:
+        cwd = os.getcwd(); os.chdir(tmp)
+        try:
+            make_fixture(tmp)
+            cfg = base_config(tmp)
+            cfg["hack_field"] = "injected"
+            expect_error("J5-D2 campo extra no config rejeitado",
+                         lambda c=cfg: g5.run(c, clock=lambda: FIXED))
+        finally:
+            os.chdir(cwd)
+
+    # D2: campo extra em authorization_flags
+    with tempfile.TemporaryDirectory() as tmp:
+        cwd = os.getcwd(); os.chdir(tmp)
+        try:
+            make_fixture(tmp)
+            cfg = base_config(tmp)
+            cfg["authorization_flags"]["extra_flag"] = False
+            expect_error("J5-D2 campo extra em authorization_flags rejeitado",
+                         lambda c=cfg: g5.run(c, clock=lambda: FIXED))
+        finally:
+            os.chdir(cwd)
+
+    # D3: config mode=real + --fixture-mode via main() deve retornar 3 (bloqueado)
+    with tempfile.TemporaryDirectory() as tmp:
+        cwd = os.getcwd(); os.chdir(tmp)
+        try:
+            make_fixture(tmp)
+            cfgp = Path(tmp) / "cfg_real.json"
+            cfgp.write_text(json.dumps(base_config(tmp, mode="real")), encoding="utf-8")
+            rc = g5.main(["prog", "--config", str(cfgp), "--fixture-mode"])
+            check("J5-D3 config mode=real + --fixture-mode bloqueado (rc=3)", rc == 3)
+        finally:
+            os.chdir(cwd)
+
+    # D3: config mode=real + --validate-only via main() deve retornar 3
+    with tempfile.TemporaryDirectory() as tmp:
+        cwd = os.getcwd(); os.chdir(tmp)
+        try:
+            make_fixture(tmp)
+            cfgp = Path(tmp) / "cfg_real2.json"
+            cfgp.write_text(json.dumps(base_config(tmp, mode="real")), encoding="utf-8")
+            rc = g5.main(["prog", "--config", str(cfgp), "--validate-only"])
+            check("J5-D3 config mode=real + --validate-only bloqueado (rc=3)", rc == 3)
+        finally:
+            os.chdir(cwd)
+
+    # D4: fixture com conteudo PE sintetico (MZ) rejeitada
+    with tempfile.TemporaryDirectory() as tmp:
+        cwd = os.getcwd(); os.chdir(tmp)
+        try:
+            pe_content = b"MZ\x90\x00\x03\x00\x00\x00" + b"\x00" * 50  # PE sintetico
+            make_fixture(tmp, content=pe_content, name="fake_pe.bin")
+            expect_error("J5-D4 fixture com PE magic (MZ) rejeitada",
+                         lambda: g5.run(base_config(tmp, input_path="fake_pe.bin"),
+                                        clock=lambda: FIXED))
+        finally:
+            os.chdir(cwd)
+
+    # D4: fixture arbitraria grande (> 1 MiB) rejeitada
+    with tempfile.TemporaryDirectory() as tmp:
+        cwd = os.getcwd(); os.chdir(tmp)
+        try:
+            big_content = b"SYN-PASS " + b"X" * (g5.FIXTURE_MAX_BYTES + 1)
+            make_fixture(tmp, content=big_content, name="big.bin")
+            expect_error("J5-D4 fixture grande rejeitada",
+                         lambda: g5.run(base_config(tmp, input_path="big.bin"),
+                                        clock=lambda: FIXED))
+        finally:
+            os.chdir(cwd)
+
+    # D5: Defender parser com mensagens adversariais
+    dfd2 = g5.DefenderAdapter()
+    check("J5-D5 Defender '0 threats detected' -> FINDING (conservador)",
+          dfd2.parse_output("0 threats detected", "", 0) == "FINDING")
+    check("J5-D5 Defender 'No threats found' + exit 0 -> FINDING (conservador: contem 'threat')",
+          dfd2.parse_output("No threats found", "", 0) == "FINDING")
+    check("J5-D5 Defender 'malware detected' -> FINDING",
+          dfd2.parse_output("malware detected in file", "", 0) == "FINDING")
+    check("J5-D5 Defender exit 2 (error) -> ERROR",
+          dfd2.parse_output("scan completed", "", 2) == "ERROR")
+
+    # ------------------------------------------------------------------ #
     # J4 — portabilidade (nada acima exigiu Windows/Defender/YARA/rede/WARP)
     # ------------------------------------------------------------------ #
     check("J4 suite roda sem scanner/rede/artefato real", True)

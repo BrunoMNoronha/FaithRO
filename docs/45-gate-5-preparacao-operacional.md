@@ -149,6 +149,8 @@ Linux, sem Windows/Defender/YARA/VPS/internet/cliente/WARP).
 - **R10** Uso de ferramenta diferente da revisada.
 - **R11** Divergência de hash da entrada.
 - **R12** Execução sem autorização.
+- **R13** Scanner localizado via `PATH` pode ser executável plantado por usuário;
+  resolver/pinar identidade do scanner antes de execução real futura.
 
 ## 10. Mitigações
 
@@ -156,6 +158,11 @@ Linux, sem Windows/Defender/YARA/VPS/internet/cliente/WARP).
   arquivo como argumento; testes confirmam entrada byte-idêntica e não executada.
 - **R2** `shell=False`, argumentos sempre como lista, sem `os.system`; testes.
 - **R3** Sem imports de rede; teste que reprova import proibido; `network_policy=blocked`.
+  **Nota:** `network_policy=blocked` é **declarativo** — não garante isolamento técnico
+  de rede no host. Um scanner local (ex.: Defender com proteção cloud) pode fazer rede
+  independentemente do campo. Uma futura execução real do GATE 5 **deve** exigir
+  verificação independente de isolamento de rede antes de executar scanners reais
+  (ex.: firewall, desativação de proteção cloud, air-gap verificado).
 - **R4** Estados fochados procedurais; `outcome` nunca `GATE_PASSED`; limitações
   explícitas; nenhuma conclusão por métrica isolada.
 - **R5/R6/R7** Achados exigem interpretação humana; parser isolado e testado por

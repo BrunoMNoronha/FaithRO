@@ -88,6 +88,8 @@ MAX_FINDINGS = 100
 MAX_ADAPTER_NAME = 64
 MAX_TIMEOUT_SECONDS = 3600
 MAX_INPUT_BYTES = 64 * 1024 * 1024  # limite defensivo de leitura de fixture
+FIXTURE_MAX_BYTES = 1 * 1024 * 1024  # fixtures sinteticas devem ser pequenas (D4)
+PE_MAGIC = b"MZ"  # rejeitar fixtures que se assemelhem a PE real (D4)
 
 
 class Gate5Error(Exception):
@@ -340,7 +342,13 @@ ADAPTERS: Dict[str, BaseAdapter] = {
 # Utilitarios de caminho (sem rede).
 # --------------------------------------------------------------------------- #
 def _which(executable: str) -> Optional[str]:
-    """Localiza um executavel no PATH sem usar shutil (implementacao minima)."""
+    """Localiza um executavel no PATH sem usar shutil (implementacao minima).
+
+    NOTA (D7): esta busca por PATH NAO pina a identidade do executavel encontrado.
+    Um futuro modo autorizado DEVE resolver/pinar a identidade do scanner local
+    (hash, caminho absoluto verificado, assinatura) ANTES de executar. Nesta etapa
+    nenhum adapter real e executado; a funcao serve apenas para detect_available().
+    """
     paths = os.environ.get("PATH", "").split(os.pathsep)
     exts = os.environ.get("PATHEXT", "").split(os.pathsep) if os.name == "nt" else [""]
     for d in paths:
@@ -388,6 +396,7 @@ REQUIRED_FALSE_FLAGS = (
     "execution_authorized",
     "local_security_scan_authorized",
     "external_reputation_upload_authorized",
+    "client_preparation_authorized",
 )
 
 
@@ -399,12 +408,22 @@ def validate_config(config: Dict[str, object]) -> None:
         raise Gate5Error("schema_version invalido")
     if config.get("gate_id") != GATE_ID:
         raise Gate5Error("gate_id invalido")
+    if config.get("gate_name") != GATE_NAME:
+        raise Gate5Error("gate_name invalido")
     mode = config.get("mode")
     if mode not in ("validate-only", "fixture", "real"):
         raise Gate5Error("mode invalido")
+    if config.get("modification_policy") != "input_never_modified":
+        raise Gate5Error("modification_policy deve ser 'input_never_modified'")
     flags = config.get("authorization_flags")
     if not isinstance(flags, dict):
         raise Gate5Error("authorization_flags ausente")
+    # Rejeitar propriedades extras em authorization_flags (fail-closed).
+    _ALLOWED_AUTH_KEYS = set(REQUIRED_FALSE_FLAGS)
+    extra_auth = set(flags.keys()) - _ALLOWED_AUTH_KEYS
+    if extra_auth:
+        raise Gate5Error("propriedade(s) extra em authorization_flags: %s"
+                         % ", ".join(sorted(extra_auth)))
     for key in REQUIRED_FALSE_FLAGS:
         if flags.get(key) is not False:
             raise Gate5Error("flag '%s' deve ser false nesta etapa" % key)
@@ -425,6 +444,17 @@ def validate_config(config: Dict[str, object]) -> None:
     for a in adapters:
         if a not in ADAPTERS:
             raise Gate5Error("adapter nao permitido: %s" % sanitize_message(str(a)))
+    # Rejeitar propriedades extras no top-level (fail-closed).
+    _ALLOWED_TOP_KEYS = {
+        "schema_version", "gate_id", "gate_name", "mode", "input_path",
+        "expected_sha256", "output_directory", "timeout_seconds",
+        "enabled_adapters", "network_policy", "execution_policy",
+        "modification_policy", "decision_ref", "authorization_flags",
+    }
+    extra_top = set(config.keys()) - _ALLOWED_TOP_KEYS
+    if extra_top:
+        raise Gate5Error("propriedade(s) extra no config: %s"
+                         % ", ".join(sorted(extra_top)))
 
 
 # --------------------------------------------------------------------------- #
@@ -546,6 +576,13 @@ def run(config: Dict[str, object],
         blob = fh.read(MAX_INPUT_BYTES + 1)
     if len(blob) > MAX_INPUT_BYTES:
         raise Gate5Error("fixture excede limite defensivo")
+    # D4: fixture sintetica nao pode comecar com PE magic nem exceder tamanho de fixture.
+    if blob[:2] == PE_MAGIC:
+        raise Gate5Error("fixture rejeitada: conteudo inicia com PE magic (MZ); "
+                         "fixture-mode opera apenas sobre dados sinteticos")
+    if len(blob) > FIXTURE_MAX_BYTES:
+        raise Gate5Error("fixture rejeitada: tamanho (%d bytes) excede limite de fixture "
+                         "sintetica (%d bytes)" % (len(blob), FIXTURE_MAX_BYTES))
 
     synth = ADAPTERS[SyntheticAdapter.adapter_id]
     results = []
@@ -594,15 +631,17 @@ def main(argv: List[str]) -> int:
         sys.stderr.write("config invalido: %s\n" % sanitize_message(str(exc)))
         return 2
 
-    # A flag de CLI, quando presente, deve ser coerente com o mode do config.
+    # Fail-closed: se o config original declara modo real, NUNCA aceitar — mesmo
+    # que a CLI tente sobrescrever com --fixture-mode ou --validate-only (D3).
+    if config.get("mode") == "real":
+        sys.stderr.write(REAL_EXECUTION_BLOCK_MESSAGE + "\n")
+        return 3
+
+    # A flag de CLI, quando presente, define o mode (so para modos permitidos).
     if args.validate_only:
         config["mode"] = "validate-only"
     elif args.fixture_mode:
         config["mode"] = "fixture"
-
-    if config.get("mode") == "real":
-        sys.stderr.write(REAL_EXECUTION_BLOCK_MESSAGE + "\n")
-        return 3
 
     try:
         evidence = run(config)
