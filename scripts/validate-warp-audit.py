@@ -58,6 +58,12 @@ ARTIFACTS = [
     # forbidden_flags). NAO concede autorizacao: state=PENDING_HUMAN_DECISION,
     # gate_5_authorized/execution_authorized/client_preparation_authorized const:false.
     ("binary-audit-gate-05-decision-package.example.json", "binary-audit-gate-05-decision-package.schema.json"),
+    # ETAPA 2P-E-C5-TOOLING-PREP: contratos de entrada e evidencia do orquestrador
+    # estatico do GATE 5. Schemas FECHADOS; flags de autorizacao const:false; a
+    # evidencia de exemplo so pode ser FIXTURE_VALIDATION_PASS (nunca GATE_PASSED).
+    # Remover ou invalidar qualquer um destes faz o validador falhar.
+    ("binary-audit-gate-05-input.example.json", "binary-audit-gate-05-input.schema.json"),
+    ("binary-audit-gate-05-evidence.example.json", "binary-audit-gate-05-evidence.schema.json"),
 ]
 
 # ETAPA 2P-E-A2: registro REAL da decisao humana (preenchido, fora do template).

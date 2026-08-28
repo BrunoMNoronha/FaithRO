@@ -46,7 +46,9 @@ auditoria. O relatório completo está em
 | [`evidence/binary-audit-gate-04-pass-evidence-2026-08-05.json`](evidence/binary-audit-gate-04-pass-evidence-2026-08-05.json) | (2P-E-C4-EXEC) Evidência **real** da execução do GATE 4: **`COMPLETED_PASS`**. Identidade reconfirmada igual ao GATE 2/3 (blob `c853da42…`, 1137152 bytes, SHA-256 `345f3464…`); analisador revisado (`f223ae7b`) invocado **uma vez** (só-leitura; `executed/loaded=false`); saída presa por SHA-256 `84c3c49a…`; binário/diretório removidos; `binary_versioned=false`, `gate_5_authorized=false`. `COMPLETED_PASS` **não** aprova o binário. |
 | [`evidence/binary-audit-gate-04-static-inventory-output-2026-08-05.json`](evidence/binary-audit-gate-04-static-inventory-output-2026-08-05.json) | (2P-E-C4-EXEC) Saída **byte-fixada** (UTF-8/LF, SHA-256 `84c3c49a…`) do inventário PE estático do WARP produzida pelo analisador revisado: fatos estruturais, heurísticas e indicadores textuais **sanitizados** (sem bytes brutos, `bCertificate`, base64, segredo, IP ou caminho pessoal). Achados **não** são veredito. |
 | [`binary-audit-gate-05-decision-package.example.json`](binary-audit-gate-05-decision-package.example.json) | (2P-E-C5-PREP) Pacote de **preparação** da futura decisão humana do **GATE 5** (verificações locais de segurança): referencia o GATE 4 integrado (squash `03348d7`, output SHA-256 `84c3c49a…`), a definição canônica do GATE 5, as lacunas e as opções A–D. `state=PENDING_HUMAN_DECISION`; **não** concede autorização (`gate_5_authorized=false`, `execution_authorized=false`, `client_preparation_authorized=false`). Ver [docs/44](../../docs/44-gate-5-decisao-e-plano.md). |
-| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json`, `binary-audit-gate-00-decision-record-real.schema.json`, `binary-audit-gate-00-provenance-evidence.schema.json`, `binary-audit-gate-01-decision-record-real.schema.json`, `binary-audit-gate-02-decision-record-real.schema.json`, `binary-audit-gate-02-integrity-evidence.schema.json`, `binary-audit-gate-03-decision-record-real.schema.json`, `binary-audit-gate-03-identity-signature-evidence.schema.json` e (convenção da repetição corretiva, sem registros reais) `binary-audit-gate-03-corrective-repeat-decision-record-real.schema.json`, `binary-audit-gate-03-corrective-repeat-pass-evidence.schema.json`, `binary-audit-gate-03-corrective-repeat-fail-evidence.schema.json`, `binary-audit-gate-03-corrective-repeat-stopped-evidence.schema.json` e `binary-audit-gate-03-corrective-repeat-parser-output.schema.json`; (convenção da **preparação do GATE 4**, sem registros reais) `binary-audit-gate-04-decision-record-real.schema.json`, `binary-audit-gate-04-pass-evidence.schema.json`, `binary-audit-gate-04-fail-evidence.schema.json`, `binary-audit-gate-04-stopped-evidence.schema.json` e `binary-audit-gate-04-static-inventory-output.schema.json`; e (convenção da **preparação da decisão do GATE 5**, sem registros reais) `binary-audit-gate-05-decision-package.schema.json`. |
+| [`binary-audit-gate-05-input.example.json`](binary-audit-gate-05-input.example.json) | (2P-E-C5-TOOLING-PREP) Exemplo do **contrato de entrada** do orquestrador estático do GATE 5 ([`scripts/warp-audit-gate-05.py`](../../scripts/warp-audit-gate-05.py)): aponta para **fixture sintética** (nunca o WARP real); `network_policy=blocked`, `execution_policy=artifact_never_executed`; flags `false`. |
+| [`binary-audit-gate-05-evidence.example.json`](binary-audit-gate-05-evidence.example.json) | (2P-E-C5-TOOLING-PREP) Exemplo de **evidência** gerada por **fixture sintética**: `outcome=FIXTURE_VALIDATION_PASS` (nunca `GATE_PASSED`); `artifact_executed=false`, `network_access=false`; resultados sanitizados; flags `false`. Ver [docs/45](../../docs/45-gate-5-preparacao-operacional.md). |
+| [`schemas/`](schemas/) | JSON Schemas (draft-07) dos artefatos, incluindo `core-path-decision-record-real.schema.json`, `binary-audit-plan.schema.json`, `binary-audit-gate-record.schema.json`, `binary-audit-gate-00-decision-record-real.schema.json`, `binary-audit-gate-00-provenance-evidence.schema.json`, `binary-audit-gate-01-decision-record-real.schema.json`, `binary-audit-gate-02-decision-record-real.schema.json`, `binary-audit-gate-02-integrity-evidence.schema.json`, `binary-audit-gate-03-decision-record-real.schema.json`, `binary-audit-gate-03-identity-signature-evidence.schema.json` e (convenção da repetição corretiva, sem registros reais) `binary-audit-gate-03-corrective-repeat-decision-record-real.schema.json`, `binary-audit-gate-03-corrective-repeat-pass-evidence.schema.json`, `binary-audit-gate-03-corrective-repeat-fail-evidence.schema.json`, `binary-audit-gate-03-corrective-repeat-stopped-evidence.schema.json` e `binary-audit-gate-03-corrective-repeat-parser-output.schema.json`; (convenção da **preparação do GATE 4**, sem registros reais) `binary-audit-gate-04-decision-record-real.schema.json`, `binary-audit-gate-04-pass-evidence.schema.json`, `binary-audit-gate-04-fail-evidence.schema.json`, `binary-audit-gate-04-stopped-evidence.schema.json` e `binary-audit-gate-04-static-inventory-output.schema.json`; (convenção da **preparação da decisão do GATE 5**, sem registros reais) `binary-audit-gate-05-decision-package.schema.json`; e (convenção do **tooling do GATE 5**, sem registros reais) `binary-audit-gate-05-input.schema.json` e `binary-audit-gate-05-evidence.schema.json`. |
 
 ## Garantias desta etapa
 
@@ -329,6 +331,24 @@ saída/evidência do GATE 4, **não** materializa nem executa qualquer PE, **nã
 o cliente e **não** acessa a VPS. `gate_5_authorized=false`,
 `execution_authorized=false`, `client_preparation_authorized=false`. Qualquer avanço
 exige **nova decisão humana** em **PR separado**.
+
+## Tooling do GATE 5 (2P-E-C5-TOOLING-PREP)
+
+Após a decisão **Opção B** (doc 44), esta etapa prepara — **sem executar** — o
+mecanismo do GATE 5: o orquestrador estático
+[`scripts/warp-audit-gate-05.py`](../../scripts/warp-audit-gate-05.py) (stdlib,
+fail-closed, sem rede, sem execução do artefato; `--validate-only`/`--fixture-mode`;
+**modo real bloqueado** com `GATE 5 REAL EXECUTION IS NOT AUTHORIZED`), os contratos
+fechados de entrada e evidência (`binary-audit-gate-05-input`/`-evidence`) e os testes
+[`scripts/test-warp-audit-gate-05.py`](../../scripts/test-warp-audit-gate-05.py) **só
+com fixtures sintéticas**. Adapters: `synthetic-local` (puro Python, habilitado em
+fixture) e `windows-defender-local`/`yara-local` (**apenas contrato**, não executados,
+exigem autorização futura). A evidência de exemplo é `FIXTURE_VALIDATION_PASS` —
+**nunca** `GATE_PASSED`.
+
+**Ferramenta preparada; testes somente sintéticos; GATE 5 não executado; scanner real
+não utilizado; autorização continua falsa.** A execução real do GATE 5 exige **nova
+decisão humana explícita** em **PR separado** (ver [docs/45](../../docs/45-gate-5-preparacao-operacional.md)).
 
 ## Propriedade intelectual
 

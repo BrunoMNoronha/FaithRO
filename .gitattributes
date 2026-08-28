@@ -59,3 +59,10 @@ scripts/test-warp-pe-identity.py text eol=lf
 scripts/inspect-warp-pe-static.py text eol=lf
 scripts/test-warp-pe-static.py text eol=lf
 client/warp-audit/evidence/binary-audit-gate-04-static-inventory-output-*.json text eol=lf
+
+# Tooling do GATE 5 (2P-E-C5-TOOLING-PREP): o orquestrador estatico e seus testes
+# DEVEM permanecer em LF inclusive em checkouts Windows com core.autocrlf=true, para
+# que os Git blob OIDs sejam reproduziveis (a FUTURA decisao real do GATE 5 podera
+# prende-los). Ver docs/45. Sem fixar SHA-256 (nao ha saida real do GATE 5).
+scripts/warp-audit-gate-05.py text eol=lf
+scripts/test-warp-audit-gate-05.py text eol=lf
