@@ -374,4 +374,5 @@ empacotar ou compartilhar (ver [docs/16](../../docs/16-politica-distribuicao-cli
 - [docs/44](../../docs/44-gate-5-decisao-e-plano.md) — preparação da decisão do GATE 5 (verificações locais).
 - [docs/45](../../docs/45-gate-5-preparacao-operacional.md) — preparação operacional do GATE 5 (verificações locais).
 - [docs/46](../../docs/46-decisao-execucao-real-gate-5-verificacoes-locais.md) — autorização condicional da execução real do GATE 5 (verificações locais).
+- [docs/47](../../docs/47-provisao-laboratorio-gate-5.md) — especificação e auditoria de prontidão do laboratório para o GATE 5.
 - [docs/16](../../docs/16-politica-distribuicao-cliente.md) — política de distribuição.
