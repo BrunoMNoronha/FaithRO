@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "project": "WARP",
+  "stage": "2P-E-C5-REAL-AUTH-DECISION",
+  "record_type": "binary-audit-gate-05-decision-record-real",
+  "status": "AUTHORIZED_FOR_SINGLE_GATE",
+  "gate": {
+    "id": 5,
+    "name": "LOCAL_SECURITY_CHECKS"
+  },
+  "decision": "AUTHORIZE_GATE_5_LOCAL_EXECUTION",
+  "execution_state": "AUTHORIZED_NOT_STARTED",
+  "decider": "BrunoMNoronha",
+  "role": "Responsavel tecnico e mantenedor do projeto FaithRO",
+  "authority": "Responsavel tecnico e mantenedor do projeto FaithRO - Laus Deo",
+  "channel": "Decisao humana registrada via consultor tecnico FaithRO nesta conversa",
+  "date": "2026-08-28",
+  "justification": "O GATE 4 terminou COMPLETED_PASS (PR #57, squash 03348d7). O output SHA-256 (84c3c49a...) foi recomputado e confere. O tooling do GATE 5 (PR #59, squash 80f6f7a) foi revisado independentemente (2P-E-C5-GATE-REVIEW): 84/84 testes PASS, todos os cenarios de rejeicao D1-D8 confirmados, cadeia de evidencias integra. O orquestrador scripts/warp-audit-gate-05.py e estritamente estatico (stdlib, fail-closed, sem rede, sem execucao do artefato); os testes usam exclusivamente fixtures sinteticas; a saida e deterministica, sanitizada e fechada por schema. As lacunas do doc 44 §10 foram fechadas neste PR: lista de ferramentas definida (Defender + YARA), ambiente isolado especificado (VM descartavel com egress bloqueado por mecanismo externo), criterios de resultado deterministicos (PASS/FINDING/ERROR/TIMEOUT/BLOCKED), identidade de alvo e scanners verificavel, R13 fechado por procedimento de verificacao obrigatorio. A materializacao futura fica limitada ao unico blob Git imutavel (win32 do WARP, blob c853da42..., 1137152 bytes) obtido apenas do GitHub oficial, fora do repositorio FaithRO. Esta autorizacao NAO constitui aprovacao de seguranca do executavel, NAO autoriza preparacao de cliente, NAO autoriza distribuicao e NAO autoriza upload externo. Execucao do PE permanece proibida. Os caminhos STOPPED e COMPLETED_FAIL permanecem disponiveis. A execucao real ocorrera em PR separado (2P-E-C5-REAL-EXEC). Nenhuma autorizacao transitiva e concedida.",
+  "conditions": [
+    { "n": 1, "text": "A autorizacao vale para uma unica execucao do GATE 5." },
+    { "n": 2, "text": "O squash integrado do tooling deve ser exatamente 80f6f7a0da38ca18edd93e87260529f74c49d5ca." },
+    { "n": 3, "text": "O blob do orquestrador deve ser exatamente 952df939d2ca2db656dd8c5ccd787916f5ea3ba0." },
+    { "n": 4, "text": "O blob dos testes deve ser exatamente 0af398724a63c8aad3123c08f3b6f860de88c370." },
+    { "n": 5, "text": "O unico alvo permitido e o blob c853da42d18dfe090b4e941b435d989311faf3dc (1137152 bytes, SHA-256 345f3464...)." },
+    { "n": 6, "text": "A unica origem de rede permitida para obter o blob e o GitHub oficial (Git Data API)." },
+    { "n": 7, "text": "A materializacao deve ocorrer fora do repositorio FaithRO, em diretorio temporario com permissoes restritas." },
+    { "n": 8, "text": "Tamanho, Git blob OID e SHA-256 devem ser reconfirmados antes de qualquer scan." },
+    { "n": 9, "text": "Qualquer divergencia de identidade do alvo deve gerar limpeza e FAIL-CLOSED." },
+    { "n": 10, "text": "Somente as ferramentas da lista fechada podem ser usadas: MpCmdRun.exe (Defender) e yara/yara64 (YARA)." },
+    { "n": 11, "text": "Cada scanner deve ser identificado antes da execucao: caminho absoluto canonicalizado, SHA-256 do executavel, versao coletada." },
+    { "n": 12, "text": "Scanners fora de localizacao esperada devem ser rejeitados (FAIL-CLOSED)." },
+    { "n": 13, "text": "Rulesets YARA devem ter SHA-256 registrado e nao podem ser baixados durante a execucao." },
+    { "n": 14, "text": "O ambiente deve ser VM descartavel/snapshotada ou equivalente com isolamento de rede verificavel." },
+    { "n": 15, "text": "O egress de rede deve ser bloqueado por mecanismo externo ao guest antes do inicio do scan." },
+    { "n": 16, "text": "Configuracao interna do Defender nao e prova suficiente de isolamento de rede." },
+    { "n": 17, "text": "O PE nao pode ser executado, carregado, emulado, desassemblado ou aberto por associacao." },
+    { "n": 18, "text": "Os scanners recebem o arquivo como ARGUMENTO, nunca como executavel." },
+    { "n": 19, "text": "Servicos externos de reputacao, upload, sandbox publica e DNS sao proibidos." },
+    { "n": 20, "text": "Nenhum acesso a VPS e permitido." },
+    { "n": 21, "text": "Nenhuma preparacao, distribuicao ou publicacao de cliente e autorizada." },
+    { "n": 22, "text": "Nenhuma credencial FaithRO, token, chave SSH ou dado de jogador pode estar presente no ambiente." },
+    { "n": 23, "text": "O binario e o diretorio temporario devem ser removidos em qualquer resultado (PASS, FINDING, ERROR, TIMEOUT, STOPPED)." },
+    { "n": 24, "text": "Nenhum binario pode ser adicionado ao Git, PR, artefato de CI ou release." },
+    { "n": 25, "text": "A evidencia deve registrar tipo de ambiente, mecanismo de isolamento, estado de rede antes e apos o scan." },
+    { "n": 26, "text": "A decisao e a execucao devem ocorrer em PRs separados." },
+    { "n": 27, "text": "Caso o ambiente ou uma ferramenta nao satisfaca o contrato, registrar STOPPED sem improvisar." },
+    { "n": 28, "text": "Nenhuma instalacao de ferramenta adicional e autorizada sem nova decisao humana." },
+    { "n": 29, "text": "Os achados exigem interpretacao contextual e humana; nenhuma conclusao depende de uma unica metrica." },
+    { "n": 30, "text": "O GATE 5 por si nao aprova o binario, nao autoriza o GATE 6+ e nao autoriza uso no cliente." }
+  ],
+  "authorizations": {
+    "human_decision_required": true,
+    "human_decision_received": true,
+    "gate_selected": true,
+    "gate_4_completed": true,
+    "temporary_materialization_authorized": true,
+    "local_hashing_authorized": true,
+    "local_security_scan_authorized": true,
+    "gate_5_authorized": true,
+    "dynamic_analysis_authorized": false,
+    "emulation_authorized": false,
+    "unpacking_authorized": false,
+    "execution_authorized": false,
+    "external_reputation_upload_authorized": false,
+    "network_validation_authorized": false,
+    "sandbox_creation_authorized": false,
+    "client_copy_provision_authorized": false,
+    "client_modification_authorized": false,
+    "patch_review_authorized": false,
+    "patch_application_authorized": false,
+    "client_preparation_authorized": false,
+    "test_account_authorized": false,
+    "first_login_authorized": false,
+    "vps_access_authorized": false,
+    "distribution_authorized": false
+  },
+  "materialization_scope": {
+    "repository_full_name": "Neo-Mind/WARP",
+    "commit_oid": "9b1173e9e4e135c68e150704f01186ab5e763acd",
+    "tree_oid": "1aebae06d5c71a145afc35cc72fcf5c210a08758",
+    "artifact_path": "win32/WARP.exe",
+    "artifact_blob_oid": "c853da42d18dfe090b4e941b435d989311faf3dc",
+    "artifact_blob_oid_algorithm": "GIT_OBJECT_ID",
+    "artifact_blob_size": 1137152,
+    "artifact_sha256": "345f3464ee72a60afc97bde0773410f47348a00d8629182fe52741c5f1a42874",
+    "max_files": 1,
+    "network_scope": "GITHUB_OFFICIAL_ONLY"
+  },
+  "allowed_scanners": [
+    {
+      "id": "windows-defender-local",
+      "executable": "MpCmdRun.exe",
+      "expected_locations": [
+        "%ProgramFiles%\\Windows Defender\\MpCmdRun.exe",
+        "%ProgramData%\\Microsoft\\Windows Defender\\Platform\\*\\MpCmdRun.exe"
+      ],
+      "identity_policy": "SHA-256 and version collected before scan; location must be in expected_locations; PATH resolution alone is insufficient",
+      "version_policy": "Platform version and security intelligence version recorded but not rigidly pinned; updates are legitimate",
+      "network_behavior": "Cloud protection not depended upon; isolation provided by environment firewall",
+      "file_as_argument": "-File <path>",
+      "never_as_executable": true
+    },
+    {
+      "id": "yara-local",
+      "executable": "yara or yara64",
+      "expected_locations": ["documented before execution"],
+      "identity_policy": "SHA-256 of executable pinned and recorded; SHA-256 of each ruleset pinned and recorded; no download during execution",
+      "version_policy": "Version pinned before execution",
+      "network_behavior": "None; local only",
+      "file_as_argument": "positional argument",
+      "never_as_executable": true
+    }
+  ],
+  "environment_requirements": {
+    "type": "disposable_vm_or_equivalent",
+    "network_egress": "blocked_by_external_mechanism",
+    "isolation_verification": "must be independently verifiable and recorded in evidence",
+    "defender_cloud_dependency": "prohibited",
+    "permanent_host_changes": "prohibited",
+    "vps_access": "prohibited",
+    "faithro_credentials": "must_not_be_present",
+    "player_data": "must_not_be_present"
+  },
+  "result_criteria": {
+    "PASS": "All scans complete normally within timeout, no findings, all identities verified, all preconditions met, cleanup confirmed, predecessor intact",
+    "FINDING": "Any scanner indicates possible threat or conservative detection; requires human interpretation",
+    "ERROR": "Scanner unavailable, hash mismatch, parser failure, unexpected output, access error, incomplete environment or cleanup",
+    "TIMEOUT": "Scanner exceeds configured timeout; independent result, never PASS",
+    "BLOCKED": "Security preconditions prevent starting scan; fail-closed"
+  },
+  "precondition": {
+    "gate_4_completed": true,
+    "gate_4_outcome": "COMPLETED_PASS",
+    "gate_4_output_sha256": "84c3c49a770b475fdf25c43467498e014b2f8950ef172384bb8ea48bbe17f584"
+  },
+  "tooling_ref": {
+    "tooling_squash": "80f6f7a0da38ca18edd93e87260529f74c49d5ca",
+    "tooling_pr": 59,
+    "tool_path": "scripts/warp-audit-gate-05.py",
+    "tool_git_blob_oid": "952df939d2ca2db656dd8c5ccd787916f5ea3ba0",
+    "test_path": "scripts/test-warp-audit-gate-05.py",
+    "test_git_blob_oid": "0af398724a63c8aad3123c08f3b6f860de88c370"
+  },
+  "prior_gate_decision_ref": {
+    "path": "client/warp-audit/decisions/binary-audit-gate-04-decision-record-2026-08-05.json"
+  },
+  "gate_4_evidence_ref": {
+    "path": "client/warp-audit/evidence/binary-audit-gate-04-pass-evidence-2026-08-05.json"
+  },
+  "gate_4_output_ref": {
+    "path": "client/warp-audit/evidence/binary-audit-gate-04-static-inventory-output-2026-08-05.json"
+  },
+  "decision_package_ref": {
+    "path": "client/warp-audit/binary-audit-gate-05-decision-package.example.json"
+  },
+  "plan_ref": {
+    "path": "client/warp-audit/binary-audit-plan.example.json"
+  },
+  "doc_ref": {
+    "path": "docs/46-decisao-execucao-real-gate-5-verificacoes-locais.md"
+  },
+  "rollback": "Antes do merge: corrigir por novo commit normal ou fechar o PR. Depois do merge: revogar por novo registro e novo PR; a reversao Git nao apaga a decisao historica. Nenhuma reversao pode executar o PE, autorizar uma segunda execucao, restaurar ou introduzir binario no Git, preparar o cliente ou acessar a VPS. Se a execucao futura ja tiver comecado, interromper, limpar a area temporaria e registrar STOPPED ou COMPLETED_FAIL conforme o estado. Nunca usar reset destrutivo nem force push.",
+  "notes": "A autorizacao e restrita ao GATE 5 (verificacoes locais de seguranca com ferramentas da lista fechada). A execucao do PE permanece proibida (execution_authorized=false). A futura execucao real ocorrera em PR separado (2P-E-C5-REAL-EXEC). GATE 6+, preparacao do cliente e distribuicao permanecem proibidos. Nenhuma autorizacao transitiva existe. client_preparation_authorized=false."
+}
