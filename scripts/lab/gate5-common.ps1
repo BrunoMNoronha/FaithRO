@@ -329,33 +329,57 @@ function Get-Gate5VmEncryptionState {
 function Set-Gate5VmxEntry {
     # Grava UMA chave no .vmx preservando tudo o mais.
     #
-    # Depois que o operador adiciona o vTPM, o VMware criptografa a VM e o
-    # material de chave fica amarrado ao conteudo do .vmx: reescrever o arquivo
-    # inteiro (mesmo so para mexer numa chave) destroi essa associacao e leva o
-    # vTPM junto. Nesse estado usamos 'vmcli ConfigParams SetEntry', que e a API
-    # do proprio VMware e trata a VM criptografada corretamente. Enquanto nao ha
-    # criptografia, a edicao direta do arquivo continua valendo.
+    # Depois que o operador adiciona o vTPM, o VMware guarda no .vmx as chaves
+    # 'encryption.*' e o material 'vtpm.*'. No modo de criptografia parcial que o
+    # TPM exige, o .vmx permanece em TEXTO PLANO e esse material aparece como
+    # valores opacos: e seguro trocar OUTRAS chaves desde que essas linhas saiam
+    # intactas, e e isso que esta funcao garante e verifica.
+    #
+    # 'vmcli ConfigParams SetEntry' NAO serve aqui: em VM criptografada ele exige
+    # a senha da criptografia pela entrada padrao ("Something went wrong while
+    # getting password from stdin"), e essa senha e exclusiva do operador - a
+    # automacao nunca a conhece, pede ou registra.
     param(
         [Parameter(Mandatory)][string]$Name,
         [Parameter(Mandatory)][string]$Value,
         $Vmware
     )
     if (-not (Test-Path $script:Gate5VmxPath)) { throw 'GATE5: VMX inexistente ao gravar configuracao.' }
-    if ((Get-Gate5VmEncryptionState).Encrypted) {
-        if (-not $Vmware) { $Vmware = Find-Gate5VmwareInstall }
-        if (-not $Vmware) { throw 'GATE5: VMware nao localizado para editar VM criptografada.' }
-        $vmcli = Join-Path $Vmware.InstallDir 'vmcli.exe'
-        if (-not (Test-Path $vmcli)) { throw "GATE5: vmcli.exe ausente em $($Vmware.InstallDir); VM criptografada nao pode ser editada com seguranca." }
-        $r = Invoke-Gate5Native -FilePath $vmcli -Arguments @($script:Gate5VmxPath, 'ConfigParams', 'SetEntry', $Name, $Value)
-        if ($r.ExitCode -ne 0) {
-            throw ("GATE5: 'vmcli ConfigParams SetEntry {0}' falhou (exit {1}): {2}" -f $Name, $r.ExitCode, ($r.Output -join '; '))
+
+    $encoding = New-Object System.Text.UTF8Encoding($false)
+    $before   = @([System.IO.File]::ReadAllLines($script:Gate5VmxPath))
+    $sensivel = '^\s*(encryption\.|vtpm\.)'
+    $antes    = @($before | Where-Object { $_ -match $sensivel })
+
+    # Substituicao NO LUGAR: a linha alvo troca de valor e todas as demais saem
+    # verbatim, na mesma ordem. Nada de reconstruir o arquivo a partir de um
+    # template - o material criptografico e copiado como esta, sem ser lido.
+    $pattern  = '^\s*{0}\s*=' -f [regex]::Escape($Name)
+    $nova     = '{0} = "{1}"' -f $Name, $Value
+    $saida    = New-Object System.Collections.Generic.List[string]
+    $trocou   = $false
+    foreach ($linha in $before) {
+        if ($linha -match $pattern) {
+            if (-not $trocou) { $saida.Add($nova); $trocou = $true }   # duplicatas da chave sao descartadas
+        } else {
+            $saida.Add($linha)
         }
-        Write-Gate5Log ("VMX (criptografado) via vmcli: {0} = {1}" -f $Name, $Value)
-    } else {
-        $lines = @(Get-Content -LiteralPath $script:Gate5VmxPath |
-                   Where-Object { $_ -notmatch ('^\s*{0}\s*=' -f [regex]::Escape($Name)) })
-        $lines += ('{0} = "{1}"' -f $Name, $Value)
-        Set-Gate5TextFile -Path $script:Gate5VmxPath -Lines $lines
+    }
+    if (-not $trocou) { $saida.Add($nova) }
+    [System.IO.File]::WriteAllText($script:Gate5VmxPath, (($saida -join "`r`n") + "`r`n"), $encoding)
+
+    # Fail-closed: as linhas de material criptografico precisam sair IDENTICAS
+    # (comparacao sensivel a maiusculas). Qualquer desvio reverte a escrita.
+    $depois = @([System.IO.File]::ReadAllLines($script:Gate5VmxPath) | Where-Object { $_ -match $sensivel })
+    $intacto = ($antes.Count -eq $depois.Count)
+    if ($intacto) {
+        for ($i = 0; $i -lt $antes.Count; $i++) {
+            if ($antes[$i] -cne $depois[$i]) { $intacto = $false; break }
+        }
+    }
+    if (-not $intacto) {
+        [System.IO.File]::WriteAllText($script:Gate5VmxPath, (($before -join "`r`n") + "`r`n"), $encoding)
+        throw ("GATE5: a escrita de '{0}' teria alterado material criptografico do .vmx; alteracao revertida." -f $Name)
     }
 }
 

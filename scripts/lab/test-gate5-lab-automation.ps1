@@ -256,7 +256,30 @@ It 'nenhuma escrita pos-criptografia reescreve o .vmx inteiro' {
     (-not (& $reescreveVmx $prov)) -and
     (-not (& $reescreveVmx $boot)) -and
     ($prov -match 'Set-Gate5VmxEntry') -and ($boot -match 'Set-Gate5VmxEntry') -and
-    ($comm -match "ConfigParams', 'SetEntry'")
+    # vmcli nao pode ser usado: em VM criptografada ele exige a senha da
+    # criptografia por stdin, e essa senha e exclusiva do operador.
+    ($comm -notmatch "ConfigParams'")
+}
+
+It 'Set-Gate5VmxEntry preserva material criptografico verbatim' {
+    # O .vmx de uma VM com vTPM fica em texto plano com 'encryption.*'/'vtpm.*'
+    # como valores opacos. Trocar outra chave nao pode alterar essas linhas.
+    $fake = Join-Path $tmp 'cripto-edit.vmx'
+    $sens1 = 'encryption.keySafe = "vmware:key/list/(pair/(MzQ1Njc4OTA,AES-256))"'
+    $sens2 = 'vtpm.ekCRT = "MIIF+DCCBOCgAwIBAgIQ' + ('A' * 200) + '"'
+    Set-Gate5TextFile -Path $fake -Lines @('firmware = "efi"', $sens1, 'sata0:1.present = "FALSE"', $sens2)
+    $original = $script:Gate5VmxPath
+    try {
+        $script:Gate5VmxPath = $fake
+        Set-Gate5VmxEntry -Name 'sata0:1.present' -Value 'TRUE'
+        Set-Gate5VmxEntry -Name 'nova.chave' -Value 'X'
+        $linhas = @([System.IO.File]::ReadAllLines($fake))
+        ($linhas -ccontains $sens1) -and ($linhas -ccontains $sens2) -and
+        ((Get-Gate5VmxValue 'sata0:1.present' -VmxPath $fake) -eq 'TRUE') -and
+        ((Get-Gate5VmxValue 'nova.chave' -VmxPath $fake) -eq 'X') -and
+        # ordem preservada: a chave trocada continua na posicao original
+        ($linhas[2] -match '^sata0:1\.present')
+    } finally { $script:Gate5VmxPath = $original }
 }
 
 It 'Set-Gate5VmxEntry preserva o restante do arquivo' {
