@@ -1594,6 +1594,18 @@ It 'a prova da ordem vem do DICT, e nao do .vmx em disco' {
     ($bootTxt -notmatch "ordemNoFirmware = Get-Gate5VmxValue")
 }
 
+It 'o pedido de power-cycle ja avisa para fechar a interface' {
+    # Sem isso o gate CLOSE_VMWARE_UI chega tarde demais: entre o Power Off e o
+    # Power On cabem poucos segundos (na tentativa 3 foram 18), e o operador
+    # religaria a VM antes de a ordem de boot poder ser gravada.
+    $trecho = [regex]::Match($bootTxt, "(?s)action=POWER_CYCLE_VM.*?Set-Gate5InstallNote 'installation_stage' 'WAITING_POWER_CYCLE'").Value
+    ($trecho -match 'if \(Test-Gate5VmwareUiRunning\)') -and
+    ($trecho -match 'FECHE a janela do VMware Workstation') -and
+    ($trecho -match 'NAO reabra ainda') -and
+    # e o texto antigo continua valendo quando a interface nao esta aberta
+    ($trecho -match 'aguarde desligar, e Power on\.')
+}
+
 } finally {
     Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
 }

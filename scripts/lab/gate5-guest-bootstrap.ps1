@@ -341,7 +341,19 @@ public static class Gate5IsoWriter {
             Write-Host ''
             Write-Host 'HUMAN_ACTION_REQUIRED'
             Write-Host 'action=POWER_CYCLE_VM'
-            Write-Host 'Na interface do VMware: Power -> Power Off, aguarde desligar, e Power on.'
+            if (Test-Gate5VmwareUiRunning) {
+                # Pedir "Power Off e Power On" aqui desperdicaria o ciclo: a
+                # ordem de boot so pode ser gravada com a interface fechada, e
+                # entre o desligamento e o novo power-on cabem poucos segundos
+                # (na tentativa 3 foram 18). A sequencia inteira precisa vir
+                # ANTES, num pedido so, com a automacao avisando quando religar.
+                Write-Host 'Na interface do VMware: Power -> Power Off e aguarde desligar por completo.'
+                Write-Host 'Depois FECHE a janela do VMware Workstation (a interface guarda a'
+                Write-Host 'configuracao em cache e descartaria a ordem de boot no proximo Power On).'
+                Write-Host 'NAO reabra ainda: a automacao grava a correcao e avisa quando ligar.'
+            } else {
+                Write-Host 'Na interface do VMware: Power -> Power Off, aguarde desligar, e Power on.'
+            }
             Write-Host 'Nao interaja com a instalacao: ela e desassistida.'
             Write-Host 'A automacao esta AGUARDANDO e agira sozinha na janela do boot.'
             Write-Host ''
