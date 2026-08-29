@@ -183,6 +183,13 @@ foreach ($gp in $guestPhases) {
         foreach ($sub in $gp.Sub) {
             Write-Gate5Log "FASE guest: $sub"
             $code = Invoke-Gate5Child 'gate5-guest-bootstrap.ps1' @('-Phase', $sub)
+            # exit 4 = GATE HUMANO (acao na interface do VMware), nao falha: a
+            # fase ja imprimiu a instrucao, entao propagamos sem transformar em
+            # LAB_AUTOPROVISION_BLOCKED, que mascararia a natureza da parada.
+            if ($code -eq 4) {
+                Write-Gate5Log "Etapa pausada em gate humano na fase $sub." 'GATE'
+                exit 4
+            }
             if ($code -ne 0) { Stop-Gate5Blocked -Blocker "GUEST_PHASE_FAILED_$($sub.ToUpperInvariant())" -Detail "exit=$code; ver logs em .local\gate5-lab\logs" }
         }
         Complete-Gate5Phase $state $gp.Checkpoint
