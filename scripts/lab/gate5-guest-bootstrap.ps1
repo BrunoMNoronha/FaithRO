@@ -357,6 +357,12 @@ public static class Gate5IsoWriter {
         # --- 2) Aguardar o power-on -------------------------------------------
         if (-not (Test-Gate5VmPoweredOn)) {
             if ((Get-Gate5State).notes.installation_stage -ne 'WAITING_POWER_CYCLE') { Assert-Gate5PreConditions }
+            # Com a VM desligada, e ANTES de gastar um gate humano: garantir que o
+            # firmware vai mesmo TENTAR a midia. Sem isso o Windows ja instalado
+            # boota direto e o prompt optico nunca chega a ser exibido - nenhuma
+            # tecla adiantaria. So enquanto o boot optico ainda nao disparou: nos
+            # reboots do proprio Setup o boot pelo disco e o comportamento certo.
+            if (-not $bootKeySent) { Set-Gate5OpticalBootFirst }
             Write-Gate5Log 'HUMAN_ACTION_REQUIRED POWER_ON_VM' 'GATE'
             Write-Host ''
             Write-Host 'HUMAN_ACTION_REQUIRED'
@@ -372,6 +378,43 @@ public static class Gate5IsoWriter {
             }
         }
         Write-Gate5Log ("Power-on detectado (uptime {0:N0}s)." -f (Get-VmUptimeSeconds))
+
+        # --- 2b) POR ONDE o firmware bootou, de fato --------------------------
+        # A tela nao distingue "a tecla foi aceita" de "o prompt nunca existiu":
+        # as duas terminam numa tela clara. O vmware.log registra a escolha do
+        # firmware em segundos, o que transforma 10 minutos de espera cega num
+        # blocker exato. Nos reboots do Setup o boot pelo disco e o esperado.
+        if (-not $bootKeySent) {
+            $inicioVm = $null
+            $procVm = @(Get-Process -Name 'vmware-vmx' -ErrorAction SilentlyContinue) | Select-Object -First 1
+            if ($procVm) { $inicioVm = $procVm.StartTime.ToUniversalTime().AddSeconds(-5) }
+            $efi    = $null
+            $ateEfi = [DateTime]::UtcNow.AddSeconds(90)
+            while ([DateTime]::UtcNow -lt $ateEfi) {
+                $efi = if ($inicioVm) { Get-Gate5EfiBootDevice -Since $inicioVm } else { Get-Gate5EfiBootDevice }
+                if ($efi) { break }
+                Start-Sleep -Seconds 2
+            }
+            if ($efi) {
+                Write-Gate5Log ("Firmware escolheu o dispositivo de boot: {0}" -f $efi.Device)
+                if (-not $efi.IsOptical) {
+                    # Evidencia da tela no momento exato, para correlacionar com o log.
+                    $telaFalha = Join-Path (Get-Gate5RunDir) 'boot-media-not-entered.png'
+                    $capFalha  = Save-Gate5VncScreenshot -Path $telaFalha
+                    Set-Gate5InstallNote 'installation_stage' 'BOOT_MEDIA_NOT_ENTERED'
+                    Stop-Gate5Blocked -Blocker 'BOOT_MEDIA_NOT_ENTERED' -Detail (@'
+O firmware EFI nao entrou na midia: bootou "{0}" em {1}. O prompt "Press any key
+to boot from CD or DVD" nunca chegou a existir, entao nenhuma tecla poderia ter
+ajudado. A ordem de boot foi fixada em efi.bootOrder="cdrom,hdd" com a VM
+desligada; se este bloqueio se repetir, o firmware esta ignorando essa chave e a
+ordem precisa ser corrigida no Boot Manager do proprio firmware.
+Evidencia: {2} (captura: {3})
+'@ -f $efi.Device, $(if ($efi.WhenUtc) { $efi.WhenUtc.ToString('o') } else { 'horario nao registrado' }), (Join-Path $script:Gate5VmDir 'vmware.log'), $capFalha)
+                }
+            } else {
+                Write-Gate5Log 'vmware.log ainda nao registrou a escolha do firmware; seguindo pelo sinal da tela.' 'WARN'
+            }
+        }
 
         # --- 3) Janela do boot optico, com verificacao VISUAL ------------------
         # A tecla so e enviada quando o framebuffer mostra a fase de firmware

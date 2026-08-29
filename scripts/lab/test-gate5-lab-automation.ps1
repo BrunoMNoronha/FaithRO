@@ -1358,6 +1358,154 @@ It 'bloqueio do boot optico descreve os DOIS sinais ausentes' {
     ($bootTxt -match 'nem o VMDK cresceu')
 }
 
+Write-Host 'T-K: ordem de boot do firmware (defeito BOOT_MEDIA_NOT_ENTERED da RUN-02)'
+
+# RAIZ da reprovacao das duas tentativas da RUN-02: apos a instalacao da RUN-01,
+# o Windows gravou 'Windows Boot Manager' na NVRAM e o firmware EFI passou a
+# boota-lo direto. O prompt 'Press any key to boot from CD or DVD' nunca chegou
+# a ser exibido - nenhuma melhoria de captura ou de deteccao poderia salvar a
+# tentativa, porque nao havia prompt algum na tela.
+
+function New-Gate5EfiLog {
+    param([Parameter(Mandatory)][string]$Path, [Parameter(Mandatory)][string[]]$Linhas)
+    Set-Content -LiteralPath $Path -Value $Linhas -Encoding ascii
+    return $Path
+}
+
+It 'Get-Gate5EfiBootDevice identifica boot pelo DISCO' {
+    $log = New-Gate5EfiLog -Path (Join-Path $tmp 'efi-disco.log') -Linhas @(
+        '2026-08-29T15:20:19.139Z -INFO vmware-vmx.exe 24836 [ws@4413 threadName="vcpu-0"] Guest: About to do EFI boot: Windows Boot Manager'
+    )
+    $d = Get-Gate5EfiBootDevice -LogPath $log
+    ($null -ne $d) -and ($d.Device -eq 'Windows Boot Manager') -and $d.IsDisk -and (-not $d.IsOptical) -and
+    ($d.WhenUtc.ToString('yyyy-MM-ddTHH:mm:ss') -eq '2026-08-29T15:20:19')
+}
+
+It 'Get-Gate5EfiBootDevice identifica boot pela MIDIA OPTICA' {
+    $log = New-Gate5EfiLog -Path (Join-Path $tmp 'efi-cd.log') -Linhas @(
+        '2026-08-29T12:21:14.426Z -INFO vmware-vmx.exe 17108 [ws@4413 threadName="vcpu-0"] Guest: About to do EFI boot: EFI VMware Virtual SATA CDROM Drive (0.0)'
+    )
+    $d = Get-Gate5EfiBootDevice -LogPath $log
+    ($null -ne $d) -and $d.IsOptical -and (-not $d.IsDisk)
+}
+
+It 'Get-Gate5EfiBootDevice devolve a ULTIMA escolha (reboots do Setup no mesmo log)' {
+    # O log so rotaciona no power-on: os reboots da instalacao escrevem no mesmo
+    # arquivo. Ler a primeira linha faria o gate aprovar um boot ja superado.
+    $log = New-Gate5EfiLog -Path (Join-Path $tmp 'efi-varios.log') -Linhas @(
+        '2026-08-29T12:21:14.426Z ... Guest: About to do EFI boot: EFI VMware Virtual SATA CDROM Drive (0.0)',
+        '2026-08-29T12:35:18.378Z ... Guest: About to do EFI boot: Windows Boot Manager'
+    )
+    $d = Get-Gate5EfiBootDevice -LogPath $log
+    $d.Device -eq 'Windows Boot Manager'
+}
+
+It 'Get-Gate5EfiBootDevice descarta boots anteriores ao power-on atual' {
+    $log = New-Gate5EfiLog -Path (Join-Path $tmp 'efi-since.log') -Linhas @(
+        '2026-08-29T12:21:14.426Z ... Guest: About to do EFI boot: EFI VMware Virtual SATA CDROM Drive (0.0)'
+    )
+    $antes  = Get-Gate5EfiBootDevice -LogPath $log -Since ([datetime]::Parse('2026-08-29T12:00:00Z').ToUniversalTime())
+    $depois = Get-Gate5EfiBootDevice -LogPath $log -Since ([datetime]::Parse('2026-08-29T13:00:00Z').ToUniversalTime())
+    ($null -ne $antes) -and ($null -eq $depois)
+}
+
+It 'Get-Gate5EfiBootDevice recusa linha sem horario quando ha filtro' {
+    # Prova fraca nao vale: sem timestamp nao da para dizer se o boot e o atual.
+    $log = New-Gate5EfiLog -Path (Join-Path $tmp 'efi-semdata.log') -Linhas @(
+        'sem carimbo de tempo Guest: About to do EFI boot: EFI VMware Virtual SATA CDROM Drive (0.0)'
+    )
+    $semFiltro = Get-Gate5EfiBootDevice -LogPath $log
+    $comFiltro = Get-Gate5EfiBootDevice -LogPath $log -Since ([datetime]::UtcNow.AddDays(-1))
+    ($null -ne $semFiltro) -and ($null -eq $comFiltro)
+}
+
+It 'Get-Gate5EfiBootDevice devolve null sem log e sem ocorrencias' {
+    $vazio = New-Gate5EfiLog -Path (Join-Path $tmp 'efi-vazio.log') -Linhas @('linha irrelevante')
+    ($null -eq (Get-Gate5EfiBootDevice -LogPath (Join-Path $tmp 'nao-existe.log'))) -and
+    ($null -eq (Get-Gate5EfiBootDevice -LogPath $vazio))
+}
+
+It 'Get-Gate5EfiBootDevice le o log aberto pelo vmware-vmx (share read/write)' {
+    # O vmware-vmx mantem o log aberto durante toda a execucao: abrir sem
+    # FileShare::ReadWrite falharia justamente com a VM ligada, que e o unico
+    # momento em que esta leitura importa.
+    $log = New-Gate5EfiLog -Path (Join-Path $tmp 'efi-aberto.log') -Linhas @(
+        '2026-08-29T15:20:19.139Z ... Guest: About to do EFI boot: Windows Boot Manager'
+    )
+    $lock = [System.IO.File]::Open($log, 'Open', 'Write', 'Read')
+    try { $d = Get-Gate5EfiBootDevice -LogPath $log } finally { $lock.Dispose() }
+    $d.Device -eq 'Windows Boot Manager'
+}
+
+It 'Set-Gate5OpticalBootFirst recusa tokens fora da tabela do firmware' {
+    # O vmware-vmx rejeita o valor com "Unrecognized efi.bootOrder" e a VM nem
+    # liga: melhor falhar aqui do que gastar um gate humano de power-on.
+    $erro = $null
+    try { Set-Gate5OpticalBootFirst -Value 'usb,cdrom' } catch { $erro = $_.Exception.Message }
+    ($null -ne $erro) -and ($erro -match 'token invalido')
+}
+
+It 'gate5-common define a ordem de boot pela chave EFI, nao pela de BIOS' {
+    # A VM roda com firmware = "efi"; 'bios.bootOrder' e a chave do BIOS legado.
+    $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    ($comm -match "Set-Gate5VmxEntry -Name 'efi\.bootOrder'") -and
+    ($comm -notmatch "Set-Gate5VmxEntry -Name 'bios\.bootOrder'") -and
+    ($comm -match "floppy', 'hdd', 'cdrom', 'efishell")
+}
+
+It 'ordem de boot so e gravada com a VM desligada' {
+    # O .vmx e lido no power-on e reescrito pelo VMware no power-off: gravar com
+    # a VM ligada nao teria efeito e ainda seria perdido.
+    $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    $trecho = [regex]::Match($comm, '(?s)function Set-Gate5OpticalBootFirst \{.*?\r?\n\}').Value
+    $iGuarda = $trecho.IndexOf('if (Test-Gate5VmPoweredOn)')
+    $iGrava  = $trecho.IndexOf('Set-Gate5VmxEntry')
+    ($iGuarda -gt 0) -and ($iGrava -gt $iGuarda)
+}
+
+It 'a ordem de boot e aplicada ANTES do gate humano de power-on' {
+    # Depois do power-on seria tarde: o firmware ja escolheu o dispositivo.
+    $iOrdem = $bootTxt.IndexOf('Set-Gate5OpticalBootFirst')
+    $iGate  = $bootTxt.IndexOf("HUMAN_ACTION_REQUIRED POWER_ON_VM' 'GATE'")
+    ($iOrdem -gt 0) -and ($iGate -gt $iOrdem)
+}
+
+It 'a ordem de boot NAO e reimposta nos reboots do proprio Setup' {
+    # Depois que o boot optico disparou, o boot pelo disco e o comportamento
+    # correto: reimpor o CD faria o Setup recomecar do zero a cada reboot.
+    $bootTxt -match 'if \(-not \$bootKeySent\) \{ Set-Gate5OpticalBootFirst \}'
+}
+
+It 'boot pelo disco vira BOOT_MEDIA_NOT_ENTERED, e nao espera cega de 10 minutos' {
+    ($bootTxt -match "Stop-Gate5Blocked -Blocker 'BOOT_MEDIA_NOT_ENTERED'") -and
+    ($bootTxt -match 'if \(-not \$efi\.IsOptical\)') -and
+    # correlacao exigida pela FASE D: log do firmware + captura da tela
+    ($bootTxt -match 'boot-media-not-entered\.png') -and
+    ($bootTxt -match 'Save-Gate5VncScreenshot -Path \$telaFalha')
+}
+
+It 'a checagem do firmware usa o power-on ATUAL como referencia' {
+    # Sem o filtro, a escolha de um boot anterior (gravada no mesmo log) poderia
+    # aprovar a tentativa atual.
+    ($bootTxt -match 'StartTime\.ToUniversalTime\(\)\.AddSeconds\(-5\)') -and
+    ($bootTxt -match 'Get-Gate5EfiBootDevice -Since \$inicioVm')
+}
+
+It 'sinal do firmware nao substitui o prompt: a tecla continua condicionada a tela' {
+    # O firmware entrar na midia nao dispensa responder ao 'Press any key'.
+    $iEfi    = $bootTxt.IndexOf('Firmware escolheu o dispositivo de boot')
+    $iPrompt = $bootTxt.IndexOf('Test-Gate5BootPromptOnScreen -ImagePath $tela')
+    ($iEfi -gt 0) -and ($iPrompt -gt $iEfi) -and
+    ($bootTxt -match 'if \(\$scr -and \$scr\.HasPrompt\) \{')
+}
+
+It 'NVRAM e vTPM nao sao tocados pela correcao da ordem de boot' {
+    $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    $trecho = [regex]::Match($comm, '(?s)function Set-Gate5OpticalBootFirst \{.*?\r?\n\}').Value
+    ($trecho -notmatch 'Remove-Item') -and ($trecho -notmatch '\.nvram') -and
+    ($trecho -notmatch 'vtpm\.') -and ($trecho -notmatch 'Set-Gate5TextFile')
+}
+
 } finally {
     Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
 }

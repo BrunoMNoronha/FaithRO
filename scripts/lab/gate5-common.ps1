@@ -575,6 +575,90 @@ function Set-Gate5VmxEntry {
     }
 }
 
+function Get-Gate5EfiBootDevice {
+    # Le do vmware.log qual dispositivo o firmware EFI escolheu de fato, na forma
+    #   ...Z ... Guest: About to do EFI boot: Windows Boot Manager
+    #
+    # E a unica prova objetiva de POR ONDE a VM bootou. A tela nao serve: o
+    # prompt optico desaparece tanto quando a tecla e aceita quanto quando ele
+    # nunca chegou a ser exibido, e as duas situacoes terminam numa tela clara.
+    #
+    # O vmware-vmx mantem o log aberto para escrita durante toda a execucao, por
+    # isso a leitura e compartilhada. Reboots do Setup escrevem no MESMO arquivo
+    # (o log so rotaciona no power-on), de onde vem devolver a ULTIMA ocorrencia.
+    param(
+        [nullable[datetime]]$Since,      # UTC; descarta boots anteriores a este instante
+        [string]$LogPath = (Join-Path $script:Gate5VmDir 'vmware.log')
+    )
+    if (-not (Test-Path -LiteralPath $LogPath)) { return $null }
+    $fs = [System.IO.File]::Open($LogPath, 'Open', 'Read', 'ReadWrite')
+    try {
+        $reader = New-Object System.IO.StreamReader($fs)
+        try {
+            $ultimo = $null
+            while (-not $reader.EndOfStream) {
+                $linha = $reader.ReadLine()
+                if ($linha -notmatch 'About to do EFI boot:\s*(.+?)\s*$') { continue }
+                $device = $Matches[1]
+                $quando = $null
+                if ($linha -match '^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z)') {
+                    $quando = [datetime]::Parse(
+                        $Matches[1],
+                        [Globalization.CultureInfo]::InvariantCulture,
+                        [Globalization.DateTimeStyles]::AdjustToUniversal -bor
+                        [Globalization.DateTimeStyles]::AssumeUniversal)
+                }
+                # Sem timestamp legivel a linha e descartada quando ha filtro:
+                # aceitar um boot de origem desconhecida como se fosse o atual
+                # e exatamente o tipo de prova fraca que este gate recusa.
+                if ($null -ne $Since -and (($null -eq $quando) -or ($quando -lt $Since))) { continue }
+                $ultimo = [pscustomobject]@{
+                    Device    = $device
+                    WhenUtc   = $quando
+                    IsOptical = [bool]($device -match 'CDROM|CD-ROM|DVD')
+                    IsDisk    = [bool]($device -match 'Windows Boot Manager|NVME|NVMe|Hard Disk')
+                }
+            }
+            return $ultimo
+        } finally { $reader.Dispose() }
+    } finally { $fs.Dispose() }
+}
+
+function Set-Gate5OpticalBootFirst {
+    # Poe a unidade optica na frente do disco na ordem de boot do firmware.
+    #
+    # Numa VM recem-criada o disco esta vazio e o firmware EFI cai no CD sozinho
+    # - foi assim que a RUN-01 instalou. Depois da primeira instalacao isso deixa
+    # de valer: o Windows grava a sua entrada 'Windows Boot Manager' na NVRAM e o
+    # firmware passa a boota-la direto, SEM exibir 'Press any key to boot from CD
+    # or DVD'. Foi o que reprovou as duas tentativas da RUN-02: nenhuma tecla
+    # poderia ter ajudado, porque prompt nenhum chegou a existir (vmware.log:
+    # 'About to do EFI boot: Windows Boot Manager', 3,6 s apos o power-on).
+    #
+    # 'efi.bootOrder' e a chave lida pelo firmware EFI; o vmware-vmx recusa
+    # valores fora de floppy/hdd/cdrom/efishell ('Unrecognized efi.bootOrder').
+    # A NVRAM nao e tocada nem removida: a ordem e imposta por cima dela na
+    # inicializacao do firmware, e o vTPM depende daquele arquivo.
+    param([string]$Value = 'cdrom,hdd')
+    $validos = @('floppy', 'hdd', 'cdrom', 'efishell')
+    foreach ($t in ($Value -split ',')) {
+        if ($validos -notcontains $t.Trim().ToLowerInvariant()) {
+            throw ("GATE5: token invalido em efi.bootOrder: '{0}'." -f $t)
+        }
+    }
+    # A configuracao so e lida no power-on, e o VMware reescreve o .vmx ao
+    # desligar: gravar com a VM ligada nao teria efeito e ainda seria perdido.
+    if (Test-Gate5VmPoweredOn) {
+        throw 'GATE5: a ordem de boot so pode ser ajustada com a VM desligada.'
+    }
+    Set-Gate5VmxEntry -Name 'efi.bootOrder' -Value $Value
+    $lido = Get-Gate5VmxValue -Key 'efi.bootOrder'
+    if ($lido -ne $Value) {
+        throw ("GATE5: efi.bootOrder nao persistiu no .vmx (lido '{0}', esperado '{1}')." -f $lido, $Value)
+    }
+    Write-Gate5Log ("Ordem de boot do firmware fixada em '{0}': a midia optica vem antes do disco." -f $Value)
+}
+
 function Set-Gate5VncConsole {
     # Liga/desliga o console VNC local do VMware no VMX (VM deve estar desligada).
     # Nunca define senha porque o socket fica preso a 127.0.0.1 e o canal existe
