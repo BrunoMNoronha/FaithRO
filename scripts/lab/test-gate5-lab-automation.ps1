@@ -222,6 +222,15 @@ It 'validador da midia le a estrutura real da ISO' {
     ($comm -match 'autounattend_na_raiz')
 }
 
+It 'automacao aguarda o power-on para pegar a janela do boot' {
+    # A janela do prompt de boot dura poucos segundos; depender de quando o
+    # operador avisa faz a automacao perde-la, como aconteceu na execucao real.
+    $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
+    ($boot -match 'AddMinutes\(30\)') -and
+    ($boot -match 'while \(\[DateTime\]::UtcNow -lt \$esperaAte -and -not \(Test-Gate5VmPoweredOn\)\)') -and
+    ($boot -match 'Power-on detectado')
+}
+
 It 'power-on de VM criptografada e gate humano com validacao automatica' {
     $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
     ($boot -match "Stop-Gate5Human -Action 'POWER_ON_VM'") -and

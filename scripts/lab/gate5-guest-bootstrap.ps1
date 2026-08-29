@@ -250,15 +250,27 @@ public static class Gate5IsoWriter {
                 Stop-Gate5Blocked -Blocker 'VNC_NOT_LOCAL' -Detail 'console temporario precisa estar preso a 127.0.0.1'
             }
 
-            Stop-Gate5Human -Action 'POWER_ON_VM' -Detail @'
-Ligue a VM na interface do VMware Workstation:
-  1. abrir C:\VMs\FaithRO-GATE5-LAB\FaithRO-GATE5-LAB.vmx
-  2. Power on this virtual machine
-  3. nao interagir com a instalacao - ela e desassistida
-A automacao entrega sozinha a tecla do prompt de boot pelo console local e
-acompanha a instalacao pelo canal serial. Reexecute gate5-provision.ps1 depois
-de ligar (pode ser em seguida; a espera e feita aqui).
-'@
+            # Gate humano com ESPERA: a janela do prompt de boot dura poucos
+            # segundos apos o power-on, entao nao da para depender de quando o
+            # operador avisa. A instrucao e impressa e a automacao fica
+            # aguardando o power-on para agir dentro da janela.
+            Write-Gate5Log 'HUMAN_ACTION_REQUIRED POWER_ON_VM' 'GATE'
+            Write-Host ''
+            Write-Host 'HUMAN_ACTION_REQUIRED'
+            Write-Host 'action=POWER_ON_VM'
+            Write-Host 'Ligue a VM na interface do VMware Workstation (Power on this virtual machine).'
+            Write-Host 'Nao interaja com a instalacao: ela e desassistida.'
+            Write-Host 'A automacao esta AGUARDANDO o power-on e agira sozinha na janela do boot.'
+            Write-Host ''
+
+            $esperaAte = [DateTime]::UtcNow.AddMinutes(30)
+            while ([DateTime]::UtcNow -lt $esperaAte -and -not (Test-Gate5VmPoweredOn)) {
+                Start-Sleep -Seconds 3
+            }
+            if (-not (Test-Gate5VmPoweredOn)) {
+                Stop-Gate5Human -Action 'POWER_ON_VM' -Detail 'A VM nao foi ligada em 30 minutos. Reexecute gate5-provision.ps1 quando puder liga-la.'
+            }
+            Write-Gate5Log 'Power-on detectado; entrando na janela do prompt de boot.'
         }
 
         # A janela do prompt de boot e determinada pelo TEMPO DE VIDA da VM, nao
