@@ -259,6 +259,16 @@ It 'midia e canais sao validados ANTES de pedir o power-on' {
     ($boot -match 'UNATTEND_MEDIA_INVALID') -and ($boot -match 'VNC_NOT_LOCAL')
 }
 
+It 'ordem do particionamento e conferida no arquivo da midia' {
+    # Nao basta validar o template do repositorio: o que importa e o
+    # Autounattend REALMENTE gravado na ISO, que e o que o Setup vai ler.
+    $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    ($comm -match 'function Get-Gate5IsoFileBytes') -and
+    ($comm -match 'ordem_particionamento_ok') -and
+    ($comm -match "Get-Gate5IsoFileBytes -IsoPath \`$IsoPath -Name 'Autounattend\.xml'") -and
+    ($comm -match "CreatePartitions,ModifyPartitions,DiskID,WillWipeDisk")
+}
+
 It 'validador da midia le a estrutura real da ISO' {
     # Nao basta procurar bytes soltos: e preciso provar que o Autounattend esta
     # na RAIZ do namespace que o Windows Setup usa (Joliet), e que os nomes com

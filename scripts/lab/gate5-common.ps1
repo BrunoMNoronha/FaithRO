@@ -836,6 +836,27 @@ function Get-Gate5IsoEntries {
     } finally { $fs.Close() }
 }
 
+function Get-Gate5IsoFileBytes {
+    # Le os bytes de um arquivo DENTRO da ISO, pelo extent do namespace Joliet.
+    # Permite validar o Autounattend realmente gravado na midia sem monta-la e
+    # sem nunca imprimir seu conteudo (ele carrega a senha de bootstrap).
+    param(
+        [Parameter(Mandatory)][string]$IsoPath,
+        [Parameter(Mandatory)][string]$Name,
+        [string]$SubPath
+    )
+    $entradas = Get-Gate5IsoEntries -IsoPath $IsoPath -SubPath $SubPath
+    $alvo = @($entradas | Where-Object { -not $_.IsDirectory -and $_.Name -eq $Name }) | Select-Object -First 1
+    if (-not $alvo) { return $null }
+    $fs = [System.IO.File]::Open($IsoPath, 'Open', 'Read', 'ReadWrite')
+    try {
+        $buf = New-Object byte[] $alvo.Size
+        $fs.Seek([int64]$alvo.Lba * 2048, 'Begin') | Out-Null
+        $fs.Read($buf, 0, $alvo.Size) | Out-Null
+        return $buf
+    } finally { $fs.Close() }
+}
+
 function Test-Gate5UnattendMedia {
     # Validacao fail-closed da midia controlada, ANTES de qualquer power-on.
     # Nunca imprime o conteudo do Autounattend (ele carrega a senha de bootstrap
@@ -848,6 +869,7 @@ function Test-Gate5UnattendMedia {
         edicao_windows_11_pro = $false; locale_pt_br = $false
         payload_script = $false; yara_bin = $false; ruleset_index = $false
         sem_chave_real = $false
+        ordem_particionamento_ok = $false
     }
     if (-not $r.iso_present) { return [pscustomobject]$r }
     $r.iso_bytes = (Get-Item $IsoPath).Length
@@ -860,6 +882,26 @@ function Test-Gate5UnattendMedia {
     $g5    = Get-Gate5IsoEntries -IsoPath $IsoPath -SubPath 'gate5'
     $yara  = Get-Gate5IsoEntries -IsoPath $IsoPath -SubPath 'gate5/yara'
     $rules = Get-Gate5IsoEntries -IsoPath $IsoPath -SubPath 'gate5/rules'
+    # Ordem dos elementos do particionamento CONFERIDA NO ARQUIVO DA MIDIA, nao
+    # no template do repositorio: e o que o Windows Setup realmente vai ler. O
+    # conteudo nunca e impresso (carrega a senha de bootstrap renderizada).
+    $bytesUnattend = Get-Gate5IsoFileBytes -IsoPath $IsoPath -Name 'Autounattend.xml'
+    if ($bytesUnattend) {
+        try {
+            $texto = [Text.Encoding]::UTF8.GetString($bytesUnattend).TrimStart([char]0xFEFF)
+            [xml]$xa = $texto
+            $nsa = New-Object System.Xml.XmlNamespaceManager($xa.NameTable)
+            $nsa.AddNamespace('u', 'urn:schemas-microsoft-com:unattend')
+            $disk = $xa.SelectSingleNode('//u:DiskConfiguration/u:Disk', $nsa)
+            $dc   = $xa.SelectSingleNode('//u:DiskConfiguration', $nsa)
+            if ($disk -and $dc) {
+                $od = @($disk.ChildNodes | Where-Object { $_.NodeType -eq 'Element' } | ForEach-Object { $_.LocalName })
+                $oc = @($dc.ChildNodes   | Where-Object { $_.NodeType -eq 'Element' } | ForEach-Object { $_.LocalName })
+                $r.ordem_particionamento_ok = ((($od -join ',') -eq 'CreatePartitions,ModifyPartitions,DiskID,WillWipeDisk') -and
+                                               (($oc -join ',') -eq 'Disk,WillShowUI'))
+            }
+        } catch { }
+    }
     $r.payload_script = [bool](@($g5    | Where-Object { $_.Name -eq 'gate5-payload.ps1' }).Count)
     $r.yara_bin       = [bool](@($yara  | Where-Object { $_.Name -eq 'yara64.exe' }).Count)
     $r.ruleset_index  = [bool](@($rules | Where-Object { $_.Name -eq 'gate5-index.yar' }).Count)
