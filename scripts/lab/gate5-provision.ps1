@@ -120,6 +120,7 @@ no mesmo diretorio. Depois reexecute .\scripts\lab\gate5-provision.ps1.
     # Comprovacao de procedencia fail-closed: hash oficial da Microsoft copiado
     # pelo operador da propria pagina de download (sidecar .sha256.official).
     $sidecar = "$($iso.FullName).sha256.official"
+    if (-not (Test-Path $sidecar) -and (Test-Path "$sidecar.txt")) { $sidecar = "$sidecar.txt" }
     if (-not (Test-Path $sidecar)) {
         Stop-Gate5Blocked -Blocker 'WINDOWS_ISO_PROVENANCE_UNVERIFIED' -Detail @"
 ISO encontrada mas sem comprovacao de procedencia oficial. Crie o arquivo
