@@ -61,6 +61,7 @@ apenas os organiza por categoria e registra estado e dependências.
 | [44-gate-5-decisao-e-plano.md](44-gate-5-decisao-e-plano.md) | Preparação (2P-E-C5-PREP) da **decisão humana do GATE 5** (verificações locais de segurança): identifica a definição canônica (doc 33 §11; plano `gate_id=5`), classifica como **D2** (nomeado/definido em alto nível, preparação operacional ausente), analisa lacunas/riscos e propõe plano de controle e matriz de decisão. **Não** executa o GATE 5, **não** repete o GATE 4, **não** altera a saída/evidência do GATE 4, **não** materializa/executa PE, **não** prepara cliente nem acessa VPS. `decision_status=PENDING_HUMAN_DECISION`, `gate_5_authorized=false`, `execution_authorized=false`, `client_preparation_authorized=false`. Decisão humana pendente em PR separado | Cliente/build/segurança | validado | preparação (GATE 5 não autorizado) | 16, 33, 40, 43 | 2026-08-05 |
 | [45-gate-5-preparacao-operacional.md](45-gate-5-preparacao-operacional.md) | Preparação operacional (2P-E-C5-TOOLING-PREP) do **GATE 5** (verificações locais de segurança): orquestrador estático [`scripts/warp-audit-gate-05.py`](../scripts/warp-audit-gate-05.py) (stdlib, fail-closed, sem rede, sem execução do artefato; modos `--validate-only`/`--fixture-mode`; **modo real bloqueado**) + testes só com **fixtures sintéticas** [`scripts/test-warp-audit-gate-05.py`](../scripts/test-warp-audit-gate-05.py); schemas fechados de entrada/evidência (flags `false`; evidência de exemplo `FIXTURE_VALIDATION_PASS`, nunca `GATE_PASSED`); adapters `synthetic-local` (habilitado) e `windows-defender-local`/`yara-local` (**só contrato**, não executados); validador/CI/`.gitattributes`/EOL estendidos. **Não** executa o GATE 5, **não** usa o WARP real, **não** executa scanner real, **não** faz upload, **não** prepara cliente nem acessa VPS. `gate_5_authorized=false`, `execution_authorized=false`, `local_security_scan_authorized=false`, `external_reputation_upload_authorized=false`, `client_preparation_authorized=false`. Execução real exige nova decisão humana em PR separado | Cliente/build/segurança | validado | preparação (execução não autorizada) | 16, 33, 40, 44 | 2026-08-05 |
 | [46-decisao-execucao-real-gate-5-verificacoes-locais.md](46-decisao-execucao-real-gate-5-verificacoes-locais.md) | Registro (2P-E-C5-REAL-AUTH-DECISION) da **decisão humana real** de autorização condicional da execução real do **GATE 5** (verificações locais de segurança): `AUTHORIZE_GATE_5_LOCAL_EXECUTION` (decisor `BrunoMNoronha`); fecha as lacunas do doc 44 §10 (lista fechada Defender+YARA, ambiente isolado, R13, critérios de resultado PASS/FINDING/ERROR/TIMEOUT/BLOCKED); `gate_5_authorized=true`, `local_security_scan_authorized=true`, `temporary_materialization_authorized=true`, `execution_authorized=false`, `client_preparation_authorized=false`. **DECISÃO AUTORIZADA — EXECUÇÃO NÃO INICIADA**; execução real em PR separado | Cliente/build/segurança | validado | decisão registrada (execução não iniciada) | 16, 33, 40, 44, 45 | 2026-08-28 |
+| [47-provisao-laboratorio-gate-5.md](47-provisao-laboratorio-gate-5.md) | Especificação, runbook e auditoria de prontidão da provisão do laboratório isolado para o GATE 5 (VM Windows descartável, isolamento externo de rede, YARA 4.5.5, Yara-Rules/rules pinado); registra pré-condições e bloqueios BLK-01..BLK-04 | Infra/segurança/auditoria | validado | em andamento (bloqueios registrados; alvo não materializado) | 16, 33, 40, 44, 45, 46 | 2026-08-28 |
 | [99-checklists.md](99-checklists.md) | Checklists de PR, deploy, balanceamento | Todos | validado | não aplicável | — | 2026-07-10 |
 
 [^1]: No documento 03, "parcialmente implantado" significa apenas que a
@@ -117,7 +118,27 @@ apenas os organiza por categoria e registra estado e dependências.
   [35](35-resultado-gate-0-proveniencia-warp.md) (resultado da execução do GATE 0 por
   metadados oficiais; `GATE 0 CONCLUÍDO — APROVADO POR METADADOS` — proveniência
   consistente; nada baixado/materializado/executado; Git object ID ≠ SHA-256 local;
-  GATE 1 exige nova decisão humana).
+  GATE 1 exige nova decisão humana),
+  [36](36-registro-autorizacao-gate-1-materializacao-warp.md) (registro da autorização
+  do GATE 1 — materialização),
+  [37](37-resultado-gate-2-materializacao-integridade-warp.md) (resultado do GATE 2 —
+  integridade local e hashing),
+  [39](39-resultado-gate-3-identidade-assinatura-warp.md) (resultado do GATE 3 —
+  identidade e assinatura estática offline),
+  [40](40-preparacao-gate-4-inventario-pe-estatico-warp.md) (preparação da ferramenta
+  do GATE 4 — inventário PE estático),
+  [42](42-autorizacao-execucao-gate-4-inventario-pe-warp.md) (autorização da execução
+  do GATE 4),
+  [43](43-resultado-gate-4-inventario-pe-estatico-warp.md) (resultado da execução do
+  GATE 4 — COMPLETED_PASS),
+  [44](44-gate-5-decisao-e-plano.md) (preparação da decisão e plano de controle do
+  GATE 5 — verificações locais de segurança),
+  [45](45-gate-5-preparacao-operacional.md) (preparação operacional do GATE 5 —
+  orquestrador, schemas, testes sintéticos),
+  [46](46-decisao-execucao-real-gate-5-verificacoes-locais.md) (registro da decisão
+  humana real de autorização condicional da execução real do GATE 5),
+  [47](47-provisao-laboratorio-gate-5.md) (especificação, runbook e auditoria de
+  prontidão do laboratório isolado para o GATE 5; bloqueios BLK-01..BLK-04).
 - **Patcher e build auditável do Beam:**
   [23](23-planejamento-primeiro-build-controlado-beam.md) (planejamento do
   primeiro build controlado; build ainda não autorizado),
