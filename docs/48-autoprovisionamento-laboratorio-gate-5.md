@@ -199,6 +199,65 @@ sem elevação — o pré-flight já não a exige (§2) e a retomada parte do ch
 
 **Testes que impedem regressão:** nenhum caminho fornece a senha ao `vmrun` (`-vp`); nenhum script lê credencial do host (`cmdkey`, `vaultcmd`, `PasswordVault`, `CredRead`, `Get-StoredCredential`); nenhum script pede senha ao operador (`Read-Host`, `Get-Credential`); e `vmrun` falha fechado em VM criptografada. As guardas analisam **apenas código** (comentários removidos pelo tokenizador), para que a documentação da proibição não gere falso positivo.
 
-## 13. Próxima etapa
+## 13. Decisão arquitetural: o runtime do Visual C++ vem do pacote oficial da Microsoft
+
+**Contexto.** A primeira instalação limpa chegou ao fim e reportou a evidência completa pela serial, mas com três critérios reprovados:
+
+| Critério | Resultado | Causa raiz |
+| --- | --- | --- |
+| `yara_4_5_5` | `yara_version` vazio, `rules_compile_ok=false` | `yara64.exe` e `yarac64.exe` importam `VCRUNTIME140.dll`, ausente num Windows 11 limpo — os binários nem iniciam |
+| `sanitize_pass` | 67 acertos decisórios | todos `*.sql` sob `AppData\Local\Microsoft\OneDrive\...\WebAssets\sql\`: modelos de consulta do próprio OneDrive, falso positivo do padrão genérico por extensão |
+| `ruleset_pinned` | sem verificação possível | a evidência do guest não carregava o commit SHA-40 nem o agregado; contar arquivos não prova o pin |
+
+A dependência foi confirmada lendo a **tabela de importações PE** do `yara64.exe` no host. Ela funciona no host porque o instalador do VMware deposita esse runtime; as `api-ms-win-crt-*` fazem parte do Windows, a `VCRUNTIME140.dll` não.
+
+**Decisão humana (2026-08-29).** O runtime vem **exclusivamente** do redistribuível oficial da Microsoft. Copiar `VCRUNTIME140.dll`/`MSVCP140.dll` do próprio host (implantação *app-local*, tecnicamente permitida pela Microsoft) foi **recusado**: a procedência seria a instalação local em vez de um pacote assinado e versionado. Seguir sem YARA também foi recusado — YARA e o ruleset pinado são requisitos explícitos do baseline do GATE 5.
+
+**Pipeline resultante (fail-closed em cada etapa).**
+
+No host, fase `Vcruntime` (checkpoint `VCRUNTIME_READY`, antes de `Yara`/`Rules`/mídia):
+
+1. valida a URL declarada contra a *allowlist* de hosts da Microsoft;
+2. baixa por `HttpWebRequest` e valida a **URL efetiva** (o `aka.ms` redireciona) **antes de gravar um único byte** — `VCRUNTIME_SOURCE_NOT_MICROSOFT`;
+3. exige Authenticode `Valid` **e** titular `Microsoft Corporation`, descartando o arquivo se falhar — `VCRUNTIME_SIGNATURE_INVALID`;
+4. calcula o SHA-256, grava o pin em `evidence/vcruntime-pin.json` e recusa qualquer divergência posterior — `VCRUNTIME_HASH_MISMATCH`;
+5. confere que a versão do pacote cobre o toolset do YARA 4.5.5 (mínimo 14.30) — `YARA_RUNTIME_DEPENDENCY_UNSATISFIED`;
+6. preserva o artefato no *staging* controlado (`.local/gate5-lab/vcredist-stage/`, fora do Git).
+
+Na construção da mídia, o SHA-256 é **reconferido na hora de embarcar** — o pin só vale se o arquivo que entra na ISO for o mesmo que foi assinado.
+
+No guest, antes de qualquer uso do YARA:
+
+1. detecta o runtime v14 x64 já instalado pela chave `HKLM:\SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64` **e** pela presença da DLL — a mera existência do arquivo **não** é aceita como prova;
+2. se ausente ou insuficiente, confere hash e Authenticode do instalador **na mídia** e o executa com `/install /quiet /norestart`;
+3. aceita os códigos 0, 1638 e 3010, mas valida pelo **resultado** (registro + versão + DLL), não pelo código de saída — `VCRUNTIME_INSTALL_FAILED`;
+4. prova a correção pela **execução real** de `yara --version` — `YARA_RUNTIME_DEPENDENCY_UNSATISFIED`;
+5. só então avança para ruleset e sanitize.
+
+**Correções dos outros dois achados.**
+
+- **Sanitize.** Os padrões decisórios foram separados em *incondicionais* (material de chave e artefatos do projeto: `*.pem`, `id_rsa*`, `.env`, `*faithro*`, `WARP*`, `*.grf`, …) e *por extensão genérica* (`*.sql`, `*.dump`), estes últimos informativos apenas sob `AppData\Local\Microsoft\` e `AppData\Local\Packages\`. Uma chave privada nessas pastas **continua reprovando**. Os acertos de fornecedor são contados e amostrados na evidência — nunca descartados em silêncio.
+- **Pin do ruleset.** A mídia passa a carregar `rules-pin.json` com o commit SHA-40, o agregado e o manifesto `<rel, sha256>` completo. O guest **recomputa** o agregado com a mesma regra do host (manifesto `<rel>TAB<sha256>LF`, na ordem do pin, UTF-8 sem BOM) e reporta `ruleset_pinned` só quando o valor bate e nenhum arquivo falta ou diverge. O pin viaja **fora** de `rules/`: dentro dela entraria no próprio conjunto que descreve.
+- **`tpm_2_0`.** A evidência trazia `TpmPresent`/`TpmReady`, que não distinguem 1.2 de 2.0. Passa a coletar `SpecVersion` de `Win32_Tpm`.
+
+**Reação do host.** A evidência é gravada **antes** de qualquer decisão; um bloqueio não pode custar a prova que o justifica. Depois disso, bloqueadores reportados pelo guest viram `LAB_AUTOPROVISION_BLOCKED` com o próprio código, e critérios reprovados viram `GUEST_BASELINE_CRITERIA_FAILED` — o provisionamento não segue para isolamento e snapshot com um baseline inválido.
+
+**Arquivos afetados:** `scripts/lab/gate5-common.ps1`, `scripts/lab/gate5-guest-bootstrap.ps1`, `scripts/lab/guest/gate5-payload.ps1`, `scripts/lab/gate5-provision.ps1`, `scripts/lab/gate5-verify-baseline.ps1`, `scripts/lab/test-gate5-lab-automation.ps1`.
+
+**Testes de regressão (102 PASS / 0 FAIL, sintéticos — sem VM, sem rede, sem alvo):** origem oficial aceita/recusada (inclusive sufixo parecido como `download.microsoft.com.evil.example` e HTTP puro); **nenhum script copia `VCRUNTIME`/`MSVCP` do host**, fechando a porta do *fallback app-local*; a URL efetiva é provada antes da gravação; a assinatura é exigida antes do pin; os cinco bloqueadores existem; a presença da DLL não basta; a validação é pelo resultado; ruleset e sanitize só rodam depois do YARA provado; o agregado do ruleset recomputado no guest bate com a regra do host, e reprova com regra alterada, regra faltante ou sem SHA-40; modelos `.sql` do OneDrive deixam de reprovar, mas chave privada e artefato do alvo reprovam **até** dentro de pasta de fornecedor; a evidência carrega todos os critérios; o host preserva a evidência antes de bloquear.
+
+A *allowlist* de downloads do laboratório foi estendida para `aka.ms/vs/<n>/release/vc_redist.x64.exe`, com o motivo registrado no próprio teste.
+
+**Riscos residuais.**
+
+1. O `aka.ms` resolve para a versão corrente do pacote: a primeira aquisição fixa o SHA-256 e as seguintes precisam bater. Trocar de versão é uma decisão consciente (apagar o *staging* para readquirir), não um efeito silencioso.
+2. Executar um instalador dentro do guest amplia levemente a superfície de bootstrap. Mitigação: pacote assinado pela Microsoft, hash pinado, verificado no host e de novo no guest, em VM isolada e descartável.
+3. O código de saída 3010 (pede reinício) é aceito; se algum cenário exigir o reinício para o runtime funcionar, a prova por `yara --version` reprova e o bloqueio aparece — nunca um falso positivo.
+
+**Rollback.** Reverter o commit desta correção restaura o pipeline anterior, que instala YARA sem runtime e volta a reprovar `yara_4_5_5`; nada no host é alterado além de `.local/gate5-lab/` (fora do Git) e a VM não é tocada. Para descartar apenas o artefato: apagar `.local/gate5-lab/vcredist-stage/` e `evidence/vcruntime-pin.json`.
+
+**Impossibilidade de aplicar ao guest atual.** O único canal de entrega controlado é a mídia, consumida pelo Windows Setup no primeiro logon; o payload da instalação atual já concluiu (`stage=DONE`, tarefa de retomada removida) e a VM criptografada não oferece *guest operations*. Injetar o runtime manualmente no guest atual quebraria a reprodutibilidade do baseline. Logo, a correção exige **nova mídia e nova instalação limpa**, com a VM desligada — um único ciclo, com o watcher já maduro.
+
+## 14. Próxima etapa
 
 Somente após `LAB_AUTOPROVISION_COMPLETE` (critério do prompt: todas as flags de sucesso verdadeiras e as flags proibidas falsas): `ETAPA 2P-E-C5-REAL-EXEC-PREFLIGHT-RERUN`, em sessão separada.

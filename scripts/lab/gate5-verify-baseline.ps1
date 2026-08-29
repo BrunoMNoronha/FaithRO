@@ -132,9 +132,34 @@ $warp = @(Get-ChildItem C:\ -Recurse -Depth 3 -Filter "WARP*" -ErrorAction Silen
     }
 }
 
+# --- Evidencia reportada pelo proprio guest pela serial -----------------------
+# Esta e a prova primaria do baseline: numa VM criptografada nao ha guest
+# operations, entao o que o guest escreveu na serial e o unico testemunho de
+# dentro. Os controles abaixo foram os que reprovaram na primeira instalacao
+# limpa e passaram a ter verificacao explicita.
+$serialEv = Join-Path $script:Gate5EvidenceDir 'guest-evidence.json'
+Check 'evidencia-guest-serial' (Test-Path $serialEv)
+if (Test-Path $serialEv) {
+    $g = Get-Content $serialEv -Raw | ConvertFrom-Json
+    $campos = @($g.PSObject.Properties.Name)
+    Check 'guest-sem-blockers' ((-not ($campos -contains 'blockers')) -or (@($g.blockers).Count -eq 0)) ("blockers=" + (@($g.blockers) -join ','))
+    Check 'guest-tpm-2.0' ([bool]($campos -contains 'tpm_2_0' -and $g.tpm_2_0)) ("spec=" + $g.tpm_spec_version)
+    Check 'guest-vcruntime' ([bool]($campos -contains 'vcruntime_sufficient' -and $g.vcruntime_sufficient)) ("versao=" + $g.vcruntime_version)
+    Check 'guest-yara-runtime' ([bool]($campos -contains 'yara_runtime_ok' -and $g.yara_runtime_ok)) ("yara=" + $g.yara_version)
+    Check 'guest-ruleset-pinned' ([bool]($campos -contains 'ruleset_pinned' -and $g.ruleset_pinned)) ("commit=" + $g.ruleset_commit)
+    Check 'guest-ruleset-compila' ([bool]$g.rules_compile_ok)
+    Check 'guest-sanitize' ([bool]($campos -contains 'sanitize_pass' -and $g.sanitize_pass)) ("gating=" + $g.secrets_gating_count + " vendor=" + $g.secrets_vendor_count)
+}
+
 # --- Secrets gate (evidencia da sanitizacao) ----------------------------------
+# Aceita as DUAS origens de prova: o arquivo da fase Sanitize por guest
+# operations (so existe em VM nao criptografada) ou a varredura que o proprio
+# payload faz e reporta pela serial. Exigir apenas a primeira reprovaria sempre
+# no desenho atual, em que a VM e criptografada por causa do vTPM.
 $sanEv = Join-Path $script:Gate5EvidenceDir 'guest-sanitize.json'
-Check 'secrets-gate' ((Test-Path $sanEv) -and ((Get-Content $sanEv -Raw | ConvertFrom-Json).count -eq 0))
+$sanLegado = (Test-Path $sanEv) -and ((Get-Content $sanEv -Raw | ConvertFrom-Json).count -eq 0)
+$sanSerial = (Test-Path $serialEv) -and [bool](Get-Content $serialEv -Raw | ConvertFrom-Json).sanitize_pass
+Check 'secrets-gate' ($sanLegado -or $sanSerial)
 
 # --- Resultado ----------------------------------------------------------------
 if ($failures.Count -gt 0) {

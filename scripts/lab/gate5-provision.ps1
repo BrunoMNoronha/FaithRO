@@ -177,6 +177,7 @@ if (-not (Test-Gate5Phase $state 'VM_CREATED')) {
 # aqui so produzia ENCRYPTED_VM_REQUIRES_HUMAN_POWER_OP logo apos a instalacao.
 # 'Yara' e 'Rules' seguem, mas como preparo de artefatos NO HOST para a midia.
 $guestPhases = @(
+    @{ Checkpoint = 'VCRUNTIME_READY'; Sub = @('Vcruntime') },
     @{ Checkpoint = 'YARA_READY';      Sub = @('Yara') },
     @{ Checkpoint = 'RULESET_READY';   Sub = @('Rules') },
     @{ Checkpoint = 'GUEST_INSTALLED'; Sub = @('Unattend', 'InstallWait') }

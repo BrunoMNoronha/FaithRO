@@ -59,12 +59,34 @@ $script:Gate5YaraDir    = 'C:\Tools\YARA'
 $script:Gate5RulesDir   = 'C:\Tools\YARA-Rules'
 $script:Gate5YaraVersion = '4.5.5'
 
+# Runtime do Visual C++ exigido pelo YARA. Os binarios oficiais yara64.exe e
+# yarac64.exe importam VCRUNTIME140.dll, que NAO existe num Windows 11 limpo (as
+# api-ms-win-crt-* fazem parte do sistema, esta nao). Sem ela nenhum dos dois
+# inicia - foi exatamente o que reprovou yara_4_5_5 e rules_compile_ok na
+# primeira instalacao limpa.
+# DECISAO ARQUITETURAL (docs/48 SS13): o runtime vem do REDISTRIBUIVEL OFICIAL da
+# Microsoft, com Authenticode valido e SHA-256 pinado. Copiar VCRUNTIME140.dll ou
+# MSVCP140.dll do proprio host ("app-local") e PROIBIDO: a proveniencia seria a
+# instalacao local, nao um pacote assinado e versionado da Microsoft.
+$script:Gate5VcRedistUrl = 'https://aka.ms/vs/17/release/vc_redist.x64.exe'
+# Hosts aceitos como origem oficial. O aka.ms redireciona, entao o host EFETIVO
+# do download tambem e verificado contra esta lista (fail-closed).
+$script:Gate5MicrosoftHosts = @(
+    'aka.ms', 'go.microsoft.com', 'download.microsoft.com',
+    'download.visualstudio.microsoft.com', 'vsblob.vsassets.io'
+)
+# Menor versao do runtime v14 x64 aceita no guest. O YARA 4.5.5 oficial e
+# compilado com o toolset do VS2022 (14.3x); versoes anteriores da mesma familia
+# binaria exportam simbolos a menos e o processo ainda falharia ao iniciar.
+$script:Gate5VcRuntimeMinVersion = [Version]'14.30'
+
 # Ordem canonica das fases (checkpoints). A retomada percorre esta lista.
 $script:Gate5Phases = @(
     'HOST_PREFLIGHT_OK',
     'VMWARE_INSTALLED',
     'ISO_VALIDATED',
     'VM_CREATED',
+    'VCRUNTIME_READY',
     'GUEST_INSTALLED',
     'GUEST_UPDATED',
     'DEFENDER_READY',
@@ -263,6 +285,37 @@ function Invoke-Gate5Native {
         $ErrorActionPreference = $previous
     }
     return [pscustomobject]@{ ExitCode = [int]$code; Output = @($out) }
+}
+
+function Test-Gate5MicrosoftSource {
+    # Origem OFICIAL Microsoft: esquema HTTPS e host na allowlist. Usada tanto na
+    # URL declarada quanto na URL EFETIVA obtida apos os redirecionamentos, para
+    # que um redirect sequestrado nao entregue um binario de terceiro.
+    param([Parameter(Mandatory)][string]$Uri)
+    try { $u = [Uri]$Uri } catch { return $false }
+    if ($u.Scheme -ne 'https') { return $false }
+    $nome = $u.Host.ToLowerInvariant()
+    return [bool](@($script:Gate5MicrosoftHosts) -contains $nome)
+}
+
+function Get-Gate5AuthenticodeMicrosoft {
+    # Assinatura Authenticode VALIDA e emitida para a Microsoft Corporation.
+    # Retorna o veredito com os dados de auditoria (nunca material secreto).
+    param([Parameter(Mandatory)][string]$Path)
+    $sig = Get-AuthenticodeSignature -LiteralPath $Path
+    $assunto = ''
+    $digital = ''
+    if ($sig.SignerCertificate) {
+        $assunto = $sig.SignerCertificate.Subject
+        $digital = $sig.SignerCertificate.Thumbprint
+    }
+    $microsoft = ($assunto -match '(?i)O=Microsoft Corporation') -or ($assunto -match '(?i)CN=Microsoft Corporation')
+    return [pscustomobject]@{
+        Status     = $sig.Status.ToString()
+        Subject    = $assunto
+        Thumbprint = $digital
+        Valid      = (($sig.Status -eq 'Valid') -and $microsoft)
+    }
 }
 
 function Test-Gate5Elevated {

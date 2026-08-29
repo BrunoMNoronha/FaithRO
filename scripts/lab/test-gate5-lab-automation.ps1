@@ -422,8 +422,11 @@ It 'nenhum script usa servico de reputacao externa' {
 }
 
 It 'downloads restritos as fontes oficiais aprovadas' {
+    # A lista foi estendida por DECISAO HUMANA (2026-08-29) para incluir o
+    # redistribuivel oficial do Visual C++: sem ele o yara64.exe nao inicia no
+    # Windows 11 limpo. A alternativa recusada foi copiar a DLL do proprio host.
     $urls = [regex]::Matches($allText, 'https://[^\s"'')]+') | ForEach-Object { $_.Value }
-    $allowed = '^https://(api\.github\.com/repos/(VirusTotal/yara|Yara-Rules/rules)|github\.com/Yara-Rules/rules|support\.broadcom\.com|www\.microsoft\.com/software-download)'
+    $allowed = '^https://(api\.github\.com/repos/(VirusTotal/yara|Yara-Rules/rules)|github\.com/Yara-Rules/rules|support\.broadcom\.com|www\.microsoft\.com/software-download|aka\.ms/vs/[0-9]+/release/vc_redist\.x64\.exe|github\.com/Yara-Rules/rules/archive/)'
     $bad = $urls | Where-Object { $_ -notmatch $allowed }
     if ($bad) { Write-Host ("        fontes nao aprovadas: " + ($bad -join ', ')) }
     @($bad).Count -eq 0
@@ -756,6 +759,297 @@ It 'validador exige todos os controles do baseline' {
     $missing = $required | Where-Object { $ver -notmatch [regex]::Escape($_) }
     if ($missing) { Write-Host ("        controles ausentes: " + ($missing -join ', ')) }
     @($missing).Count -eq 0
+}
+
+Write-Host 'T-D: runtime do Visual C++, pin do ruleset e criterios do baseline'
+
+$bootTxt    = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
+$payloadTxt = Get-Content (Join-Path $labDir 'guest\gate5-payload.ps1') -Raw
+$provTxt    = Get-Content (Join-Path $labDir 'gate5-provision.ps1') -Raw
+$verifyTxt  = Get-Content (Join-Path $labDir 'gate5-verify-baseline.ps1') -Raw
+
+function Get-FunctionText {
+    # Extrai o texto de uma funcao pelo casamento de chaves, para exercitar a
+    # implementacao REAL do payload sem executar o script (que roda no guest).
+    param([string]$Texto, [string]$Nome)
+    $i = $Texto.IndexOf("function $Nome")
+    if ($i -lt 0) { return '' }
+    $abre = $Texto.IndexOf('{', $i)
+    $nivel = 0
+    for ($j = $abre; $j -lt $Texto.Length; $j++) {
+        if ($Texto[$j] -eq '{') { $nivel++ }
+        elseif ($Texto[$j] -eq '}') { $nivel--; if ($nivel -eq 0) { return $Texto.Substring($i, $j - $i + 1) } }
+    }
+    return ''
+}
+
+It 'origem oficial: aceita hosts da Microsoft e recusa o resto' {
+    (Test-Gate5MicrosoftSource -Uri 'https://aka.ms/vs/17/release/vc_redist.x64.exe') -and
+    (Test-Gate5MicrosoftSource -Uri 'https://download.visualstudio.microsoft.com/download/pr/x/vc_redist.x64.exe') -and
+    # HTTP puro nao serve nem em host oficial
+    (-not (Test-Gate5MicrosoftSource -Uri 'http://download.microsoft.com/x.exe')) -and
+    # sufixo parecido nao e a Microsoft
+    (-not (Test-Gate5MicrosoftSource -Uri 'https://download.microsoft.com.evil.example/x.exe')) -and
+    (-not (Test-Gate5MicrosoftSource -Uri 'https://cdn.example.net/vc_redist.x64.exe')) -and
+    (-not (Test-Gate5MicrosoftSource -Uri 'nao-e-uma-url'))
+}
+
+It 'URL declarada do redistribuivel e oficial da Microsoft' {
+    Test-Gate5MicrosoftSource -Uri $script:Gate5VcRedistUrl
+}
+
+It 'nenhum script copia VCRUNTIME/MSVCP do host (fallback app-local proibido)' {
+    # REGRESSAO: a saida facil para o yara64.exe nao iniciar seria copiar a DLL
+    # da instalacao local para junto do executavel. A decisao humana recusou esse
+    # caminho: a proveniencia precisa ser um pacote assinado da Microsoft.
+    $copias = [regex]::Matches($allCode, '(?i)(Copy-Item|copy\s|xcopy|robocopy)[^\r\n]*(VCRUNTIME\w*\.dll|MSVCP\w*\.dll)[^\r\n]*')
+    if ($copias.Count -gt 0) { Write-Host ("        copia proibida: " + $copias[0].Value) }
+    ($copias.Count -eq 0) -and
+    ($allCode -notmatch '(?i)MSVCP140\.dll') -and
+    # a unica mencao permitida a VCRUNTIME140.dll e a DETECCAO no guest
+    ($payloadTxt -match "Join-Path \`$env:SystemRoot 'System32\\VCRUNTIME140\.dll'")
+}
+
+It 'a midia embarca o pacote oficial, nao DLLs soltas' {
+    ($bootTxt -match "Copy-Item \`$vcExeStage \(Join-Path \`$payloadDir 'vcredist'\)") -and
+    ($bootTxt -match "vcredist\\vcruntime-pin\.json")
+}
+
+It 'download so grava bytes depois de provar a URL efetiva' {
+    $iEfetiva = $bootTxt.IndexOf('Test-Gate5MicrosoftSource -Uri $urlEfetiva')
+    $iGrava   = $bootTxt.IndexOf('[IO.File]::Create($vcExe)')
+    ($iEfetiva -gt 0) -and ($iGrava -gt $iEfetiva)
+}
+
+It 'assinatura Authenticode e exigida antes de pinar o hash' {
+    $iSig  = $bootTxt.IndexOf('Get-Gate5AuthenticodeMicrosoft -Path $vcExe')
+    $iHash = $bootTxt.IndexOf('$vcSha  = Get-Gate5Sha256 -Path $vcExe')
+    ($iSig -gt 0) -and ($iHash -gt $iSig)
+}
+
+It 'Get-Gate5AuthenticodeMicrosoft exige status Valid E titular Microsoft' {
+    $fn = Get-FunctionText -Texto (Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw) -Nome 'Get-Gate5AuthenticodeMicrosoft'
+    ($fn -match "O=Microsoft Corporation") -and
+    ($fn -match "\`$sig\.Status -eq 'Valid'") -and
+    ($fn -match '\$microsoft')
+}
+
+It 'os cinco bloqueadores fail-closed do runtime existem no pipeline' {
+    $codigos = @('VCRUNTIME_SOURCE_NOT_MICROSOFT', 'VCRUNTIME_SIGNATURE_INVALID',
+                 'VCRUNTIME_HASH_MISMATCH', 'VCRUNTIME_INSTALL_FAILED',
+                 'YARA_RUNTIME_DEPENDENCY_UNSATISFIED')
+    $faltando = $codigos | Where-Object { ($bootTxt + $payloadTxt) -notmatch [regex]::Escape($_) }
+    if ($faltando) { Write-Host ("        bloqueadores ausentes: " + ($faltando -join ', ')) }
+    @($faltando).Count -eq 0
+}
+
+It 'guest instala pelo pacote oficial em modo silencioso' {
+    ($payloadTxt -match "'/install', '/quiet', '/norestart'") -and
+    ($payloadTxt -match 'Get-AuthenticodeSignature -LiteralPath \$exe') -and
+    ($payloadTxt -match 'Get-FileHash -LiteralPath \$exe')
+}
+
+It 'guest valida o runtime pelo RESULTADO, nao pelo exit code' {
+    $iExit  = $payloadTxt.IndexOf('$saida.exit_code = [int]$proc.ExitCode')
+    $iPos   = $payloadTxt.IndexOf('$depois = Get-VcRuntimeState -Minimo $minimo')
+    ($iExit -gt 0) -and ($iPos -gt $iExit) -and
+    ($payloadTxt -match 'pos-instalacao insuficiente')
+}
+
+It 'presenca da DLL nao e prova suficiente de runtime' {
+    # Exige o pacote REGISTRADO com versao coberta, alem do arquivo no disco.
+    $fn = Get-FunctionText -Texto $payloadTxt -Nome 'Get-VcRuntimeState'
+    ($fn -match 'VisualStudio\\14\.0\\VC\\Runtimes\\x64') -and
+    ($fn -match '\$instalado = \(\[int\]\$p\.Installed -eq 1\)') -and
+    ($fn -match 'Sufficient = \(\$suficiente -and \$dllPresente\)')
+}
+
+It 'prova final do YARA e a execucao real de --version' {
+    ($payloadTxt -match "--version") -and
+    ($payloadTxt -match "\`$yaraOk  = \(\`$yaraVer -eq '4\.5\.5'\)")
+}
+
+It 'ruleset e sanitize so rodam depois do YARA provado' {
+    $iGate  = $payloadTxt.IndexOf('    if ($yaraOk) {')
+    $iPin   = $payloadTxt.IndexOf('$pin = Test-RulesetPin -PinPath')
+    $iScan  = $payloadTxt.IndexOf('$gatingAlways = @(')
+    ($iGate -gt 0) -and ($iPin -gt $iGate) -and ($iScan -gt $iGate)
+}
+
+It 'fase Vcruntime precede a construcao da midia' {
+    $iVc  = $provTxt.IndexOf("'VCRUNTIME_READY'")
+    $iVm  = $provTxt.IndexOf("'GUEST_INSTALLED'")
+    ($iVc -gt 0) -and ($iVm -gt $iVc) -and ($script:Gate5Phases -contains 'VCRUNTIME_READY')
+}
+
+It 'midia nao e construida sem o redistribuivel pinado' {
+    ($bootTxt -match 'execute a fase Vcruntime antes') -and
+    ($bootTxt -match 'execute a fase Rules antes')
+}
+
+Write-Host 'T-E: pin do ruleset verificavel dentro do guest'
+
+# Reproduz a regra do HOST para o agregado (manifesto <rel>TAB<sha>LF, ordem
+# ordinal, UTF-8 sem BOM) e confronta com a implementacao REAL do guest.
+function Get-AgregadoHost {
+    param([object[]]$Entradas)
+    $manifesto = ($Entradas | ForEach-Object { "{0}`t{1}`n" -f $_.rel, $_.sha }) -join ''
+    $utf8 = New-Object System.Text.UTF8Encoding($false)
+    $sha  = [Security.Cryptography.SHA256]::Create()
+    return ([BitConverter]::ToString($sha.ComputeHash($utf8.GetBytes($manifesto))) -replace '-', '').ToLowerInvariant()
+}
+
+$rulesTmp = Join-Path $tmp 'YARA-Rules'
+New-Item -ItemType Directory -Force (Join-Path $rulesTmp 'malware') | Out-Null
+New-Item -ItemType Directory -Force (Join-Path $rulesTmp 'crypto')  | Out-Null
+Set-Content -LiteralPath (Join-Path $rulesTmp 'malware\a.yar') -Value 'rule a { condition: true }' -Encoding ascii
+Set-Content -LiteralPath (Join-Path $rulesTmp 'crypto\b.yar')  -Value 'rule b { condition: false }' -Encoding ascii
+$relList = @('crypto/b.yar', 'malware/a.yar')   # ordem ordinal, como no host
+$entradas = $relList | ForEach-Object {
+    [pscustomobject]@{ rel = $_; sha = (Get-FileHash -LiteralPath (Join-Path $rulesTmp ($_ -replace '/', '\')) -Algorithm SHA256).Hash.ToLowerInvariant() }
+}
+$pinTmp = Join-Path $tmp 'rules-pin.json'
+function Write-PinSintetico {
+    param([string]$Agregado)
+    [ordered]@{
+        schema = 'gate5-lab-ruleset-pin/v1'
+        commit_sha40 = '0123456789abcdef0123456789abcdef01234567'
+        file_count = $entradas.Count
+        aggregate_sha256 = $Agregado
+        files = @($entradas)
+    } | ConvertTo-Json -Depth 5 | Out-File $pinTmp -Encoding utf8
+}
+function Write-Log { param([string]$m) }   # stub: o guest loga, o teste nao
+Invoke-Expression (Get-FunctionText -Texto $payloadTxt -Nome 'Test-RulesetPin')
+
+It 'guest recomputa o agregado do ruleset igual ao host' {
+    Write-PinSintetico -Agregado (Get-AgregadoHost -Entradas $entradas)
+    $r = Test-RulesetPin -PinPath $pinTmp -Dir $rulesTmp
+    $r.Ok -and ($r.Computed -eq $r.Expected) -and ($r.Missing -eq 0) -and ($r.Mismatched -eq 0) -and
+    ($r.Commit -match '^[0-9a-f]{40}$')
+}
+
+It 'pin reprova quando uma regra entregue foi alterada' {
+    Write-PinSintetico -Agregado (Get-AgregadoHost -Entradas $entradas)
+    Set-Content -LiteralPath (Join-Path $rulesTmp 'malware\a.yar') -Value 'rule a { condition: false }' -Encoding ascii
+    $r = Test-RulesetPin -PinPath $pinTmp -Dir $rulesTmp
+    (-not $r.Ok) -and ($r.Mismatched -eq 1)
+}
+
+It 'pin reprova quando uma regra do commit nao foi entregue' {
+    Write-PinSintetico -Agregado (Get-AgregadoHost -Entradas $entradas)
+    Remove-Item (Join-Path $rulesTmp 'crypto\b.yar') -Force
+    $r = Test-RulesetPin -PinPath $pinTmp -Dir $rulesTmp
+    (-not $r.Ok) -and ($r.Missing -eq 1)
+}
+
+It 'pin reprova sem SHA-40 do commit' {
+    [ordered]@{ commit_sha40 = ''; aggregate_sha256 = ''; files = @() } |
+        ConvertTo-Json -Depth 3 | Out-File $pinTmp -Encoding utf8
+    -not (Test-RulesetPin -PinPath $pinTmp -Dir $rulesTmp).Ok
+}
+
+It 'o pin viaja na midia fora da arvore de regras' {
+    # Dentro de rules\ ele seria copiado para C:\Tools\YARA-Rules e entraria no
+    # proprio conjunto que descreve, mudando o agregado.
+    ($bootTxt -match "Join-Path \`$payloadDir 'rules-pin\.json'") -and
+    ($payloadTxt -match "Copy-Item \(Join-Path \`$root 'rules-pin\.json'\) \`$RulesPin")
+}
+
+Write-Host 'T-F: classificacao de secrets (assets de fornecedor)'
+
+# Extrai as listas REAIS do payload e classifica caminhos sinteticos com a
+# mesma regra, sem executar nada dentro de um guest.
+$mAlways = [regex]::Match($payloadTxt, '(?s)\$gatingAlways = @\((?<c>.*?)\)\r?\n')
+$mVendor = [regex]::Match($payloadTxt, '(?s)\$gatingUnlessVendor = @\((?<c>.*?)\)\r?\n')
+$mRegex  = [regex]::Match($payloadTxt, "\`$vendorAsset = '(?<c>[^']+)'")
+$gatingAlwaysReal = @(Invoke-Expression ('@(' + $mAlways.Groups['c'].Value + ')'))
+$gatingVendorReal = @(Invoke-Expression ('@(' + $mVendor.Groups['c'].Value + ')'))
+$vendorRegexReal  = $mRegex.Groups['c'].Value
+
+function Test-Gating {
+    # Reproduz a decisao do payload: incondicional sempre reprova; generico
+    # reprova apenas fora das arvores de assets de fornecedor.
+    param([string]$Caminho)
+    $nome = Split-Path $Caminho -Leaf
+    foreach ($p in $gatingAlwaysReal) { if ($nome -like $p) { return $true } }
+    foreach ($p in $gatingVendorReal) { if ($nome -like $p) { return ($Caminho -notmatch $vendorRegexReal) } }
+    return $false
+}
+
+It 'as listas e a regra de fornecedor foram extraidas do payload' {
+    ($gatingAlwaysReal.Count -ge 10) -and ($gatingVendorReal.Count -ge 1) -and
+    ($vendorRegexReal -match 'AppData') -and
+    # extensoes genericas NAO podem estar na lista incondicional
+    ($gatingAlwaysReal -notcontains '*.sql') -and ($gatingVendorReal -contains '*.sql')
+}
+
+It 'modelos .sql do OneDrive deixam de reprovar (achado da instalacao limpa)' {
+    -not (Test-Gating 'C:\Users\gate5boot\AppData\Local\Microsoft\OneDrive\26.150.0804.0011\WebAssets\sql\query.sql')
+}
+
+It 'assets de pacote da loja tambem sao informativos' {
+    -not (Test-Gating 'C:\Users\gate5boot\AppData\Local\Packages\MSTeams_8wekyb3d8bbwe\LocalCache\x.sql')
+}
+
+It 'dump ou .sql fora de arvore de fornecedor continua reprovando' {
+    (Test-Gating 'C:\Users\gate5boot\Documents\faithro-backup.sql') -and
+    (Test-Gating 'C:\Temp\ragnarok.dump')
+}
+
+It 'material de chave reprova ATE dentro de arvore de fornecedor' {
+    # A excecao vale so para extensao generica; chave privada nunca e asset.
+    (Test-Gating 'C:\Users\gate5boot\AppData\Local\Microsoft\OneDrive\id_rsa') -and
+    (Test-Gating 'C:\Users\gate5boot\AppData\Local\Packages\x\server.pem') -and
+    (Test-Gating 'C:\Users\gate5boot\AppData\Local\Microsoft\.env')
+}
+
+It 'artefato do alvo reprova ATE dentro de arvore de fornecedor' {
+    (Test-Gating 'C:\Users\gate5boot\AppData\Local\Microsoft\WARP.exe') -and
+    (Test-Gating 'C:\Users\gate5boot\AppData\Local\Packages\data.grf')
+}
+
+It 'acertos de fornecedor sao contados e amostrados, nunca descartados' {
+    ($payloadTxt -match 'secrets_vendor_count') -and ($payloadTxt -match 'secrets_vendor_sample')
+}
+
+Write-Host 'T-G: criterios do baseline reportados e exigidos'
+
+It 'evidencia do guest carrega todos os criterios do baseline' {
+    $chaves = @('tpm_spec_version', 'tpm_2_0', 'vcruntime_sufficient', 'vcruntime_sha256',
+                'yara_runtime_ok', 'ruleset_commit', 'ruleset_aggregate_computed',
+                'ruleset_pinned', 'sanitize_pass', 'blockers')
+    $faltando = $chaves | Where-Object { $payloadTxt -notmatch [regex]::Escape($_) }
+    if ($faltando) { Write-Host ("        campos ausentes: " + ($faltando -join ', ')) }
+    (@($faltando).Count -eq 0) -and ($payloadTxt -match "schema            = 'gate5-guest-evidence/v2'")
+}
+
+It 'tpm_2_0 vem da SpecVersion, nao de TpmPresent' {
+    ($payloadTxt -match 'Win32_Tpm') -and
+    ($payloadTxt -match "tpm_2_0           = \[bool\]\(\`$tpmSpec -like '2\.0\*'\)")
+}
+
+It 'host preserva a evidencia ANTES de bloquear por ela' {
+    $iSalva = $bootTxt.IndexOf('$ev | ConvertTo-Json -Depth 6) | Out-File $destino')
+    $iBlock = $bootTxt.IndexOf('Stop-Gate5Blocked -Blocker ([string]$blk[0])')
+    if ($iBlock -lt 0) { $iBlock = $bootTxt.IndexOf('Bloqueadores reportados pelo proprio guest') }
+    ($iSalva -gt 0) -and ($iBlock -gt $iSalva)
+}
+
+It 'host bloqueia com criterio reprovado dentro do guest' {
+    ($bootTxt -match 'GUEST_BASELINE_CRITERIA_FAILED') -and
+    ($bootTxt -match "\`$reprovados \+= 'yara_4_5_5'") -and
+    ($bootTxt -match "\`$reprovados \+= 'ruleset_pinned'") -and
+    ($bootTxt -match "\`$reprovados \+= 'sanitize_pass'") -and
+    ($bootTxt -match "\`$reprovados \+= 'tpm_2_0'")
+}
+
+It 'validador exige os controles novos do baseline' {
+    $novos = @('guest-sem-blockers', 'guest-tpm-2.0', 'guest-vcruntime',
+               'guest-yara-runtime', 'guest-ruleset-pinned', 'guest-sanitize')
+    $faltando = $novos | Where-Object { $verifyTxt -notmatch [regex]::Escape($_) }
+    if ($faltando) { Write-Host ("        controles ausentes: " + ($faltando -join ', ')) }
+    @($faltando).Count -eq 0
 }
 
 } finally {

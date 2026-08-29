@@ -1,6 +1,6 @@
 # gate5-guest-bootstrap.ps1 - Fases de bootstrap do guest FaithRO-GATE5-LAB.
 # Chamado pelo entrypoint gate5-provision.ps1 com -Phase <fase>.
-# Fases: Unattend | InstallWait | Updates | Defender | Yara | Rules | Sanitize
+# Fases: Unattend | InstallWait | Updates | Defender | Vcruntime | Yara | Rules | Sanitize
 #
 # Credenciais do guest: geradas em runtime, gravadas SOMENTE em
 # .local\gate5-lab\secrets\guest-credential.xml (Export-Clixml, DPAPI do
@@ -9,7 +9,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)]
-    [ValidateSet('Unattend','InstallWait','Updates','Defender','Yara','Rules','Sanitize')]
+    [ValidateSet('Unattend','InstallWait','Updates','Defender','Vcruntime','Yara','Rules','Sanitize')]
     [string]$Phase
 )
 
@@ -151,6 +151,7 @@ gerou a credencial, ou recrie o laboratorio do zero apagando
         $payloadDir = Join-Path $stageDir 'gate5'
         New-Item -ItemType Directory -Force (Join-Path $payloadDir 'yara')  | Out-Null
         New-Item -ItemType Directory -Force (Join-Path $payloadDir 'rules') | Out-Null
+        New-Item -ItemType Directory -Force (Join-Path $payloadDir 'vcredist') | Out-Null
         Copy-Item (Join-Path $PSScriptRoot 'guest\gate5-payload.ps1') $payloadDir -Force
         Set-Content -Path (Join-Path $payloadDir 'payload-marker.txt') -Value 'FaithRO-GATE5-LAB payload' -Encoding ascii
         foreach ($bin in 'yara64.exe', 'yarac64.exe') {
@@ -162,6 +163,48 @@ gerou a credencial, ou recrie o laboratorio do zero apagando
             throw 'GATE5: ruleset nao preparado; execute a fase Rules antes.'
         }
         Copy-Item (Join-Path $script:Gate5RulesDir '*') (Join-Path $payloadDir 'rules') -Recurse -Force
+
+        # Runtime do Visual C++: embarcado na midia como PACOTE OFICIAL assinado.
+        # O guest instala silenciosamente antes de tocar no YARA. Copiar DLL solta
+        # do host seria mais simples e esta PROIBIDO (docs/48 SS13).
+        $vcExeStage = Join-Path (Join-Path $script:Gate5LocalDir 'vcredist-stage') 'vc_redist.x64.exe'
+        $vcPinFile  = Join-Path $script:Gate5EvidenceDir 'vcruntime-pin.json'
+        if (-not (Test-Path $vcExeStage) -or -not (Test-Path $vcPinFile)) {
+            throw 'GATE5: redistribuivel do Visual C++ ausente; execute a fase Vcruntime antes.'
+        }
+        # Reverificacao na hora de embarcar: o pin so vale se o arquivo que entra
+        # na midia for o MESMO que foi assinado e hasheado na aquisicao.
+        $vcPinObj = Get-Content $vcPinFile -Raw | ConvertFrom-Json
+        $vcShaNow = Get-Gate5Sha256 -Path $vcExeStage
+        if ($vcShaNow -ne $vcPinObj.sha256) {
+            Stop-Gate5Blocked -Blocker 'VCRUNTIME_HASH_MISMATCH' -Detail @"
+O artefato do staging mudou depois da aquisicao e NAO foi embarcado.
+  pin   = $($vcPinObj.sha256)
+  atual = $vcShaNow
+"@
+        }
+        Copy-Item $vcExeStage (Join-Path $payloadDir 'vcredist') -Force
+        Copy-Item $vcPinFile  (Join-Path $payloadDir 'vcredist\vcruntime-pin.json') -Force
+
+        # Pin do ruleset na midia: sem ele o guest consegue contar arquivos, mas
+        # nao PROVAR que o conjunto entregue e o commit pinado - foi o que deixou
+        # ruleset_pinned sem verificacao na primeira instalacao limpa. Vai o
+        # commit SHA-40, o agregado e o manifesto <rel, sha> completo, para que o
+        # guest recompute o agregado com a mesma regra do host.
+        $rulesEvFile = Join-Path $script:Gate5EvidenceDir 'ruleset.json'
+        if (-not (Test-Path $rulesEvFile)) { throw 'GATE5: evidencia do ruleset ausente; execute a fase Rules antes.' }
+        $rulesEv = Get-Content $rulesEvFile -Raw | ConvertFrom-Json
+        if ([string]$rulesEv.commit_sha40 -notmatch '^[0-9a-f]{40}$') { throw 'GATE5: pin do ruleset sem SHA-40 valido.' }
+        # Fora da pasta 'rules': o que estiver la dentro e copiado para
+        # C:\Tools\YARA-Rules e entraria no proprio conjunto que ele descreve.
+        [ordered]@{
+            schema           = 'gate5-lab-ruleset-pin/v1'
+            repo             = 'https://github.com/Yara-Rules/rules'
+            commit_sha40     = $rulesEv.commit_sha40
+            file_count       = $rulesEv.file_count
+            aggregate_sha256 = $rulesEv.aggregate_sha256
+            files            = @($rulesEv.files)
+        } | ConvertTo-Json -Depth 5 | Out-File (Join-Path $payloadDir 'rules-pin.json') -Encoding utf8
         $payloadFiles = @(Get-ChildItem $payloadDir -Recurse -File)
         Write-Gate5Log ("Payload da midia: {0} arquivos, {1:N1} MB" -f $payloadFiles.Count, (($payloadFiles | Measure-Object Length -Sum).Sum / 1MB))
 
@@ -387,6 +430,30 @@ e enviada fora dele. Refaca o power-cycle com a automacao ja aguardando.
                 ($ev | ConvertTo-Json -Depth 6) | Out-File $destino -Encoding utf8
                 Write-Gate5Log ("Evidencia recebida do guest: {0} build {1}" -f $ev.os_caption, $ev.os_build)
                 Set-Gate5InstallNote 'installation_stage' 'GUEST_REPORTED'
+                # A evidencia e gravada ANTES de qualquer decisao: um bloqueio
+                # nao pode custar a prova que o justifica.
+                $campos = @($ev.PSObject.Properties.Name)
+                $blk = @()
+                if ($campos -contains 'blockers') { $blk = @($ev.blockers) | Where-Object { $_ } }
+                if ($blk.Count -gt 0) {
+                    Stop-Gate5Blocked -Blocker ([string]$blk[0]) -Detail @"
+Bloqueadores reportados pelo proprio guest: $($blk -join ', ')
+Evidencia preservada em $destino
+"@
+                }
+                # Criterios do baseline verificados dentro do guest. Reprovar aqui
+                # evita seguir para isolamento e snapshot com um baseline invalido.
+                $reprovados = @()
+                if ($campos -contains 'yara_runtime_ok' -and -not $ev.yara_runtime_ok) { $reprovados += 'yara_4_5_5' }
+                if ($campos -contains 'ruleset_pinned'  -and -not $ev.ruleset_pinned)  { $reprovados += 'ruleset_pinned' }
+                if ($campos -contains 'sanitize_pass'   -and -not $ev.sanitize_pass)   { $reprovados += 'sanitize_pass' }
+                if ($campos -contains 'tpm_2_0'         -and -not $ev.tpm_2_0)         { $reprovados += 'tpm_2_0' }
+                if ($reprovados.Count -gt 0) {
+                    Stop-Gate5Blocked -Blocker 'GUEST_BASELINE_CRITERIA_FAILED' -Detail @"
+Criterios reprovados dentro do guest: $($reprovados -join ', ')
+Evidencia preservada em $destino
+"@
+                }
                 exit 0
             }
             if (-not (Test-Gate5VmPoweredOn)) {
@@ -468,6 +535,101 @@ $sig = Get-AuthenticodeSignature $mpCmd
         $d = Get-Content $tmp -Raw | ConvertFrom-Json
         if (-not ($d.antivirus_enabled -and $d.realtime_enabled)) { throw 'GATE5: Defender nao esta com antivirus+realtime habilitados.' }
         Write-Gate5Log ("Defender OK: platform={0} engine={1} sig={2}" -f $d.platform_version, $d.engine_version, $d.signature_version)
+        exit 0
+    }
+
+    # -------------------------------------------------------------------------
+    'Vcruntime' {
+        # Aquisicao HOST-side do redistribuivel OFICIAL do Visual C++ (x64), a
+        # dependencia real do yara64.exe/yarac64.exe. Cada etapa falha fechado:
+        # origem, assinatura, hash pinado. Nada e copiado do proprio host.
+        $stage   = Join-Path $script:Gate5LocalDir 'vcredist-stage'
+        New-Item -ItemType Directory -Force $stage | Out-Null
+        $vcExe   = Join-Path $stage 'vc_redist.x64.exe'
+        $pinFile = Join-Path $script:Gate5EvidenceDir 'vcruntime-pin.json'
+        $pin     = if (Test-Path $pinFile) { Get-Content $pinFile -Raw | ConvertFrom-Json } else { $null }
+        $urlEfetiva = if ($pin) { [string]$pin.effective_url } else { '' }
+
+        if (-not (Test-Path $vcExe)) {
+            if (-not (Test-Gate5MicrosoftSource -Uri $script:Gate5VcRedistUrl)) {
+                Stop-Gate5Blocked -Blocker 'VCRUNTIME_SOURCE_NOT_MICROSOFT' `
+                    -Detail ("URL declarada fora da allowlist Microsoft: " + $script:Gate5VcRedistUrl)
+            }
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            Write-Gate5Log ("Baixando o redistribuivel oficial do Visual C++: " + $script:Gate5VcRedistUrl)
+            # HttpWebRequest em vez de Invoke-WebRequest: precisamos da URL
+            # EFETIVA (ResponseUri) para provar que o redirecionamento do aka.ms
+            # terminou num host da Microsoft, antes de gravar um unico byte.
+            $req = [Net.HttpWebRequest]::Create($script:Gate5VcRedistUrl)
+            $req.AllowAutoRedirect = $true
+            $req.UserAgent = 'FaithRO-GATE5-Lab'
+            $resp = $req.GetResponse()
+            $urlEfetiva = $resp.ResponseUri.AbsoluteUri
+            if (-not (Test-Gate5MicrosoftSource -Uri $urlEfetiva)) {
+                $resp.Close()
+                Stop-Gate5Blocked -Blocker 'VCRUNTIME_SOURCE_NOT_MICROSOFT' `
+                    -Detail ("URL efetiva apos redirecionamento fora da allowlist Microsoft: " + $urlEfetiva)
+            }
+            $fs = [IO.File]::Create($vcExe)
+            try { $resp.GetResponseStream().CopyTo($fs) } finally { $fs.Close(); $resp.Close() }
+            Write-Gate5Log ("URL efetiva: " + $urlEfetiva)
+        }
+
+        $sig = Get-Gate5AuthenticodeMicrosoft -Path $vcExe
+        if (-not $sig.Valid) {
+            Remove-Item $vcExe -Force -ErrorAction SilentlyContinue
+            Stop-Gate5Blocked -Blocker 'VCRUNTIME_SIGNATURE_INVALID' -Detail @"
+Assinatura Authenticode recusada (artefato descartado).
+  status  = $($sig.Status)
+  subject = $($sig.Subject)
+Exigido: status Valid E certificado emitido para a Microsoft Corporation.
+"@
+        }
+
+        $vcSha  = Get-Gate5Sha256 -Path $vcExe
+        $vcInfo = (Get-Item $vcExe).VersionInfo
+        $vcVer  = [string]$vcInfo.ProductVersion
+        if ($pin -and $pin.sha256 -and ($pin.sha256 -ne $vcSha)) {
+            Stop-Gate5Blocked -Blocker 'VCRUNTIME_HASH_MISMATCH' -Detail @"
+O artefato do staging nao confere com o pin registrado.
+  pin      = $($pin.sha256)
+  atual    = $vcSha
+Apague $vcExe para readquirir a partir da fonte oficial, ou investigue a
+divergencia antes de prosseguir.
+"@
+        }
+        # A versao do pacote precisa cobrir o toolset com que o YARA 4.5.5 foi
+        # compilado; um runtime mais antigo instalaria sem erro e ainda assim
+        # deixaria o yara64.exe sem iniciar.
+        $vcMajorMinor = $null
+        if ($vcVer -match '^(\d+)\.(\d+)') { $vcMajorMinor = [Version]("{0}.{1}" -f $Matches[1], $Matches[2]) }
+        if (-not $vcMajorMinor -or $vcMajorMinor -lt $script:Gate5VcRuntimeMinVersion) {
+            Stop-Gate5Blocked -Blocker 'YARA_RUNTIME_DEPENDENCY_UNSATISFIED' -Detail @"
+O redistribuivel obtido nao cobre o toolset exigido pelo YARA $($script:Gate5YaraVersion).
+  versao do pacote = $vcVer
+  minimo exigido   = $($script:Gate5VcRuntimeMinVersion)
+"@
+        }
+
+        [ordered]@{
+            schema           = 'gate5-lab-vcruntime/v1'
+            source           = 'Microsoft Visual C++ Redistributable x64 (oficial)'
+            declared_url     = $script:Gate5VcRedistUrl
+            effective_url    = $urlEfetiva
+            file_name        = 'vc_redist.x64.exe'
+            size_bytes       = (Get-Item $vcExe).Length
+            sha256           = $vcSha
+            product_version  = $vcVer
+            file_version     = [string]$vcInfo.FileVersion
+            signature_status = $sig.Status
+            signature_subject= $sig.Subject
+            signature_thumbprint = $sig.Thumbprint
+            min_runtime_version  = $script:Gate5VcRuntimeMinVersion.ToString()
+            timestamp_utc    = [DateTime]::UtcNow.ToString('s') + 'Z'
+        } | ConvertTo-Json | Out-File $pinFile -Encoding utf8
+        Copy-Item $pinFile (Join-Path $script:Gate5EvidenceDir 'vcruntime.json') -Force
+        Write-Gate5Log ("Redistribuivel do Visual C++ verificado e pinado: versao={0} sha256={1}" -f $vcVer, $vcSha)
+        Write-Gate5Log 'Entrega ao guest sera feita pela midia controlada (sem copiar DLL do host).'
         exit 0
     }
 
