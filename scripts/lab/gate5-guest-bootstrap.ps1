@@ -77,10 +77,31 @@ switch ($Phase) {
     'Unattend' {
         # Idempotencia: com a VM ligada, a midia ja esta montada e em uso pelo
         # Setup - regenerar a ISO falharia (arquivo bloqueado) e, pior, trocaria
-        # o payload sob os pes de uma instalacao em andamento. Nada a fazer aqui.
+        # o payload sob os pes de uma instalacao em andamento.
         if ((Test-Gate5VmPoweredOn) -and (Test-Path $unattendIso)) {
-            Write-Gate5Log 'VM em execucao com a midia ja anexada: fase Unattend nada a fazer.'
-            exit 0
+            $tplPath = Join-Path $PSScriptRoot 'templates\Autounattend.template.xml'
+            $midiaAtual = (Get-Item $unattendIso).LastWriteTimeUtc -ge (Get-Item $tplPath).LastWriteTimeUtc
+            if ($midiaAtual) {
+                Write-Gate5Log 'VM em execucao com a midia ja anexada e atualizada: fase Unattend nada a fazer.'
+                exit 0
+            }
+            # Template mais novo que a midia: e preciso reconstruir, e isso so e
+            # possivel com a VM desligada (a ISO esta montada). Aguardamos o
+            # power-off aqui para que um unico ciclo do operador baste.
+            Write-Gate5Log 'Template mais novo que a midia: reconstrucao necessaria com a VM desligada.' 'WARN'
+            Write-Gate5Log 'HUMAN_ACTION_REQUIRED POWER_CYCLE_VM' 'GATE'
+            Write-Host ''
+            Write-Host 'HUMAN_ACTION_REQUIRED'
+            Write-Host 'action=POWER_CYCLE_VM'
+            Write-Host 'Na interface do VMware: Power -> Power Off, aguarde desligar, e Power on.'
+            Write-Host 'A automacao reconstroi a midia enquanto a VM estiver desligada e age sozinha no boot.'
+            Write-Host ''
+            $ate = [DateTime]::UtcNow.AddMinutes(30)
+            while ([DateTime]::UtcNow -lt $ate -and (Test-Gate5VmPoweredOn)) { Start-Sleep -Seconds 3 }
+            if (Test-Gate5VmPoweredOn) {
+                Stop-Gate5Human -Action 'POWER_CYCLE_VM' -Detail 'A VM nao foi desligada em 30 minutos. Reexecute gate5-provision.ps1 quando puder faze-lo.'
+            }
+            Write-Gate5Log 'VM desligada; reconstruindo a midia com o template corrigido.'
         }
 
         # 1) Senha de bootstrap gerada em runtime (nunca versionada/logada)

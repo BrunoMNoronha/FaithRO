@@ -160,6 +160,16 @@ It 'payload do guest e entregue por midia, nao por guest operations' {
     ($tpl  -match '<FirstLogonCommands>') -and ($tpl -match 'gate5-payload\.ps1')
 }
 
+It 'midia desatualizada e reconstruida apos o power-off, num unico ciclo' {
+    # Se o template mudou, a ISO montada precisa ser refeita - e isso exige a VM
+    # desligada. A fase aguarda o power-off e reconstroi, para que um unico
+    # ciclo do operador baste.
+    $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
+    ($boot -match '\$midiaAtual = \(Get-Item \$unattendIso\)\.LastWriteTimeUtc -ge') -and
+    ($boot -match 'Template mais novo que a midia') -and
+    ($boot -match 'reconstruindo a midia com o template corrigido')
+}
+
 It 'fase Unattend nao mexe na midia com a VM em execucao' {
     # Regressao: regenerar a ISO com a VM ligada falha (arquivo em uso) e
     # trocaria o payload sob uma instalacao em andamento.
