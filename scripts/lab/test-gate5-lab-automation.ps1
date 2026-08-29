@@ -262,6 +262,31 @@ It 'entrega da tecla de boot falha fechado se o console nao responder' {
     ($boot -match 'BOOT_KEY_CHANNEL_UNAVAILABLE') -and ($boot -match 'Send-Gate5VncKey -Keysym 0xFF0D')
 }
 
+It 'estado criptografico e reportado sem expor valores' {
+    # Get-Gate5VmEncryptionState deve devolver booleanos e NOMES de propriedades,
+    # nunca o material de 'encryption.*'/'vtpm.*'.
+    $fake = Join-Path $tmp 'cripto.vmx'
+    Set-Gate5TextFile -Path $fake -Lines @(
+        'firmware = "efi"'
+        'uefi.secureBoot.enabled = "TRUE"'
+        'encryption.keySafe = "SEGREDO-NAO-PODE-VAZAR"'
+        'encryption.data = "OUTRO-SEGREDO"'
+        'vtpm.present = "TRUE"'
+    )
+    $st = Get-Gate5VmEncryptionState -VmxPath $fake
+    $texto = ($st | Format-List | Out-String)
+    $st.Encrypted -and $st.VtpmPresent -and $st.SecureBoot -and ($st.Firmware -eq 'efi') -and
+    ($st.MaterialPropertyNames -contains 'encryption.keySafe') -and
+    ($st.MaterialPropertyNames -contains 'vtpm.present') -and
+    ($texto -notmatch 'SEGREDO-NAO-PODE-VAZAR') -and ($texto -notmatch 'OUTRO-SEGREDO')
+}
+
+It 'divergencia em VM criptografada nunca imprime material sensivel' {
+    $cv = Get-Content (Join-Path $labDir 'gate5-create-vm.ps1') -Raw
+    # Substring literal: escapar isto como regex e mais fragil que compara-lo.
+    $cv.Contains('=<redigido>') -and ($cv -match "match '\^\(encryption\\\.\|vtpm")
+}
+
 It 'VMX criptografado nunca e reescrito pela automacao' {
     # Reescrever o .vmx de uma VM criptografada destroi a associacao da
     # criptografia e, com ela, o vTPM que o gate humano acabou de criar.

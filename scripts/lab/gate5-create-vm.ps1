@@ -154,6 +154,10 @@ if (Test-Path $script:Gate5VmxPath) {
             # A ISO do sistema pode ter sido desconectada de proposito pela fase
             # de isolamento; o restante das chaves canonicas deve bater.
             if ($k -like ($script:Gate5CdOs + '*')) { continue }
+            # Defesa em profundidade: nenhuma chave de material criptografico ou
+            # de identidade do TPM pode ter o valor impresso, mesmo que algum dia
+            # entre no conjunto canonico. Reporta-se apenas o nome.
+            if ($k -match '^(encryption\.|vtpm\.)') { $divergentes += ("{0}=<redigido>" -f $k); continue }
             $v = Get-Gate5VmxValue -Key $k
             if ($v -ne $canonical[$k]) { $divergentes += ("{0}='{1}' (esperado '{2}')" -f $k, $v, $canonical[$k]) }
         }

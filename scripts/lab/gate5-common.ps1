@@ -295,6 +295,35 @@ function Invoke-Gate5Vmrun {
     return $r
 }
 
+function Get-Gate5VmEncryptionState {
+    # Estado criptografico da VM a partir do .vmx, SEM NUNCA devolver valores:
+    # 'encryption.*' e 'vtpm.*' carregam material de chave e identidade do TPM.
+    # Retorna apenas booleanos e os NOMES das propriedades encontradas, para que
+    # a evidencia possa ser registrada sem vazar segredo.
+    param([string]$VmxPath = $script:Gate5VmxPath)
+    $state = [pscustomobject]@{
+        Encrypted             = $false
+        VtpmPresent           = $false
+        MaterialPropertyNames = @()
+        Firmware              = $null
+        SecureBoot            = $false
+    }
+    if (-not (Test-Path -LiteralPath $VmxPath)) { return $state }
+    $names = @()
+    foreach ($line in Get-Content -LiteralPath $VmxPath) {
+        if ($line -match '^\s*([A-Za-z0-9_.:]+)\s*=') {
+            $key = $Matches[1]
+            if ($key -match '^(encryption\.|vtpm\.)') { $names += $key }
+        }
+    }
+    $state.MaterialPropertyNames = @($names | Sort-Object -Unique)
+    $state.Encrypted   = [bool](@($names | Where-Object { $_ -like 'encryption.*' }).Count)
+    $state.VtpmPresent = [bool](@($names | Where-Object { $_ -like 'vtpm.*' }).Count)
+    $state.Firmware    = Get-Gate5VmxValue -Key 'firmware'
+    $state.SecureBoot  = ((Get-Gate5VmxValue -Key 'uefi.secureBoot.enabled') -eq 'TRUE')
+    return $state
+}
+
 function Set-Gate5VncConsole {
     # Liga/desliga o console VNC local do VMware no VMX (VM deve estar desligada).
     # Nunca define senha porque o socket fica preso a 127.0.0.1 e o canal existe
