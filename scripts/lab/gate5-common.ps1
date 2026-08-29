@@ -49,6 +49,11 @@ $script:Gate5CdUnattend = 'sata0:1'   # ISO auxiliar com o Autounattend.xml
 # a sua ausencia e conferida pelo validador antes do snapshot.
 $script:Gate5VncPort = 5943
 
+# Canal de SAIDA de mao unica do guest para o host: a porta serial da VM grava
+# neste arquivo. Substitui as guest operations do vmrun, indisponiveis em VM
+# criptografada (docs/48 §12). Trafega apenas metadados de validacao.
+$script:Gate5EvidenceSerial = Join-Path $script:Gate5VmDir 'gate5-evidence-serial.txt'
+
 $script:Gate5StagingDirs = @('C:\Users\bruno\Downloads', 'C:\Installers', 'C:\ISO', 'C:\VMs', 'C:\Tools')
 $script:Gate5YaraDir    = 'C:\Tools\YARA'
 $script:Gate5RulesDir   = 'C:\Tools\YARA-Rules'
@@ -145,6 +150,43 @@ function Stop-Gate5Blocked {
     Write-Host "blocker=$Blocker"
     if ($Detail) { Write-Host $Detail }
     exit 2
+}
+
+function Stop-Gate5Human {
+    # Gate humano FORMAL: uma acao que so pode ser feita na interface do VMware
+    # porque a VM e criptografada e a senha pertence ao operador. Nao e falha de
+    # automacao - e parte auditavel do procedimento, sempre seguida de validacao
+    # tecnica automatica na proxima execucao.
+    param([Parameter(Mandatory)][string]$Action, [string]$Detail = '')
+    Write-Gate5Log "HUMAN_ACTION_REQUIRED $Action" 'GATE'
+    Write-Host ''
+    Write-Host 'HUMAN_ACTION_REQUIRED'
+    Write-Host "action=$Action"
+    if ($Detail) { Write-Host $Detail }
+    exit 4
+}
+
+function Test-Gate5VmPoweredOn {
+    # Sem vmrun (VM criptografada): a presenca de um processo vmware-vmx com o
+    # .vmx travado e a prova de que ESTA VM esta ligada.
+    $lockDirs = @(Get-ChildItem -LiteralPath $script:Gate5VmDir -Force -Directory -ErrorAction SilentlyContinue |
+                  Where-Object { $_.Name -like '*.vmdk.lck' -or $_.Name -like '*.vmem.lck' })
+    $proc = @(Get-Process -Name 'vmware-vmx' -ErrorAction SilentlyContinue)
+    return (($proc.Count -gt 0) -and ($lockDirs.Count -gt 0))
+}
+
+function Get-Gate5SerialEvidence {
+    # Le a evidencia que o guest escreveu na porta serial. Retorna $null enquanto
+    # o bloco completo (com marcadores de inicio e fim) nao tiver chegado.
+    param([string]$Path = $script:Gate5EvidenceSerial)
+    if (-not (Test-Path -LiteralPath $Path)) { return $null }
+    try {
+        $fs = [System.IO.File]::Open($Path, 'Open', 'Read', 'ReadWrite')
+        try { $texto = (New-Object System.IO.StreamReader($fs)).ReadToEnd() } finally { $fs.Close() }
+    } catch { return $null }
+    $m = [regex]::Match($texto, '<<<GATE5-EVIDENCE-BEGIN>>>(?<j>.*?)<<<GATE5-EVIDENCE-END>>>', 'Singleline')
+    if (-not $m.Success) { return $null }
+    try { return ($m.Groups['j'].Value -replace '[\r\n]', '') | ConvertFrom-Json } catch { return $null }
 }
 
 function Stop-Gate5Paused {

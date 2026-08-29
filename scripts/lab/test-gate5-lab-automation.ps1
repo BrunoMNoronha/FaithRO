@@ -149,6 +149,42 @@ $allCode = ($scriptFiles | ForEach-Object {
     ($tokens | Where-Object { $_.Type -ne 'Comment' } | ForEach-Object { $_.Content }) -join ' '
 }) -join "`n"
 
+It 'payload do guest e entregue por midia, nao por guest operations' {
+    # Em VM criptografada nao ha canal vmrun; YARA, ruleset e o script do guest
+    # viajam na ISO controlada e o Windows Setup os dispara.
+    $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
+    $tpl  = Get-Content (Join-Path $labDir 'templates\Autounattend.template.xml') -Raw
+    (Test-Path (Join-Path $labDir 'guest\gate5-payload.ps1')) -and
+    ($boot -match 'payload-marker\.txt') -and
+    ($boot -notmatch 'Copy-ToGuest -HostPath') -and
+    ($tpl  -match '<FirstLogonCommands>') -and ($tpl -match 'gate5-payload\.ps1')
+}
+
+It 'evidencia sai do guest por canal serial de mao unica' {
+    $common = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    $boot   = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
+    $guest  = Get-Content (Join-Path $labDir 'guest\gate5-payload.ps1') -Raw
+    ($common -match 'Gate5EvidenceSerial') -and ($common -match 'GATE5-EVIDENCE-BEGIN') -and
+    ($boot -match "'serial0\.fileType'\s+-Value\s+'file'") -and
+    ($guest -match 'GATE5-EVIDENCE-BEGIN')
+}
+
+It 'power-on de VM criptografada e gate humano com validacao automatica' {
+    $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
+    ($boot -match "Stop-Gate5Human -Action 'POWER_ON_VM'") -and
+    ($boot -match 'Get-Gate5SerialEvidence') -and
+    # a espera termina pela EVIDENCIA tecnica, nunca por confirmacao textual
+    ($boot -match 'Evidencia recebida do guest')
+}
+
+It 'payload do guest nao referencia o alvo nem a VPS' {
+    $guest = Get-Content (Join-Path $labDir 'guest\gate5-payload.ps1') -Raw
+    ($guest -notmatch '(?i)faithro-vps') -and
+    ($guest -notmatch '(?i)(Invoke-WebRequest|Invoke-RestMethod|curl)') -and
+    # 'WARP*' aparece apenas como padrao que PROVA a ausencia do alvo
+    ($guest -match "warp_artifacts")
+}
+
 It 'nenhum caminho fornece a senha de criptografia ao vmrun' {
     # DECISAO ARQUITETURAL: a senha da criptografia da VM (exigida pelo vTPM) e
     # exclusiva do operador. '-vp' a exporia na lista de processos da maquina.
@@ -278,9 +314,13 @@ It 'vTPM nao e dado como valido pela chave de auto-adicao' {
     # - a chave e escrita pela propria automacao e o Workstation so a honra no
     # fluxo gerenciado, nao em 'vmrun start' sobre um .vmx escrito a mao.
     $ver  = Get-Content (Join-Path $labDir 'gate5-verify-baseline.ps1') -Raw
-    $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
+    $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    # O validador exige o dispositivo materializado...
     ($ver -match "Check 'vtpm-vmx' \(\(Get-Gate5VmxValue 'vtpm\.present'\)") -and
-    ($boot -match 'VTPM_AUTOMATION_NOT_SUPPORTED')
+    # ...e o helper de estado so considera vTPM quando ha propriedade 'vtpm.*'
+    # real no .vmx, nunca a chave de auto-adicao escrita pela automacao.
+    ($comm -match "VtpmPresent = \[bool\]\(@\(\`$names \| Where-Object \{ \`$_ -like 'vtpm\.\*' \}\)\.Count\)") -and
+    ($comm -notmatch "managedvm\.autoAddVTPM'\)\s*-eq")
 }
 
 It 'nenhuma escrita pos-criptografia reescreve o .vmx inteiro' {

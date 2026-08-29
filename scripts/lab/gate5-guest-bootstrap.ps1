@@ -112,8 +112,29 @@ gerou a credencial, ou recrie o laboratorio do zero apagando
         $template = Get-Content (Join-Path $PSScriptRoot 'templates\Autounattend.template.xml') -Raw
         $rendered = $template.Replace('{{BOOTSTRAP_PASSWORD}}', [Security.SecurityElement]::Escape($plain))
         $stageDir = Join-Path $script:Gate5LocalDir 'unattend-stage'
+        if (Test-Path $stageDir) { Remove-Item $stageDir -Recurse -Force }
         New-Item -ItemType Directory -Force $stageDir | Out-Null
         Set-Content -Path (Join-Path $stageDir 'Autounattend.xml') -Value $rendered -Encoding utf8
+
+        # 2b) Payload da MIDIA CONTROLADA. Sem guest operations do vmrun (VM
+        # criptografada, docs/48 §12), tudo o que o guest precisa viaja nesta
+        # ISO e e instalado pelo proprio script que o Windows Setup dispara.
+        $payloadDir = Join-Path $stageDir 'gate5'
+        New-Item -ItemType Directory -Force (Join-Path $payloadDir 'yara')  | Out-Null
+        New-Item -ItemType Directory -Force (Join-Path $payloadDir 'rules') | Out-Null
+        Copy-Item (Join-Path $PSScriptRoot 'guest\gate5-payload.ps1') $payloadDir -Force
+        Set-Content -Path (Join-Path $payloadDir 'payload-marker.txt') -Value 'FaithRO-GATE5-LAB payload' -Encoding ascii
+        foreach ($bin in 'yara64.exe', 'yarac64.exe') {
+            $src = Join-Path $script:Gate5YaraDir $bin
+            if (-not (Test-Path $src)) { throw "GATE5: $bin ausente em $($script:Gate5YaraDir); execute a fase Yara antes." }
+            Copy-Item $src (Join-Path $payloadDir 'yara') -Force
+        }
+        if (-not (Test-Path (Join-Path $script:Gate5RulesDir 'gate5-index.yar'))) {
+            throw 'GATE5: ruleset nao preparado; execute a fase Rules antes.'
+        }
+        Copy-Item (Join-Path $script:Gate5RulesDir '*') (Join-Path $payloadDir 'rules') -Recurse -Force
+        $payloadFiles = @(Get-ChildItem $payloadDir -Recurse -File)
+        Write-Gate5Log ("Payload da midia: {0} arquivos, {1:N1} MB" -f $payloadFiles.Count, (($payloadFiles | Measure-Object Length -Sum).Sum / 1MB))
 
         # 3) Gerar ISO auxiliar com IMAPI2FS (COM nativo do Windows, sem downloads)
         $fsi = New-Object -ComObject IMAPI2FS.MsftFileSystemImage
@@ -122,6 +143,7 @@ gerou a credencial, ou recrie o laboratorio do zero apagando
         $fsi.Root.AddTree($stageDir, $false)
         $img = $fsi.CreateResultImage()
         $stream = $img.ImageStream
+        Remove-Item $unattendIso -Force -ErrorAction SilentlyContinue
         # gravar o stream COM em arquivo
         Add-Type -TypeDefinition @'
 using System;
@@ -147,8 +169,19 @@ public static class Gate5IsoWriter {
 }
 '@ -ErrorAction SilentlyContinue
         [Gate5IsoWriter]::Write($stream, $unattendIso)
-        Remove-Item $stageDir -Recurse -Force
         if (-not (Test-Path $unattendIso)) { throw 'GATE5: falha ao gerar ISO de unattend.' }
+
+        # O IMAPI mantem handles abertos na arvore de origem enquanto os objetos
+        # COM vivem; liberar antes de apagar o staging, com repeticao curta para
+        # o caso de um antivirus ainda estar lendo os arquivos recem-gravados.
+        foreach ($com in $stream, $img, $fsi) {
+            try { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($com) } catch {}
+        }
+        [GC]::Collect(); [GC]::WaitForPendingFinalizers()
+        for ($try = 1; $try -le 5; $try++) {
+            try { Remove-Item $stageDir -Recurse -Force -ErrorAction Stop; break }
+            catch { if ($try -eq 5) { Write-Gate5Log "staging nao removido ($stageDir): $($_.Exception.Message)" 'WARN' } else { Start-Sleep -Seconds 2 } }
+        }
         Write-Gate5Log "ISO de unattend gerada: $unattendIso (sera destruida na fase Sanitize)."
 
         # 4) Anexar como segundo CD-ROM no VMX (VM precisa estar desligada)
@@ -160,101 +193,84 @@ public static class Gate5IsoWriter {
         Set-Gate5VmxEntry -Name ('{0}.fileName' -f $cd)        -Value $unattendIso    -Vmware $vmware
         Set-Gate5VmxEntry -Name ('{0}.startConnected' -f $cd)  -Value 'TRUE'          -Vmware $vmware
         Write-Gate5Log "ISO de unattend anexada em $cd."
+
+        # Canal de evidencia: porta serial do guest gravando num arquivo do host.
+        # E um canal de SAIDA de mao unica (o guest escreve, o host le), que
+        # substitui as guest operations indisponiveis na VM criptografada. Nao
+        # transporta segredo - apenas metadados de validacao.
+        Set-Gate5VmxEntry -Name 'serial0.present'        -Value 'TRUE'                       -Vmware $vmware
+        Set-Gate5VmxEntry -Name 'serial0.fileType'       -Value 'file'                       -Vmware $vmware
+        Set-Gate5VmxEntry -Name 'serial0.fileName'       -Value $script:Gate5EvidenceSerial  -Vmware $vmware
+        Set-Gate5VmxEntry -Name 'serial0.startConnected' -Value 'TRUE'                       -Vmware $vmware
+        Set-Gate5VmxEntry -Name 'serial0.yieldOnMsrRead' -Value 'TRUE'                       -Vmware $vmware
+        if (Test-Path $script:Gate5EvidenceSerial) { Remove-Item $script:Gate5EvidenceSerial -Force }
+        Write-Gate5Log "Canal serial de evidencia: $($script:Gate5EvidenceSerial)"
         exit 0
     }
 
     # -------------------------------------------------------------------------
     'InstallWait' {
-        # Liga a VM e aguarda o Windows Setup terminar (deteccao: guest ops
-        # respondem com a credencial de bootstrap). Timeout global de 2h.
+        # VM criptografada (exigencia do vTPM): 'vmrun' nao pode liga-la sem a
+        # senha, que pertence exclusivamente ao operador. O power-on e portanto
+        # um GATE HUMANO formal na interface do VMware, e tudo o que vem depois
+        # e validado tecnicamente aqui - a confirmacao textual do operador nunca
+        # e aceita como prova. Ver docs/48 §12.
         $vmdk = Join-Path $script:Gate5VmDir 'FaithRO-GATE5-LAB.vmdk'
-        $running = (Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('list') -AllowFailure).Output
-        $justStarted = $false
-        if ($running -notmatch [regex]::Escape($script:Gate5VmxPath)) {
-            # Console VNC local ligado ANTES do power-on: e por ele que a tecla
-            # do prompt de boot chega ao guest.
-            Set-Gate5VncConsole -Enabled $true
-            Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('start', $script:Gate5VmxPath, 'nogui') | Out-Null
-            $justStarted = $true
-            Write-Gate5Log 'VM ligada; aguardando instalacao unattended do Windows...'
-        }
 
-        # Prompt "Press any key to boot from CD or DVD": a ISO oficial da
-        # Microsoft usa o carregador com prompt e, sem uma tecla, o firmware
-        # registra "Status upon boot failure: Time out" e cai para os proximos
-        # dispositivos - o Setup nunca inicia. O 'vmcli MKS sendKeyEvent' retorna
-        # sucesso mas a tecla NAO chega ao guest sem um console conectado; o
-        # console VNC local do proprio VMware entrega a tecla de fato.
-        if ($justStarted) {
-            $baseSize = (Get-Item $vmdk).Length
-            $entregue = $false
-            for ($k = 0; $k -lt 30; $k++) {
-                $r = Send-Gate5VncKey -Keysym 0xFF0D    # Enter
-                if ($k -eq 0) { Write-Gate5Log "Console VNC local: primeira tecla -> $r" }
-                if ($r -eq 'OK') { $entregue = $true }
-                Start-Sleep -Milliseconds 900
-                # O disco crescer prova que o Setup comecou a gravar: paramos de
-                # teclar para nao interferir nos reboots seguintes do Setup.
-                if ((Get-Item $vmdk).Length -gt ($baseSize + 20MB)) { break }
-            }
-            if (-not $entregue) {
-                Stop-Gate5Blocked -Blocker 'BOOT_KEY_CHANNEL_UNAVAILABLE' -Detail @'
-Nao foi possivel entregar a tecla do prompt de boot pelo console VNC local do
-VMware (127.0.0.1). Sem ela a ISO oficial do Windows nao inicia o Setup.
-Verifique se a porta local nao esta ocupada e reexecute gate5-provision.ps1.
-'@
-            }
-            Write-Gate5Log ("Janela do prompt de boot concluida; disco cresceu {0} MB." -f [int](((Get-Item $vmdk).Length - $baseSize) / 1MB))
-        }
-
-        # Verificacao do vTPM por EVIDENCIA, nao pela chave que nos mesmos
-        # escrevemos: 'managedvm.autoAddVTPM' e honrado pelo fluxo gerenciado do
-        # Workstation e NAO por 'vmrun start' sobre um .vmx escrito a mao, de
-        # modo que aceitar a propria chave como prova era um falso positivo. Sem
-        # TPM o Setup do Windows 11 aborta na checagem de requisitos. Nao ha
-        # como criar o vTPM por automacao sem o material de chave que so o
-        # VMware gera, e inventar valores .vmx e proibido.
-        $vmwareLog = Join-Path $script:Gate5VmDir 'vmware.log'
-        $tpmProved = ((Get-Gate5VmxValue 'vtpm.present') -eq 'TRUE')
-        if (-not $tpmProved -and (Test-Path $vmwareLog)) {
-            $tpmProved = [bool](Select-String -LiteralPath $vmwareLog -Pattern 'VTPM:|TPM device|vtpm.*(created|initialized)' -Quiet)
-        }
-        if (-not $tpmProved) {
-            Stop-Gate5Blocked -Blocker 'VTPM_AUTOMATION_NOT_SUPPORTED' -Detail @'
-Nenhum dispositivo TPM virtual foi materializado nesta VM. Verificado: o
-Workstation instalado nao expoe TPM nem criptografia em vmrun nem em vmcli
-(modulos disponiveis: Chipset, ConfigParams, Disk, Ethernet, Guest, HGFS, MKS,
-Nvme, Power, Sata, Serial, Snapshot, Tools, VM), e "managedvm.autoAddVTPM"
-nao e aplicado quando a VM e ligada por vmrun sobre um .vmx escrito a mao.
-O vTPM do Workstation exige criptografia parcial da VM, cujo material de chave
-so o proprio VMware gera - inventar essas chaves e proibido por esta etapa.
-
-UNICO PASSO HUMANO NECESSARIO: abrir o VMware Workstation, abrir a VM
-FaithRO-GATE5-LAB, VM Settings -> Add -> Trusted Platform Module, aceitar a
-criptografia proposta pelo produto (a senha NAO deve ser versionada nem
-registrada em log) e fechar. Depois reexecutar gate5-provision.ps1, que retoma
-do checkpoint atual automaticamente.
+        if (-not (Test-Gate5VmPoweredOn)) {
+            $ev = Get-Gate5SerialEvidence
+            if ($ev) { Write-Gate5Log 'Guest ja reportou evidencia pela serial; instalacao concluida.'; exit 0 }
+            Stop-Gate5Human -Action 'POWER_ON_VM' -Detail @'
+Ligue a VM na interface do VMware Workstation:
+  1. abrir C:\VMs\FaithRO-GATE5-LAB\FaithRO-GATE5-LAB.vmx
+  2. Power on this virtual machine
+  3. nao interagir com a instalacao - ela e desassistida
+A automacao entrega sozinha a tecla do prompt de boot pelo console local e
+acompanha a instalacao pelo canal serial. Reexecute gate5-provision.ps1 depois
+de ligar (pode ser em seguida; a espera e feita aqui).
 '@
         }
-        Write-Gate5Log 'vTPM materializado e confirmado por evidencia.'
-        $cred  = Get-GuestCredential
-        $plain = $cred.GetNetworkCredential().Password
-        $deadline = [DateTime]::UtcNow.AddHours(2)
-        while ([DateTime]::UtcNow -lt $deadline) {
-            $r = Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('-gu', $cred.UserName, '-gp', $plain, 'runProgramInGuest', $script:Gate5VmxPath, 'C:\Windows\System32\cmd.exe', '/c', 'ver') -AllowFailure
-            if ($r.ExitCode -eq 0) {
-                Write-Gate5Log 'Guest operacional: instalacao do Windows concluida.'
-                # VMware Tools: necessario para guest ops estaveis e drivers
-                $t = Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('checkToolsState', $script:Gate5VmxPath) -AllowFailure
-                if ($t.Output -notmatch 'installed|running') {
-                    Write-Gate5Log 'Instalando VMware Tools...'
-                    Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('installTools', $script:Gate5VmxPath) -AllowFailure | Out-Null
-                }
+
+        Write-Gate5Log 'VM ligada detectada; entregando a tecla do prompt de boot pelo console local.'
+        $base = (Get-Item $vmdk).Length
+        $entregue = $false
+        for ($k = 0; $k -lt 40; $k++) {
+            $r = Send-Gate5VncKey -Keysym 0xFF0D    # Enter
+            if ($k -eq 0) { Write-Gate5Log "Console VNC local: primeira tecla -> $r" }
+            if ($r -eq 'OK') { $entregue = $true }
+            Start-Sleep -Milliseconds 900
+            if ((Get-Item $vmdk).Length -gt ($base + 20MB)) { break }
+        }
+        if (-not $entregue) {
+            Stop-Gate5Blocked -Blocker 'BOOT_KEY_CHANNEL_UNAVAILABLE' -Detail @'
+Nao foi possivel entregar a tecla do prompt de boot pelo console VNC local
+(127.0.0.1). Sem ela a ISO oficial do Windows nao inicia o Setup.
+'@
+        }
+        Write-Gate5Log ("Prompt de boot respondido; disco cresceu {0} MB." -f [int](((Get-Item $vmdk).Length - $base) / 1MB))
+
+        # Espera a instalacao desassistida + Windows Update + coleta do payload.
+        # O guest reinicia sozinho quantas vezes precisar; o fim e sinalizado
+        # pela chegada do bloco de evidencia na serial.
+        $limite = [DateTime]::UtcNow.AddHours(4)
+        while ([DateTime]::UtcNow -lt $limite) {
+            $ev = Get-Gate5SerialEvidence
+            if ($ev) {
+                $destino = Join-Path $script:Gate5EvidenceDir 'guest-evidence.json'
+                ($ev | ConvertTo-Json -Depth 6) | Out-File $destino -Encoding utf8
+                Write-Gate5Log ("Evidencia recebida do guest: {0} build {1}" -f $ev.os_caption, $ev.os_build)
                 exit 0
             }
-            Start-Sleep -Seconds 120
+            if (-not (Test-Gate5VmPoweredOn)) {
+                Write-Gate5Log 'VM desligou antes de reportar evidencia.' 'WARN'
+                Start-Sleep -Seconds 60
+                if (-not (Get-Gate5SerialEvidence)) {
+                    Stop-Gate5Human -Action 'POWER_ON_VM' -Detail 'A VM desligou sem reportar evidencia. Ligue-a novamente pela interface do VMware e reexecute gate5-provision.ps1.'
+                }
+            }
+            Start-Sleep -Seconds 60
         }
-        throw 'GATE5: timeout aguardando a instalacao do Windows no guest (2h).'
+        throw 'GATE5: timeout (4h) aguardando a evidencia do guest pela serial.'
     }
 
     # -------------------------------------------------------------------------
@@ -366,22 +382,14 @@ $sig = Get-AuthenticodeSignature $mpCmd
         }
         $evidence | ConvertTo-Json | Out-File (Join-Path $script:Gate5EvidenceDir 'yara.json') -Encoding utf8
 
-        # Espelho local em C:\Tools\YARA + copia para o guest
+        # Espelho local em C:\Tools\YARA. A entrega ao guest NAO usa guest
+        # operations do vmrun (indisponiveis em VM criptografada, ver docs/48
+        # §12): os binarios vao no payload da ISO controlada e sao instalados
+        # pelo proprio script que o Windows Setup executa dentro do guest.
         New-Item -ItemType Directory -Force $script:Gate5YaraDir | Out-Null
         Copy-Item $yaraExe.FullName  (Join-Path $script:Gate5YaraDir 'yara64.exe')  -Force
         Copy-Item $yaracExe.FullName (Join-Path $script:Gate5YaraDir 'yarac64.exe') -Force
-        Invoke-GuestPS -ScriptText 'New-Item -ItemType Directory -Force C:\Tools\YARA | Out-Null' -Label 'gate5-mkdir-yara' | Out-Null
-        Copy-ToGuest -HostPath (Join-Path $script:Gate5YaraDir 'yara64.exe')  -GuestPath 'C:\Tools\YARA\yara64.exe'
-        Copy-ToGuest -HostPath (Join-Path $script:Gate5YaraDir 'yarac64.exe') -GuestPath 'C:\Tools\YARA\yarac64.exe'
-        # Verificacao dentro do guest (fail-closed)
-        $check = Invoke-GuestPS -Label 'gate5-yara-check' -ScriptText @'
-$v = & C:\Tools\YARA\yara64.exe --version
-@{ version = $v.Trim(); sha256 = (Get-FileHash C:\Tools\YARA\yara64.exe -Algorithm SHA256).Hash.ToLowerInvariant() } |
-    ConvertTo-Json | Out-File C:\gate5\yara-check.json -Encoding utf8
-if ($v.Trim() -ne "4.5.5") { exit 1 }
-'@
-        if ($check.ExitCode -ne 0) { throw 'GATE5: verificacao do YARA no guest falhou.' }
-        Write-Gate5Log 'YARA 4.5.5 posicionado e verificado no guest.'
+        Write-Gate5Log 'YARA 4.5.5 verificado e preparado no host para entrega por midia controlada.'
         exit 0
     }
 
@@ -514,18 +522,9 @@ if ($v.Trim() -ne "4.5.5") { exit 1 }
         } | ConvertTo-Json -Depth 5 | Out-File (Join-Path $script:Gate5EvidenceDir 'ruleset.json') -Encoding utf8
         Write-Gate5Log ("Ruleset: files={0} excluidas={1} aggregate={2}" -f $effective.Count, $compileErrors.Count, $aggregate)
 
-        # Copia do conjunto efetivo para o guest
-        $rulesZip = Join-Path $script:Gate5LocalDir 'gate5-rules.zip'
-        if (Test-Path $rulesZip) { Remove-Item $rulesZip -Force }
-        Compress-Archive -Path (Join-Path $script:Gate5RulesDir '*') -DestinationPath $rulesZip
-        Copy-ToGuest -HostPath $rulesZip -GuestPath 'C:\gate5\gate5-rules.zip'
-        $r = Invoke-GuestPS -Label 'gate5-rules-deploy' -ScriptText @'
-Expand-Archive -Path C:\gate5\gate5-rules.zip -DestinationPath C:\Tools\YARA-Rules -Force
-Remove-Item C:\gate5\gate5-rules.zip -Force
-if (-not (Test-Path C:\Tools\YARA-Rules\gate5-index.yar)) { exit 1 }
-'@
-        if ($r.ExitCode -ne 0) { throw 'GATE5: deploy do ruleset no guest falhou.' }
-        Write-Gate5Log 'Ruleset posicionado no guest em C:\Tools\YARA-Rules.'
+        # O conjunto efetivo fica pronto no host; a entrega ao guest e feita pelo
+        # payload da ISO controlada (sem guest operations do vmrun).
+        Write-Gate5Log 'Ruleset pinado, compilado e preparado no host para entrega por midia controlada.'
         exit 0
     }
 

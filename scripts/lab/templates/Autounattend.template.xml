@@ -84,10 +84,25 @@
       </UserAccounts>
       <AutoLogon>
         <Enabled>true</Enabled>
-        <LogonCount>1</LogonCount>
+        <LogonCount>3</LogonCount>
         <Username>gate5boot</Username>
         <Password><Value>{{BOOTSTRAP_PASSWORD}}</Value><PlainText>true</PlainText></Password>
       </AutoLogon>
+      <!--
+        Dispara o payload entregue pela midia controlada. Nao ha guest
+        operations do vmrun (a VM e criptografada por exigencia do vTPM), entao
+        e o proprio Windows Setup que inicia a configuracao do guest. A unidade
+        da midia varia entre boots: o script e localizado pelo marcador
+        gate5\payload-marker.txt, nunca por letra fixa.
+      -->
+      <FirstLogonCommands>
+        <SynchronousCommand wcm:action="add" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
+          <Order>1</Order>
+          <Description>GATE5 payload</Description>
+          <CommandLine>cmd /c for %d in (D E F G H I) do @if exist %d:\gate5\payload-marker.txt start "" /min powershell.exe -NoProfile -ExecutionPolicy Bypass -File %d:\gate5\gate5-payload.ps1</CommandLine>
+          <RequiresUserInput>false</RequiresUserInput>
+        </SynchronousCommand>
+      </FirstLogonCommands>
     </component>
   </settings>
 </unattend>
