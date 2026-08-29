@@ -160,6 +160,22 @@ It 'payload do guest e entregue por midia, nao por guest operations' {
     ($tpl  -match '<FirstLogonCommands>') -and ($tpl -match 'gate5-payload\.ps1')
 }
 
+It 'fase Unattend nao mexe na midia com a VM em execucao' {
+    # Regressao: regenerar a ISO com a VM ligada falha (arquivo em uso) e
+    # trocaria o payload sob uma instalacao em andamento.
+    $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
+    $iGuarda = $boot.IndexOf('VM em execucao com a midia ja anexada')
+    $iIso    = $boot.IndexOf('CreateResultImage')
+    ($iGuarda -gt 0) -and ($iIso -gt $iGuarda) -and
+    ($boot -match 'if \(\(Test-Gate5VmPoweredOn\) -and \(Test-Path \$unattendIso\)\)')
+}
+
+It 'tecla de boot nao e injetada com o Setup ja em andamento' {
+    $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
+    ($boot -match '\$setupJaIniciou = \$base -gt 500MB') -and
+    ($boot -match 'for \(\$k = 0; \(-not \$setupJaIniciou\)')
+}
+
 It 'evidencia sai do guest por canal serial de mao unica' {
     $common = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
     $boot   = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw

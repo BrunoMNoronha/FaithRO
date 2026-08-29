@@ -75,6 +75,14 @@ switch ($Phase) {
 
     # -------------------------------------------------------------------------
     'Unattend' {
+        # Idempotencia: com a VM ligada, a midia ja esta montada e em uso pelo
+        # Setup - regenerar a ISO falharia (arquivo bloqueado) e, pior, trocaria
+        # o payload sob os pes de uma instalacao em andamento. Nada a fazer aqui.
+        if ((Test-Gate5VmPoweredOn) -and (Test-Path $unattendIso)) {
+            Write-Gate5Log 'VM em execucao com a midia ja anexada: fase Unattend nada a fazer.'
+            exit 0
+        }
+
         # 1) Senha de bootstrap gerada em runtime (nunca versionada/logada)
         if (-not (Test-GuestCredentialUsable)) {
             # Credencial ilegivel (gerada por outra conta) e Windows ja instalado
@@ -231,10 +239,16 @@ de ligar (pode ser em seguida; a espera e feita aqui).
 '@
         }
 
-        Write-Gate5Log 'VM ligada detectada; entregando a tecla do prompt de boot pelo console local.'
+        # Se o disco ja cresceu muito, o Setup passou do prompt de boot ha tempo e
+        # esta gravando: teclar agora so arriscaria interagir com a instalacao.
         $base = (Get-Item $vmdk).Length
-        $entregue = $false
-        for ($k = 0; $k -lt 40; $k++) {
+        $setupJaIniciou = $base -gt 500MB
+        if ($setupJaIniciou) {
+            Write-Gate5Log ("Setup ja em andamento (disco={0:N0} MB); prompt de boot dispensado." -f ($base / 1MB))
+        }
+        $entregue = $setupJaIniciou
+        if (-not $setupJaIniciou) { Write-Gate5Log 'VM ligada detectada; entregando a tecla do prompt de boot pelo console local.' }
+        for ($k = 0; (-not $setupJaIniciou) -and $k -lt 40; $k++) {
             $r = Send-Gate5VncKey -Keysym 0xFF0D    # Enter
             if ($k -eq 0) { Write-Gate5Log "Console VNC local: primeira tecla -> $r" }
             if ($r -eq 'OK') { $entregue = $true }
