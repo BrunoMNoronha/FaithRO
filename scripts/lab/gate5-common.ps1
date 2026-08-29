@@ -515,14 +515,79 @@ function Send-Gate5VncKey {
                              [byte](($Keysym -shr 8)  -band 0xFF), [byte]($Keysym -band 0xFF))
             $stream.Write($msg, 0, 8)
             $stream.Flush()
-            Start-Sleep -Milliseconds 60
+            Start-Sleep -Milliseconds 120
         }
+        Sync-Gate5VncStream -Stream $stream
         return 'OK'
     } catch {
         return ('erro: ' + $_.Exception.Message)
     } finally {
         $client.Close()
     }
+}
+
+function Sync-Gate5VncStream {
+    # Fecha o ciclo com o servidor VNC antes de encerrar a conexao: pede uma
+    # atualizacao de framebuffer e espera a resposta. Sem isso o socket era
+    # fechado logo apos os KeyEvent e o servidor descartava a entrada ainda nao
+    # processada - a tecla "chegava" pelo protocolo mas nunca no guest.
+    param([Parameter(Mandatory)][System.IO.Stream]$Stream)
+    try {
+        # FramebufferUpdateRequest incremental de 1x1 pixel: barato e suficiente
+        # para forcar o servidor a processar tudo o que veio antes.
+        $Stream.Write([byte[]]@(3, 1, 0,0, 0,0, 0,1, 0,1), 0, 10)
+        $Stream.Flush()
+        $eco = New-Object byte[] 1
+        $Stream.ReadTimeout = 4000
+        [void]$Stream.Read($eco, 0, 1)
+    } catch { }
+    Start-Sleep -Milliseconds 250
+}
+
+function Send-Gate5VncPointerClick {
+    # Clique pelo console VNC local. Serve quando o teclado nao chega ao guest
+    # (o console da interface do VMware pode deter a entrada): o evento de
+    # ponteiro do RFB atinge a coordenada diretamente, sem depender de foco.
+    param(
+        [Parameter(Mandatory)][int]$X,
+        [Parameter(Mandatory)][int]$Y,
+        [int]$Port = $script:Gate5VncPort
+    )
+    $client = New-Object System.Net.Sockets.TcpClient
+    try {
+        $client.Connect('127.0.0.1', $Port)
+        $s = $client.GetStream(); $s.ReadTimeout = 6000; $s.WriteTimeout = 6000
+        $buf = New-Object byte[] 12
+        if ($s.Read($buf, 0, 12) -lt 12) { return 'handshake RFB incompleto' }
+        $s.Write([Text.Encoding]::ASCII.GetBytes("RFB 003.008`n"), 0, 12)
+        $one = New-Object byte[] 1
+        if ($s.Read($one, 0, 1) -lt 1) { return 'sem tipos de seguranca' }
+        $count = [int]$one[0]; if ($count -eq 0) { return 'conexao recusada' }
+        $types = New-Object byte[] $count; $s.Read($types, 0, $count) | Out-Null
+        if ($types -notcontains 1) { return 'console exige autenticacao' }
+        $s.Write([byte[]]@(1), 0, 1)
+        $res = New-Object byte[] 4; $s.Read($res, 0, 4) | Out-Null
+        if (($res[0] -bor $res[1] -bor $res[2] -bor $res[3]) -ne 0) { return 'SecurityResult negativo' }
+        $s.Write([byte[]]@(1), 0, 1)
+        $si = New-Object byte[] 24; $s.Read($si, 0, 24) | Out-Null
+        $nameLen = [int]$si[20]*16777216 + [int]$si[21]*65536 + [int]$si[22]*256 + [int]$si[23]
+        if ($nameLen -gt 0) { $nm = New-Object byte[] $nameLen; $s.Read($nm, 0, $nameLen) | Out-Null }
+
+        # PointerEvent: tipo 5, mascara de botoes, x e y (big-endian).
+        $pointer = {
+            param($stream, [int]$mask, [int]$px, [int]$py)
+            $m = [byte[]]@(5, [byte]$mask,
+                           [byte](($px -shr 8) -band 0xFF), [byte]($px -band 0xFF),
+                           [byte](($py -shr 8) -band 0xFF), [byte]($py -band 0xFF))
+            $stream.Write($m, 0, 6); $stream.Flush(); Start-Sleep -Milliseconds 120
+        }
+        & $pointer $s 0 $X $Y      # move
+        & $pointer $s 1 $X $Y      # botao esquerdo pressionado
+        & $pointer $s 0 $X $Y      # solto
+        Sync-Gate5VncStream -Stream $s
+        return 'OK'
+    } catch { return ('erro: ' + $_.Exception.Message) }
+    finally { $client.Close() }
 }
 
 function Send-Gate5VncKeyCombo {
@@ -560,7 +625,7 @@ function Send-Gate5VncKeyCombo {
         }
         foreach ($k in $Keysyms) { & $enviar $s $k 1 }
         for ($i = $Keysyms.Count - 1; $i -ge 0; $i--) { & $enviar $s $Keysyms[$i] 0 }
-        Start-Sleep -Milliseconds 300
+        Sync-Gate5VncStream -Stream $s
         return 'OK'
     } catch { return ('erro: ' + $_.Exception.Message) }
     finally { $client.Close() }

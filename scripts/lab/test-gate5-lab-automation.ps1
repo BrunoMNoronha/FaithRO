@@ -170,10 +170,24 @@ It 'fase Unattend nao mexe na midia com a VM em execucao' {
     ($boot -match 'if \(\(Test-Gate5VmPoweredOn\) -and \(Test-Path \$unattendIso\)\)')
 }
 
-It 'tecla de boot nao e injetada com o Setup ja em andamento' {
+It 'janela da tecla de boot vem do uptime da VM, nao do tamanho do disco' {
+    # Regressao: um disco thin NAO encolhe quando o Setup o limpa, entao um VMDK
+    # grande pode conter uma instalacao ja apagada. O criterio de tamanho pulava
+    # o envio da tecla justamente quando ela era necessaria.
     $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
-    ($boot -match '\$setupJaIniciou = \$base -gt 500MB') -and
+    ($boot -match '\$setupJaIniciou = \$uptime -gt 120') -and
+    ($boot -notmatch '\$setupJaIniciou = \$base -gt') -and
     ($boot -match 'for \(\$k = 0; \(-not \$setupJaIniciou\)')
+}
+
+It 'console local oferece teclado, combinacao e ponteiro' {
+    # O teclado nao chega ao guest em alguns estados (o console da interface do
+    # VMware pode deter a entrada); o evento de ponteiro atinge a coordenada sem
+    # depender de foco, e foi o que destravou o dialogo do Setup.
+    $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    ($comm -match 'function Send-Gate5VncPointerClick') -and
+    ($comm -match 'function Sync-Gate5VncStream') -and
+    ($comm -match 'PointerEvent')
 }
 
 It 'evidencia sai do guest por canal serial de mao unica' {

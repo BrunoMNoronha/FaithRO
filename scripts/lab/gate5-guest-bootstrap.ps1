@@ -261,12 +261,18 @@ de ligar (pode ser em seguida; a espera e feita aqui).
 '@
         }
 
-        # Se o disco ja cresceu muito, o Setup passou do prompt de boot ha tempo e
-        # esta gravando: teclar agora so arriscaria interagir com a instalacao.
+        # A janela do prompt de boot e determinada pelo TEMPO DE VIDA da VM, nao
+        # pelo tamanho do VMDK: um disco thin nao encolhe quando o Setup o limpa,
+        # entao um disco grande pode conter uma instalacao ja apagada e o
+        # criterio de tamanho pularia a tecla justamente quando ela e necessaria.
         $base = (Get-Item $vmdk).Length
-        $setupJaIniciou = $base -gt 500MB
+        $vmProc = @(Get-Process -Name 'vmware-vmx' -ErrorAction SilentlyContinue) | Select-Object -First 1
+        $uptime = if ($vmProc) { ((Get-Date) - $vmProc.StartTime).TotalSeconds } else { 0 }
+        $setupJaIniciou = $uptime -gt 120
         if ($setupJaIniciou) {
-            Write-Gate5Log ("Setup ja em andamento (disco={0:N0} MB); prompt de boot dispensado." -f ($base / 1MB))
+            Write-Gate5Log ("VM ligada ha {0:N0}s: a janela do prompt de boot ja passou; nenhuma tecla sera enviada." -f $uptime)
+        } else {
+            Write-Gate5Log ("VM ligada ha {0:N0}s: dentro da janela do prompt de boot." -f $uptime)
         }
         $entregue = $setupJaIniciou
         if (-not $setupJaIniciou) { Write-Gate5Log 'VM ligada detectada; entregando a tecla do prompt de boot pelo console local.' }
