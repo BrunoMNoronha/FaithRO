@@ -519,6 +519,125 @@ function Send-Gate5VncKey {
     }
 }
 
+function Send-Gate5VncKeyCombo {
+    # Combinacao de teclas pelo console VNC local: pressiona os keysyms na ordem
+    # dada e solta na ordem inversa (ex.: Alt_L + 'n' para acionar um acelerador
+    # sublinhado de dialogo). Usa acelerador em vez de navegar por setas porque
+    # o alvo fica deterministico, sem depender de onde esta o foco.
+    param([Parameter(Mandatory)][uint32[]]$Keysyms, [int]$Port = $script:Gate5VncPort)
+    $client = New-Object System.Net.Sockets.TcpClient
+    try {
+        $client.Connect('127.0.0.1', $Port)
+        $s = $client.GetStream(); $s.ReadTimeout = 5000; $s.WriteTimeout = 5000
+        $buf = New-Object byte[] 12
+        if ($s.Read($buf, 0, 12) -lt 12) { return 'handshake RFB incompleto' }
+        $s.Write([Text.Encoding]::ASCII.GetBytes("RFB 003.008`n"), 0, 12)
+        $one = New-Object byte[] 1
+        if ($s.Read($one, 0, 1) -lt 1) { return 'sem tipos de seguranca' }
+        $count = [int]$one[0]; if ($count -eq 0) { return 'conexao recusada' }
+        $types = New-Object byte[] $count; $s.Read($types, 0, $count) | Out-Null
+        if ($types -notcontains 1) { return 'console exige autenticacao' }
+        $s.Write([byte[]]@(1), 0, 1)
+        $res = New-Object byte[] 4; $s.Read($res, 0, 4) | Out-Null
+        if (($res[0] -bor $res[1] -bor $res[2] -bor $res[3]) -ne 0) { return 'SecurityResult negativo' }
+        $s.Write([byte[]]@(1), 0, 1)
+        $si = New-Object byte[] 24; $s.Read($si, 0, 24) | Out-Null
+        $nameLen = [int]$si[20]*16777216 + [int]$si[21]*65536 + [int]$si[22]*256 + [int]$si[23]
+        if ($nameLen -gt 0) { $nm = New-Object byte[] $nameLen; $s.Read($nm, 0, $nameLen) | Out-Null }
+
+        $enviar = {
+            param($stream, [uint32]$k, [int]$down)
+            $m = [byte[]]@(4, [byte]$down, 0, 0,
+                           [byte](($k -shr 24) -band 0xFF), [byte](($k -shr 16) -band 0xFF),
+                           [byte](($k -shr 8) -band 0xFF),  [byte]($k -band 0xFF))
+            $stream.Write($m, 0, 8); $stream.Flush(); Start-Sleep -Milliseconds 60
+        }
+        foreach ($k in $Keysyms) { & $enviar $s $k 1 }
+        for ($i = $Keysyms.Count - 1; $i -ge 0; $i--) { & $enviar $s $Keysyms[$i] 0 }
+        Start-Sleep -Milliseconds 300
+        return 'OK'
+    } catch { return ('erro: ' + $_.Exception.Message) }
+    finally { $client.Close() }
+}
+
+function Save-Gate5VncScreenshot {
+    # Captura a tela do guest pelo console VNC LOCAL (127.0.0.1), decodificando
+    # RAW do proprio protocolo RFB. Necessario porque 'vmcli MKS
+    # captureScreenshot' exige a senha da criptografia em VM criptografada, e
+    # essa senha nunca passa pela automacao (docs/48 §12). Retorna 'OK' ou o erro.
+    param([Parameter(Mandatory)][string]$Path, [int]$Port = $script:Gate5VncPort)
+    $client = New-Object System.Net.Sockets.TcpClient
+    try {
+        $client.Connect('127.0.0.1', $Port)
+        $s = $client.GetStream(); $s.ReadTimeout = 20000; $s.WriteTimeout = 20000
+
+        function Read-Exact([System.IO.Stream]$Stream, [int]$Count) {
+            $buf = New-Object byte[] $Count; $off = 0
+            while ($off -lt $Count) {
+                $n = $Stream.Read($buf, $off, $Count - $off)
+                if ($n -le 0) { throw 'conexao encerrada pelo servidor VNC' }
+                $off += $n
+            }
+            return $buf
+        }
+
+        [void](Read-Exact $s 12)
+        $s.Write([Text.Encoding]::ASCII.GetBytes("RFB 003.008`n"), 0, 12)
+        $n = (Read-Exact $s 1)[0]
+        if ($n -eq 0) { return 'servidor recusou a conexao' }
+        $types = Read-Exact $s $n
+        if ($types -notcontains 1) { return 'console VNC exige autenticacao' }
+        $s.Write([byte[]]@(1), 0, 1)
+        $res = Read-Exact $s 4
+        if (($res[0] -bor $res[1] -bor $res[2] -bor $res[3]) -ne 0) { return 'SecurityResult negativo' }
+        $s.Write([byte[]]@(1), 0, 1)                       # ClientInit compartilhado
+        $si = Read-Exact $s 24
+        $w = [int]$si[0] * 256 + [int]$si[1]
+        $h = [int]$si[2] * 256 + [int]$si[3]
+        $nameLen = [int]$si[20] * 16777216 + [int]$si[21] * 65536 + [int]$si[22] * 256 + [int]$si[23]
+        if ($nameLen -gt 0) { [void](Read-Exact $s $nameLen) }
+        if ($w -le 0 -or $h -le 0) { return "dimensoes invalidas ($w x $h)" }
+
+        # SetPixelFormat: 32bpp BGRX, para decodificar RAW sem ambiguidade.
+        $s.Write([byte[]]@(0,0,0,0, 32,24,0,1, 0,255,0,255,0,255, 16,8,0, 0,0,0), 0, 20)
+        # SetEncodings: apenas RAW(0)
+        $s.Write([byte[]]@(2,0,0,1, 0,0,0,0), 0, 8)
+        # FramebufferUpdateRequest completo (incremental=0)
+        $req = [byte[]]@(3, 0, 0,0, 0,0,
+                         [byte](($w -shr 8) -band 0xFF), [byte]($w -band 0xFF),
+                         [byte](($h -shr 8) -band 0xFF), [byte]($h -band 0xFF))
+        $s.Write($req, 0, 10); $s.Flush()
+
+        $hdr = Read-Exact $s 4
+        if ($hdr[0] -ne 0) { return "mensagem inesperada do servidor (tipo $($hdr[0]))" }
+        $rects = [int]$hdr[2] * 256 + [int]$hdr[3]
+        $bmp = New-Object System.Drawing.Bitmap($w, $h)
+        for ($r = 0; $r -lt $rects; $r++) {
+            $rh = Read-Exact $s 12
+            $rx = [int]$rh[0]*256 + [int]$rh[1]; $ry = [int]$rh[2]*256 + [int]$rh[3]
+            $rw = [int]$rh[4]*256 + [int]$rh[5]; $rhh = [int]$rh[6]*256 + [int]$rh[7]
+            $enc = [BitConverter]::ToInt32(@($rh[11], $rh[10], $rh[9], $rh[8]), 0)
+            if ($enc -ne 0) { return "encoding nao-RAW recebido ($enc)" }
+            if ($rw -le 0 -or $rhh -le 0) { continue }
+            $data = Read-Exact $s ($rw * $rhh * 4)
+            $rect = New-Object System.Drawing.Rectangle($rx, $ry, $rw, $rhh)
+            $bd = $bmp.LockBits($rect, [System.Drawing.Imaging.ImageLockMode]::WriteOnly,
+                                [System.Drawing.Imaging.PixelFormat]::Format32bppRgb)
+            try {
+                for ($y = 0; $y -lt $rhh; $y++) {
+                    [System.Runtime.InteropServices.Marshal]::Copy(
+                        $data, $y * $rw * 4, [IntPtr]($bd.Scan0.ToInt64() + $y * $bd.Stride), $rw * 4)
+                }
+            } finally { $bmp.UnlockBits($bd) }
+        }
+        $bmp.Save($Path, [System.Drawing.Imaging.ImageFormat]::Png)
+        $bmp.Dispose()
+        return 'OK'
+    } catch {
+        return ('erro: ' + $_.Exception.Message)
+    } finally { $client.Close() }
+}
+
 function Get-Gate5VmxValue {
     param([Parameter(Mandatory)][string]$Key, [string]$VmxPath)
     if (-not $VmxPath) { $VmxPath = $script:Gate5VmxPath }

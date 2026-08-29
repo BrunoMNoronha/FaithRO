@@ -308,9 +308,32 @@ It 'nenhuma senha literal versionada nos scripts ou no template' {
     ($allText -notmatch '(?i)ConvertTo-SecureString\s+["''][^"'']+["'']\s+-AsPlainText')
 }
 
-It 'nenhuma chave de produto do Windows no template' {
+It 'unattend declara chave vazia e nao para em nenhuma tela' {
+    # Regressao da primeira execucao real: sem <ProductKey> o Setup PARA na tela
+    # "Chave do produto" e espera um humano, quebrando a instalacao desassistida.
+    [xml]$x = Get-Content (Join-Path $labDir 'templates\Autounattend.template.xml')
+    $ns = New-Object System.Xml.XmlNamespaceManager($x.NameTable)
+    $ns.AddNamespace('u', 'urn:schemas-microsoft-com:unattend')
+    $pk = $x.SelectSingleNode('//u:UserData/u:ProductKey', $ns)
     $tpl = Get-Content (Join-Path $labDir 'templates\Autounattend.template.xml') -Raw
-    ($tpl -notmatch '(?i)<ProductKey>') -and ($tpl -notmatch '[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}')
+    ($null -ne $pk) -and
+    ([string]::IsNullOrEmpty($pk.SelectSingleNode('u:Key', $ns).InnerText)) -and
+    ($pk.SelectSingleNode('u:WillShowUI', $ns).InnerText -eq 'Never') -and
+    ($tpl -match '<DiskConfiguration>\s*<WillShowUI>OnError</WillShowUI>')
+}
+
+It 'nenhuma chave de produto do Windows no template' {
+    # O elemento <ProductKey> e necessario (com chave VAZIA) para a instalacao
+    # nao parar numa tela; o que nao pode existir e um VALOR de chave. Verificado
+    # por XML: um regex sobre <Key> pegaria tambem o metadado /IMAGE/NAME.
+    $caminho = Join-Path $labDir 'templates\Autounattend.template.xml'
+    [xml]$x = Get-Content $caminho
+    $ns = New-Object System.Xml.XmlNamespaceManager($x.NameTable)
+    $ns.AddNamespace('u', 'urn:schemas-microsoft-com:unattend')
+    $chaves = @($x.SelectNodes('//u:ProductKey/u:Key', $ns) | ForEach-Object { $_.InnerText })
+    $tpl = Get-Content $caminho -Raw
+    (@($chaves | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }).Count -eq 0) -and
+    ($tpl -notmatch '[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}')
 }
 
 It 'portas de CD vem de uma definicao unica compartilhada' {
