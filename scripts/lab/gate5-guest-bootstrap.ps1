@@ -337,30 +337,40 @@ public static class Gate5IsoWriter {
         if ($bootKeySent) {
             Write-Gate5Log 'Tecla de boot ja entregue nesta instalacao: nenhuma nova sera enviada (boot pelo disco esperado).'
         } else {
-            $tela = Join-Path $script:Gate5EvidenceDir 'boot-window.png'
-            $ate  = [DateTime]::UtcNow.AddSeconds(180)
-            while ([DateTime]::UtcNow -lt $ate -and -not $bootKeySent) {
+            # 'boot_key_sent' significa "o boot optico REALMENTE disparou", nao
+            # "uma tecla foi enviada": marcar no envio gastava a unica tecla numa
+            # tela preta anterior ao prompt e, quando o prompt aparecia, ja nao
+            # restava tecla. O prompt e respondido sempre que aparecer, ate o
+            # Setup comecar a gravar no disco - so entao o estado e fixado e
+            # nenhuma tecla e enviada nos reboots seguintes.
+            $tela      = Join-Path $script:Gate5EvidenceDir 'boot-window.png'
+            $discoBase = (Get-Item $vmdk).Length
+            $ate       = [DateTime]::UtcNow.AddMinutes(10)
+            $instalando = $false
+            while ([DateTime]::UtcNow -lt $ate -and -not $instalando) {
                 $cap = Save-Gate5VncScreenshot -Path $tela
-                if ($cap -eq 'OK') {
-                    $scr = Test-Gate5FirmwareScreen -ImagePath $tela
-                    if ($scr -and $scr.IsFirmware) {
-                        $r = Send-Gate5VncKey -Keysym 0xFF0D          # Enter: uma unica tecla
-                        Write-Gate5Log ("Prompt de boot optico detectado (dark={0}); tecla entregue: {1}" -f $scr.DarkFraction, $r)
-                        if ($r -eq 'OK') {
-                            $bootKeySent = $true
-                            Set-Gate5InstallNote 'boot_key_sent' $true
-                            Set-Gate5InstallNote 'installation_stage' 'DISK_BOOT_EXPECTED'
-                            Write-Gate5Log 'installation_stage=OPTICAL_BOOT_TRIGGERED -> DISK_BOOT_EXPECTED'
-                        }
+                if ($cap -ne 'OK') {
+                    Write-Gate5Log "Captura do console falhou: $cap" 'WARN'
+                } else {
+                    $scr = Test-Gate5BootPromptOnScreen -ImagePath $tela
+                    if ($scr -and $scr.HasPrompt) {
+                        $r = Send-Gate5VncKey -Keysym 0xFF0D
+                        Write-Gate5Log ("Prompt de boot na tela (dark={0} topo={1}); tecla entregue: {2}" -f $scr.DarkFraction, $scr.BrightTop, $r)
                     }
                 }
-                if (-not $bootKeySent) { Start-Sleep -Seconds 3 }
+                if ((Get-Item $vmdk).Length -gt ($discoBase + 200MB)) { $instalando = $true }
+                if (-not $instalando) { Start-Sleep -Seconds 2 }
             }
-            if (-not $bootKeySent) {
+            if ($instalando) {
+                $bootKeySent = $true
+                Set-Gate5InstallNote 'boot_key_sent' $true
+                Set-Gate5InstallNote 'installation_stage' 'DISK_BOOT_EXPECTED'
+                Write-Gate5Log 'installation_stage=OPTICAL_BOOT_TRIGGERED -> DISK_BOOT_EXPECTED (Setup gravando no disco).'
+            } else {
                 Stop-Gate5Blocked -Blocker 'OPTICAL_BOOT_PROMPT_NOT_SEEN' -Detail @'
-A janela do prompt de boot pelo CD nao foi observada no framebuffer local em 3
-minutos apos o power-on. Nenhuma tecla foi enviada (a automacao nao tecla no
-Windows Setup). Refaca o power-cycle com a automacao ja aguardando.
+O Setup nao comecou a gravar no disco em 10 minutos apos o power-on. O prompt de
+boot pelo CD foi respondido sempre que apareceu no console local; nenhuma tecla
+e enviada fora dele. Refaca o power-cycle com a automacao ja aguardando.
 '@
             }
         }

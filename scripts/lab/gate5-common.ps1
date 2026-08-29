@@ -763,6 +763,54 @@ function Test-Gate5FirmwareScreen {
     } finally { $bmp.Dispose() }
 }
 
+function Test-Gate5BootPromptOnScreen {
+    # Detecta o PROMPT "Press any key to boot from CD or DVD" especificamente,
+    # e nao apenas "tela preta". O prompt escreve texto claro numa FAIXA
+    # SUPERIOR estreita; entre as fases do firmware a tela fica preta e VAZIA.
+    # Sem essa distincao a automacao gastava sua tecla numa tela preta anterior
+    # ao prompt, e quando o prompt aparecia ja nao restava tecla para envia-lo.
+    param(
+        [Parameter(Mandatory)][string]$ImagePath,
+        # O sinal discriminante e o TEXTO CLARO NO TOPO. O criterio de escuridao
+        # fica frouxo de proposito: o prompt costuma aparecer sobreposto a tela
+        # anterior (ex.: sobre o Boot Manager), quando a fracao escura cai para
+        # ~0,64 - exigir 0,85 ali fazia o prompt real passar despercebido.
+        [double]$MinDark = 0.50,
+        [int]$MinBrightTop = 120
+    )
+    if (-not (Test-Path -LiteralPath $ImagePath)) { return $null }
+    Add-Type -AssemblyName System.Drawing -ErrorAction SilentlyContinue
+    $bmp = New-Object System.Drawing.Bitmap($ImagePath)
+    try {
+        $rect = New-Object System.Drawing.Rectangle(0, 0, $bmp.Width, $bmp.Height)
+        $bd = $bmp.LockBits($rect, [System.Drawing.Imaging.ImageLockMode]::ReadOnly,
+                            [System.Drawing.Imaging.PixelFormat]::Format32bppRgb)
+        try {
+            $bytes = New-Object byte[] ($bd.Stride * $bmp.Height)
+            [System.Runtime.InteropServices.Marshal]::Copy($bd.Scan0, $bytes, 0, $bytes.Length)
+            $escuros = 0; $total = 0; $clarosTopo = 0
+            $topo = [math]::Min(46, $bmp.Height - 1)
+            for ($y = 0; $y -lt $bmp.Height; $y += 2) {
+                $linha = $y * $bd.Stride
+                for ($x = 0; $x -lt $bmp.Width; $x += 2) {
+                    $i = $linha + $x * 4
+                    $lum = ([int]$bytes[$i] + [int]$bytes[$i + 1] + [int]$bytes[$i + 2]) / 3
+                    if ($lum -lt 32) { $escuros++ }
+                    $total++
+                    if ($y -ge 8 -and $y -le $topo -and $lum -gt 180) { $clarosTopo++ }
+                }
+            }
+            $fracao = if ($total -gt 0) { [double]$escuros / $total } else { 0 }
+            return [pscustomobject]@{
+                DarkFraction = [math]::Round($fracao, 4)
+                BrightTop    = $clarosTopo
+                HasPrompt    = (($fracao -ge $MinDark) -and ($clarosTopo -ge $MinBrightTop))
+                IsFirmware   = ($fracao -ge $MinDark)
+            }
+        } finally { $bmp.UnlockBits($bd) }
+    } finally { $bmp.Dispose() }
+}
+
 function Get-Gate5IsoEntries {
     # Lista as entradas de um diretorio da ISO pelo namespace Joliet - que e o
     # que o Windows Setup usa para nomes longos como 'Autounattend.xml'. Serve

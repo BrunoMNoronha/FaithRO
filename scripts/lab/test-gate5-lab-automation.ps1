@@ -202,14 +202,26 @@ It 'captura de tela carrega System.Drawing e resolve caminho relativo' {
     ($trecho -match 'New-Item -ItemType Directory')
 }
 
-It 'tecla de boot so e enviada com o firmware na tela' {
-    # No Windows Setup uma tecla poderia acionar um botao em foco; a tecla so
-    # sai quando o framebuffer mostra a fase de firmware (tela preta de texto).
+It 'tecla de boot so e enviada com o PROMPT na tela' {
+    # Detectar apenas "tela preta" fazia a automacao gastar a tecla numa tela
+    # anterior ao prompt. O sinal e o texto claro na faixa superior.
     $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
     $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
-    ($comm -match 'function Test-Gate5FirmwareScreen') -and
-    ($boot -match 'if \(\$scr -and \$scr\.IsFirmware\)') -and
+    ($comm -match 'function Test-Gate5BootPromptOnScreen') -and
+    ($comm -match 'BrightTop') -and
+    ($boot -match 'if \(\$scr -and \$scr\.HasPrompt\)') -and
+    ($boot -notmatch '\$scr\.IsFirmware') -and
     ($boot -match 'OPTICAL_BOOT_PROMPT_NOT_SEEN')
+}
+
+It 'boot_key_sent so e fixado quando o Setup grava no disco' {
+    # O estado anti-loop precisa significar "o boot optico disparou", nao
+    # "uma tecla foi enviada" - senao a unica tecla se perde antes do prompt.
+    $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
+    $iCresceu = $boot.IndexOf('$discoBase + 200MB')
+    $iFixa    = $boot.IndexOf("Set-Gate5InstallNote 'boot_key_sent' ")
+    ($iCresceu -gt 0) -and ($iFixa -gt $iCresceu) -and
+    ($boot -match 'if \(\$instalando\)')
 }
 
 It 'estado boot_key_sent impede segunda tecla nos reboots' {
