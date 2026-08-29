@@ -18,11 +18,16 @@
       <UserLocale>pt-BR</UserLocale>
     </component>
     <component name="Microsoft-Windows-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <!--
+        ORDEM DOS ELEMENTOS IMPORTA. O esquema do unattend define a sequencia
+        Disk -> (CreatePartitions, ModifyPartitions, DiskID, WillWipeDisk) e
+        DiskConfiguration -> (Disk, WillShowUI). Com DiskID/WillWipeDisk antes
+        das particoes, o Setup aplicou apenas a primeira particao e caiu na
+        interface (WillShowUI=OnError expondo o erro). Esta e a ordem dos
+        exemplos oficiais da Microsoft.
+      -->
       <DiskConfiguration>
-        <WillShowUI>OnError</WillShowUI>
         <Disk wcm:action="add" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
-          <DiskID>0</DiskID>
-          <WillWipeDisk>true</WillWipeDisk>
           <CreatePartitions>
             <CreatePartition wcm:action="add"><Order>1</Order><Type>EFI</Type><Size>300</Size></CreatePartition>
             <CreatePartition wcm:action="add"><Order>2</Order><Type>MSR</Type><Size>16</Size></CreatePartition>
@@ -30,9 +35,13 @@
           </CreatePartitions>
           <ModifyPartitions>
             <ModifyPartition wcm:action="add"><Order>1</Order><PartitionID>1</PartitionID><Format>FAT32</Format><Label>System</Label></ModifyPartition>
-            <ModifyPartition wcm:action="add"><Order>2</Order><PartitionID>3</PartitionID><Format>NTFS</Format><Label>Windows</Label><Letter>C</Letter></ModifyPartition>
+            <ModifyPartition wcm:action="add"><Order>2</Order><PartitionID>2</PartitionID></ModifyPartition>
+            <ModifyPartition wcm:action="add"><Order>3</Order><PartitionID>3</PartitionID><Format>NTFS</Format><Label>Windows</Label><Letter>C</Letter></ModifyPartition>
           </ModifyPartitions>
+          <DiskID>0</DiskID>
+          <WillWipeDisk>true</WillWipeDisk>
         </Disk>
+        <WillShowUI>OnError</WillShowUI>
       </DiskConfiguration>
       <ImageInstall>
         <OSImage>
@@ -44,6 +53,7 @@
           </InstallFrom>
           <InstallTo><DiskID>0</DiskID><PartitionID>3</PartitionID></InstallTo>
           <WillShowUI>OnError</WillShowUI>
+          <InstallToAvailablePartition>false</InstallToAvailablePartition>
         </OSImage>
       </ImageInstall>
       <UserData>

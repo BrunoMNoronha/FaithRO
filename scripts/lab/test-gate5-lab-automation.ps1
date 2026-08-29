@@ -393,6 +393,22 @@ It 'nenhuma senha literal versionada nos scripts ou no template' {
     ($allText -notmatch '(?i)ConvertTo-SecureString\s+["''][^"'']+["'']\s+-AsPlainText')
 }
 
+It 'particionamento segue a ordem de elementos do esquema unattend' {
+    # Regressao: com DiskID/WillWipeDisk ANTES de CreatePartitions, o Setup
+    # aplicou so a primeira particao e caiu na interface. O esquema exige
+    # Disk -> (CreatePartitions, ModifyPartitions, DiskID, WillWipeDisk) e
+    # DiskConfiguration -> (Disk, WillShowUI).
+    [xml]$x = Get-Content (Join-Path $labDir 'templates\Autounattend.template.xml')
+    $ns = New-Object System.Xml.XmlNamespaceManager($x.NameTable)
+    $ns.AddNamespace('u', 'urn:schemas-microsoft-com:unattend')
+    $disk = $x.SelectSingleNode('//u:DiskConfiguration/u:Disk', $ns)
+    $dc   = $x.SelectSingleNode('//u:DiskConfiguration', $ns)
+    $ordemDisk = @($disk.ChildNodes | Where-Object { $_.NodeType -eq 'Element' } | ForEach-Object { $_.LocalName })
+    $ordemDc   = @($dc.ChildNodes   | Where-Object { $_.NodeType -eq 'Element' } | ForEach-Object { $_.LocalName })
+    (($ordemDisk -join ',') -eq 'CreatePartitions,ModifyPartitions,DiskID,WillWipeDisk') -and
+    (($ordemDc -join ',') -eq 'Disk,WillShowUI')
+}
+
 It 'unattend declara chave vazia e nao para em nenhuma tela' {
     # Regressao da primeira execucao real: sem <ProductKey> o Setup PARA na tela
     # "Chave do produto" e espera um humano, quebrando a instalacao desassistida.
@@ -404,7 +420,10 @@ It 'unattend declara chave vazia e nao para em nenhuma tela' {
     ($null -ne $pk) -and
     ([string]::IsNullOrEmpty($pk.SelectSingleNode('u:Key', $ns).InnerText)) -and
     ($pk.SelectSingleNode('u:WillShowUI', $ns).InnerText -eq 'Never') -and
-    ($tpl -match '<DiskConfiguration>\s*<WillShowUI>OnError</WillShowUI>')
+    # WillShowUI=OnError existe no particionamento (posicao verificada pelo
+    # teste de ordem do esquema) e na selecao de imagem.
+    ($x.SelectSingleNode('//u:DiskConfiguration/u:WillShowUI', $ns).InnerText -eq 'OnError') -and
+    ($x.SelectSingleNode('//u:ImageInstall/u:OSImage/u:WillShowUI', $ns).InnerText -eq 'OnError')
 }
 
 It 'nenhuma chave de produto do Windows no template' {
