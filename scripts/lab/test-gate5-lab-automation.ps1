@@ -1273,6 +1273,91 @@ It 'run_id corrente vem do estado, com default da etapa' {
     ((Get-Gate5RunId) -match '^run-\d{2}-')
 }
 
+Write-Host 'T-J: captura do console e sinal de progresso do boot (defeitos da RUN-02)'
+
+It 'leitor de bytes devolve byte[], nao array desenrolado' {
+    # RAIZ do travamento da RUN-02: 'return $buf' faz o PowerShell DESENROLAR o
+    # array no pipeline, e o chamador recebe um Object[] com um elemento por
+    # byte. Marshal::Copy entao re-coage o vetor inteiro A CADA CHAMADA - com
+    # rects de 1 MB (tela 1024x768) uma unica captura passava de 99 segundos e o
+    # watcher perdia a janela do prompt de boot. Em 640x480 o custo era pequeno
+    # o bastante para o defeito nunca aparecer.
+    function Devolve-Desenrolado { $b = New-Object byte[] 8; return $b }
+    function Devolve-Preso       { $b = New-Object byte[] 8; return ,$b }
+    $mau = Devolve-Desenrolado
+    $bom = Devolve-Preso
+    ($mau -isnot [byte[]]) -and ($bom -is [byte[]]) -and ($bom.Length -eq 8)
+}
+
+It 'Read-Exact e Get-Gate5IsoFileBytes usam o operador de virgula' {
+    $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    # Nenhum 'return $buf' solto pode voltar: e a forma exata do defeito.
+    ($comm -notmatch '(?m)^\s*return \$buf\s*$') -and
+    ($comm -match '(?s)function Read-Exact.*?return ,\$buf') -and
+    ($comm -match '(?s)function Get-Gate5IsoFileBytes.*?return ,\$buf')
+}
+
+It 'copia para o bitmap recebe um byte[] de verdade' {
+    # Prova funcional do custo: com Object[], Marshal::Copy precisa converter o
+    # vetor inteiro a cada linha. Medimos as duas formas sobre o mesmo volume de
+    # dados de um rect real (512x512 RGBX).
+    Add-Type -AssemblyName System.Drawing -ErrorAction SilentlyContinue
+    $lado = 512
+    $bruto = New-Object byte[] ($lado * $lado * 4)
+    $desenrolado = [object[]]$bruto
+    $bmp = New-Object System.Drawing.Bitmap($lado, $lado)
+    try {
+        $rect = New-Object System.Drawing.Rectangle(0, 0, $lado, $lado)
+        $bd = $bmp.LockBits($rect, [System.Drawing.Imaging.ImageLockMode]::WriteOnly,
+                            [System.Drawing.Imaging.PixelFormat]::Format32bppRgb)
+        try {
+            $sw = [Diagnostics.Stopwatch]::StartNew()
+            for ($y = 0; $y -lt 8; $y++) {
+                [System.Runtime.InteropServices.Marshal]::Copy($bruto, $y * $lado * 4, [IntPtr]($bd.Scan0.ToInt64() + $y * $bd.Stride), $lado * 4)
+            }
+            $msBom = $sw.ElapsedMilliseconds
+            $sw.Restart()
+            for ($y = 0; $y -lt 8; $y++) {
+                [System.Runtime.InteropServices.Marshal]::Copy($desenrolado, $y * $lado * 4, [IntPtr]($bd.Scan0.ToInt64() + $y * $bd.Stride), $lado * 4)
+            }
+            $msMau = $sw.ElapsedMilliseconds
+        } finally { $bmp.UnlockBits($bd) }
+    } finally { $bmp.Dispose() }
+    $linhasReais = 512 * 4
+    $projecao = [math]::Round(($msMau / 8.0) * $linhasReais / 1000.0)
+    Write-Host ("        8 linhas: byte[]={0}ms  Object[]={1}ms -> captura inteira com Object[] ~{2}s" -f $msBom, $msMau, $projecao)
+    # A razao e o invariante: um limite absoluto em ms depende da maquina. Com
+    # Object[] a captura inteira (512 linhas x 4 rects) nao cabe na janela de 2
+    # segundos entre amostras - foi assim que o watcher perdeu o prompt.
+    ($msMau -ge ($msBom * 10)) -and ($projecao -gt 60)
+}
+
+It 'progresso do boot nao depende so do crescimento do VMDK' {
+    # O VMDK da RUN-02 ja esta 100% alocado pela instalacao anterior: nunca mais
+    # cresce 200 MB, e o laco ficava cego mesmo com a instalacao correndo.
+    ($bootTxt -match '\$forasDoFirmware') -and
+    ($bootTxt -match 'Test-Gate5FirmwareScreen -ImagePath \$tela') -and
+    ($bootTxt -match "\`$gatilho = 'crescimento do VMDK'") -and
+    ($bootTxt -match '\$gatilho = "tela fora do firmware')
+}
+
+It 'tela so conta como progresso DEPOIS de a tecla ter sido entregue' {
+    # Sem essa condicao, qualquer tela nao-preta (inclusive o Windows da
+    # execucao anterior) marcaria boot_key_sent e gastaria a janela.
+    $iTecla = $bootTxt.IndexOf('$teclaEnviada = $true')
+    $iUso   = $bootTxt.IndexOf('if ($teclaEnviada) {')
+    $iFora  = $bootTxt.IndexOf('$forasDoFirmware++')
+    ($iTecla -gt 0) -and ($iUso -gt $iTecla) -and ($iFora -gt $iUso) -and
+    # e exige varias amostras seguidas, nao uma piscada entre fases do firmware
+    ($bootTxt -match '\$forasDoFirmware -ge 3')
+}
+
+It 'bloqueio do boot optico descreve os DOIS sinais ausentes' {
+    ($bootTxt -match 'OPTICAL_BOOT_PROMPT_NOT_SEEN') -and
+    ($bootTxt -match 'nem a tela saiu da fase') -and
+    ($bootTxt -match 'nem o VMDK cresceu')
+}
+
 } finally {
     Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
 }

@@ -789,7 +789,13 @@ function Save-Gate5VncScreenshot {
                 if ($n -le 0) { throw 'conexao encerrada pelo servidor VNC' }
                 $off += $n
             }
-            return $buf
+            # ',': sem o operador de virgula o PowerShell DESENROLA o array no
+            # pipeline e o chamador recebe um Object[] de um elemento por byte.
+            # Marshal::Copy entao re-coage o vetor inteiro a cada chamada - com
+            # rects de 1 MB (tela 1024x768) uma captura passava de minutos e o
+            # watcher perdia a janela do prompt de boot. Em 640x480 o custo era
+            # pequeno o bastante para o defeito nao aparecer.
+            return ,$buf
         }
 
         [void](Read-Exact $s 12)
@@ -1038,7 +1044,9 @@ function Get-Gate5IsoFileBytes {
             $lidos += $n
         }
         if ($lidos -ne $alvo.Size) { return $null }
-        return $buf
+        # ',' pelo mesmo motivo de Read-Exact: sem ele o chamador recebe um
+        # Object[] de dezenas de milhoes de elementos para o redistribuivel.
+        return ,$buf
     } finally { $fs.Close() }
 }
 

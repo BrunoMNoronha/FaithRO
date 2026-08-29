@@ -390,6 +390,9 @@ public static class Gate5IsoWriter {
             $discoBase = (Get-Item $vmdk).Length
             $ate       = [DateTime]::UtcNow.AddMinutes(10)
             $instalando = $false
+            $gatilho    = ''
+            $teclaEnviada = $false
+            $forasDoFirmware = 0
             while ([DateTime]::UtcNow -lt $ate -and -not $instalando) {
                 $cap = Save-Gate5VncScreenshot -Path $tela
                 if ($cap -ne 'OK') {
@@ -398,22 +401,43 @@ public static class Gate5IsoWriter {
                     $scr = Test-Gate5BootPromptOnScreen -ImagePath $tela
                     if ($scr -and $scr.HasPrompt) {
                         $r = Send-Gate5VncKey -Keysym 0xFF0D
+                        $teclaEnviada = $true
                         Write-Gate5Log ("Prompt de boot na tela (dark={0} topo={1}); tecla entregue: {2}" -f $scr.DarkFraction, $scr.BrightTop, $r)
                     }
+                    # Progresso pela TELA: depois de a tecla ter sido entregue num
+                    # prompt comprovado, sair da fase de firmware prova que o boot
+                    # avancou. Exigimos amostras seguidas para nao confundir com a
+                    # piscada entre fases do proprio firmware.
+                    if ($teclaEnviada) {
+                        $fw = Test-Gate5FirmwareScreen -ImagePath $tela
+                        if ($fw -and -not $fw.IsFirmware) { $forasDoFirmware++ } else { $forasDoFirmware = 0 }
+                        if ($forasDoFirmware -ge 3) {
+                            $instalando = $true
+                            $gatilho = "tela fora do firmware (dark=$($fw.DarkFraction))"
+                        }
+                    }
                 }
-                if ((Get-Item $vmdk).Length -gt ($discoBase + 200MB)) { $instalando = $true }
+                # Crescimento do VMDK: continua valendo para uma VM nova, mas NAO
+                # pode ser o unico sinal. Numa reinstalacao o arquivo ja esta 100%
+                # alocado (o disco inteiro foi tocado na execucao anterior) e nunca
+                # mais cresce 200 MB - foi o que deixou este laco cego na RUN-02.
+                if ((Get-Item $vmdk).Length -gt ($discoBase + 200MB)) {
+                    $instalando = $true
+                    $gatilho = 'crescimento do VMDK'
+                }
                 if (-not $instalando) { Start-Sleep -Seconds 2 }
             }
             if ($instalando) {
                 $bootKeySent = $true
                 Set-Gate5InstallNote 'boot_key_sent' $true
                 Set-Gate5InstallNote 'installation_stage' 'DISK_BOOT_EXPECTED'
-                Write-Gate5Log 'installation_stage=OPTICAL_BOOT_TRIGGERED -> DISK_BOOT_EXPECTED (Setup gravando no disco).'
+                Write-Gate5Log ("installation_stage=OPTICAL_BOOT_TRIGGERED -> DISK_BOOT_EXPECTED (gatilho: {0})." -f $gatilho)
             } else {
                 Stop-Gate5Blocked -Blocker 'OPTICAL_BOOT_PROMPT_NOT_SEEN' -Detail @'
-O Setup nao comecou a gravar no disco em 10 minutos apos o power-on. O prompt de
-boot pelo CD foi respondido sempre que apareceu no console local; nenhuma tecla
-e enviada fora dele. Refaca o power-cycle com a automacao ja aguardando.
+O boot optico nao avancou em 10 minutos apos o power-on: nem a tela saiu da fase
+de firmware apos a tecla, nem o VMDK cresceu. O prompt de boot pelo CD foi
+respondido sempre que apareceu no console local; nenhuma tecla e enviada fora
+dele. Refaca o power-cycle com a automacao ja aguardando.
 '@
             }
         }
