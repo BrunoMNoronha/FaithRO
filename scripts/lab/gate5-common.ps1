@@ -660,6 +660,31 @@ function Get-Gate5VmwareLogDictValue {
     } finally { $fs.Dispose() }
 }
 
+function Get-Gate5EfiBootOrderRejections {
+    # Tokens de efi.bootOrder que o FIRMWARE recusou neste power-on, na forma
+    #   ...Z ... Unrecognized efi.bootOrder: "cdrom".
+    #
+    # Sem isso, um vocabulario errado se disfarca de "o firmware ignorou a
+    # chave": foi o que aconteceu com 'cdrom,hdd', que o firmware recebeu,
+    # recusou token a token e substituiu pelo boot do disco.
+    param([string]$LogPath = (Join-Path $script:Gate5VmDir 'vmware.log'))
+    if (-not (Test-Path -LiteralPath $LogPath)) { return @() }
+    $fs = [System.IO.File]::Open($LogPath, 'Open', 'Read', 'ReadWrite')
+    try {
+        $reader = New-Object System.IO.StreamReader($fs)
+        try {
+            $tokens = New-Object System.Collections.Generic.List[string]
+            while (-not $reader.EndOfStream) {
+                $linha = $reader.ReadLine()
+                if ($linha -match 'Unrecognized efi\.bootOrder:\s*"([^"]*)"') {
+                    if (-not $tokens.Contains($Matches[1])) { $tokens.Add($Matches[1]) }
+                }
+            }
+            return @($tokens)
+        } finally { $reader.Dispose() }
+    } finally { $fs.Dispose() }
+}
+
 function Set-Gate5OpticalBootFirst {
     # Poe a unidade optica na frente do disco na ordem de boot do firmware.
     #
@@ -671,12 +696,16 @@ function Set-Gate5OpticalBootFirst {
     # poderia ter ajudado, porque prompt nenhum chegou a existir (vmware.log:
     # 'About to do EFI boot: Windows Boot Manager', 3,6 s apos o power-on).
     #
-    # 'efi.bootOrder' e a chave lida pelo firmware EFI; o vmware-vmx recusa
-    # valores fora de floppy/hdd/cdrom/efishell ('Unrecognized efi.bootOrder').
+    # 'efi.bootOrder' e a chave lida pelo firmware EFI, e o seu vocabulario NAO
+    # e o de 'bios.bootOrder'. A tabela do BIOS legado (FLOPPY/HDD/CDROM/EFISHELL)
+    # fica no mesmo binario e induz ao erro: com 'cdrom,hdd' o firmware respondeu
+    # 'Unrecognized efi.bootOrder: "cdrom"' / '"hdd"' e bootou pelo disco. Os
+    # tokens do caminho EFI sao os abaixo, extraidos do vmware-vmx.exe.
+    #
     # A NVRAM nao e tocada nem removida: a ordem e imposta por cima dela na
     # inicializacao do firmware, e o vTPM depende daquele arquivo.
-    param([string]$Value = 'cdrom,hdd')
-    $validos = @('floppy', 'hdd', 'cdrom', 'efishell')
+    param([string]$Value = 'cd,hd')
+    $validos = @('net', 'pcmcia', 'cd', 'hd', 'fd', 'efishell', 'any')
     foreach ($t in ($Value -split ',')) {
         if ($validos -notcontains $t.Trim().ToLowerInvariant()) {
             throw ("GATE5: token invalido em efi.bootOrder: '{0}'." -f $t)

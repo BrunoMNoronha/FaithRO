@@ -1450,7 +1450,8 @@ It 'gate5-common define a ordem de boot pela chave EFI, nao pela de BIOS' {
     $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
     ($comm -match "Set-Gate5VmxEntry -Name 'efi\.bootOrder'") -and
     ($comm -notmatch "Set-Gate5VmxEntry -Name 'bios\.bootOrder'") -and
-    ($comm -match "floppy', 'hdd', 'cdrom', 'efishell")
+    # e com o vocabulario do caminho EFI, nao o do BIOS legado
+    ($comm -match "'net', 'pcmcia', 'cd', 'hd', 'fd', 'efishell', 'any'")
 }
 
 It 'ordem de boot so e gravada com a VM desligada' {
@@ -1477,7 +1478,9 @@ It 'a ordem de boot NAO e reimposta nos reboots do proprio Setup' {
     # fora dele - por isso a contagem, e nao so a presenca do trecho.
     $guardada = [regex]::Match($bootTxt, '(?s)if \(-not \$bootKeySent\) \{.*?Set-Gate5OpticalBootFirst').Value
     ($guardada.Length -gt 0) -and
-    (([regex]::Matches($bootTxt, 'Set-Gate5OpticalBootFirst')).Count -eq 1)
+    # Contar CHAMADAS (sozinhas na linha), nao mencoes ao nome da funcao dentro
+    # do texto de um blocker - senao o teste quebra ao melhorar uma mensagem.
+    (([regex]::Matches($bootTxt, '(?m)^\s*Set-Gate5OpticalBootFirst\s*$')).Count -eq 1)
 }
 
 It 'boot pelo disco vira BOOT_MEDIA_NOT_ENTERED, e nao espera cega de 10 minutos' {
@@ -1604,6 +1607,70 @@ It 'o pedido de power-cycle ja avisa para fechar a interface' {
     ($trecho -match 'NAO reabra ainda') -and
     # e o texto antigo continua valendo quando a interface nao esta aberta
     ($trecho -match 'aguarde desligar, e Power on\.')
+}
+
+Write-Host 'T-M: vocabulario do efi.bootOrder (defeito BOOT_ORDER_TOKEN_REJECTED)'
+
+# RAIZ da quarta reprovacao da RUN-02: a chave chegou ao firmware, que respondeu
+# 'Unrecognized efi.bootOrder: "cdrom"' / '"hdd"' e bootou pelo disco. A tabela
+# FLOPPY/HDD/CDROM/EFISHELL que vive no mesmo binario pertence a bios.bootOrder;
+# o caminho EFI usa net/pcmcia/cd/hd/fd/efishell/any - a unidade optica e 'cd'.
+
+It 'o valor padrao usa os tokens do caminho EFI' {
+    $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    $trecho = [regex]::Match($comm, '(?s)function Set-Gate5OpticalBootFirst \{.*?\r?\n\}').Value
+    ($trecho -match "\[string\]\`$Value = 'cd,hd'") -and
+    # o vocabulario do BIOS legado nao pode voltar como valor padrao
+    ($trecho -notmatch "\`$Value = 'cdrom,hdd'")
+}
+
+It 'Set-Gate5OpticalBootFirst aceita os tokens EFI e recusa os do BIOS' {
+    $erroBios = $null
+    try { Set-Gate5OpticalBootFirst -Value 'cdrom,hdd' } catch { $erroBios = $_.Exception.Message }
+    $erroEfi = $null
+    try { Set-Gate5OpticalBootFirst -Value 'cd,hd' } catch { $erroEfi = $_.Exception.Message }
+    # 'cdrom' reprova no vocabulario; 'cd,hd' passa dele e so para na guarda
+    # seguinte (VM ligada ou interface aberta), nunca por token invalido.
+    ($erroBios -match 'token invalido') -and ($erroEfi -notmatch 'token invalido')
+}
+
+It 'Get-Gate5EfiBootOrderRejections lista os tokens recusados, sem repetir' {
+    # O firmware repete a recusa a cada passagem: o que importa e o conjunto.
+    $log = Join-Path $tmp 'efi-recusa.log'
+    Set-Content -LiteralPath $log -Encoding ascii -Value @(
+        '2026-08-29T16:39:25.602Z ... Unrecognized efi.bootOrder: "cdrom".',
+        '2026-08-29T16:39:25.602Z ... Unrecognized efi.bootOrder: "hdd".',
+        '2026-08-29T16:39:25.631Z ... Unrecognized efi.bootOrder: "cdrom".',
+        '2026-08-29T16:39:25.631Z ... Unrecognized efi.bootOrder: "hdd".'
+    )
+    $r = @(Get-Gate5EfiBootOrderRejections -LogPath $log)
+    ($r.Count -eq 2) -and ($r -contains 'cdrom') -and ($r -contains 'hdd')
+}
+
+It 'Get-Gate5EfiBootOrderRejections devolve vazio quando o firmware aceitou' {
+    $log = Join-Path $tmp 'efi-aceito.log'
+    Set-Content -LiteralPath $log -Encoding ascii -Value @(
+        '2026-08-29T16:39:18.628Z ... DICT             efi.bootOrder = "cd,hd"'
+    )
+    (@(Get-Gate5EfiBootOrderRejections -LogPath $log).Count -eq 0) -and
+    (@(Get-Gate5EfiBootOrderRejections -LogPath (Join-Path $tmp 'nao-existe.log')).Count -eq 0)
+}
+
+It 'token recusado vira BOOT_ORDER_TOKEN_REJECTED, e nao acusa o firmware' {
+    # Recebida-e-recusada e um defeito NOSSO; recebida-e-ignorada seria do
+    # firmware. Confundir os dois manda o operador procurar no lugar errado.
+    ($bootTxt -match "Stop-Gate5Blocked -Blocker 'BOOT_ORDER_TOKEN_REJECTED'") -and
+    ($bootTxt -match 'Get-Gate5EfiBootOrderRejections') -and
+    ($bootTxt -match 'net, pcmcia, cd, hd,') -and
+    ($bootTxt -match 'nenhuma acao na VM resolve isto')
+}
+
+It 'a recusa de token e avaliada ANTES dos blockers de dispositivo' {
+    # Um token recusado explica os outros dois sintomas: precisa vir primeiro.
+    $iToken = $bootTxt.IndexOf("Stop-Gate5Blocked -Blocker 'BOOT_ORDER_TOKEN_REJECTED'")
+    $iOrdem = $bootTxt.IndexOf("Stop-Gate5Blocked -Blocker 'BOOT_ORDER_NOT_APPLIED'")
+    $iMidia = $bootTxt.IndexOf("Stop-Gate5Blocked -Blocker 'BOOT_MEDIA_NOT_ENTERED'")
+    ($iToken -gt 0) -and ($iOrdem -gt $iToken) -and ($iMidia -gt $iOrdem)
 }
 
 } finally {

@@ -440,6 +440,22 @@ public static class Gate5IsoWriter {
             } else {
                 Write-Gate5Log 'O firmware NAO recebeu efi.bootOrder: o .vmx foi reescrito depois da gravacao.' 'WARN'
             }
+            # O firmware recusou algum token? Recebida-e-recusada nao e o mesmo
+            # que recebida-e-ignorada: a primeira e vocabulario errado do nosso
+            # lado, e precisa dizer isso em vez de acusar o firmware.
+            $recusados = @(Get-Gate5EfiBootOrderRejections)
+            if ($recusados.Count -gt 0) {
+                $telaToken = Join-Path (Get-Gate5RunDir) 'boot-order-token-rejected.png'
+                $capToken  = Save-Gate5VncScreenshot -Path $telaToken
+                Set-Gate5InstallNote 'installation_stage' 'BOOT_ORDER_TOKEN_REJECTED'
+                Stop-Gate5Blocked -Blocker 'BOOT_ORDER_TOKEN_REJECTED' -Detail (@'
+O firmware recebeu efi.bootOrder mas RECUSOU os tokens: {0}. O vocabulario do
+caminho EFI nao e o do BIOS legado - os tokens aceitos sao net, pcmcia, cd, hd,
+fd, efishell e any (a unidade optica e "cd", nao "cdrom"). Corrija o valor em
+Set-Gate5OpticalBootFirst; nenhuma acao na VM resolve isto.
+Evidencia: {1} (captura: {2})
+'@ -f ($recusados -join ', '), (Join-Path $script:Gate5VmDir 'vmware.log'), $capToken)
+            }
             if ($efi) {
                 Write-Gate5Log ("Firmware escolheu o dispositivo de boot: {0}" -f $efi.Device)
                 if (-not $efi.IsOptical -and -not $ordemNoFirmware) {
