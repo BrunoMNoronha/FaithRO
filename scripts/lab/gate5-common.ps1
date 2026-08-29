@@ -279,6 +279,24 @@ function Invoke-Gate5Vmrun {
         [Parameter(Mandatory)][string[]]$Arguments,
         [switch]$AllowFailure
     )
+    # DECISAO ARQUITETURAL (2026-08-29): em VM criptografada, 'vmrun' exige a
+    # senha da criptografia ("A password is required for this operation") e a
+    # unica forma de fornece-la seria '-vp <senha>' na linha de comando, o que
+    # exporia a credencial na lista de processos da maquina. A senha e exclusiva
+    # do operador: a automacao nao a le, nao a pede e nao a transporta. Por isso
+    # as operacoes de energia/snapshot de uma VM criptografada sao GATES HUMANOS
+    # na interface do VMware, e o vmrun falha fechado aqui em vez de tentar.
+    if ((Get-Gate5VmEncryptionState).Encrypted) {
+        $op = @($Arguments | Where-Object { $_ -notmatch '^-' })[0]
+        Stop-Gate5Blocked -Blocker 'ENCRYPTED_VM_REQUIRES_HUMAN_POWER_OP' -Detail @"
+A VM esta criptografada (exigencia do vTPM) e o vmrun so operaria nela com a
+senha da criptografia, que pertence exclusivamente ao operador e nunca e
+manipulada por esta automacao. Operacao recusada: '$op'.
+Execute essa operacao pela interface do VMware Workstation; a automacao valida
+o resultado tecnicamente em seguida.
+"@
+    }
+
     # Redacao: '-gu'/'-gp' sao seguidos do usuario/senha do guest; suprimimos o
     # proprio valor, nao apenas a flag, para que nada vaze no log.
     $printable = @()

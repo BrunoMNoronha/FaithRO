@@ -178,6 +178,27 @@ sem elevação — o pré-flight já não a exige (§2) e a retomada parte do ch
 
 **Não é mais bloqueio:** o boot da ISO. Ele foi diagnosticado e resolvido nesta etapa, com o Windows 11 Setup em pt-BR comprovadamente iniciando (§4, §7-D15).
 
-## 12. Próxima etapa
+## 12. Decisão arquitetural: a senha da criptografia nunca passa pela automação
+
+**Contexto.** O Windows 11 exige TPM 2.0; o vTPM do VMware Workstation exige criptografia da VM. Comprovado nesta instalação, com a VM já criptografada:
+
+- `vmrun` recusa **qualquer** operação — inclusive leitura, como `listSnapshots` — com `Cannot open VM: ..., A password is required for this operation`;
+- `vmcli` recusa com `Something went wrong while getting password from stdin`, mesmo para `ConfigParams query`;
+- a senha **está** guardada no Gerenciador de Credenciais do Windows (destino `VMware Encrypted VM: <caminho do .vmx>`), colocada lá pelo próprio VMware a pedido do operador, mas as ferramentas de linha de comando não consultam esse cofre;
+- a única forma de fornecê-la ao `vmrun` seria `-vp <senha>`, que a exporia na **lista de processos** da máquina — que tem outras contas.
+
+**Decisão (2026-08-29).** A senha de criptografia é exclusiva do operador. A automação **não** a lê, não a pede, não a armazena e não a transporta — nem por `-vp`, nem pelo Gerenciador de Credenciais, nem por variável de ambiente, stdin, arquivo ou argumento de processo. O pequeno custo operacional de algumas intervenções manuais é aceito em vez de reduzir a segurança do desenho.
+
+**Consequências:**
+
+1. Operações de energia e snapshot da VM criptografada são **gates humanos formais** na interface do VMware — parte auditável do procedimento, não falha de automação.
+2. Todo payload destinado ao guest é entregue por **mídia controlada** (ISO gerada e verificada no host), não por *guest operations* do `vmrun`.
+3. Cada gate humano é mínimo, explícito e seguido de **validação técnica automática** — a confirmação textual do operador nunca é aceita como prova.
+4. `Invoke-Gate5Vmrun` falha fechado em VM criptografada (`ENCRYPTED_VM_REQUIRES_HUMAN_POWER_OP`) em vez de tentar a operação.
+5. O `.vmx` continua editável porque, no modo de criptografia parcial que o TPM exige, ele permanece em texto plano; `Set-Gate5VmxEntry` troca uma chave por vez e **verifica** que as linhas de material criptográfico saem intactas.
+
+**Testes que impedem regressão:** nenhum caminho fornece a senha ao `vmrun` (`-vp`); nenhum script lê credencial do host (`cmdkey`, `vaultcmd`, `PasswordVault`, `CredRead`, `Get-StoredCredential`); nenhum script pede senha ao operador (`Read-Host`, `Get-Credential`); e `vmrun` falha fechado em VM criptografada. As guardas analisam **apenas código** (comentários removidos pelo tokenizador), para que a documentação da proibição não gere falso positivo.
+
+## 13. Próxima etapa
 
 Somente após `LAB_AUTOPROVISION_COMPLETE` (critério do prompt: todas as flags de sucesso verdadeiras e as flags proibidas falsas): `ETAPA 2P-E-C5-REAL-EXEC-PREFLIGHT-RERUN`, em sessão separada.

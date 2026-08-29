@@ -137,8 +137,48 @@ It 'manifesto UTF-8 sem BOM produz o mesmo aggregate para o mesmo conteudo' {
 
 Write-Host 'T-C: invariantes estaticas dos scripts (boundary do GATE 5)'
 
-$allText = (Get-ChildItem $labDir -Filter '*.ps1' -Recurse | Where-Object { $_.Name -ne 'test-gate5-lab-automation.ps1' } |
-            ForEach-Object { Get-Content $_.FullName -Raw }) -join "`n"
+$scriptFiles = @(Get-ChildItem $labDir -Filter '*.ps1' -Recurse | Where-Object { $_.Name -ne 'test-gate5-lab-automation.ps1' })
+$allText = ($scriptFiles | ForEach-Object { Get-Content $_.FullName -Raw }) -join "`n"
+
+# Somente CODIGO (comentarios removidos pelo tokenizador). Guardas sobre
+# mecanismos proibidos precisam disto: os comentarios que EXPLICAM a proibicao
+# citam o mecanismo e disparariam falso positivo contra a propria documentacao.
+$allCode = ($scriptFiles | ForEach-Object {
+    $erros = $null
+    $tokens = [System.Management.Automation.PSParser]::Tokenize((Get-Content $_.FullName -Raw), [ref]$erros)
+    ($tokens | Where-Object { $_.Type -ne 'Comment' } | ForEach-Object { $_.Content }) -join ' '
+}) -join "`n"
+
+It 'nenhum caminho fornece a senha de criptografia ao vmrun' {
+    # DECISAO ARQUITETURAL: a senha da criptografia da VM (exigida pelo vTPM) e
+    # exclusiva do operador. '-vp' a exporia na lista de processos da maquina.
+    ($allCode -notmatch '(?m)-vp\b') -and
+    ($allCode -notmatch '(?i)authd.*password') -and
+    ($allCode -notmatch '(?i)VM_ENCRYPTION_PASSWORD')
+}
+
+It 'nenhum script le a credencial de criptografia guardada no host' {
+    # Nem do Gerenciador de Credenciais, nem de cofres equivalentes.
+    ($allCode -notmatch '(?i)\bcmdkey\b') -and
+    ($allCode -notmatch '(?i)\bvaultcmd\b') -and
+    ($allCode -notmatch '(?i)PasswordVault') -and
+    ($allCode -notmatch '(?i)CredRead') -and
+    ($allCode -notmatch '(?i)Get-StoredCredential') -and
+    ($allCode -notmatch '(?i)Microsoft\.Security\.Credentials')
+}
+
+It 'nenhum script pede a senha de criptografia ao operador' {
+    # O gate humano pede uma ACAO na interface do VMware, nunca a credencial.
+    ($allCode -notmatch '(?i)Read-Host') -and
+    ($allCode -notmatch '(?i)Get-Credential')
+}
+
+It 'vmrun falha fechado em VM criptografada' {
+    $common = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    $iGuarda = $common.IndexOf('ENCRYPTED_VM_REQUIRES_HUMAN_POWER_OP')
+    $iExec   = $common.IndexOf('Invoke-Gate5Native -FilePath $Vmware.VmrunExe')
+    ($iGuarda -gt 0) -and ($iExec -gt $iGuarda)
+}
 
 It 'nenhum script contata a VPS de producao' {
     $allText -notmatch 'faithro-vps' -and $allText -notmatch 'ssh\s+faithro'
