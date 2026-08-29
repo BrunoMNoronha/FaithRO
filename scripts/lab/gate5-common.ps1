@@ -30,6 +30,12 @@ $script:Gate5SecretDir  = Join-Path $script:Gate5LocalDir 'secrets'
 $script:Gate5StateFile  = Join-Path $script:Gate5LocalDir 'state.json'
 $script:Gate5EvidenceDir= Join-Path $script:Gate5LocalDir 'evidence'
 
+# Namespace de evidencia por EXECUCAO. A instalacao limpa da RUN-01 reprovou
+# tres criterios e por isso vale como prova de um baseline recusado, nao como
+# lixo temporario: a RUN-02 precisa de um diretorio proprio para nao sobrescreve-la.
+# A execucao corrente vem do estado (notes.run_id); o default acompanha a etapa.
+$script:Gate5RunIdDefault = 'run-02-clean-install'
+
 $script:Gate5VmName     = 'FaithRO-GATE5-LAB'
 $script:Gate5VmDir      = 'C:\VMs\FaithRO-GATE5-LAB'
 $script:Gate5VmxPath    = Join-Path $script:Gate5VmDir 'FaithRO-GATE5-LAB.vmx'
@@ -174,6 +180,39 @@ function Complete-Gate5Phase {
     # Mantem o objeto do chamador alinhado com o que ficou no disco.
     $State.completed = @($atual.completed)
     $State.notes     = $atual.notes
+}
+
+# --- Namespace de evidencia por execucao -------------------------------------
+function Get-Gate5RunId {
+    # Identificador da execucao corrente. Fica no estado para que todas as fases
+    # filhas (processos separados) escrevam no MESMO diretorio.
+    $s = Get-Gate5State
+    if ($s.notes -and $s.notes.PSObject.Properties['run_id']) {
+        $v = [string]$s.notes.run_id
+        if ($v) { return $v }
+    }
+    return $script:Gate5RunIdDefault
+}
+
+function Test-Gate5RunSealed {
+    # Uma execucao SELADA e evidencia fechada: a RUN-01 reprovou tres criterios e
+    # justamente por isso e prova, nao rascunho. Escrever nela e proibido.
+    param([Parameter(Mandatory)][string]$RunId)
+    return (Test-Path (Join-Path (Join-Path $script:Gate5EvidenceDir $RunId) 'sealed.json'))
+}
+
+function Get-Gate5RunDir {
+    # Diretorio de evidencia da execucao corrente, criado sob demanda. Falha
+    # fechado se a execucao ja tiver sido selada - sobrescrever a prova de uma
+    # execucao anterior seria destruir evidencia, nao reaproveitar espaco.
+    param([string]$RunId)
+    if (-not $RunId) { $RunId = Get-Gate5RunId }
+    if (Test-Gate5RunSealed -RunId $RunId) {
+        Stop-Gate5Blocked -Blocker 'RUN_EVIDENCE_SEALED' -Detail "a execucao '$RunId' ja esta selada; defina notes.run_id para uma nova execucao antes de gravar evidencia."
+    }
+    $dir = Join-Path $script:Gate5EvidenceDir $RunId
+    if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Force $dir | Out-Null }
+    return $dir
 }
 
 # --- Saidas padronizadas (fail-closed) ---------------------------------------
@@ -980,14 +1019,25 @@ function Get-Gate5IsoFileBytes {
         [Parameter(Mandatory)][string]$Name,
         [string]$SubPath
     )
-    $entradas = Get-Gate5IsoEntries -IsoPath $IsoPath -SubPath $SubPath
+    # Diretorio inexistente devolve $null; sob Set-StrictMode filtrar $null por
+    # propriedade lanca, e "arquivo ausente" tem de ser $null, nunca excecao.
+    $entradas = @(Get-Gate5IsoEntries -IsoPath $IsoPath -SubPath $SubPath | Where-Object { $_ })
     $alvo = @($entradas | Where-Object { -not $_.IsDirectory -and $_.Name -eq $Name }) | Select-Object -First 1
     if (-not $alvo) { return $null }
     $fs = [System.IO.File]::Open($IsoPath, 'Open', 'Read', 'ReadWrite')
     try {
         $buf = New-Object byte[] $alvo.Size
         $fs.Seek([int64]$alvo.Lba * 2048, 'Begin') | Out-Null
-        $fs.Read($buf, 0, $alvo.Size) | Out-Null
+        # Leitura em laco: uma unica chamada a Read nao garante preencher o
+        # buffer, e o redistribuivel embarcado tem dezenas de MB - conferir o
+        # SHA-256 sobre uma leitura parcial reprovaria um arquivo integro.
+        $lidos = 0
+        while ($lidos -lt $alvo.Size) {
+            $n = $fs.Read($buf, $lidos, [int]($alvo.Size - $lidos))
+            if ($n -le 0) { break }
+            $lidos += $n
+        }
+        if ($lidos -ne $alvo.Size) { return $null }
         return $buf
     } finally { $fs.Close() }
 }
@@ -1003,7 +1053,9 @@ function Test-Gate5UnattendMedia {
         product_key_vazio = $false; product_key_ui_never = $false
         edicao_windows_11_pro = $false; locale_pt_br = $false
         payload_script = $false; yara_bin = $false; ruleset_index = $false
-        sem_chave_real = $false
+        ruleset_sha40 = $false; ruleset_manifest = $false
+        vcredist_x64 = $false; vcredist_sha256 = $false
+        sem_chave_real = $false; sem_segredos = $false
         ordem_particionamento_ok = $false
     }
     if (-not $r.iso_present) { return [pscustomobject]$r }
@@ -1014,9 +1066,12 @@ function Test-Gate5UnattendMedia {
         $r.autounattend_na_raiz = [bool](@($raiz | Where-Object { $_.Name -eq 'Autounattend.xml' -and -not $_.IsDirectory }).Count)
         $r.payload_na_raiz      = [bool](@($raiz | Where-Object { $_.Name -eq 'gate5' -and $_.IsDirectory }).Count)
     }
-    $g5    = Get-Gate5IsoEntries -IsoPath $IsoPath -SubPath 'gate5'
-    $yara  = Get-Gate5IsoEntries -IsoPath $IsoPath -SubPath 'gate5/yara'
-    $rules = Get-Gate5IsoEntries -IsoPath $IsoPath -SubPath 'gate5/rules'
+    # 'Where-Object { $_ }': um diretorio ausente devolve $null, e sob
+    # Set-StrictMode filtrar $null por propriedade LANCA em vez de reprovar o
+    # controle - uma midia incompleta tem de dar 'false', nunca excecao.
+    $g5    = @(Get-Gate5IsoEntries -IsoPath $IsoPath -SubPath 'gate5'       | Where-Object { $_ })
+    $yara  = @(Get-Gate5IsoEntries -IsoPath $IsoPath -SubPath 'gate5/yara'  | Where-Object { $_ })
+    $rules = @(Get-Gate5IsoEntries -IsoPath $IsoPath -SubPath 'gate5/rules' | Where-Object { $_ })
     # Ordem dos elementos do particionamento CONFERIDA NO ARQUIVO DA MIDIA, nao
     # no template do repositorio: e o que o Windows Setup realmente vai ler. O
     # conteudo nunca e impresso (carrega a senha de bootstrap renderizada).
@@ -1041,6 +1096,49 @@ function Test-Gate5UnattendMedia {
     $r.yara_bin       = [bool](@($yara  | Where-Object { $_.Name -eq 'yara64.exe' }).Count)
     $r.ruleset_index  = [bool](@($rules | Where-Object { $_.Name -eq 'gate5-index.yar' }).Count)
 
+    # Pin do ruleset GRAVADO NA MIDIA. Sem ele o guest so consegue contar
+    # arquivos - foi assim que a RUN-01 declarou o ruleset sem prova nenhuma. O
+    # que o guest precisa para PROVAR o commit e o SHA-40 estrito mais o
+    # manifesto <rel, sha> completo com o agregado esperado.
+    $bytesPin = Get-Gate5IsoFileBytes -IsoPath $IsoPath -Name 'rules-pin.json' -SubPath 'gate5'
+    if ($bytesPin) {
+        try {
+            $pin = [Text.Encoding]::UTF8.GetString($bytesPin).TrimStart([char]0xFEFF) | ConvertFrom-Json
+            # -cmatch: '-match' e insensivel a maiusculas no PowerShell e
+            # deixaria passar um SHA-40 em caixa alta como se fosse o formato
+            # estrito exigido. O guest compara o mesmo valor com -cmatch.
+            $r.ruleset_sha40 = ([string]$pin.commit_sha40 -cmatch '^[0-9a-f]{40}$')
+            $arquivos = @($pin.files)
+            $r.ruleset_manifest = (
+                ($arquivos.Count -gt 0) -and
+                ([string]$pin.aggregate_sha256 -match '^[0-9a-f]{64}$') -and
+                ([int]$pin.file_count -eq $arquivos.Count) -and
+                (@($arquivos | Where-Object { -not ($_.rel) -or ([string]$_.sha -notmatch '^[0-9a-f]{64}$') }).Count -eq 0)
+            )
+        } catch {}
+    }
+
+    # Redistribuivel oficial do Visual C++: presente E byte-identico ao pin. O
+    # hash e recomputado sobre os bytes que estao DENTRO da ISO, nao sobre o
+    # arquivo do staging - a midia e o que o guest vai executar.
+    $vc = @(Get-Gate5IsoEntries -IsoPath $IsoPath -SubPath 'gate5/vcredist' | Where-Object { $_ })
+    $r.vcredist_x64 = [bool](@($vc | Where-Object { $_.Name -eq 'vc_redist.x64.exe' }).Count)
+    $bytesVcPin = Get-Gate5IsoFileBytes -IsoPath $IsoPath -Name 'vcruntime-pin.json' -SubPath 'gate5/vcredist'
+    if ($r.vcredist_x64 -and $bytesVcPin) {
+        try {
+            $vcPin = [Text.Encoding]::UTF8.GetString($bytesVcPin).TrimStart([char]0xFEFF) | ConvertFrom-Json
+            $esperado = ([string]$vcPin.sha256).ToLowerInvariant()
+            if ($esperado -match '^[0-9a-f]{64}$') {
+                $bytesVc = Get-Gate5IsoFileBytes -IsoPath $IsoPath -Name 'vc_redist.x64.exe' -SubPath 'gate5/vcredist'
+                if ($bytesVc) {
+                    $sha = [Security.Cryptography.SHA256]::Create()
+                    $obtido = ([BitConverter]::ToString($sha.ComputeHash($bytesVc)) -replace '-', '').ToLowerInvariant()
+                    $r.vcredist_sha256 = ($obtido -eq $esperado)
+                }
+            }
+        } catch {}
+    }
+
     $bytes = [System.IO.File]::ReadAllBytes($IsoPath)
     $texto = [Text.Encoding]::UTF8.GetString($bytes)
     $r.product_key_vazio     = ($texto -match '<ProductKey>\s*<Key>\s*</Key>')
@@ -1049,6 +1147,17 @@ function Test-Gate5UnattendMedia {
     $r.locale_pt_br          = ($texto -match '<UILanguage>pt-BR</UILanguage>')
     # Nenhuma chave de produto real (formato 5x5) em lugar algum da midia.
     $r.sem_chave_real        = -not ($texto -match '[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}')
+    # Nenhum material sensivel embarcado. A credencial de BOOTSTRAP do guest
+    # esta na midia por desenho (o Setup precisa dela) e nao entra nesta busca -
+    # ela e efemera, nunca versionada e nunca impressa. O que nao pode viajar e
+    # material de chave, token de servico e material criptografico da VM.
+    $marcadores = @(
+        '-----BEGIN [A-Z ]*PRIVATE KEY-----',
+        'PuTTY-User-Key-File',
+        'ghp_[A-Za-z0-9]{20}', 'github_pat_[A-Za-z0-9_]{20}',
+        'encryption\.keySafe\s*=', 'encryption\.data\s*=', 'vtpm\.data\s*='
+    )
+    $r.sem_segredos = -not (@($marcadores | Where-Object { $texto -match $_ }).Count)
     return [pscustomobject]$r
 }
 

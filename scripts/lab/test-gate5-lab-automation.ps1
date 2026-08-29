@@ -943,6 +943,19 @@ It 'pin reprova quando uma regra do commit nao foi entregue' {
     (-not $r.Ok) -and ($r.Missing -eq 1)
 }
 
+It 'pin do guest reprova SHA-40 malformado, inclusive em caixa alta' {
+    # '-match' e insensivel a maiusculas: sem '-cmatch' um SHA em caixa alta
+    # passaria por formato estrito, tanto aqui quanto no validador da midia.
+    foreach ($mau in @('0F93570194A80D2F2032869055808B0DDCDFB360',
+                       '0f93570194a80d2f2032869055808b0ddcdfb36',
+                       'zzzz570194a80d2f2032869055808b0ddcdfb360')) {
+        [ordered]@{ commit_sha40 = $mau; file_count = 0; aggregate_sha256 = ('a' * 64); files = @() } |
+            ConvertTo-Json -Depth 3 | Out-File $pinTmp -Encoding utf8
+        if ((Test-RulesetPin -PinPath $pinTmp -Dir $rulesTmp).Ok) { return $false }
+    }
+    ((Get-Content (Join-Path $labDir 'guest\gate5-payload.ps1') -Raw) -match "\`$commit -cmatch '\^\[0-9a-f\]\{40\}\`$'")
+}
+
 It 'pin reprova sem SHA-40 do commit' {
     [ordered]@{ commit_sha40 = ''; aggregate_sha256 = ''; files = @() } |
         ConvertTo-Json -Depth 3 | Out-File $pinTmp -Encoding utf8
@@ -1050,6 +1063,214 @@ It 'validador exige os controles novos do baseline' {
     $faltando = $novos | Where-Object { $verifyTxt -notmatch [regex]::Escape($_) }
     if ($faltando) { Write-Host ("        controles ausentes: " + ($faltando -join ', ')) }
     @($faltando).Count -eq 0
+}
+
+Write-Host 'T-H: controles novos da midia da RUN-02'
+
+# Mesmo escritor de stream COM do host, para nao depender de ferramenta externa.
+Add-Type -TypeDefinition @'
+using System;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
+public static class Gate5TestIsoWriter {
+    public static void Write(object comStream, string path) {
+        IStream src = (IStream)comStream;
+        using (FileStream fs = File.Create(path)) {
+            byte[] buf = new byte[1048576];
+            IntPtr readPtr = Marshal.AllocHGlobal(sizeof(int));
+            try {
+                while (true) {
+                    src.Read(buf, buf.Length, readPtr);
+                    int read = Marshal.ReadInt32(readPtr);
+                    if (read <= 0) break;
+                    fs.Write(buf, 0, read);
+                }
+            } finally { Marshal.FreeHGlobal(readPtr); }
+        }
+    }
+}
+'@ -ErrorAction SilentlyContinue
+
+# Constroi uma ISO SINTETICA com o mesmo mecanismo do host (IMAPI2FS) para
+# exercitar o validador contra uma midia de verdade, e nao contra o texto do
+# script. Nenhum arquivo real do laboratorio e usado.
+function New-IsoSintetica {
+    param([Parameter(Mandatory)][string]$Origem, [Parameter(Mandatory)][string]$Destino)
+    $fsi = New-Object -ComObject IMAPI2FS.MsftFileSystemImage
+    $fsi.FileSystemsToCreate = 3
+    $fsi.VolumeName = 'GATE5TEST'
+    $fsi.Root.AddTree($Origem, $false)
+    $img = $fsi.CreateResultImage()
+    $stream = $img.ImageStream
+    Remove-Item $Destino -Force -ErrorAction SilentlyContinue
+    [Gate5TestIsoWriter]::Write($stream, $Destino)
+    foreach ($com in $stream, $img, $fsi) {
+        try { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($com) } catch {}
+    }
+    [GC]::Collect(); [GC]::WaitForPendingFinalizers()
+}
+
+$midiaRaiz = Join-Path $tmp 'midia'
+function Build-MidiaSintetica {
+    # Monta uma midia minima porem ESTRUTURALMENTE igual a real e devolve o
+    # resultado do validador. Os blocos sao ajustaveis para simular defeitos.
+    param(
+        [string]$CommitSha40 = '0f93570194a80d2f2032869055808b0ddcdfb360',
+        [int]$FileCountDeclarado = -1,
+        [switch]$AdulterarVcredist,
+        [switch]$EmbarcarMaterialCripto
+    )
+    if (Test-Path $midiaRaiz) { Remove-Item $midiaRaiz -Recurse -Force }
+    $g5 = Join-Path $midiaRaiz 'gate5'
+    New-Item -ItemType Directory -Force (Join-Path $g5 'yara')     | Out-Null
+    New-Item -ItemType Directory -Force (Join-Path $g5 'rules')    | Out-Null
+    New-Item -ItemType Directory -Force (Join-Path $g5 'vcredist') | Out-Null
+    Set-Content -LiteralPath (Join-Path $midiaRaiz 'Autounattend.xml') -Value '<unattend/>' -Encoding ascii
+    Set-Content -LiteralPath (Join-Path $g5 'gate5-payload.ps1')       -Value '# payload'  -Encoding ascii
+    Set-Content -LiteralPath (Join-Path $g5 'yara\yara64.exe')         -Value 'MZ'         -Encoding ascii
+    Set-Content -LiteralPath (Join-Path $g5 'rules\gate5-index.yar')   -Value 'include "a.yar"' -Encoding ascii
+    Set-Content -LiteralPath (Join-Path $g5 'rules\a.yar')             -Value 'rule a { condition: true }' -Encoding ascii
+
+    $relSha = (Get-FileHash -LiteralPath (Join-Path $g5 'rules\a.yar') -Algorithm SHA256).Hash.ToLowerInvariant()
+    $arquivos = @([pscustomobject]@{ rel = 'a.yar'; sha = $relSha })
+    $contagem = if ($FileCountDeclarado -ge 0) { $FileCountDeclarado } else { $arquivos.Count }
+    [ordered]@{
+        schema           = 'gate5-lab-ruleset-pin/v1'
+        commit_sha40     = $CommitSha40
+        file_count       = $contagem
+        aggregate_sha256 = ('a' * 64)
+        files            = $arquivos
+    } | ConvertTo-Json -Depth 5 | Out-File (Join-Path $g5 'rules-pin.json') -Encoding utf8
+
+    $vcExe = Join-Path $g5 'vcredist\vc_redist.x64.exe'
+    Set-Content -LiteralPath $vcExe -Value 'redistribuivel sintetico' -Encoding ascii
+    $vcSha = (Get-FileHash -LiteralPath $vcExe -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($AdulterarVcredist) { Add-Content -LiteralPath $vcExe -Value 'bytes a mais' -Encoding ascii }
+    [ordered]@{ schema = 'gate5-lab-vcruntime/v1'; sha256 = $vcSha; min_runtime_version = '14.30' } |
+        ConvertTo-Json | Out-File (Join-Path $g5 'vcredist\vcruntime-pin.json') -Encoding utf8
+
+    if ($EmbarcarMaterialCripto) {
+        Set-Content -LiteralPath (Join-Path $g5 'vazamento.txt') -Encoding ascii `
+            -Value 'encryption.keySafe = "vmware:key/list/(pair/(id))"'
+    }
+    $iso = Join-Path $tmp 'midia-sintetica.iso'
+    New-IsoSintetica -Origem $midiaRaiz -Destino $iso
+    return (Test-Gate5UnattendMedia -IsoPath $iso)
+}
+
+It 'validador le o pin do ruleset e o redistribuivel DE DENTRO da ISO' {
+    $m = Build-MidiaSintetica
+    $m.ruleset_sha40 -and $m.ruleset_manifest -and $m.vcredist_x64 -and $m.vcredist_sha256 -and $m.sem_segredos
+}
+
+It 'SHA-40 ausente ou malformado reprova o pin da midia' {
+    $vazio = Build-MidiaSintetica -CommitSha40 ''
+    $curto = Build-MidiaSintetica -CommitSha40 '0f93570194a80d2f2032869055808b0ddcdfb36'
+    $maius = Build-MidiaSintetica -CommitSha40 '0F93570194A80D2F2032869055808B0DDCDFB360'
+    (-not $vazio.ruleset_sha40) -and (-not $curto.ruleset_sha40) -and (-not $maius.ruleset_sha40)
+}
+
+It 'manifesto divergente do proprio pin reprova a midia' {
+    # file_count que nao corresponde a lista entregue: o guest recomputaria o
+    # agregado sobre um conjunto diferente do descrito.
+    $m = Build-MidiaSintetica -FileCountDeclarado 99
+    (-not $m.ruleset_manifest) -and $m.ruleset_sha40
+}
+
+It 'redistribuivel adulterado na midia reprova pelo hash do proprio arquivo' {
+    $m = Build-MidiaSintetica -AdulterarVcredist
+    $m.vcredist_x64 -and (-not $m.vcredist_sha256)
+}
+
+It 'material criptografico embarcado reprova a midia' {
+    $m = Build-MidiaSintetica -EmbarcarMaterialCripto
+    -not $m.sem_segredos
+}
+
+It 'leitura de arquivo da ISO nao se contenta com leitura parcial' {
+    # Uma unica chamada a Read nao garante encher o buffer; sem o laco, o hash
+    # de um arquivo grande (o redistribuivel tem dezenas de MB) reprovaria um
+    # arquivo integro.
+    $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    ($comm -match '(?s)function Get-Gate5IsoFileBytes.*?while \(\$lidos -lt \$alvo\.Size\)') -and
+    ($comm -match '(?s)function Get-Gate5IsoFileBytes.*?if \(\$lidos -ne \$alvo\.Size\) \{ return \$null \}')
+}
+
+It 'midia sem os diretorios novos REPROVA, em vez de lancar excecao' {
+    # Foi o que aconteceu ao validar a midia da RUN-01 (sem gate5/vcredist):
+    # sob Set-StrictMode, filtrar $null por propriedade lanca, e um controle que
+    # lanca nao reprova - ele derruba o validador inteiro.
+    $so = Join-Path $tmp 'midia-magra'
+    if (Test-Path $so) { Remove-Item $so -Recurse -Force }
+    New-Item -ItemType Directory -Force $so | Out-Null
+    Set-Content -LiteralPath (Join-Path $so 'Autounattend.xml') -Value '<unattend/>' -Encoding ascii
+    $isoMagra = Join-Path $tmp 'midia-magra.iso'
+    New-IsoSintetica -Origem $so -Destino $isoMagra
+    $m = Test-Gate5UnattendMedia -IsoPath $isoMagra
+    $m.autounattend_na_raiz -and
+    (-not $m.payload_na_raiz) -and (-not $m.yara_bin) -and (-not $m.ruleset_index) -and
+    (-not $m.ruleset_sha40) -and (-not $m.ruleset_manifest) -and
+    (-not $m.vcredist_x64) -and (-not $m.vcredist_sha256)
+}
+
+It 'pre-condicoes do power-on exigem TODOS os controles novos da midia' {
+    # Assert-Gate5PreConditions reprova qualquer propriedade diferente de $true
+    # (menos iso_bytes): basta o controle existir para virar bloqueio.
+    $m = Build-MidiaSintetica
+    $novos = @('ruleset_sha40', 'ruleset_manifest', 'vcredist_x64', 'vcredist_sha256', 'sem_segredos')
+    $faltando = $novos | Where-Object { -not $m.PSObject.Properties[$_] }
+    if ($faltando) { Write-Host ("        controles ausentes: " + ($faltando -join ', ')) }
+    (@($faltando).Count -eq 0) -and
+    ($bootTxt -match "\`$_\.Name -ne 'iso_bytes' -and \`$_\.Value -ne \`$true") -and
+    ($bootTxt -match 'UNATTEND_MEDIA_INVALID')
+}
+
+Write-Host 'T-I: retomada pos-reboot e namespace de evidencia por execucao'
+
+It 'retomada e registrada ANTES de qualquer estagio que possa reiniciar o guest' {
+    # Registrar so no fim do INSTALL deixava uma janela em que um reboot vindo
+    # de fora abandonaria o laboratorio sem quem retomasse o payload.
+    $iReg     = $payloadTxt.IndexOf("`n    Register-StartupTask")
+    $iUpdate  = $payloadTxt.IndexOf("Set-Stage 'UPDATE'")
+    $iRestart = $payloadTxt.IndexOf('Restart-Computer -Force')
+    $iVc      = $payloadTxt.IndexOf('$rt = Install-VcRuntimeFromMedia')
+    ($iReg -gt 0) -and ($iUpdate -gt $iReg) -and ($iRestart -gt $iReg) -and ($iVc -gt $iReg)
+}
+
+It 'a tarefa de retomada roda como SYSTEM na inicializacao' {
+    ($payloadTxt -match 'New-ScheduledTaskTrigger -AtStartup') -and
+    ($payloadTxt -match "New-ScheduledTaskPrincipal -UserId 'SYSTEM'") -and
+    ($payloadTxt -match 'Register-ScheduledTask -TaskName') -and
+    # aponta para a copia LOCAL, nao para a midia (desconectada no isolamento)
+    ($payloadTxt -match 'gate5-payload\.ps1"'' -f \$Gate5Dir')
+}
+
+It 'evidencia de uma execucao selada nunca e sobrescrita' {
+    $runSel = 'run-teste-selada-' + [Guid]::NewGuid().ToString('N').Substring(0, 8)
+    $dirSel = Join-Path $script:Gate5EvidenceDir $runSel
+    New-Item -ItemType Directory -Force $dirSel | Out-Null
+    try {
+        Set-Content -LiteralPath (Join-Path $dirSel 'sealed.json') -Value '{}' -Encoding ascii
+        $selada = Test-Gate5RunSealed -RunId $runSel
+        $aberta = -not (Test-Gate5RunSealed -RunId ($runSel + '-outra'))
+        $selada -and $aberta -and
+        # o bloqueio e fail-closed, nao um aviso
+        ((Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw) -match "Stop-Gate5Blocked -Blocker 'RUN_EVIDENCE_SEALED'")
+    } finally { Remove-Item $dirSel -Recurse -Force -ErrorAction SilentlyContinue }
+}
+
+It 'evidencia da execucao corrente vai para o namespace da execucao' {
+    ($bootTxt -match "Join-Path \(Get-Gate5RunDir\) 'guest-evidence\.json'") -and
+    ($bootTxt -notmatch "Join-Path \`$script:Gate5EvidenceDir 'guest-evidence\.json'") -and
+    ($verifyTxt -match 'Join-Path \$script:Gate5EvidenceDir \(Get-Gate5RunId\)')
+}
+
+It 'run_id corrente vem do estado, com default da etapa' {
+    $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    ($comm -match "Gate5RunIdDefault = 'run-02-clean-install'") -and
+    ($comm -match "notes\.PSObject\.Properties\['run_id'\]") -and
+    ((Get-Gate5RunId) -match '^run-\d{2}-')
 }
 
 } finally {

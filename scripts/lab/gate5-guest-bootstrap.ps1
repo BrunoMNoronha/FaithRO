@@ -194,7 +194,7 @@ O artefato do staging mudou depois da aquisicao e NAO foi embarcado.
         $rulesEvFile = Join-Path $script:Gate5EvidenceDir 'ruleset.json'
         if (-not (Test-Path $rulesEvFile)) { throw 'GATE5: evidencia do ruleset ausente; execute a fase Rules antes.' }
         $rulesEv = Get-Content $rulesEvFile -Raw | ConvertFrom-Json
-        if ([string]$rulesEv.commit_sha40 -notmatch '^[0-9a-f]{40}$') { throw 'GATE5: pin do ruleset sem SHA-40 valido.' }
+        if ([string]$rulesEv.commit_sha40 -cnotmatch '^[0-9a-f]{40}$') { throw 'GATE5: pin do ruleset sem SHA-40 valido.' }
         # Fora da pasta 'rules': o que estiver la dentro e copiado para
         # C:\Tools\YARA-Rules e entraria no proprio conjunto que ele descreve.
         [ordered]@{
@@ -326,7 +326,7 @@ public static class Gate5IsoWriter {
         # --- 0) Evidencia ja recebida? ---------------------------------------
         $ev = Get-Gate5SerialEvidence
         if ($ev) {
-            $destino = Join-Path $script:Gate5EvidenceDir 'guest-evidence.json'
+            $destino = Join-Path (Get-Gate5RunDir) 'guest-evidence.json'
             ($ev | ConvertTo-Json -Depth 6) | Out-File $destino -Encoding utf8
             Write-Gate5Log 'Guest ja reportou evidencia pela serial; instalacao concluida.'
             exit 0
@@ -386,7 +386,7 @@ public static class Gate5IsoWriter {
             # restava tecla. O prompt e respondido sempre que aparecer, ate o
             # Setup comecar a gravar no disco - so entao o estado e fixado e
             # nenhuma tecla e enviada nos reboots seguintes.
-            $tela      = Join-Path $script:Gate5EvidenceDir 'boot-window.png'
+            $tela      = Join-Path (Get-Gate5RunDir) 'boot-window.png'
             $discoBase = (Get-Item $vmdk).Length
             $ate       = [DateTime]::UtcNow.AddMinutes(10)
             $instalando = $false
@@ -426,7 +426,7 @@ e enviada fora dele. Refaca o power-cycle com a automacao ja aguardando.
         while ([DateTime]::UtcNow -lt $limite) {
             $ev = Get-Gate5SerialEvidence
             if ($ev) {
-                $destino = Join-Path $script:Gate5EvidenceDir 'guest-evidence.json'
+                $destino = Join-Path (Get-Gate5RunDir) 'guest-evidence.json'
                 ($ev | ConvertTo-Json -Depth 6) | Out-File $destino -Encoding utf8
                 Write-Gate5Log ("Evidencia recebida do guest: {0} build {1}" -f $ev.os_caption, $ev.os_build)
                 Set-Gate5InstallNote 'installation_stage' 'GUEST_REPORTED'
@@ -705,7 +705,7 @@ O redistribuivel obtido nao cobre o toolset exigido pelo YARA $($script:Gate5Yar
             $branch   = [string]$repoMeta.default_branch
             $head     = Invoke-RestMethod -Uri ('https://api.github.com/repos/Yara-Rules/rules/commits/' + $branch) -Headers $ua -UseBasicParsing
             $pin      = [string]$head.sha
-            if ($pin -notmatch '^[0-9a-f]{40}$') { throw 'GATE5: SHA-40 do ruleset nao resolvido.' }
+            if ($pin -cnotmatch '^[0-9a-f]{40}$') { throw 'GATE5: SHA-40 do ruleset nao resolvido.' }
             [ordered]@{ repo = 'https://github.com/Yara-Rules/rules'; default_branch = $branch;
                         commit_sha40 = $pin; license = 'GPL-2.0';
                         timestamp_utc = [DateTime]::UtcNow.ToString('s') + 'Z';

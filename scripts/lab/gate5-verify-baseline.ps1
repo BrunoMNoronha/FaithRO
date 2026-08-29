@@ -137,7 +137,9 @@ $warp = @(Get-ChildItem C:\ -Recurse -Depth 3 -Filter "WARP*" -ErrorAction Silen
 # operations, entao o que o guest escreveu na serial e o unico testemunho de
 # dentro. Os controles abaixo foram os que reprovaram na primeira instalacao
 # limpa e passaram a ter verificacao explicita.
-$serialEv = Join-Path $script:Gate5EvidenceDir 'guest-evidence.json'
+# O baseline e sempre o da execucao CORRENTE: a evidencia de uma execucao
+# anterior fica preservada no diretorio dela e nunca aprova a atual.
+$serialEv = Join-Path (Join-Path $script:Gate5EvidenceDir (Get-Gate5RunId)) 'guest-evidence.json'
 Check 'evidencia-guest-serial' (Test-Path $serialEv)
 if (Test-Path $serialEv) {
     $g = Get-Content $serialEv -Raw | ConvertFrom-Json

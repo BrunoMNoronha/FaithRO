@@ -279,7 +279,7 @@ function Test-RulesetPin {
         Total      = $total
         Missing    = $faltando
         Mismatched = $divergentes
-        Ok         = (($commit -match '^[0-9a-f]{40}$') -and $esperado -and ($computado -eq $esperado) -and ($faltando -eq 0) -and ($divergentes -eq 0))
+        Ok         = (($commit -cmatch '^[0-9a-f]{40}$') -and $esperado -and ($computado -eq $esperado) -and ($faltando -eq 0) -and ($divergentes -eq 0))
     }
 }
 
@@ -297,6 +297,13 @@ if ((Get-Stage) -eq 'INSTALL') {
 
     # Copia o proprio script para o disco: a midia e desconectada no isolamento.
     Copy-Item (Join-Path $root 'gate5-payload.ps1') (Join-Path $Gate5Dir 'gate5-payload.ps1') -Force
+
+    # Retomada registrada AGORA, antes de qualquer etapa capaz de reiniciar o
+    # guest. O instalador do runtime roda com /norestart, mas um reboot vindo de
+    # outra origem antes do registro deixaria o laboratorio parado para sempre,
+    # sem ninguem para retomar o payload. O custo de registrar cedo e zero.
+    Register-StartupTask
+
     New-Item -ItemType Directory -Force $YaraDir | Out-Null
     Copy-Item (Join-Path $root 'yara\*') "$YaraDir\" -Force
     New-Item -ItemType Directory -Force $RulesDir | Out-Null
@@ -322,7 +329,6 @@ if ((Get-Stage) -eq 'INSTALL') {
     $rt | Add-Member -NotePropertyName yara_version_install -NotePropertyValue $yaraVersaoInstall -Force
     ($rt | ConvertTo-Json -Depth 4) | Set-Content -LiteralPath $RuntimeFile -Encoding utf8
 
-    Register-StartupTask
     Set-Stage 'UPDATE'
 }
 
