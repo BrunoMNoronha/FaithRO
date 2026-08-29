@@ -42,8 +42,24 @@ if ($cs.TotalPhysicalMemory -lt (16GB * 0.95)) { Add-Failure ("PREFLIGHT: RAM fi
 $minFree = 40GB
 if ($c.Free -lt $minFree) { Add-Failure ("PREFLIGHT: espaco livre em C: insuficiente ({0:N1} GB < 40 GB)." -f ($c.Free / 1GB)) }
 
-# Privilegio administrativo (necessario para instalar VMware / criar VM em C:\VMs)
-if (-not (Test-Gate5Elevated)) { Add-Failure 'PREFLIGHT: sessao PowerShell nao esta elevada (Administrator requerido).' }
+# Privilegio administrativo: exigido SOMENTE para o que realmente precisa dele -
+# instalar o VMware e criar o diretorio da VM. Depois disso o laboratorio opera
+# sem privilegio administrativo (menor privilegio, que e o estado preferivel), e
+# exigir elevacao em toda execucao apenas impediria a retomada, sem ganho de
+# seguranca. Nesta maquina a elevacao ainda usa outra conta administrativa, o que
+# tornaria os segredos DPAPI dependentes dela.
+$vmwareFound     = $null -ne (Find-Gate5VmwareInstall)
+$vmDirWritable   = Test-Gate5PathWritable -Path $script:Gate5VmDir
+$elevated        = Test-Gate5Elevated
+$needsElevation  = (-not $vmwareFound) -or (-not $vmDirWritable)
+Write-Gate5Log ("host vmware_instalado={0} vm_dir_gravavel={1} elevado={2} elevacao_necessaria={3}" -f $vmwareFound, $vmDirWritable, $elevated, $needsElevation)
+if ($needsElevation -and -not $elevated) {
+    if (-not $vmwareFound) {
+        Add-Failure 'PREFLIGHT: VMware Workstation nao esta instalado e a sessao nao esta elevada (a instalacao exige Administrator).'
+    } else {
+        Add-Failure ("PREFLIGHT: sem permissao de escrita em {0} e a sessao nao esta elevada." -f $script:Gate5VmDir)
+    }
+}
 
 # Registro de evidencia do pre-flight
 $evidence = [ordered]@{
@@ -56,7 +72,10 @@ $evidence = [ordered]@{
     ram_bytes     = $cs.TotalPhysicalMemory
     hypervisor_present = [bool]$cs.HypervisorPresent
     c_free_bytes  = $c.Free
-    elevated      = (Test-Gate5Elevated)
+    elevated          = $elevated
+    vmware_installed  = $vmwareFound
+    vm_dir_writable   = $vmDirWritable
+    elevation_needed  = $needsElevation
     pass          = $result.pass
     failures      = $result.failures
 }

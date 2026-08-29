@@ -140,8 +140,37 @@ $canonical = [ordered]@{
 
 $existing = @()
 if (Test-Path $script:Gate5VmxPath) {
-    Write-Gate5Log "VMX ja existe, reparando para a configuracao canonica: $($script:Gate5VmxPath)"
     $existing = @(Get-Content -LiteralPath $script:Gate5VmxPath)
+
+    # VM criptografada: o vTPM do Workstation exige criptografia, e o material de
+    # chave fica amarrado ao conteudo do .vmx. Reescrever o arquivo destruiria
+    # essa associacao (e com ela o vTPM). Neste estado a configuracao e apenas
+    # CONFERIDA - qualquer divergencia canonica vira bloqueio para correcao
+    # humana pela interface do VMware, nunca reescrita automatica.
+    if ($existing -match '^encryption\.' -or $existing -match '^vtpm\.') {
+        Write-Gate5Log 'VMX com estado criptografico do VMware: somente conferencia, sem reescrita.'
+        $divergentes = @()
+        foreach ($k in $canonical.Keys) {
+            # A ISO do sistema pode ter sido desconectada de proposito pela fase
+            # de isolamento; o restante das chaves canonicas deve bater.
+            if ($k -like ($script:Gate5CdOs + '*')) { continue }
+            $v = Get-Gate5VmxValue -Key $k
+            if ($v -ne $canonical[$k]) { $divergentes += ("{0}='{1}' (esperado '{2}')" -f $k, $v, $canonical[$k]) }
+        }
+        if ($divergentes.Count -gt 0) {
+            Stop-Gate5Blocked -Blocker 'ENCRYPTED_VMX_CONFIG_DIVERGENT' -Detail @"
+A VM ja possui estado criptografico do VMware (vTPM) e nao pode ser reescrita
+pela automacao sem destruir a associacao da criptografia. As chaves abaixo
+divergem da configuracao canonica e precisam ser ajustadas pela interface do
+VMware Workstation (VM Settings), com a VM desligada:
+$(($divergentes | ForEach-Object { '  - ' + $_ }) -join "`n")
+"@
+        }
+        Write-Gate5Log 'Configuracao canonica conferida na VM criptografada.'
+        exit 0
+    }
+
+    Write-Gate5Log "VMX ja existe, reparando para a configuracao canonica: $($script:Gate5VmxPath)"
 } else {
     Write-Gate5Log "Criando VMX: $($script:Gate5VmxPath)"
 }

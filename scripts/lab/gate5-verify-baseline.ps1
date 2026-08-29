@@ -38,6 +38,9 @@ if (Test-Path $script:Gate5VmxPath) {
     Check 'dnd-off'  ((Get-Gate5VmxValue 'isolation.tools.dnd.disable') -eq 'TRUE')
     Check 'hgfs-off' ((Get-Gate5VmxValue 'isolation.tools.hgfs.disable') -eq 'TRUE')
     Check 'usb-off'  ((Get-Gate5VmxValue 'usb.present') -ne 'TRUE')
+    # O console VNC e um canal de administracao LOCAL e TEMPORARIO da instalacao;
+    # nao pode sobreviver ao baseline.
+    Check 'console-vnc-removido' ($null -eq (Get-Gate5VmxValue 'RemoteDisplay.vnc.enabled'))
     $vmdk = Join-Path $script:Gate5VmDir 'FaithRO-GATE5-LAB.vmdk'
     Check 'disk-60gb-existe' (Test-Path $vmdk)
 }

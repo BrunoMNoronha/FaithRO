@@ -83,6 +83,16 @@ It 'TLS 1.2 habilitado para as fontes oficiais aprovadas' {
     ([Net.ServicePointManager]::SecurityProtocol -band [Net.SecurityProtocolType]::Tls12) -ne 0
 }
 
+It 'Test-Gate5PathWritable distingue gravavel de nao-gravavel' {
+    $okDir = Join-Path $tmp 'gravavel'
+    New-Item -ItemType Directory -Force $okDir | Out-Null
+    # Diretorio inexistente cai no pai (e onde ele seria criado).
+    $novo = Join-Path $okDir 'ainda-nao-existe'
+    (Test-Gate5PathWritable -Path $okDir) -and
+    (Test-Gate5PathWritable -Path $novo) -and
+    (-not (Test-Gate5PathWritable -Path 'Z:\caminho\inexistente\demais'))
+}
+
 It 'Get-Gate5Sha256 devolve hash minusculo de 64 hex' {
     $f = Join-Path $tmp 'hash.txt'
     Set-Content -LiteralPath $f -Value 'abc' -Encoding ascii
@@ -231,6 +241,50 @@ It 'vTPM nao e dado como valido pela chave de auto-adicao' {
     $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
     ($ver -match "Check 'vtpm-vmx' \(\(Get-Gate5VmxValue 'vtpm\.present'\)") -and
     ($boot -match 'VTPM_AUTOMATION_NOT_SUPPORTED')
+}
+
+It 'console VNC e local, temporario e verificado como removido' {
+    # A tecla do prompt "Press any key to boot from CD" so chega ao guest por um
+    # console conectado; o console VNC do VMware e esse canal. Ele precisa ficar
+    # preso a 127.0.0.1 e nao pode sobreviver ao snapshot baseline.
+    $common = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    $prov   = Get-Content (Join-Path $labDir 'gate5-provision.ps1') -Raw
+    $ver    = Get-Content (Join-Path $labDir 'gate5-verify-baseline.ps1') -Raw
+    ($common -match 'RemoteDisplay\.vnc\.ip = "127\.0\.0\.1"') -and
+    ($common -notmatch 'RemoteDisplay\.vnc\.ip = "0\.0\.0\.0"') -and
+    ($prov   -match "notmatch '\^RemoteDisplay\\\.vnc\\\.'") -and
+    ($prov   -match "Get-Gate5VmxValue 'RemoteDisplay\.vnc\.enabled'") -and
+    ($ver    -match 'console-vnc-removido')
+}
+
+It 'entrega da tecla de boot falha fechado se o console nao responder' {
+    $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
+    ($boot -match 'BOOT_KEY_CHANNEL_UNAVAILABLE') -and ($boot -match 'Send-Gate5VncKey -Keysym 0xFF0D')
+}
+
+It 'VMX criptografado nunca e reescrito pela automacao' {
+    # Reescrever o .vmx de uma VM criptografada destroi a associacao da
+    # criptografia e, com ela, o vTPM que o gate humano acabou de criar.
+    $cv = Get-Content (Join-Path $labDir 'gate5-create-vm.ps1') -Raw
+    $guardaAntes = $cv.IndexOf("'^encryption\.'")
+    $reescrita   = $cv.IndexOf('Set-Gate5TextFile -Path $script:Gate5VmxPath')
+    ($guardaAntes -gt 0) -and ($reescrita -gt $guardaAntes) -and ($cv -match 'ENCRYPTED_VMX_CONFIG_DIVERGENT')
+}
+
+It 'elevacao e exigida apenas quando realmente necessaria' {
+    # Exigir Administrator em toda execucao impediria a retomada depois que o
+    # VMware ja esta instalado, sem nenhum ganho de seguranca.
+    $pf = Get-Content (Join-Path $labDir 'gate5-host-preflight.ps1') -Raw
+    ($pf -match '\$needsElevation\s*=\s*\(-not \$vmwareFound\) -or \(-not \$vmDirWritable\)') -and
+    ($pf -match 'if \(\$needsElevation -and -not \$elevated\)') -and
+    ($pf -notmatch 'if \(-not \(Test-Gate5Elevated\)\) \{ Add-Failure')
+}
+
+It 'credencial ilegivel com guest instalado falha fechado' {
+    # DPAPI e por usuario: gerar uma senha nova nao abriria um Windows ja
+    # instalado com a senha antiga.
+    $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
+    ($boot -match 'GUEST_CREDENTIAL_UNREADABLE') -and ($boot -match 'Test-GuestCredentialUsable')
 }
 
 It 'NVRAM so e descartada com o disco ainda vazio' {

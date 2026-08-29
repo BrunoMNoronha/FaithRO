@@ -42,6 +42,13 @@ $script:Gate5SnapshotName = 'BASELINE_GATE5_ISOLATED'
 $script:Gate5CdOs       = 'sata0:0'   # ISO oficial do Windows
 $script:Gate5CdUnattend = 'sata0:1'   # ISO auxiliar com o Autounattend.xml
 
+# Console VNC do proprio VMware, usado APENAS como canal LOCAL e TEMPORARIO para
+# entregar a tecla exigida pelo prompt "Press any key to boot from CD or DVD" da
+# ISO oficial (o vmcli MKS aceita a tecla mas ela nao chega ao guest sem um
+# console conectado). Fica preso a 127.0.0.1, e removido na fase de isolamento e
+# a sua ausencia e conferida pelo validador antes do snapshot.
+$script:Gate5VncPort = 5943
+
 $script:Gate5StagingDirs = @('C:\Users\bruno\Downloads', 'C:\Installers', 'C:\ISO', 'C:\VMs', 'C:\Tools')
 $script:Gate5YaraDir    = 'C:\Tools\YARA'
 $script:Gate5RulesDir   = 'C:\Tools\YARA-Rules'
@@ -187,6 +194,21 @@ function Test-Gate5Elevated {
     return ([Security.Principal.WindowsPrincipal]$id).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
+function Test-Gate5PathWritable {
+    # Escrita real de um arquivo-sonda (ACL efetiva, nao apenas herdada).
+    # Se o diretorio ainda nao existe, testa o pai - e nele que ele sera criado.
+    param([Parameter(Mandatory)][string]$Path)
+    $target = $Path
+    if (-not (Test-Path -LiteralPath $target)) { $target = Split-Path -Parent $target }
+    if (-not (Test-Path -LiteralPath $target)) { return $false }
+    $probe = Join-Path $target ('.gate5-write-probe-' + [Guid]::NewGuid().ToString('N'))
+    try {
+        Set-Content -LiteralPath $probe -Value 'probe' -ErrorAction Stop
+        Remove-Item -LiteralPath $probe -Force -ErrorAction SilentlyContinue
+        return $true
+    } catch { return $false }
+}
+
 function Find-Gate5VmwareInstall {
     # Retorna caminhos reais dos executaveis VMware ou $null se nao instalado.
     $candidates = @(
@@ -271,6 +293,76 @@ function Invoke-Gate5Vmrun {
         throw ("GATE5: vmrun falhou (exit {0}): {1}" -f $r.ExitCode, ($r.Output -join ' | '))
     }
     return $r
+}
+
+function Set-Gate5VncConsole {
+    # Liga/desliga o console VNC local do VMware no VMX (VM deve estar desligada).
+    # Nunca define senha porque o socket fica preso a 127.0.0.1 e o canal existe
+    # somente durante a instalacao do guest; a fase de isolamento o remove.
+    param([Parameter(Mandatory)][bool]$Enabled)
+    if (-not (Test-Path $script:Gate5VmxPath)) { throw 'GATE5: VMX inexistente ao configurar o console VNC.' }
+    $lines = @(Get-Content -LiteralPath $script:Gate5VmxPath | Where-Object { $_ -notmatch '^RemoteDisplay\.vnc\.' })
+    if ($Enabled) {
+        $lines += 'RemoteDisplay.vnc.enabled = "TRUE"'
+        $lines += ('RemoteDisplay.vnc.port = "{0}"' -f $script:Gate5VncPort)
+        $lines += 'RemoteDisplay.vnc.ip = "127.0.0.1"'
+    }
+    Set-Gate5TextFile -Path $script:Gate5VmxPath -Lines $lines
+    Write-Gate5Log ("Console VNC local {0} (127.0.0.1:{1})." -f $(if ($Enabled) { 'HABILITADO' } else { 'REMOVIDO' }), $script:Gate5VncPort)
+}
+
+function Send-Gate5VncKey {
+    # Cliente RFB 3.8 minimo: handshake, auth None e um par KeyEvent down/up.
+    # Retorna 'OK' ou uma descricao do erro (nunca lanca, para nao derrubar o
+    # laco de boot quando o console ainda nao esta pronto).
+    param([Parameter(Mandatory)][uint32]$Keysym, [int]$Port = $script:Gate5VncPort)
+    $client = New-Object System.Net.Sockets.TcpClient
+    try {
+        $client.Connect('127.0.0.1', $Port)
+        $stream = $client.GetStream()
+        $stream.ReadTimeout = 5000; $stream.WriteTimeout = 5000
+
+        $buf = New-Object byte[] 12
+        if ($stream.Read($buf, 0, 12) -lt 12) { return 'handshake RFB incompleto' }
+        $stream.Write([Text.Encoding]::ASCII.GetBytes("RFB 003.008`n"), 0, 12)
+
+        $one = New-Object byte[] 1
+        if ($stream.Read($one, 0, 1) -lt 1) { return 'servidor nao ofereceu tipos de seguranca' }
+        $count = [int]$one[0]
+        if ($count -eq 0) { return 'servidor recusou a conexao' }
+        $types = New-Object byte[] $count
+        $stream.Read($types, 0, $count) | Out-Null
+        if ($types -notcontains 1) { return ('console VNC exige autenticacao (tipos: ' + ($types -join ',') + ')') }
+        $stream.Write([byte[]]@(1), 0, 1)
+
+        $result = New-Object byte[] 4
+        $stream.Read($result, 0, 4) | Out-Null
+        if (($result[0] -bor $result[1] -bor $result[2] -bor $result[3]) -ne 0) { return 'SecurityResult negativo' }
+
+        $stream.Write([byte[]]@(1), 0, 1)   # ClientInit: sessao compartilhada
+        $serverInit = New-Object byte[] 24
+        $stream.Read($serverInit, 0, 24) | Out-Null
+        $nameLen = [int]$serverInit[20] * 16777216 + [int]$serverInit[21] * 65536 +
+                   [int]$serverInit[22] * 256 + [int]$serverInit[23]
+        if ($nameLen -gt 0) {
+            $name = New-Object byte[] $nameLen
+            $stream.Read($name, 0, $nameLen) | Out-Null
+        }
+
+        foreach ($down in 1, 0) {
+            $msg = [byte[]]@(4, [byte]$down, 0, 0,
+                             [byte](($Keysym -shr 24) -band 0xFF), [byte](($Keysym -shr 16) -band 0xFF),
+                             [byte](($Keysym -shr 8)  -band 0xFF), [byte]($Keysym -band 0xFF))
+            $stream.Write($msg, 0, 8)
+            $stream.Flush()
+            Start-Sleep -Milliseconds 60
+        }
+        return 'OK'
+    } catch {
+        return ('erro: ' + $_.Exception.Message)
+    } finally {
+        $client.Close()
+    }
 }
 
 function Get-Gate5VmxValue {

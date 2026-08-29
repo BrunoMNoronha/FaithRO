@@ -209,7 +209,10 @@ if (-not (Test-Gate5Phase $state 'ISOLATED')) {
     $vmx = $vmx | Where-Object {
         $_ -notmatch '^ethernet0\.(startConnected|connected)\s*=' -and
         $_ -notmatch ('^{0}\.startConnected\s*=' -f $osCd) -and
-        $_ -notmatch ('^{0}\.' -f $unCd)
+        $_ -notmatch ('^{0}\.' -f $unCd) -and
+        # Canal temporario de teclado (console VNC local) removido aqui: ele so
+        # existe para vencer o prompt de boot pelo CD durante a instalacao.
+        $_ -notmatch '^RemoteDisplay\.vnc\.'
     }
     $vmx += 'ethernet0.startConnected = "FALSE"'
     $vmx += 'ethernet0.connected = "FALSE"'
@@ -221,6 +224,7 @@ if (-not (Test-Gate5Phase $state 'ISOLATED')) {
         if ((Get-Gate5VmxValue $pair[0]) -ne $pair[1]) { Stop-Gate5Blocked -Blocker 'ISOLATION_VMX_INVALID' -Detail $pair[0] }
     }
     if ((Get-Gate5VmxValue 'ethernet0.startConnected') -ne 'FALSE') { Stop-Gate5Blocked -Blocker 'ISOLATION_VMX_INVALID' -Detail 'ethernet0.startConnected' }
+    if ($null -ne (Get-Gate5VmxValue 'RemoteDisplay.vnc.enabled')) { Stop-Gate5Blocked -Blocker 'ISOLATION_VMX_INVALID' -Detail 'console VNC temporario ainda presente' }
     Write-Gate5Log 'Isolamento aplicado e verificado no VMX.'
     Complete-Gate5Phase $state 'ISOLATED'
 }

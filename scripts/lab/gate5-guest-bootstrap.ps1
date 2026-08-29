@@ -27,6 +27,17 @@ function Get-GuestCredential {
     return Import-Clixml $credFile
 }
 
+function Test-GuestCredentialUsable {
+    # A credencial e protegida por DPAPI DA CONTA que a gerou. Se a automacao
+    # passar a rodar sob outra conta (por exemplo deixando de precisar de
+    # elevacao), o arquivo existe mas nao pode ser decifrado.
+    if (-not (Test-Path $credFile)) { return $false }
+    try {
+        $c = Import-Clixml $credFile
+        return -not [string]::IsNullOrEmpty($c.GetNetworkCredential().Password)
+    } catch { return $false }
+}
+
 function Invoke-GuestPS {
     # Executa um script PowerShell dentro do guest via vmrun (canal temporario
     # de administracao LOCAL; removido na fase Sanitize junto com a conta).
@@ -65,6 +76,27 @@ switch ($Phase) {
     # -------------------------------------------------------------------------
     'Unattend' {
         # 1) Senha de bootstrap gerada em runtime (nunca versionada/logada)
+        if (-not (Test-GuestCredentialUsable)) {
+            # Credencial ilegivel (gerada por outra conta) e Windows ja instalado
+            # seria irrecuperavel: a senha esta gravada dentro do guest e nao pode
+            # ser redefinida por aqui. Fail-closed em vez de gerar uma senha nova
+            # que nao abriria mais o guest.
+            $vmdkNow = Join-Path $script:Gate5VmDir 'FaithRO-GATE5-LAB.vmdk'
+            $guestInstalled = (Test-Path $vmdkNow) -and ((Get-Item $vmdkNow).Length -gt 1GB)
+            if ((Test-Path $credFile) -and $guestInstalled) {
+                Stop-Gate5Blocked -Blocker 'GUEST_CREDENTIAL_UNREADABLE' -Detail @'
+A credencial de bootstrap do guest existe mas nao pode ser decifrada por esta
+conta (DPAPI e por usuario) e o Windows ja esta instalado, de modo que gerar
+uma senha nova nao abriria o guest. Reexecute a automacao sob a MESMA conta que
+gerou a credencial, ou recrie o laboratorio do zero apagando
+.local\gate5-lab\ e C:\VMs\FaithRO-GATE5-LAB\.
+'@
+            }
+            if (Test-Path $credFile) {
+                Write-Gate5Log 'Credencial de bootstrap ilegivel por esta conta e guest ainda nao instalado: gerando uma nova.' 'WARN'
+                Remove-Item $credFile -Force
+            }
+        }
         if (-not (Test-Path $credFile)) {
             $bytes = New-Object byte[] 24
             [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
@@ -137,29 +169,44 @@ public static class Gate5IsoWriter {
     'InstallWait' {
         # Liga a VM e aguarda o Windows Setup terminar (deteccao: guest ops
         # respondem com a credencial de bootstrap). Timeout global de 2h.
+        $vmdk = Join-Path $script:Gate5VmDir 'FaithRO-GATE5-LAB.vmdk'
         $running = (Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('list') -AllowFailure).Output
+        $justStarted = $false
         if ($running -notmatch [regex]::Escape($script:Gate5VmxPath)) {
+            # Console VNC local ligado ANTES do power-on: e por ele que a tecla
+            # do prompt de boot chega ao guest.
+            Set-Gate5VncConsole -Enabled $true
             Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('start', $script:Gate5VmxPath, 'nogui') | Out-Null
+            $justStarted = $true
             Write-Gate5Log 'VM ligada; aguardando instalacao unattended do Windows...'
         }
 
         # Prompt "Press any key to boot from CD or DVD": a ISO oficial da
-        # Microsoft usa o carregador com prompt, e sem uma tecla o firmware
-        # desiste do CD e cai para os proximos dispositivos de boot. Enviamos
-        # teclas pelo canal suportado (vmcli MKS) durante a janela do prompt,
-        # parando assim que o disco comeca a crescer (Setup gravando).
-        $vmcli = Join-Path $vmware.InstallDir 'vmcli.exe'
-        $vmdk  = Join-Path $script:Gate5VmDir 'FaithRO-GATE5-LAB.vmdk'
-        $baseSize = (Get-Item $vmdk).Length
-        if (Test-Path $vmcli) {
-            for ($k = 0; $k -lt 20; $k++) {
-                Start-Sleep -Seconds 3
-                Invoke-Gate5Native -FilePath $vmcli -Arguments @($script:Gate5VmxPath, 'MKS', 'sendKeyEvent', '40', '0') | Out-Null
-                if ((Get-Item $vmdk).Length -gt ($baseSize + 10MB)) { break }
+        # Microsoft usa o carregador com prompt e, sem uma tecla, o firmware
+        # registra "Status upon boot failure: Time out" e cai para os proximos
+        # dispositivos - o Setup nunca inicia. O 'vmcli MKS sendKeyEvent' retorna
+        # sucesso mas a tecla NAO chega ao guest sem um console conectado; o
+        # console VNC local do proprio VMware entrega a tecla de fato.
+        if ($justStarted) {
+            $baseSize = (Get-Item $vmdk).Length
+            $entregue = $false
+            for ($k = 0; $k -lt 30; $k++) {
+                $r = Send-Gate5VncKey -Keysym 0xFF0D    # Enter
+                if ($k -eq 0) { Write-Gate5Log "Console VNC local: primeira tecla -> $r" }
+                if ($r -eq 'OK') { $entregue = $true }
+                Start-Sleep -Milliseconds 900
+                # O disco crescer prova que o Setup comecou a gravar: paramos de
+                # teclar para nao interferir nos reboots seguintes do Setup.
+                if ((Get-Item $vmdk).Length -gt ($baseSize + 20MB)) { break }
             }
-            Write-Gate5Log 'Janela do prompt de boot pelo CD concluida.'
-        } else {
-            Write-Gate5Log "vmcli.exe nao localizado em $($vmware.InstallDir); prompt de boot pelo CD nao pode ser respondido." 'WARN'
+            if (-not $entregue) {
+                Stop-Gate5Blocked -Blocker 'BOOT_KEY_CHANNEL_UNAVAILABLE' -Detail @'
+Nao foi possivel entregar a tecla do prompt de boot pelo console VNC local do
+VMware (127.0.0.1). Sem ela a ISO oficial do Windows nao inicia o Setup.
+Verifique se a porta local nao esta ocupada e reexecute gate5-provision.ps1.
+'@
+            }
+            Write-Gate5Log ("Janela do prompt de boot concluida; disco cresceu {0} MB." -f [int](((Get-Item $vmdk).Length - $baseSize) / 1MB))
         }
 
         # Verificacao do vTPM por EVIDENCIA, nao pela chave que nos mesmos
