@@ -162,13 +162,9 @@ Herdados do prompt/doc 47: R1 instalador adulterado (assinatura+SHA-256+fonte of
 
 Constatado empiricamente nesta instalação do Workstation 26.0.0: `managedvm.autoAddVTPM="software"` aparece no `DICT` do `vmware.log` mas **nenhum dispositivo TPM é criado** por `vmrun start` sobre um `.vmx` escrito à mão; `vmrun` não expõe comando de TPM; `vmcli` não possui módulo de TPM nem de criptografia. O vTPM do Workstation exige criptografia da VM, cujo material de chave só o próprio VMware gera — inventar essas chaves, copiar identidade TPM de outra VM ou contornar o requisito de TPM do Windows 11 são ações **proibidas** nesta etapa.
 
-Além disso, a VM ficou **ligada sob a conta administrativa** usada nas execuções elevadas anteriores (processo `vmware-vmx` órfão), e a conta de trabalho não consegue encerrá-la.
+**Estado em 2026-08-29 (`PRE_VTPM_READY`):** a VM órfã que ficara ligada sob a conta administrativa foi encerrada pelo operador (confirmado por abertura exclusiva do VMDK, não apenas por `vmrun`), os resíduos do hard power-off foram removidos com a VM comprovadamente parada, e a configuração canônica foi aplicada **antes** da criptografia — `virtualHW.version=22`, `numvcpus=2`, `memsize=4096`, `firmware=efi`, Secure Boot ligado, disco 60 GB thin em NVMe, ISO do Windows em `sata0:0`, ISO de unattend em `sata0:1`, shared folders/clipboard/drag-and-drop/USB desabilitados, identidade da VM (`uuid.bios`, MAC gerado) preservada.
 
-**Passos humanos necessários (nesta ordem):**
-
-1. Encerrar a VM órfã: Gerenciador de Tarefas → finalizar `vmware-vmx.exe` (ou reiniciar o host).
-2. Avisar, para que a automação aplique a configuração canônica no `.vmx` **antes** da criptografia (depois dela o arquivo não pode mais ser reescrito).
-3. Abrir o VMware Workstation → abrir `C:\VMs\FaithRO-GATE5-LAB\FaithRO-GATE5-LAB.vmx` → `VM Settings` → `Add` → `Trusted Platform Module` → aceitar a criptografia proposta pelo produto → fechar.
+**Passo humano restante:** abrir o VMware Workstation → abrir `C:\VMs\FaithRO-GATE5-LAB\FaithRO-GATE5-LAB.vmx` → com a VM desligada → `VM Settings` → `Add` → `Trusted Platform Module` → aceitar a criptografia proposta pelo produto → fechar `VM Settings` → **não iniciar a VM manualmente**.
 
 A senha de criptografia é definida e mantida **exclusivamente pelo operador**: não deve ser digitada no terminal, versionada nem registrada em log.
 
