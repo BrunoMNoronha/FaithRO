@@ -219,19 +219,29 @@ public static class Gate5IsoWriter {
     # -------------------------------------------------------------------------
     'InstallWait' {
         # VM criptografada (exigencia do vTPM): 'vmrun' nao pode liga-la sem a
-        # senha, que pertence exclusivamente ao operador. O power-on e portanto
-        # um GATE HUMANO formal na interface do VMware, e tudo o que vem depois
+        # senha, que pertence exclusivamente ao operador. As operacoes de energia
+        # sao GATES HUMANOS formais na interface do VMware; tudo o que vem depois
         # e validado tecnicamente aqui - a confirmacao textual do operador nunca
         # e aceita como prova. Ver docs/48 §12.
-        $vmdk = Join-Path $script:Gate5VmDir 'FaithRO-GATE5-LAB.vmdk'
+        $vmdk  = Join-Path $script:Gate5VmDir 'FaithRO-GATE5-LAB.vmdk'
+        $state = Get-Gate5State
+        $bootKeySent = $false
+        if ($state.notes.PSObject.Properties['boot_key_sent']) { $bootKeySent = [bool]$state.notes.boot_key_sent }
 
-        if (-not (Test-Gate5VmPoweredOn)) {
-            $ev = Get-Gate5SerialEvidence
-            if ($ev) { Write-Gate5Log 'Guest ja reportou evidencia pela serial; instalacao concluida.'; exit 0 }
-
-            # Fail-closed antes de pedir o power-on: uma midia invalida faria a
-            # instalacao parar numa tela e desperdicaria o gate humano - foi
-            # exatamente o que aconteceu com o Autounattend sem <ProductKey>.
+        function Get-VmUptimeSeconds {
+            $p = @(Get-Process -Name 'vmware-vmx' -ErrorAction SilentlyContinue) | Select-Object -First 1
+            if ($p) { return ((Get-Date) - $p.StartTime).TotalSeconds }
+            return 0
+        }
+        function Set-Gate5InstallNote {
+            param([string]$Nome, $Valor)
+            $state.notes | Add-Member -NotePropertyName $Nome -NotePropertyValue $Valor -Force
+            Save-Gate5State $state
+        }
+        function Assert-Gate5PreConditions {
+            # Fail-closed antes de gastar um gate humano: midia invalida faria a
+            # instalacao parar numa tela, como ja aconteceu com o Autounattend
+            # sem <ProductKey>.
             $midia = Test-Gate5UnattendMedia
             $ruins = @($midia.PSObject.Properties |
                        Where-Object { $_.Name -ne 'iso_bytes' -and $_.Value -ne $true } |
@@ -239,9 +249,6 @@ public static class Gate5IsoWriter {
             if ($ruins.Count -gt 0) {
                 Stop-Gate5Blocked -Blocker 'UNATTEND_MEDIA_INVALID' -Detail ("controles reprovados: " + ($ruins -join ', '))
             }
-            Write-Gate5Log ("Midia de unattend validada ({0:N1} MB): Autounattend na raiz, chave vazia, payload completo." -f ($midia.iso_bytes / 1MB))
-
-            # O canal serial precisa estar pronto para receber a evidencia.
             if ((Get-Gate5VmxValue 'serial0.fileType') -ne 'file' -or
                 (Get-Gate5VmxValue 'serial0.fileName') -ne $script:Gate5EvidenceSerial) {
                 Stop-Gate5Blocked -Blocker 'SERIAL_CHANNEL_NOT_READY' -Detail 'porta serial da VM nao aponta para o arquivo de evidencia do host'
@@ -249,63 +256,98 @@ public static class Gate5IsoWriter {
             if ((Get-Gate5VmxValue 'RemoteDisplay.vnc.ip') -ne '127.0.0.1') {
                 Stop-Gate5Blocked -Blocker 'VNC_NOT_LOCAL' -Detail 'console temporario precisa estar preso a 127.0.0.1'
             }
+            Write-Gate5Log ("Midia e canais validados ({0:N1} MB): Autounattend na raiz, chave vazia, payload completo." -f ($midia.iso_bytes / 1MB))
+        }
 
-            # Gate humano com ESPERA: a janela do prompt de boot dura poucos
-            # segundos apos o power-on, entao nao da para depender de quando o
-            # operador avisa. A instrucao e impressa e a automacao fica
-            # aguardando o power-on para agir dentro da janela.
+        # --- 0) Evidencia ja recebida? ---------------------------------------
+        $ev = Get-Gate5SerialEvidence
+        if ($ev) {
+            $destino = Join-Path $script:Gate5EvidenceDir 'guest-evidence.json'
+            ($ev | ConvertTo-Json -Depth 6) | Out-File $destino -Encoding utf8
+            Write-Gate5Log 'Guest ja reportou evidencia pela serial; instalacao concluida.'
+            exit 0
+        }
+
+        # --- 1) Sessao antiga: VM ligada fora da janela e sem tecla entregue --
+        # Essa instalacao e descartavel; esperamos o operador desliga-la para que
+        # o proximo boot comece limpo e dentro da janela do prompt optico.
+        if ((Test-Gate5VmPoweredOn) -and -not $bootKeySent -and (Get-VmUptimeSeconds) -gt 150) {
+            Assert-Gate5PreConditions
+            Write-Gate5Log 'HUMAN_ACTION_REQUIRED POWER_CYCLE_VM' 'GATE'
+            Write-Host ''
+            Write-Host 'HUMAN_ACTION_REQUIRED'
+            Write-Host 'action=POWER_CYCLE_VM'
+            Write-Host 'Na interface do VMware: Power -> Power Off, aguarde desligar, e Power on.'
+            Write-Host 'Nao interaja com a instalacao: ela e desassistida.'
+            Write-Host 'A automacao esta AGUARDANDO e agira sozinha na janela do boot.'
+            Write-Host ''
+            Set-Gate5InstallNote 'installation_stage' 'WAITING_POWER_CYCLE'
+            $ate = [DateTime]::UtcNow.AddMinutes(30)
+            while ([DateTime]::UtcNow -lt $ate -and (Test-Gate5VmPoweredOn)) { Start-Sleep -Seconds 3 }
+            if (Test-Gate5VmPoweredOn) {
+                Stop-Gate5Human -Action 'POWER_CYCLE_VM' -Detail 'A VM nao foi desligada em 30 minutos. Reexecute gate5-provision.ps1 quando puder faze-lo.'
+            }
+            Write-Gate5Log 'VM desligada; aguardando o novo power-on.'
+        }
+
+        # --- 2) Aguardar o power-on -------------------------------------------
+        if (-not (Test-Gate5VmPoweredOn)) {
+            if ((Get-Gate5State).notes.installation_stage -ne 'WAITING_POWER_CYCLE') { Assert-Gate5PreConditions }
             Write-Gate5Log 'HUMAN_ACTION_REQUIRED POWER_ON_VM' 'GATE'
             Write-Host ''
             Write-Host 'HUMAN_ACTION_REQUIRED'
             Write-Host 'action=POWER_ON_VM'
-            Write-Host 'Ligue a VM na interface do VMware Workstation (Power on this virtual machine).'
-            Write-Host 'Nao interaja com a instalacao: ela e desassistida.'
+            Write-Host 'Ligue a VM na interface do VMware (Power on this virtual machine).'
             Write-Host 'A automacao esta AGUARDANDO o power-on e agira sozinha na janela do boot.'
             Write-Host ''
-
-            $esperaAte = [DateTime]::UtcNow.AddMinutes(30)
-            while ([DateTime]::UtcNow -lt $esperaAte -and -not (Test-Gate5VmPoweredOn)) {
-                Start-Sleep -Seconds 3
-            }
+            Set-Gate5InstallNote 'installation_stage' 'WAITING_POWER_ON'
+            $ate = [DateTime]::UtcNow.AddMinutes(30)
+            while ([DateTime]::UtcNow -lt $ate -and -not (Test-Gate5VmPoweredOn)) { Start-Sleep -Seconds 3 }
             if (-not (Test-Gate5VmPoweredOn)) {
                 Stop-Gate5Human -Action 'POWER_ON_VM' -Detail 'A VM nao foi ligada em 30 minutos. Reexecute gate5-provision.ps1 quando puder liga-la.'
             }
-            Write-Gate5Log 'Power-on detectado; entrando na janela do prompt de boot.'
         }
+        Write-Gate5Log ("Power-on detectado (uptime {0:N0}s)." -f (Get-VmUptimeSeconds))
 
-        # A janela do prompt de boot e determinada pelo TEMPO DE VIDA da VM, nao
-        # pelo tamanho do VMDK: um disco thin nao encolhe quando o Setup o limpa,
-        # entao um disco grande pode conter uma instalacao ja apagada e o
-        # criterio de tamanho pularia a tecla justamente quando ela e necessaria.
-        $base = (Get-Item $vmdk).Length
-        $vmProc = @(Get-Process -Name 'vmware-vmx' -ErrorAction SilentlyContinue) | Select-Object -First 1
-        $uptime = if ($vmProc) { ((Get-Date) - $vmProc.StartTime).TotalSeconds } else { 0 }
-        $setupJaIniciou = $uptime -gt 120
-        if ($setupJaIniciou) {
-            Write-Gate5Log ("VM ligada ha {0:N0}s: a janela do prompt de boot ja passou; nenhuma tecla sera enviada." -f $uptime)
+        # --- 3) Janela do boot optico, com verificacao VISUAL ------------------
+        # A tecla so e enviada quando o framebuffer mostra a fase de firmware
+        # (tela preta de texto). No Windows Setup uma tecla poderia acionar um
+        # botao em foco, e por isso nunca e enviada la.
+        if ($bootKeySent) {
+            Write-Gate5Log 'Tecla de boot ja entregue nesta instalacao: nenhuma nova sera enviada (boot pelo disco esperado).'
         } else {
-            Write-Gate5Log ("VM ligada ha {0:N0}s: dentro da janela do prompt de boot." -f $uptime)
-        }
-        $entregue = $setupJaIniciou
-        if (-not $setupJaIniciou) { Write-Gate5Log 'VM ligada detectada; entregando a tecla do prompt de boot pelo console local.' }
-        for ($k = 0; (-not $setupJaIniciou) -and $k -lt 40; $k++) {
-            $r = Send-Gate5VncKey -Keysym 0xFF0D    # Enter
-            if ($k -eq 0) { Write-Gate5Log "Console VNC local: primeira tecla -> $r" }
-            if ($r -eq 'OK') { $entregue = $true }
-            Start-Sleep -Milliseconds 900
-            if ((Get-Item $vmdk).Length -gt ($base + 20MB)) { break }
-        }
-        if (-not $entregue) {
-            Stop-Gate5Blocked -Blocker 'BOOT_KEY_CHANNEL_UNAVAILABLE' -Detail @'
-Nao foi possivel entregar a tecla do prompt de boot pelo console VNC local
-(127.0.0.1). Sem ela a ISO oficial do Windows nao inicia o Setup.
+            $tela = Join-Path $script:Gate5EvidenceDir 'boot-window.png'
+            $ate  = [DateTime]::UtcNow.AddSeconds(180)
+            while ([DateTime]::UtcNow -lt $ate -and -not $bootKeySent) {
+                $cap = Save-Gate5VncScreenshot -Path $tela
+                if ($cap -eq 'OK') {
+                    $scr = Test-Gate5FirmwareScreen -ImagePath $tela
+                    if ($scr -and $scr.IsFirmware) {
+                        $r = Send-Gate5VncKey -Keysym 0xFF0D          # Enter: uma unica tecla
+                        Write-Gate5Log ("Prompt de boot optico detectado (dark={0}); tecla entregue: {1}" -f $scr.DarkFraction, $r)
+                        if ($r -eq 'OK') {
+                            $bootKeySent = $true
+                            Set-Gate5InstallNote 'boot_key_sent' $true
+                            Set-Gate5InstallNote 'installation_stage' 'DISK_BOOT_EXPECTED'
+                            Write-Gate5Log 'installation_stage=OPTICAL_BOOT_TRIGGERED -> DISK_BOOT_EXPECTED'
+                        }
+                    }
+                }
+                if (-not $bootKeySent) { Start-Sleep -Seconds 3 }
+            }
+            if (-not $bootKeySent) {
+                Stop-Gate5Blocked -Blocker 'OPTICAL_BOOT_PROMPT_NOT_SEEN' -Detail @'
+A janela do prompt de boot pelo CD nao foi observada no framebuffer local em 3
+minutos apos o power-on. Nenhuma tecla foi enviada (a automacao nao tecla no
+Windows Setup). Refaca o power-cycle com a automacao ja aguardando.
 '@
+            }
         }
-        Write-Gate5Log ("Prompt de boot respondido; disco cresceu {0} MB." -f [int](((Get-Item $vmdk).Length - $base) / 1MB))
 
-        # Espera a instalacao desassistida + Windows Update + coleta do payload.
-        # O guest reinicia sozinho quantas vezes precisar; o fim e sinalizado
-        # pela chegada do bloco de evidencia na serial.
+        # --- 4) Acompanhar a instalacao pelo canal serial ----------------------
+        # O guest reinicia sozinho quantas vezes precisar; nenhuma tecla de boot
+        # e enviada nesses reboots (boot_key_sent). O fim e sinalizado pela
+        # chegada do bloco COMPLETO de evidencia na serial.
         $limite = [DateTime]::UtcNow.AddHours(4)
         while ([DateTime]::UtcNow -lt $limite) {
             $ev = Get-Gate5SerialEvidence
@@ -313,10 +355,10 @@ Nao foi possivel entregar a tecla do prompt de boot pelo console VNC local
                 $destino = Join-Path $script:Gate5EvidenceDir 'guest-evidence.json'
                 ($ev | ConvertTo-Json -Depth 6) | Out-File $destino -Encoding utf8
                 Write-Gate5Log ("Evidencia recebida do guest: {0} build {1}" -f $ev.os_caption, $ev.os_build)
+                Set-Gate5InstallNote 'installation_stage' 'GUEST_REPORTED'
                 exit 0
             }
             if (-not (Test-Gate5VmPoweredOn)) {
-                Write-Gate5Log 'VM desligou antes de reportar evidencia.' 'WARN'
                 Start-Sleep -Seconds 60
                 if (-not (Get-Gate5SerialEvidence)) {
                     Stop-Gate5Human -Action 'POWER_ON_VM' -Detail 'A VM desligou sem reportar evidencia. Ligue-a novamente pela interface do VMware e reexecute gate5-provision.ps1.'

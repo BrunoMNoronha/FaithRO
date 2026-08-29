@@ -709,6 +709,46 @@ function Save-Gate5VncScreenshot {
     } finally { $client.Close() }
 }
 
+function Test-Gate5FirmwareScreen {
+    # Decide, pelo FRAMEBUFFER, se o guest esta na fase de firmware (prompt de
+    # boot pelo CD, lista de dispositivos ou Boot Manager) ou ja dentro do
+    # Windows Setup. E o que autoriza enviar a tecla do prompt: no firmware uma
+    # tecla e inofensiva, no Setup ela poderia acionar um botao em foco.
+    #
+    # Criterio: as telas de firmware sao quase totalmente pretas (texto claro
+    # sobre fundo preto), enquanto o Setup pinta a tela inteira de azul-escuro.
+    # Amostragem de 1 em cada 4 pixels nos dois eixos - suficiente e barato.
+    param([Parameter(Mandatory)][string]$ImagePath, [double]$MinDark = 0.90)
+    if (-not (Test-Path -LiteralPath $ImagePath)) { return $null }
+    Add-Type -AssemblyName System.Drawing -ErrorAction SilentlyContinue
+    $bmp = New-Object System.Drawing.Bitmap($ImagePath)
+    try {
+        $rect = New-Object System.Drawing.Rectangle(0, 0, $bmp.Width, $bmp.Height)
+        $bd = $bmp.LockBits($rect, [System.Drawing.Imaging.ImageLockMode]::ReadOnly,
+                            [System.Drawing.Imaging.PixelFormat]::Format32bppRgb)
+        try {
+            $bytes = New-Object byte[] ($bd.Stride * $bmp.Height)
+            [System.Runtime.InteropServices.Marshal]::Copy($bd.Scan0, $bytes, 0, $bytes.Length)
+            $escuros = 0; $total = 0
+            for ($y = 0; $y -lt $bmp.Height; $y += 4) {
+                $linha = $y * $bd.Stride
+                for ($x = 0; $x -lt $bmp.Width; $x += 4) {
+                    $i = $linha + $x * 4
+                    if ((([int]$bytes[$i] + [int]$bytes[$i + 1] + [int]$bytes[$i + 2]) / 3) -lt 32) { $escuros++ }
+                    $total++
+                }
+            }
+            $fracao = if ($total -gt 0) { [double]$escuros / $total } else { 0 }
+            return [pscustomobject]@{
+                DarkFraction = [math]::Round($fracao, 4)
+                IsFirmware   = ($fracao -ge $MinDark)
+                Width        = $bmp.Width
+                Height       = $bmp.Height
+            }
+        } finally { $bmp.UnlockBits($bd) }
+    } finally { $bmp.Dispose() }
+}
+
 function Get-Gate5IsoEntries {
     # Lista as entradas de um diretorio da ISO pelo namespace Joliet - que e o
     # que o Windows Setup usa para nomes longos como 'Autounattend.xml'. Serve

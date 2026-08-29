@@ -170,14 +170,40 @@ It 'fase Unattend nao mexe na midia com a VM em execucao' {
     ($boot -match 'if \(\(Test-Gate5VmPoweredOn\) -and \(Test-Path \$unattendIso\)\)')
 }
 
-It 'janela da tecla de boot vem do uptime da VM, nao do tamanho do disco' {
+It 'tecla de boot nunca depende do tamanho do VMDK' {
     # Regressao: um disco thin NAO encolhe quando o Setup o limpa, entao um VMDK
     # grande pode conter uma instalacao ja apagada. O criterio de tamanho pulava
     # o envio da tecla justamente quando ela era necessaria.
     $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
-    ($boot -match '\$setupJaIniciou = \$uptime -gt 120') -and
-    ($boot -notmatch '\$setupJaIniciou = \$base -gt') -and
-    ($boot -match 'for \(\$k = 0; \(-not \$setupJaIniciou\)')
+    ($boot -notmatch 'setupJaIniciou') -and
+    ($boot -match 'Get-VmUptimeSeconds')
+}
+
+It 'tecla de boot so e enviada com o firmware na tela' {
+    # No Windows Setup uma tecla poderia acionar um botao em foco; a tecla so
+    # sai quando o framebuffer mostra a fase de firmware (tela preta de texto).
+    $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
+    $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    ($comm -match 'function Test-Gate5FirmwareScreen') -and
+    ($boot -match 'if \(\$scr -and \$scr\.IsFirmware\)') -and
+    ($boot -match 'OPTICAL_BOOT_PROMPT_NOT_SEEN')
+}
+
+It 'estado boot_key_sent impede segunda tecla nos reboots' {
+    # Sem isso o Setup seria reiniciado pela ISO a cada reboot da instalacao.
+    $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
+    # Substring literal: escapar '$true' como regex em aspas duplas produz \T.
+    $boot.Contains("Set-Gate5InstallNote 'boot_key_sent' " + '$true') -and
+    ($boot -match "Set-Gate5InstallNote 'installation_stage' 'DISK_BOOT_EXPECTED'") -and
+    ($boot -match 'if \(\$bootKeySent\)') -and
+    ($boot -match 'nenhuma nova sera enviada')
+}
+
+It 'watcher aguarda o power-cycle sem depender do aviso do operador' {
+    $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
+    ($boot -match "action=POWER_CYCLE_VM") -and
+    ($boot -match 'while \(\[DateTime\]::UtcNow -lt \$ate -and \(Test-Gate5VmPoweredOn\)\)') -and
+    ($boot -match 'while \(\[DateTime\]::UtcNow -lt \$ate -and -not \(Test-Gate5VmPoweredOn\)\)')
 }
 
 It 'console local oferece teclado, combinacao e ponteiro' {
@@ -227,8 +253,8 @@ It 'automacao aguarda o power-on para pegar a janela do boot' {
     # operador avisa faz a automacao perde-la, como aconteceu na execucao real.
     $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
     ($boot -match 'AddMinutes\(30\)') -and
-    ($boot -match 'while \(\[DateTime\]::UtcNow -lt \$esperaAte -and -not \(Test-Gate5VmPoweredOn\)\)') -and
-    ($boot -match 'Power-on detectado')
+    ($boot -match 'Power-on detectado') -and
+    ($boot -match 'WAITING_POWER_ON')
 }
 
 It 'power-on de VM criptografada e gate humano com validacao automatica' {
@@ -512,9 +538,11 @@ It 'console VNC e local, temporario e verificado como removido' {
     ($ver    -match 'console-vnc-desligado')
 }
 
-It 'entrega da tecla de boot falha fechado se o console nao responder' {
+It 'entrega da tecla de boot falha fechado se o prompt nao aparecer' {
+    # Silencio nunca vira sucesso: sem observar o prompt no framebuffer, a etapa
+    # bloqueia em vez de teclar as cegas.
     $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
-    ($boot -match 'BOOT_KEY_CHANNEL_UNAVAILABLE') -and ($boot -match 'Send-Gate5VncKey -Keysym 0xFF0D')
+    ($boot -match 'OPTICAL_BOOT_PROMPT_NOT_SEEN') -and ($boot -match 'Send-Gate5VncKey -Keysym 0xFF0D')
 }
 
 It 'estado criptografico e reportado sem expor valores' {
