@@ -9,9 +9,13 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 # --- Caminhos canonicos -------------------------------------------------------
-$script:Gate5RepoRoot   = (git -C (Split-Path -Parent $PSScriptRoot) rev-parse --show-toplevel 2>$null)
-if (-not $script:Gate5RepoRoot) { throw 'GATE5: repositorio Git nao localizado a partir de scripts/lab.' }
-$script:Gate5RepoRoot   = $script:Gate5RepoRoot -replace '/', '\'
+# Raiz do repo derivada do caminho do script (scripts\lab -> raiz), sem git:
+# o provisionamento elevado pode rodar sob outra conta administradora, na qual
+# git falharia por "dubious ownership" no repo de outro usuario.
+$script:Gate5RepoRoot   = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+if (-not (Test-Path (Join-Path $script:Gate5RepoRoot 'scripts\lab\gate5-common.ps1'))) {
+    throw 'GATE5: raiz do repositorio nao derivada corretamente de scripts/lab.'
+}
 $script:Gate5LocalDir   = Join-Path $script:Gate5RepoRoot '.local\gate5-lab'
 $script:Gate5LogDir     = Join-Path $script:Gate5LocalDir 'logs'
 $script:Gate5SecretDir  = Join-Path $script:Gate5LocalDir 'secrets'
