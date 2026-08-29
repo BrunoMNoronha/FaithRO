@@ -35,6 +35,13 @@ $script:Gate5VmDir      = 'C:\VMs\FaithRO-GATE5-LAB'
 $script:Gate5VmxPath    = Join-Path $script:Gate5VmDir 'FaithRO-GATE5-LAB.vmx'
 $script:Gate5SnapshotName = 'BASELINE_GATE5_ISOLATED'
 
+# Portas de CD-ROM da VM, definidas em um unico lugar porque tres scripts as
+# referenciam (criacao, anexo do unattend e isolamento final). O VMware numera
+# os dispositivos SATA a partir da porta 0; usar portas 1/2 deixando a 0 vazia
+# nao e a convencao que o proprio produto gera.
+$script:Gate5CdOs       = 'sata0:0'   # ISO oficial do Windows
+$script:Gate5CdUnattend = 'sata0:1'   # ISO auxiliar com o Autounattend.xml
+
 $script:Gate5StagingDirs = @('C:\Users\bruno\Downloads', 'C:\Installers', 'C:\ISO', 'C:\VMs', 'C:\Tools')
 $script:Gate5YaraDir    = 'C:\Tools\YARA'
 $script:Gate5RulesDir   = 'C:\Tools\YARA-Rules'

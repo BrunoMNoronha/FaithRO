@@ -211,6 +211,35 @@ It 'nenhuma chave de produto do Windows no template' {
     ($tpl -notmatch '(?i)<ProductKey>') -and ($tpl -notmatch '[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}')
 }
 
+It 'portas de CD vem de uma definicao unica compartilhada' {
+    # Criacao, anexo do unattend e isolamento referenciam as mesmas portas; um
+    # literal solto em qualquer um deles deixaria a VM com duas unidades
+    # apontando para a mesma ISO ou com o CD errado desconectado no baseline.
+    $common = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    $declared = ($common -match 'Gate5CdOs\s*=') -and ($common -match 'Gate5CdUnattend\s*=')
+    $consumers = @('gate5-create-vm.ps1', 'gate5-guest-bootstrap.ps1', 'gate5-provision.ps1') |
+        ForEach-Object { Get-Content (Join-Path $labDir $_) -Raw }
+    $hardcoded = $consumers | Where-Object { $_ -match "'sata0:\d\." }
+    $declared -and (@($hardcoded).Count -eq 0)
+}
+
+It 'vTPM nao e dado como valido pela chave de auto-adicao' {
+    # Regressao: aceitar managedvm.autoAddVTPM como prova era um falso positivo
+    # - a chave e escrita pela propria automacao e o Workstation so a honra no
+    # fluxo gerenciado, nao em 'vmrun start' sobre um .vmx escrito a mao.
+    $ver  = Get-Content (Join-Path $labDir 'gate5-verify-baseline.ps1') -Raw
+    $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
+    ($ver -match "Check 'vtpm-vmx' \(\(Get-Gate5VmxValue 'vtpm\.present'\)") -and
+    ($boot -match 'VTPM_AUTOMATION_NOT_SUPPORTED')
+}
+
+It 'NVRAM so e descartada com o disco ainda vazio' {
+    # Descartar a NVRAM depois do Windows instalado apagaria a entrada de boot
+    # do proprio sistema; o criterio objetivo e o disco praticamente vazio.
+    $cv = Get-Content (Join-Path $labDir 'gate5-create-vm.ps1') -Raw
+    $cv -match '\$vmdkPath[^\r\n]*\)\.Length -lt 100MB'
+}
+
 It 'snapshot baseline so e criado apos a fase de isolamento' {
     $prov = Get-Content (Join-Path $labDir 'gate5-provision.ps1') -Raw
     $iIsolated = $prov.IndexOf("'ISOLATED'")

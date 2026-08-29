@@ -120,12 +120,13 @@ public static class Gate5IsoWriter {
         Write-Gate5Log "ISO de unattend gerada: $unattendIso (sera destruida na fase Sanitize)."
 
         # 4) Anexar como segundo CD-ROM no VMX (VM precisa estar desligada)
-        if (-not (Select-String -LiteralPath $script:Gate5VmxPath -Pattern '^sata0:2\.present' -Quiet)) {
+        $cd = $script:Gate5CdUnattend
+        if (-not (Select-String -LiteralPath $script:Gate5VmxPath -Pattern ('^{0}\.present' -f [regex]::Escape($cd)) -Quiet)) {
             $vmxLines = @(Get-Content -LiteralPath $script:Gate5VmxPath) + @(
-                'sata0:2.present = "TRUE"'
-                'sata0:2.deviceType = "cdrom-image"'
-                ('sata0:2.fileName = "{0}"' -f $unattendIso)
-                'sata0:2.startConnected = "TRUE"'
+                ('{0}.present = "TRUE"' -f $cd)
+                ('{0}.deviceType = "cdrom-image"' -f $cd)
+                ('{0}.fileName = "{1}"' -f $cd, $unattendIso)
+                ('{0}.startConnected = "TRUE"' -f $cd)
             )
             Set-Gate5TextFile -Path $script:Gate5VmxPath -Lines $vmxLines
         }
@@ -142,22 +143,55 @@ public static class Gate5IsoWriter {
             Write-Gate5Log 'VM ligada; aguardando instalacao unattended do Windows...'
         }
 
-        # Verificacao precoce do vTPM: 'managedvm.autoAddVTPM' e materializado
-        # pelo VMware no primeiro power-on. Sem TPM o Setup do Windows 11 aborta
-        # e so descobririamos isso apos o timeout de 2h. Falha rapido em vez de
-        # improvisar chaves .vmx desconhecidas (proibido).
-        Start-Sleep -Seconds 45
-        if (-not ((Get-Gate5VmxValue 'vtpm.present') -eq 'TRUE' -or (Get-Gate5VmxValue 'managedvm.autoAddVTPM') -eq 'software')) {
+        # Prompt "Press any key to boot from CD or DVD": a ISO oficial da
+        # Microsoft usa o carregador com prompt, e sem uma tecla o firmware
+        # desiste do CD e cai para os proximos dispositivos de boot. Enviamos
+        # teclas pelo canal suportado (vmcli MKS) durante a janela do prompt,
+        # parando assim que o disco comeca a crescer (Setup gravando).
+        $vmcli = Join-Path $vmware.InstallDir 'vmcli.exe'
+        $vmdk  = Join-Path $script:Gate5VmDir 'FaithRO-GATE5-LAB.vmdk'
+        $baseSize = (Get-Item $vmdk).Length
+        if (Test-Path $vmcli) {
+            for ($k = 0; $k -lt 20; $k++) {
+                Start-Sleep -Seconds 3
+                Invoke-Gate5Native -FilePath $vmcli -Arguments @($script:Gate5VmxPath, 'MKS', 'sendKeyEvent', '40', '0') | Out-Null
+                if ((Get-Item $vmdk).Length -gt ($baseSize + 10MB)) { break }
+            }
+            Write-Gate5Log 'Janela do prompt de boot pelo CD concluida.'
+        } else {
+            Write-Gate5Log "vmcli.exe nao localizado em $($vmware.InstallDir); prompt de boot pelo CD nao pode ser respondido." 'WARN'
+        }
+
+        # Verificacao do vTPM por EVIDENCIA, nao pela chave que nos mesmos
+        # escrevemos: 'managedvm.autoAddVTPM' e honrado pelo fluxo gerenciado do
+        # Workstation e NAO por 'vmrun start' sobre um .vmx escrito a mao, de
+        # modo que aceitar a propria chave como prova era um falso positivo. Sem
+        # TPM o Setup do Windows 11 aborta na checagem de requisitos. Nao ha
+        # como criar o vTPM por automacao sem o material de chave que so o
+        # VMware gera, e inventar valores .vmx e proibido.
+        $vmwareLog = Join-Path $script:Gate5VmDir 'vmware.log'
+        $tpmProved = ((Get-Gate5VmxValue 'vtpm.present') -eq 'TRUE')
+        if (-not $tpmProved -and (Test-Path $vmwareLog)) {
+            $tpmProved = [bool](Select-String -LiteralPath $vmwareLog -Pattern 'VTPM:|TPM device|vtpm.*(created|initialized)' -Quiet)
+        }
+        if (-not $tpmProved) {
             Stop-Gate5Blocked -Blocker 'VTPM_AUTOMATION_NOT_SUPPORTED' -Detail @'
-O VMware nao materializou um dispositivo TPM virtual a partir de
-managedvm.autoAddVTPM="software" no primeiro power-on desta VM. O Windows 11
-exige TPM 2.0 e o Setup abortaria. Nao ha mecanismo suportado alternativo que
-possa ser aplicado por automacao sem inventar chaves .vmx; adicionar o vTPM
-pela interface do Workstation (VM Settings -> Add -> Trusted Platform Module)
-e o unico passo humano necessario. Depois reexecute gate5-provision.ps1.
+Nenhum dispositivo TPM virtual foi materializado nesta VM. Verificado: o
+Workstation instalado nao expoe TPM nem criptografia em vmrun nem em vmcli
+(modulos disponiveis: Chipset, ConfigParams, Disk, Ethernet, Guest, HGFS, MKS,
+Nvme, Power, Sata, Serial, Snapshot, Tools, VM), e "managedvm.autoAddVTPM"
+nao e aplicado quando a VM e ligada por vmrun sobre um .vmx escrito a mao.
+O vTPM do Workstation exige criptografia parcial da VM, cujo material de chave
+so o proprio VMware gera - inventar essas chaves e proibido por esta etapa.
+
+UNICO PASSO HUMANO NECESSARIO: abrir o VMware Workstation, abrir a VM
+FaithRO-GATE5-LAB, VM Settings -> Add -> Trusted Platform Module, aceitar a
+criptografia proposta pelo produto (a senha NAO deve ser versionada nem
+registrada em log) e fechar. Depois reexecutar gate5-provision.ps1, que retoma
+do checkpoint atual automaticamente.
 '@
         }
-        Write-Gate5Log 'vTPM confirmado na configuracao da VM.'
+        Write-Gate5Log 'vTPM materializado e confirmado por evidencia.'
         $cred  = Get-GuestCredential
         $plain = $cred.GetNetworkCredential().Password
         $deadline = [DateTime]::UtcNow.AddHours(2)

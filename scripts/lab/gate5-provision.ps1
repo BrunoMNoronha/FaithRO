@@ -201,11 +201,19 @@ if (-not (Test-Gate5Phase $state 'ISOLATED')) {
         Start-Sleep -Seconds 30
     }
     # Editar VMX com a VM desligada: NIC permanece presente, porem desconectada
+    # Desconecta a NIC (sem remove-la) e o CD do sistema; o CD do unattend e
+    # retirado por completo, pois sua ISO e destruida na fase Sanitize.
+    $osCd  = [regex]::Escape($script:Gate5CdOs)
+    $unCd  = [regex]::Escape($script:Gate5CdUnattend)
     $vmx = Get-Content $script:Gate5VmxPath
-    $vmx = $vmx | Where-Object { $_ -notmatch '^ethernet0\.(startConnected|connected)\s*=' -and $_ -notmatch '^sata0:1\.startConnected\s*=' -and $_ -notmatch '^sata0:2\.' }
+    $vmx = $vmx | Where-Object {
+        $_ -notmatch '^ethernet0\.(startConnected|connected)\s*=' -and
+        $_ -notmatch ('^{0}\.startConnected\s*=' -f $osCd) -and
+        $_ -notmatch ('^{0}\.' -f $unCd)
+    }
     $vmx += 'ethernet0.startConnected = "FALSE"'
     $vmx += 'ethernet0.connected = "FALSE"'
-    $vmx += 'sata0:1.startConnected = "FALSE"'
+    $vmx += ('{0}.startConnected = "FALSE"' -f $script:Gate5CdOs)
     Set-Gate5TextFile -Path $script:Gate5VmxPath -Lines $vmx
     foreach ($pair in @(
         @('isolation.tools.copy.disable', 'TRUE'), @('isolation.tools.paste.disable', 'TRUE'),

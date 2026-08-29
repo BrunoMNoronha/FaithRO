@@ -28,8 +28,9 @@ if (Test-Path $script:Gate5VmxPath) {
     Check 'ram-4096' ((Get-Gate5VmxValue 'memsize') -eq '4096')
     Check 'uefi'     ((Get-Gate5VmxValue 'firmware') -eq 'efi')
     Check 'secureboot-vmx' ((Get-Gate5VmxValue 'uefi.secureBoot.enabled') -eq 'TRUE')
-    $vtpmCfg = (Get-Gate5VmxValue 'managedvm.autoAddVTPM') -eq 'software' -or (Get-Gate5VmxValue 'vtpm.present') -eq 'TRUE'
-    Check 'vtpm-vmx' $vtpmCfg
+    # Exige o dispositivo materializado. 'managedvm.autoAddVTPM' e apenas um
+    # pedido de auto-adicao e nao prova que existe um TPM na VM.
+    Check 'vtpm-vmx' ((Get-Gate5VmxValue 'vtpm.present') -eq 'TRUE')
     Check 'nic-startconnected-false' ((Get-Gate5VmxValue 'ethernet0.startConnected') -eq 'FALSE')
     $nicConn = Get-Gate5VmxValue 'ethernet0.connected'
     Check 'nic-disconnected' ($nicConn -eq 'FALSE' -or ((Get-Gate5VmxValue 'ethernet0.startConnected') -eq 'FALSE' -and $null -eq $nicConn))
