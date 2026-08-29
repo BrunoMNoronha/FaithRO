@@ -251,6 +251,32 @@ It 'console local oferece teclado, combinacao e ponteiro' {
     ($comm -match 'PointerEvent')
 }
 
+It 'payload emite batimentos de progresso pela serial' {
+    # Sem batimento o host so recebia sinal no FIM de tudo e nao distinguia
+    # "payload trabalhando" de "payload morto" - foi preciso pericia de tela.
+    $guest = Get-Content (Join-Path $labDir 'guest\gate5-payload.ps1') -Raw
+    $comm  = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    ($guest -match 'function Send-Heartbeat') -and
+    ($guest -match "Send-Heartbeat 'PAYLOAD_STARTED'") -and
+    ($guest -match "Send-Heartbeat 'UPDATE_SEARCH_DONE'") -and
+    ($comm  -match 'function Get-Gate5SerialStages')
+}
+
+It 'batimento nao afrouxa o parser fail-closed da evidencia' {
+    # Um batimento sozinho NAO pode ser lido como evidencia; so o bloco
+    # completo START->END vale.
+    $fake = Join-Path $tmp 'serial-heartbeat.txt'
+    Set-Content -LiteralPath $fake -Encoding ascii -Value '<<<GATE5-STAGE:UPDATE|2026-08-29T12:00:00Z|encontradas=3>>>'
+    $estagios = Get-Gate5SerialStages -Path $fake
+    $ev = Get-Gate5SerialEvidence -Path $fake
+    # E com o bloco completo, a evidencia passa a ser lida.
+    $cheio = Join-Path $tmp 'serial-cheio.txt'
+    Set-Content -LiteralPath $cheio -Encoding ascii -Value '<<<GATE5-STAGE:EVIDENCE|t>>><<<GATE5-EVIDENCE-BEGIN>>>{"os_build":"26200"}<<<GATE5-EVIDENCE-END>>>'
+    $ev2 = Get-Gate5SerialEvidence -Path $cheio
+    (@($estagios).Count -eq 1) -and ($estagios[0].Stage -eq 'UPDATE') -and
+    ($null -eq $ev) -and ($null -ne $ev2) -and ($ev2.os_build -eq '26200')
+}
+
 It 'evidencia sai do guest por canal serial de mao unica' {
     $common = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
     $boot   = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw

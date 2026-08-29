@@ -189,6 +189,27 @@ function Get-Gate5SerialEvidence {
     try { return ($m.Groups['j'].Value -replace '[\r\n]', '') | ConvertFrom-Json } catch { return $null }
 }
 
+function Get-Gate5SerialStages {
+    # Batimentos de progresso do payload. Servem para saber SE o guest esta
+    # trabalhando; nao substituem a evidencia, que continua exigindo o bloco
+    # completo START->END em Get-Gate5SerialEvidence (fail-closed inalterado).
+    param([string]$Path = $script:Gate5EvidenceSerial)
+    if (-not (Test-Path -LiteralPath $Path)) { return @() }
+    try {
+        $fs = [System.IO.File]::Open($Path, 'Open', 'Read', 'ReadWrite')
+        try { $texto = (New-Object System.IO.StreamReader($fs)).ReadToEnd() } finally { $fs.Close() }
+    } catch { return @() }
+    $saida = @()
+    foreach ($m in [regex]::Matches($texto, '<<<GATE5-STAGE:(?<n>[^|>]+)\|(?<t>[^|>]+)(\|(?<d>[^>]*))?>>>')) {
+        $saida += [pscustomobject]@{
+            Stage     = $m.Groups['n'].Value
+            Timestamp = $m.Groups['t'].Value
+            Detail    = $m.Groups['d'].Value
+        }
+    }
+    return $saida
+}
+
 function Stop-Gate5Paused {
     param([Parameter(Mandatory)][string]$Reason, [string]$Detail = '')
     Write-Gate5Log "LAB_AUTOPROVISION_PAUSED reason=$Reason $Detail" 'PAUSE'

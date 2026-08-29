@@ -48,8 +48,21 @@ function Send-Serial([string]$Text) {
     }
 }
 
+function Send-Heartbeat([string]$Estagio, [string]$Detalhe = '') {
+    # Batimento de progresso pela serial. Sem isto o host so recebia sinal no
+    # FIM de tudo e nao conseguia distinguir "payload trabalhando" de "payload
+    # morto" - foi preciso pericia de tela para saber que o script rodava.
+    # Marcador proprio, diferente do bloco de evidencia, para nao confundir o
+    # parser fail-closed do host.
+    $m = '<<<GATE5-STAGE:' + $Estagio + '|' + ([DateTime]::UtcNow.ToString('s')) + 'Z'
+    if ($Detalhe) { $m += '|' + $Detalhe }
+    $m += '>>>'
+    [void](Send-Serial $m)
+    Write-Log ("heartbeat " + $Estagio + " " + $Detalhe)
+}
+
 function Get-Stage { if (Test-Path $StageFile) { (Get-Content $StageFile -Raw).Trim() } else { 'INSTALL' } }
-function Set-Stage([string]$s) { Set-Content -LiteralPath $StageFile -Value $s -Encoding ascii; Write-Log "stage=$s" }
+function Set-Stage([string]$s) { Set-Content -LiteralPath $StageFile -Value $s -Encoding ascii; Write-Log "stage=$s"; Send-Heartbeat $s }
 
 function Find-PayloadRoot {
     # A midia controlada e reconhecida por um marcador proprio, nunca por letra
@@ -79,6 +92,9 @@ function Unregister-StartupTask {
 
 New-Item -ItemType Directory -Force $Gate5Dir | Out-Null
 Write-Log '=== payload GATE 5 iniciado ==='
+# Primeiro sinal de vida: prova ao host que FirstLogonCommands disparou e que o
+# script esta executando, antes de qualquer etapa demorada.
+Send-Heartbeat 'PAYLOAD_STARTED' ("stage=" + (Get-Stage))
 
 # ---------------------------------------------------------------- INSTALL ----
 if ((Get-Stage) -eq 'INSTALL') {
@@ -105,6 +121,7 @@ if ((Get-Stage) -eq 'UPDATE') {
         $searcher = $session.CreateUpdateSearcher()
         $result   = $searcher.Search("IsInstalled=0 and IsHidden=0 and Type='Software'")
         Write-Log ("Windows Update: encontradas=" + $result.Updates.Count)
+        Send-Heartbeat 'UPDATE_SEARCH_DONE' ("encontradas=" + $result.Updates.Count)
         if ($result.Updates.Count -gt 0) {
             $coll = New-Object -ComObject Microsoft.Update.UpdateColl
             foreach ($u in $result.Updates) { if (-not $u.EulaAccepted) { $u.AcceptEula() }; $coll.Add($u) | Out-Null }
@@ -112,6 +129,7 @@ if ((Get-Stage) -eq 'UPDATE') {
             $inst = $session.CreateUpdateInstaller(); $inst.Updates = $coll
             $ir = $inst.Install()
             Write-Log ("Windows Update: instaladas=" + $coll.Count + " reboot=" + $ir.RebootRequired)
+            Send-Heartbeat 'UPDATE_INSTALLED' ("instaladas=" + $coll.Count + ";reboot=" + $ir.RebootRequired)
             if ($ir.RebootRequired) { Write-Log 'reiniciando o guest para concluir as atualizacoes'; Restart-Computer -Force; exit 0 }
             # Ainda pode haver updates encadeados: repete no proximo ciclo.
             Restart-Computer -Force
