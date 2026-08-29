@@ -1,10 +1,10 @@
 # Autoprovisionamento automatizado do laboratório GATE 5
 
-> **Etapa:** 2P-E-C5-LAB-AUTOPROVISION  
-> **Predecessor:** 2P-E-C5-LAB-PROVISION-EXEC (resultado: bloqueado — host sem VMware Workstation Pro 26H1 e sem ISO oficial do Windows 11)  
-> **Especificação de base:** [doc 47](47-provisao-laboratorio-gate-5.md)  
-> **Estado desta etapa:** `LAB_AUTOPROVISION_BLOCKED` — VMware, ISO e VM prontos; o boot da ISO foi **resolvido e comprovado**; resta um único gate humano: adicionar o vTPM pela interface do Workstation (ver §11)  
-> **Data:** 2026-08-28; execução real e recuperação em 2026-08-29 (etapa 2P-E-C5-LAB-VTPM-BOOT-RECOVERY)
+> - **Etapa:** 2P-E-C5-LAB-AUTOPROVISION
+> - **Predecessor:** 2P-E-C5-LAB-PROVISION-EXEC (resultado: bloqueado — host sem VMware Workstation Pro 26H1 e sem ISO oficial do Windows 11)
+> - **Especificação de base:** [doc 47](47-provisao-laboratorio-gate-5.md)
+> - **Estado desta etapa:** `LAB_AUTOPROVISION_BLOCKED` — VMware, ISO e VM prontos; o boot da ISO foi **resolvido e comprovado**; resta um único gate humano: adicionar o vTPM pela interface do Workstation (ver §11)
+> - **Data:** 2026-08-28; execução real e recuperação em 2026-08-29 (etapa 2P-E-C5-LAB-VTPM-BOOT-RECOVERY)
 
 ```text
 target_materialized=false
