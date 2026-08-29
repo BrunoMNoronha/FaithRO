@@ -43,7 +43,14 @@ if (Test-Path $script:Gate5VmxPath) {
         # sistema sumiu do Boot Manager ate a NVRAM ser descartada). So e seguro
         # descartar enquanto o Windows ainda nao foi instalado - criterio
         # objetivo: o disco virtual ainda esta praticamente vazio.
-        if ((Get-Item -LiteralPath $vmdkPath -ErrorAction SilentlyContinue).Length -lt 100MB) {
+        #
+        # E NUNCA em VM criptografada: a partir do vTPM, a NVRAM guarda o estado
+        # persistente do TPM virtual. Descarta-la ali destruiria em silencio o
+        # dispositivo que o operador acabou de criar pela interface do VMware.
+        $cryptoState = Get-Gate5VmEncryptionState
+        if ($cryptoState.Encrypted -or $cryptoState.VtpmPresent) {
+            Write-Gate5Log 'VM com vTPM/criptografia: NVRAM preservada (guarda o estado do TPM).'
+        } elseif ((Get-Item -LiteralPath $vmdkPath -ErrorAction SilentlyContinue).Length -lt 100MB) {
             $stale += @(Get-ChildItem -LiteralPath $script:Gate5VmDir -File -ErrorAction SilentlyContinue |
                         Where-Object { $_.Name -eq 'nvram' -or $_.Extension -eq '.nvram' })
         }

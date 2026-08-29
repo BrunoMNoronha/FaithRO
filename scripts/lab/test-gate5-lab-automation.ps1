@@ -361,6 +361,18 @@ It 'credencial ilegivel com guest instalado falha fechado' {
     ($boot -match 'GUEST_CREDENTIAL_UNREADABLE') -and ($boot -match 'Test-GuestCredentialUsable')
 }
 
+It 'NVRAM nunca e descartada em VM com vTPM ou criptografia' {
+    # A partir do vTPM a NVRAM guarda o estado persistente do TPM virtual;
+    # descarta-la destruiria em silencio o dispositivo criado pelo operador.
+    # O disco ainda vazio (criterio antigo) NAO pode mais autorizar a remocao.
+    $cv = Get-Content (Join-Path $labDir 'gate5-create-vm.ps1') -Raw
+    $iCrypto = $cv.IndexOf('$cryptoState = Get-Gate5VmEncryptionState')
+    $iDisco  = $cv.IndexOf('-lt 100MB')
+    ($iCrypto -gt 0) -and ($iDisco -gt $iCrypto) -and
+    ($cv -match 'if \(\$cryptoState\.Encrypted -or \$cryptoState\.VtpmPresent\)') -and
+    ($cv -match '\} elseif \(\(Get-Item -LiteralPath \$vmdkPath')
+}
+
 It 'NVRAM so e descartada com o disco ainda vazio' {
     # Descartar a NVRAM depois do Windows instalado apagaria a entrada de boot
     # do proprio sistema; o criterio objetivo e o disco praticamente vazio.
