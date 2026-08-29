@@ -65,7 +65,9 @@ if (Test-Path $defEv)   { $d = Get-Content $defEv -Raw | ConvertFrom-Json; Check
 
 # --- Prova dentro do guest (VM isolada; power-on -> coleta -> power-off) ------
 $guestProof = $null
-if ($vmware -and (Test-Path $script:Gate5VmxPath) -and $failures.Count -eq 0) {
+# A prova no guest roda mesmo com falhas ja registradas no host: interromper
+# aqui esconderia o estado real do guest justamente no relatorio de diagnostico.
+if ($vmware -and (Test-Path $script:Gate5VmxPath)) {
     $credFile = Join-Path $script:Gate5SecretDir 'guest-credential.xml'
     if (-not (Test-Path $credFile)) {
         Check 'guest-proof' $false 'credencial de verificacao ausente (esperada em .local; nunca versionada)'

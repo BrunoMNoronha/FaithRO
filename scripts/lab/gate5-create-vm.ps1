@@ -30,9 +30,9 @@ if (Test-Path $vmdkPath) {
     Write-Gate5Log "VMDK ja existe, preservando: $vmdkPath"
 } else {
     Write-Gate5Log 'Criando VMDK thin de 60 GB (nvme, growable)...'
-    & $vmware.VdiskManagerExe -c -s 60GB -a nvme -t 0 $vmdkPath
-    if ($LASTEXITCODE -ne 0 -or -not (Test-Path $vmdkPath)) {
-        throw "GATE5: vmware-vdiskmanager falhou (exit $LASTEXITCODE)."
+    $vd = Invoke-Gate5Native -FilePath $vmware.VdiskManagerExe -Arguments @('-c', '-s', '60GB', '-a', 'nvme', '-t', '0', $vmdkPath)
+    if ($vd.ExitCode -ne 0 -or -not (Test-Path $vmdkPath)) {
+        throw ("GATE5: vmware-vdiskmanager falhou (exit {0}): {1}" -f $vd.ExitCode, ($vd.Output -join ' | '))
     }
 }
 
@@ -82,7 +82,7 @@ if (Test-Path $script:Gate5VmxPath) {
         'sharedFolder.maxNum = "0"'
         'tools.upgrade.policy = "manual"'
     )
-    Set-Content -Path $script:Gate5VmxPath -Value ($vmx -join "`r`n") -Encoding utf8
+    Set-Gate5TextFile -Path $script:Gate5VmxPath -Lines $vmx
     Write-Gate5Log "VMX criado: $($script:Gate5VmxPath)"
 }
 

@@ -8,6 +8,14 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# TLS 1.2+ explicito: o PowerShell 5.1 ainda negocia SSL3/TLS1.0 por padrao e
+# as fontes oficiais aprovadas (api.github.com / objects.githubusercontent.com)
+# recusam handshakes abaixo de TLS 1.2. Sem isto a fase Yara falha na conexao.
+try {
+    [Net.ServicePointManager]::SecurityProtocol =
+        [Net.SecurityProtocolType]::Tls12 -bor [Net.ServicePointManager]::SecurityProtocol
+} catch {}
+
 # --- Caminhos canonicos -------------------------------------------------------
 # Raiz do repo derivada do caminho do script (scripts\lab -> raiz), sem git:
 # o provisionamento elevado pode rodar sob outra conta administradora, na qual
@@ -54,8 +62,16 @@ function Initialize-Gate5Log {
     foreach ($d in @($script:Gate5LocalDir, $script:Gate5LogDir, $script:Gate5SecretDir, $script:Gate5EvidenceDir)) {
         if (-not (Test-Path $d)) { New-Item -ItemType Directory -Force $d | Out-Null }
     }
-    $stamp = [DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss')
-    $script:Gate5LogFile = Join-Path $script:Gate5LogDir "provision-$stamp.log"
+    # Um unico log por execucao, compartilhado com os processos filhos via
+    # GATE5_LOG_FILE: sem isto cada fase gerava um arquivo solto e a trilha de
+    # auditoria ficava fragmentada entre pai e filhos.
+    if ($env:GATE5_LOG_FILE) {
+        $script:Gate5LogFile = $env:GATE5_LOG_FILE
+    } else {
+        $stamp = [DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss')
+        $script:Gate5LogFile = Join-Path $script:Gate5LogDir "provision-$stamp.log"
+        $env:GATE5_LOG_FILE = $script:Gate5LogFile
+    }
 }
 
 function Write-Gate5Log {
@@ -134,6 +150,31 @@ function Get-Gate5Sha256 {
     return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
 }
 
+function Set-Gate5TextFile {
+    # Grava texto em UTF-8 SEM BOM com quebras CRLF. Necessario para arquivos
+    # .vmx: Set-Content -Encoding utf8 no PowerShell 5.1 prefixa um BOM, que o
+    # VMware pode rejeitar ao interpretar a primeira chave de configuracao.
+    param([Parameter(Mandatory)][string]$Path, [Parameter(Mandatory)][string[]]$Lines)
+    $text = ($Lines -join "`r`n") + "`r`n"
+    [System.IO.File]::WriteAllText($Path, $text, (New-Object System.Text.UTF8Encoding($false)))
+}
+
+function Invoke-Gate5Native {
+    # Executa um programa nativo capturando stdout+stderr sem que o
+    # NativeCommandError do PowerShell 5.1 dispare por causa de
+    # $ErrorActionPreference='Stop' (stderr redirecionado vira ErrorRecord).
+    param([Parameter(Mandatory)][string]$FilePath, [string[]]$Arguments = @())
+    $previous = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $out = & $FilePath @Arguments 2>&1 | ForEach-Object { [string]$_ }
+        $code = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previous
+    }
+    return [pscustomobject]@{ ExitCode = [int]$code; Output = @($out) }
+}
+
 function Test-Gate5Elevated {
     $id = [Security.Principal.WindowsIdentity]::GetCurrent()
     return ([Security.Principal.WindowsPrincipal]$id).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -176,6 +217,17 @@ function Find-Gate5File {
     return $found | Sort-Object LastWriteTime -Descending
 }
 
+function Get-Gate5IsoSidecar {
+    # Caminho do sidecar com o SHA-256 oficial da Microsoft ao lado da ISO,
+    # ou $null se ausente. Aceita '<iso>.sha256.official' e a variante '.txt'
+    # (o Bloco de Notas do Windows acrescenta .txt ao salvar).
+    param([Parameter(Mandatory)][string]$IsoPath)
+    foreach ($cand in @("$IsoPath.sha256.official", "$IsoPath.sha256.official.txt")) {
+        if (Test-Path -LiteralPath $cand) { return $cand }
+    }
+    return $null
+}
+
 function Assert-Gate5AuthenticodeValid {
     param(
         [Parameter(Mandatory)][string]$Path,
@@ -198,15 +250,20 @@ function Invoke-Gate5Vmrun {
         [Parameter(Mandatory)][string[]]$Arguments,
         [switch]$AllowFailure
     )
-    $printable = ($Arguments | ForEach-Object { if ($_ -match '^-g[up]$') { '<redacted-flag>' } else { $_ } }) -join ' '
-    Write-Gate5Log "vmrun $printable"
-    $out = & $Vmware.VmrunExe -T ws @Arguments 2>&1
-    $code = $LASTEXITCODE
-    if ($code -ne 0 -and -not $AllowFailure) {
-        Write-Gate5Log "vmrun exit=$code saida=$out" 'ERROR'
-        throw "GATE5: vmrun falhou (exit $code): $out"
+    # Redacao: '-gu'/'-gp' sao seguidos do usuario/senha do guest; suprimimos o
+    # proprio valor, nao apenas a flag, para que nada vaze no log.
+    $printable = @()
+    for ($i = 0; $i -lt $Arguments.Count; $i++) {
+        if ($Arguments[$i] -match '^-g[up]$') { $printable += $Arguments[$i]; $printable += '<redacted>'; $i++ }
+        else { $printable += $Arguments[$i] }
     }
-    return [pscustomobject]@{ ExitCode = $code; Output = $out }
+    Write-Gate5Log ("vmrun " + ($printable -join ' '))
+    $r = Invoke-Gate5Native -FilePath $Vmware.VmrunExe -Arguments (@('-T', 'ws') + $Arguments)
+    if ($r.ExitCode -ne 0 -and -not $AllowFailure) {
+        Write-Gate5Log ("vmrun exit={0} saida={1}" -f $r.ExitCode, ($r.Output -join ' | ')) 'ERROR'
+        throw ("GATE5: vmrun falhou (exit {0}): {1}" -f $r.ExitCode, ($r.Output -join ' | '))
+    }
+    return $r
 }
 
 function Get-Gate5VmxValue {

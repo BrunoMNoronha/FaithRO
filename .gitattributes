@@ -66,3 +66,9 @@ client/warp-audit/evidence/binary-audit-gate-04-static-inventory-output-*.json t
 # prende-los). Ver docs/45. Sem fixar SHA-256 (nao ha saida real do GATE 5).
 scripts/warp-audit-gate-05.py text eol=lf
 scripts/test-warp-audit-gate-05.py text eol=lf
+
+# Automacao do laboratorio GATE 5 (2P-E-C5-LAB-AUTOPROVISION): os scripts de
+# provisionamento e seus testes DEVEM permanecer em LF inclusive em checkouts
+# Windows com core.autocrlf=true, para que o conteudo versionado seja
+# byte-identico em qualquer maquina que reexecute a automacao. Ver docs/48.
+scripts/lab/** text eol=lf

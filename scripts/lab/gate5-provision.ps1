@@ -21,9 +21,14 @@ Write-Gate5Log '=== ETAPA 2P-E-C5-LAB-AUTOPROVISION: inicio/retomada ==='
 $state = Get-Gate5State
 
 function Invoke-Gate5Child {
+    # Retorna SOMENTE o exit code do filho. A saida do processo filho e
+    # reemitida com Write-Host: se ela caisse no pipeline da funcao, o valor de
+    # retorno viraria um array (linhas + codigo) e '$code -ne 0' seria sempre
+    # verdadeiro, bloqueando a etapa mesmo com o filho retornando 0.
     param([Parameter(Mandatory)][string]$Script, [string[]]$Arguments = @())
-    & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot $Script) @Arguments
-    return $LASTEXITCODE
+    & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot $Script) @Arguments |
+        ForEach-Object { Write-Host $_ }
+    return [int]$LASTEXITCODE
 }
 
 # =============================================================================
@@ -74,7 +79,12 @@ Depois reexecute .\scripts\lab\gate5-provision.ps1 (retomada automatica).
         # Windows do Workstation Pro (formato oficial /s /v"/qn ..."). Confirmar
         # contra a documentacao 26H1 se a instalacao falhar.
         Write-Gate5Log 'Executando instalacao silenciosa (parametros oficiais documentados)...'
-        $p = Start-Process -FilePath $inst.FullName -ArgumentList '/s', '/v', '/qn EULAS_AGREED=1 REBOOT=ReallySuppress AUTOSOFTWAREUPDATE=0 DATACOLLECTION=0' -Wait -PassThru
+        # Formato oficial do instalador Windows do Workstation Pro: /s /v"<props>"
+        # sem espaco entre /v e as aspas. Passar como UMA string preserva a
+        # sintaxe; um array de argumentos insere um espaco apos /v e o
+        # instalador ignora as propriedades, caindo para modo interativo.
+        $installArgs = '/s /v"/qn EULAS_AGREED=1 REBOOT=ReallySuppress AUTOSOFTWAREUPDATE=0 DATACOLLECTION=0"'
+        $p = Start-Process -FilePath $inst.FullName -ArgumentList $installArgs -Wait -PassThru
         Write-Gate5Log "Instalador exit=$($p.ExitCode)"
         if ($p.ExitCode -eq 3010) {
             # 3010 = ERROR_SUCCESS_REBOOT_REQUIRED: NAO reiniciar silenciosamente
@@ -113,22 +123,30 @@ da Microsoft ("Verify your download") para um arquivo <nome-da-iso>.sha256.offic
 no mesmo diretorio. Depois reexecute .\scripts\lab\gate5-provision.ps1.
 '@
     }
-    $iso = $isoCandidates | Select-Object -First 1
-    Write-Gate5Log ("ISO candidata: {0} ({1:N1} GB)" -f $iso.FullName, ($iso.Length / 1GB))
-    $isoSha = Get-Gate5Sha256 -Path $iso.FullName
-    Write-Gate5Log "ISO sha256=$isoSha"
-    # Comprovacao de procedencia fail-closed: hash oficial da Microsoft copiado
-    # pelo operador da propria pagina de download (sidecar .sha256.official).
-    $sidecar = "$($iso.FullName).sha256.official"
-    if (-not (Test-Path $sidecar) -and (Test-Path "$sidecar.txt")) { $sidecar = "$sidecar.txt" }
-    if (-not (Test-Path $sidecar)) {
+    # Selecao determinista por PROCEDENCIA, nao por data: copias da mesma ISO
+    # podem existir em varios diretorios de staging com o mesmo timestamp, e
+    # escolher a mais recente poderia cair numa copia sem comprovacao oficial.
+    # So e candidata a ISO que tenha o sidecar com o SHA-256 da Microsoft.
+    Write-Gate5Log ("ISOs Windows 11 encontradas: {0}" -f (@($isoCandidates).Count))
+    $iso = $null; $sidecar = $null
+    foreach ($cand in $isoCandidates) {
+        $sc = Get-Gate5IsoSidecar -IsoPath $cand.FullName
+        if ($sc) { $iso = $cand; $sidecar = $sc; break }
+        Write-Gate5Log ("ISO ignorada (sem sidecar de hash oficial): {0}" -f $cand.FullName) 'WARN'
+    }
+    if (-not $iso) {
         Stop-Gate5Blocked -Blocker 'WINDOWS_ISO_PROVENANCE_UNVERIFIED' -Detail @"
-ISO encontrada mas sem comprovacao de procedencia oficial. Crie o arquivo
-$sidecar
-contendo apenas o SHA-256 oficial exibido pela Microsoft na pagina de download
+ISO(s) encontrada(s), porem nenhuma com comprovacao de procedencia oficial.
+Ao lado da ISO oficial, crie o arquivo <nome-da-iso>.sha256.official.txt
+contendo apenas o SHA-256 exibido pela Microsoft na pagina de download
 (secao "Verify your download") e reexecute a automacao.
+Candidatas avaliadas:
+$(@($isoCandidates | ForEach-Object { '  - ' + $_.FullName }) -join "`n")
 "@
     }
+    Write-Gate5Log ("ISO selecionada: {0} ({1:N1} GB)" -f $iso.FullName, ($iso.Length / 1GB))
+    $isoSha = Get-Gate5Sha256 -Path $iso.FullName
+    Write-Gate5Log "ISO sha256=$isoSha"
     $official = (Get-Content $sidecar -Raw).Trim().ToLowerInvariant()
     if ($official -notmatch '^[0-9a-f]{64}$') { Stop-Gate5Blocked -Blocker 'WINDOWS_ISO_OFFICIAL_HASH_MALFORMED' -Detail $sidecar }
     if ($official -ne $isoSha) { Stop-Gate5Blocked -Blocker 'WINDOWS_ISO_HASH_MISMATCH' -Detail "oficial=$official calculado=$isoSha" }
@@ -188,7 +206,7 @@ if (-not (Test-Gate5Phase $state 'ISOLATED')) {
     $vmx += 'ethernet0.startConnected = "FALSE"'
     $vmx += 'ethernet0.connected = "FALSE"'
     $vmx += 'sata0:1.startConnected = "FALSE"'
-    Set-Content -Path $script:Gate5VmxPath -Value $vmx -Encoding utf8
+    Set-Gate5TextFile -Path $script:Gate5VmxPath -Lines $vmx
     foreach ($pair in @(
         @('isolation.tools.copy.disable', 'TRUE'), @('isolation.tools.paste.disable', 'TRUE'),
         @('isolation.tools.dnd.disable', 'TRUE'), @('isolation.tools.hgfs.disable', 'TRUE'))) {

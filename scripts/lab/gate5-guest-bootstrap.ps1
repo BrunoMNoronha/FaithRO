@@ -91,7 +91,6 @@ switch ($Phase) {
         $img = $fsi.CreateResultImage()
         $stream = $img.ImageStream
         # gravar o stream COM em arquivo
-        $ctype = [Type]::GetTypeFromCLSID('0000000C-0000-0000-C000-000000000046')
         Add-Type -TypeDefinition @'
 using System;
 using System.IO;
@@ -122,12 +121,13 @@ public static class Gate5IsoWriter {
 
         # 4) Anexar como segundo CD-ROM no VMX (VM precisa estar desligada)
         if (-not (Select-String -LiteralPath $script:Gate5VmxPath -Pattern '^sata0:2\.present' -Quiet)) {
-            Add-Content -Path $script:Gate5VmxPath -Encoding utf8 -Value @(
+            $vmxLines = @(Get-Content -LiteralPath $script:Gate5VmxPath) + @(
                 'sata0:2.present = "TRUE"'
                 'sata0:2.deviceType = "cdrom-image"'
                 ('sata0:2.fileName = "{0}"' -f $unattendIso)
                 'sata0:2.startConnected = "TRUE"'
             )
+            Set-Gate5TextFile -Path $script:Gate5VmxPath -Lines $vmxLines
         }
         exit 0
     }
@@ -141,6 +141,23 @@ public static class Gate5IsoWriter {
             Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('start', $script:Gate5VmxPath, 'nogui') | Out-Null
             Write-Gate5Log 'VM ligada; aguardando instalacao unattended do Windows...'
         }
+
+        # Verificacao precoce do vTPM: 'managedvm.autoAddVTPM' e materializado
+        # pelo VMware no primeiro power-on. Sem TPM o Setup do Windows 11 aborta
+        # e so descobririamos isso apos o timeout de 2h. Falha rapido em vez de
+        # improvisar chaves .vmx desconhecidas (proibido).
+        Start-Sleep -Seconds 45
+        if (-not ((Get-Gate5VmxValue 'vtpm.present') -eq 'TRUE' -or (Get-Gate5VmxValue 'managedvm.autoAddVTPM') -eq 'software')) {
+            Stop-Gate5Blocked -Blocker 'VTPM_AUTOMATION_NOT_SUPPORTED' -Detail @'
+O VMware nao materializou um dispositivo TPM virtual a partir de
+managedvm.autoAddVTPM="software" no primeiro power-on desta VM. O Windows 11
+exige TPM 2.0 e o Setup abortaria. Nao ha mecanismo suportado alternativo que
+possa ser aplicado por automacao sem inventar chaves .vmx; adicionar o vTPM
+pela interface do Workstation (VM Settings -> Add -> Trusted Platform Module)
+e o unico passo humano necessario. Depois reexecute gate5-provision.ps1.
+'@
+        }
+        Write-Gate5Log 'vTPM confirmado na configuracao da VM.'
         $cred  = Get-GuestCredential
         $plain = $cred.GetNetworkCredential().Password
         $deadline = [DateTime]::UtcNow.AddHours(2)
@@ -242,11 +259,11 @@ $sig = Get-AuthenticodeSignature $mpCmd
         if (-not (Test-Path $zipPath)) {
             $api = 'https://api.github.com/repos/VirusTotal/yara/releases/tags/v4.5.5'
             Write-Gate5Log "Consultando metadados da release oficial: $api"
-            $rel = Invoke-RestMethod -Uri $api -Headers @{ 'User-Agent' = 'FaithRO-GATE5-Lab' }
+            $rel = Invoke-RestMethod -Uri $api -Headers @{ 'User-Agent' = 'FaithRO-GATE5-Lab' } -UseBasicParsing
             $asset = $rel.assets | Where-Object { $_.name -match '^yara-(v?)4\.5\.5.*win64\.zip$' } | Select-Object -First 1
             if (-not $asset) { throw 'GATE5: asset win64 da release v4.5.5 nao localizado nos metadados oficiais.' }
             Write-Gate5Log ("Baixando asset oficial: {0} ({1} bytes)" -f $asset.name, $asset.size)
-            Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zipPath
+            Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zipPath -UseBasicParsing
             if ((Get-Item $zipPath).Length -ne $asset.size) { throw 'GATE5: tamanho do download nao confere com os metadados da release.' }
         }
         $zipSha = Get-Gate5Sha256 -Path $zipPath
@@ -255,8 +272,9 @@ $sig = Get-AuthenticodeSignature $mpCmd
         $yaraExe  = Get-ChildItem (Join-Path $stage 'extracted') -Recurse -Filter 'yara64.exe'  | Select-Object -First 1
         $yaracExe = Get-ChildItem (Join-Path $stage 'extracted') -Recurse -Filter 'yarac64.exe' | Select-Object -First 1
         if (-not $yaraExe -or -not $yaracExe) { throw 'GATE5: yara64.exe/yarac64.exe ausentes no asset oficial.' }
-        $ver = & $yaraExe.FullName --version
-        if ($ver.Trim() -ne $script:Gate5YaraVersion) { throw "GATE5: versao YARA inesperada no host: '$ver' (esperado 4.5.5)." }
+        $verRun = Invoke-Gate5Native -FilePath $yaraExe.FullName -Arguments @('--version')
+        $ver = ($verRun.Output -join '').Trim()
+        if ($ver -ne $script:Gate5YaraVersion) { throw "GATE5: versao YARA inesperada no host: '$ver' (esperado 4.5.5)." }
 
         $evidence = [ordered]@{
             schema         = 'gate5-lab-yara/v1'
@@ -264,7 +282,7 @@ $sig = Get-AuthenticodeSignature $mpCmd
             zip_sha256     = $zipSha
             yara64_sha256  = Get-Gate5Sha256 -Path $yaraExe.FullName
             yarac64_sha256 = Get-Gate5Sha256 -Path $yaracExe.FullName
-            version        = $ver.Trim()
+            version        = $ver
             timestamp_utc  = [DateTime]::UtcNow.ToString('s') + 'Z'
         }
         $evidence | ConvertTo-Json | Out-File (Join-Path $script:Gate5EvidenceDir 'yara.json') -Encoding utf8
@@ -298,21 +316,50 @@ if ($v.Trim() -ne "4.5.5") { exit 1 }
         $rulesRepo = Join-Path $script:Gate5LocalDir 'yara-rules-src'
         $pinFile   = Join-Path $script:Gate5EvidenceDir 'ruleset-pin.json'
 
+        # A aquisicao NAO usa 'git': o provisionamento roda elevado sob outra
+        # conta administradora, onde uma instalacao per-user do git nao esta no
+        # PATH. O SHA-40 da branch default e resolvido pela API oficial, fixado,
+        # e o conteudo e materializado pelo zipball daquele commit exato.
+        $ua = @{ 'User-Agent' = 'FaithRO-GATE5-Lab' }
         if (Test-Path $pinFile) {
             $pin = (Get-Content $pinFile -Raw | ConvertFrom-Json).commit_sha40
             Write-Gate5Log "Ruleset ja pinado: $pin"
         } else {
-            git clone --quiet https://github.com/Yara-Rules/rules $rulesRepo
-            $pin = (git -C $rulesRepo rev-parse HEAD).Trim()
+            $repoMeta = Invoke-RestMethod -Uri 'https://api.github.com/repos/Yara-Rules/rules' -Headers $ua -UseBasicParsing
+            $branch   = [string]$repoMeta.default_branch
+            $head     = Invoke-RestMethod -Uri ('https://api.github.com/repos/Yara-Rules/rules/commits/' + $branch) -Headers $ua -UseBasicParsing
+            $pin      = [string]$head.sha
             if ($pin -notmatch '^[0-9a-f]{40}$') { throw 'GATE5: SHA-40 do ruleset nao resolvido.' }
-            [ordered]@{ repo = 'https://github.com/Yara-Rules/rules'; commit_sha40 = $pin; license = 'GPL-2.0';
+            [ordered]@{ repo = 'https://github.com/Yara-Rules/rules'; default_branch = $branch;
+                        commit_sha40 = $pin; license = 'GPL-2.0';
                         timestamp_utc = [DateTime]::UtcNow.ToString('s') + 'Z';
                         categories_included = $included; categories_excluded = $excluded } |
                 ConvertTo-Json | Out-File $pinFile -Encoding utf8
-            Write-Gate5Log "Ruleset pinado no commit $pin"
+            Write-Gate5Log "Ruleset pinado no commit $pin (branch default: $branch)"
         }
-        if (-not (Test-Path $rulesRepo)) { throw 'GATE5: clone do ruleset ausente; remova o pin para readquirir.' }
-        git -C $rulesRepo checkout --quiet $pin
+
+        # Materializacao idempotente do conteudo no commit pinado.
+        $pinMarker = Join-Path $rulesRepo '.gate5-pin'
+        if (-not (Test-Path $pinMarker) -or (Get-Content $pinMarker -Raw).Trim() -ne $pin) {
+            if (Test-Path $rulesRepo) { Remove-Item $rulesRepo -Recurse -Force }
+            New-Item -ItemType Directory -Force $rulesRepo | Out-Null
+            $zip = Join-Path $script:Gate5LocalDir 'yara-rules-src.zip'
+            $url = 'https://github.com/Yara-Rules/rules/archive/' + $pin + '.zip'
+            Write-Gate5Log "Baixando ruleset no commit pinado: $url"
+            Invoke-WebRequest -Uri $url -OutFile $zip -Headers $ua -UseBasicParsing
+            $unzip = Join-Path $script:Gate5LocalDir 'yara-rules-unzip'
+            if (Test-Path $unzip) { Remove-Item $unzip -Recurse -Force }
+            Expand-Archive -Path $zip -DestinationPath $unzip -Force
+            # O zipball do GitHub cria uma unica pasta raiz 'rules-<sha>'.
+            $inner = @(Get-ChildItem $unzip -Directory) | Select-Object -First 1
+            if (-not $inner) { throw 'GATE5: zipball do ruleset sem diretorio raiz esperado.' }
+            Get-ChildItem $inner.FullName -Force | Move-Item -Destination $rulesRepo -Force
+            Remove-Item $unzip -Recurse -Force -ErrorAction SilentlyContinue
+            Remove-Item $zip -Force -ErrorAction SilentlyContinue
+            Set-Content -LiteralPath $pinMarker -Value $pin -Encoding ascii
+            Write-Gate5Log "Ruleset materializado no commit $pin"
+        }
+        if (-not (Test-Path $rulesRepo)) { throw 'GATE5: fonte do ruleset ausente; remova o pin para readquirir.' }
 
         # Selecao das categorias autorizadas
         New-Item -ItemType Directory -Force $script:Gate5RulesDir | Out-Null
@@ -335,33 +382,43 @@ if ($v.Trim() -ne "4.5.5") { exit 1 }
         if (-not (Test-Path $yarac)) { throw 'GATE5: yarac64.exe nao posicionado (fase Yara pendente).' }
         $compileErrors = @()
         $effective = @()
+        $probe = Join-Path $env:TEMP 'gate5-compile-test.yrc'
         foreach ($f in $selected) {
-            $null = & $yarac $f.FullName (Join-Path $env:TEMP 'gate5-compile-test.yrc') 2>&1
-            if ($LASTEXITCODE -ne 0) {
-                $err = (& $yarac $f.FullName (Join-Path $env:TEMP 'gate5-compile-test.yrc') 2>&1) -join '; '
+            $c = Invoke-Gate5Native -FilePath $yarac -Arguments @($f.FullName, $probe)
+            if ($c.ExitCode -ne 0) {
+                $err = ($c.Output -join '; ')
                 $compileErrors += [ordered]@{ file = $f.FullName; error = $err; action = 'EXCLUIDA: incompativel com YARA 4.5.5 (erro de compilacao upstream)' }
                 Write-Gate5Log "Regra excluida (nao compila em 4.5.5): $($f.FullName)" 'WARN'
             } else {
                 $effective += $f
             }
         }
-        Remove-Item (Join-Path $env:TEMP 'gate5-compile-test.yrc') -Force -ErrorAction SilentlyContinue
+        Remove-Item $probe -Force -ErrorAction SilentlyContinue
 
         # Indice do GATE 5 apenas com os arquivos efetivos, e compilacao final
         $indexPath = Join-Path $script:Gate5RulesDir 'gate5-index.yar'
         $indexLines = $effective | Sort-Object FullName | ForEach-Object {
             'include "{0}"' -f ($_.FullName -replace '\\', '/')
         }
-        Set-Content -Path $indexPath -Value ($indexLines -join "`n") -Encoding utf8
-        $null = & $yarac $indexPath (Join-Path $script:Gate5RulesDir 'gate5-index.yrc') 2>&1
-        if ($LASTEXITCODE -ne 0) { throw 'GATE5: indice final nao compila com 0 erros (fail-closed).' }
+        Set-Gate5TextFile -Path $indexPath -Lines $indexLines
+        $ci = Invoke-Gate5Native -FilePath $yarac -Arguments @($indexPath, (Join-Path $script:Gate5RulesDir 'gate5-index.yrc'))
+        if ($ci.ExitCode -ne 0) {
+            throw ('GATE5: indice final nao compila com 0 erros (fail-closed): ' + ($ci.Output -join '; '))
+        }
 
         # Hashes deterministicos (manifesto: <relative-path>\t<SHA256>\n, UTF-8 sem BOM, ordenacao ordinal)
         $rulesRoot = (Get-Item $script:Gate5RulesDir).FullName
-        $entries = $effective | ForEach-Object {
-            $rel = $_.FullName.Substring($rulesRoot.Length).TrimStart('\') -replace '\\', '/'
-            [pscustomobject]@{ rel = $rel; sha = Get-Gate5Sha256 -Path $_.FullName }
-        } | Sort-Object { $_.rel }, { [string]$_.rel } # ordenacao ordinal por caminho relativo
+        $byRel = @{}
+        foreach ($f in $effective) {
+            $rel = $f.FullName.Substring($rulesRoot.Length).TrimStart('\') -replace '\\', '/'
+            $byRel[$rel] = Get-Gate5Sha256 -Path $f.FullName
+        }
+        # Ordenacao ORDINAL explicita: Sort-Object usa comparacao sensivel a
+        # cultura, o que tornaria o aggregate hash dependente do locale da
+        # maquina e quebraria a reprodutibilidade exigida pela etapa.
+        $relSorted = [string[]]@($byRel.Keys)
+        [Array]::Sort($relSorted, [StringComparer]::Ordinal)
+        $entries = $relSorted | ForEach-Object { [pscustomobject]@{ rel = $_; sha = $byRel[$_] } }
         $manifest = ($entries | ForEach-Object { "{0}`t{1}`n" -f $_.rel, $_.sha }) -join ''
         $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
         $sha256 = [Security.Cryptography.SHA256]::Create()
@@ -399,30 +456,48 @@ if (-not (Test-Path C:\Tools\YARA-Rules\gate5-index.yar)) { exit 1 }
         # Nunca imprime conteudo: somente paths e classificacao.
         $sanitizeScript = @'
 $ErrorActionPreference = "Continue"
-$patterns = @("*.pem","*.ppk","id_rsa*","id_ed25519*","*.sql","*.dump",".env*","*credential*","*token*","*github*","*faithro-vps*","Ragexe*","*.grf","WARP*")
+# Padroes DECISORIOS: nomes que so existem se um segredo/dado proibido tiver
+# sido introduzido no guest. Qualquer acerto reprova a etapa (fail-closed).
+$gating = @("*.pem","*.ppk","id_rsa*","id_ed25519*","*.sql","*.dump",".env",".env.*",
+            "*faithro*","Ragexe*","*.grf","WARP*","*.gat","*.rsw")
+# Padroes INFORMATIVOS: substrings genericas que o proprio Windows usa em
+# arquivos internos (ex.: TokenBroker, credential providers). Sao registrados
+# para revisao humana, mas NAO reprovam sozinhos - do contrario a etapa
+# falharia por artefatos do sistema operacional, nao por vazamento real.
+$informational = @("*credential*","*token*","*github*")
 $roots = @("C:\Users","C:\gate5","C:\Tools","C:\Temp","C:\Windows\Temp")
-$hits = @()
-foreach ($root in $roots) {
-    if (Test-Path $root) {
-        foreach ($p in $patterns) {
-            $hits += Get-ChildItem $root -Recurse -Force -Filter $p -ErrorAction SilentlyContinue |
-                     Where-Object { -not $_.PSIsContainer } | Select-Object -ExpandProperty FullName
+
+function Find-Hits([string[]]$Patterns) {
+    $acc = @()
+    foreach ($root in $roots) {
+        if (Test-Path $root) {
+            foreach ($p in $Patterns) {
+                $acc += Get-ChildItem $root -Recurse -Force -Filter $p -ErrorAction SilentlyContinue |
+                        Where-Object { -not $_.PSIsContainer } | Select-Object -ExpandProperty FullName
+            }
         }
     }
+    return @($acc | Sort-Object -Unique)
 }
-# Excluir falsos positivos conhecidos do proprio bootstrap/ferramentas
-$hits = $hits | Where-Object { $_ -notmatch '\\Tools\\YARA' -and $_ -notmatch 'WindowsUpdate' }
+# A propria arvore de ferramentas aprovadas do laboratorio nao e vazamento:
+# C:\Tools\YARA-Rules contem regras cujos nomes citam malware/tokens.
+$benign = '\\Tools\\YARA'
+$hits = @(Find-Hits $gating        | Where-Object { $_ -notmatch $benign })
+$info = @(Find-Hits $informational | Where-Object { $_ -notmatch $benign })
 # Limpeza de bootstrap
 Remove-Item C:\gate5\*.ps1 -Force -ErrorAction SilentlyContinue
 Remove-Item C:\gate5\*.json -Force -ErrorAction SilentlyContinue
 Clear-RecycleBin -Force -ErrorAction SilentlyContinue
 Remove-Item "$env:TEMP\*" -Recurse -Force -ErrorAction SilentlyContinue
-@{ suspicious_paths = @($hits); count = @($hits).Count } | ConvertTo-Json | Out-File C:\gate5\sanitize-result.json -Encoding utf8
+@{ suspicious_paths = @($hits); count = @($hits).Count
+   informational_paths = @($info); informational_count = @($info).Count } |
+    ConvertTo-Json -Depth 4 | Out-File C:\gate5\sanitize-result.json -Encoding utf8
 '@
         Invoke-GuestPS -ScriptText $sanitizeScript -Label 'gate5-sanitize' | Out-Null
         $tmp = Join-Path $script:Gate5EvidenceDir 'guest-sanitize.json'
         Copy-FromGuest -GuestPath 'C:\gate5\sanitize-result.json' -HostPath $tmp
         $s = Get-Content $tmp -Raw | ConvertFrom-Json
+        Write-Gate5Log ("SANITIZE: decisorios={0} informativos={1}" -f $s.count, $s.informational_count)
         if ($s.count -gt 0) {
             Write-Gate5Log ("SANITIZE: {0} paths suspeitos encontrados (ver evidencia); revisao humana requerida." -f $s.count) 'FAIL'
             exit 1
