@@ -406,6 +406,12 @@ function Set-Gate5VmxEntry {
     )
     if (-not (Test-Path $script:Gate5VmxPath)) { throw 'GATE5: VMX inexistente ao gravar configuracao.' }
 
+    # Idempotencia: se a chave ja tem o valor desejado, nao reescrever o arquivo.
+    # Alem de evitar trabalho inutil, isso impede tocar no .vmx de uma VM aberta
+    # na interface do VMware (que mantem a configuracao em cache) quando nao ha
+    # nada a mudar - o arquivo so e reescrito quando realmente muda algo.
+    if ((Get-Gate5VmxValue -Key $Name) -eq $Value) { return }
+
     $encoding = New-Object System.Text.UTF8Encoding($false)
     $before   = @([System.IO.File]::ReadAllLines($script:Gate5VmxPath))
     $sensivel = '^\s*(encryption\.|vtpm\.)'
@@ -636,6 +642,118 @@ function Save-Gate5VncScreenshot {
     } catch {
         return ('erro: ' + $_.Exception.Message)
     } finally { $client.Close() }
+}
+
+function Get-Gate5IsoEntries {
+    # Lista as entradas de um diretorio da ISO pelo namespace Joliet - que e o
+    # que o Windows Setup usa para nomes longos como 'Autounattend.xml'. Serve
+    # para provar onde os arquivos estao de fato na midia, e nao apenas que
+    # aparecem em algum lugar dos bytes.
+    #
+    # Os nomes trazem o sufixo de versao ';1' do ISO9660, que os drivers de
+    # sistema de arquivos ignoram; normalizamos aqui para comparar por nome.
+    param(
+        [Parameter(Mandatory)][string]$IsoPath,
+        [string]$SubPath   # ex.: 'gate5' ou 'gate5/rules'; vazio = raiz
+    )
+    $fs = [System.IO.File]::Open($IsoPath, 'Open', 'Read', 'ReadWrite')
+    try {
+        $sector = New-Object byte[] 2048
+        $svdLba = $null
+        for ($i = 16; $i -lt 40; $i++) {
+            $fs.Seek($i * 2048, 'Begin') | Out-Null
+            if ($fs.Read($sector, 0, 2048) -lt 2048) { break }
+            $id = [Text.Encoding]::ASCII.GetString($sector, 1, 5)
+            if ($id -ne 'CD001') { continue }
+            if ($sector[0] -eq 255) { break }                     # terminador
+            # Tipo 2 = Supplementary (Joliet quando o escape e %/@ %/C %/E)
+            if ($sector[0] -eq 2 -and $sector[88] -eq 0x25 -and $sector[89] -eq 0x2F) {
+                $svdLba = [BitConverter]::ToUInt32($sector, 156 + 2)
+                $svdLen = [BitConverter]::ToUInt32($sector, 156 + 10)
+                break
+            }
+        }
+        if ($null -eq $svdLba) { return $null }                   # sem Joliet
+
+        $lerDiretorio = {
+            param([uint32]$Lba, [uint32]$Tamanho)
+            $dir = New-Object byte[] $Tamanho
+            $fs.Seek([int64]$Lba * 2048, 'Begin') | Out-Null
+            $fs.Read($dir, 0, $Tamanho) | Out-Null
+            $itens = @()
+            $p = 0
+            while ($p -lt $dir.Length) {
+                $len = $dir[$p]
+                if ($len -eq 0) {
+                    $p = [int](([math]::Floor($p / 2048) + 1) * 2048)   # proximo setor
+                    if ($p -ge $dir.Length) { break }
+                    continue
+                }
+                $nameLen = $dir[$p + 32]
+                if ($nameLen -gt 1) {
+                    $nome = [Text.Encoding]::BigEndianUnicode.GetString($dir, $p + 33, $nameLen)
+                    $itens += [pscustomobject]@{
+                        Name        = ($nome -replace ';\d+$', '')
+                        IsDirectory = (($dir[$p + 25] -band 0x02) -ne 0)
+                        Lba         = [BitConverter]::ToUInt32($dir, $p + 2)
+                        Size        = [BitConverter]::ToUInt32($dir, $p + 10)
+                    }
+                }
+                $p += $len
+            }
+            return $itens
+        }
+
+        $atualLba = $svdLba; $atualLen = $svdLen
+        if ($SubPath) {
+            foreach ($parte in ($SubPath -split '[\/]' | Where-Object { $_ })) {
+                $filhos = & $lerDiretorio $atualLba $atualLen
+                $alvo = @($filhos | Where-Object { $_.IsDirectory -and $_.Name -eq $parte }) | Select-Object -First 1
+                if (-not $alvo) { return $null }
+                $atualLba = $alvo.Lba; $atualLen = $alvo.Size
+            }
+        }
+        return (& $lerDiretorio $atualLba $atualLen)
+    } finally { $fs.Close() }
+}
+
+function Test-Gate5UnattendMedia {
+    # Validacao fail-closed da midia controlada, ANTES de qualquer power-on.
+    # Nunca imprime o conteudo do Autounattend (ele carrega a senha de bootstrap
+    # renderizada); apenas confirma propriedades por marcadores.
+    param([string]$IsoPath = (Join-Path $script:Gate5VmDir 'gate5-unattend.iso'))
+    $r = [ordered]@{
+        iso_present = (Test-Path $IsoPath); iso_bytes = 0
+        autounattend_na_raiz = $false; payload_na_raiz = $false
+        product_key_vazio = $false; product_key_ui_never = $false
+        edicao_windows_11_pro = $false; locale_pt_br = $false
+        payload_script = $false; yara_bin = $false; ruleset_index = $false
+        sem_chave_real = $false
+    }
+    if (-not $r.iso_present) { return [pscustomobject]$r }
+    $r.iso_bytes = (Get-Item $IsoPath).Length
+
+    $raiz = Get-Gate5IsoEntries -IsoPath $IsoPath
+    if ($raiz) {
+        $r.autounattend_na_raiz = [bool](@($raiz | Where-Object { $_.Name -eq 'Autounattend.xml' -and -not $_.IsDirectory }).Count)
+        $r.payload_na_raiz      = [bool](@($raiz | Where-Object { $_.Name -eq 'gate5' -and $_.IsDirectory }).Count)
+    }
+    $g5    = Get-Gate5IsoEntries -IsoPath $IsoPath -SubPath 'gate5'
+    $yara  = Get-Gate5IsoEntries -IsoPath $IsoPath -SubPath 'gate5/yara'
+    $rules = Get-Gate5IsoEntries -IsoPath $IsoPath -SubPath 'gate5/rules'
+    $r.payload_script = [bool](@($g5    | Where-Object { $_.Name -eq 'gate5-payload.ps1' }).Count)
+    $r.yara_bin       = [bool](@($yara  | Where-Object { $_.Name -eq 'yara64.exe' }).Count)
+    $r.ruleset_index  = [bool](@($rules | Where-Object { $_.Name -eq 'gate5-index.yar' }).Count)
+
+    $bytes = [System.IO.File]::ReadAllBytes($IsoPath)
+    $texto = [Text.Encoding]::UTF8.GetString($bytes)
+    $r.product_key_vazio     = ($texto -match '<ProductKey>\s*<Key>\s*</Key>')
+    $r.product_key_ui_never  = ($texto -match '<ProductKey>[\s\S]{0,200}?<WillShowUI>Never</WillShowUI>')
+    $r.edicao_windows_11_pro = ($texto -match '<Value>Windows 11 Pro</Value>')
+    $r.locale_pt_br          = ($texto -match '<UILanguage>pt-BR</UILanguage>')
+    # Nenhuma chave de produto real (formato 5x5) em lugar algum da midia.
+    $r.sem_chave_real        = -not ($texto -match '[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}')
+    return [pscustomobject]$r
 }
 
 function Get-Gate5VmxValue {

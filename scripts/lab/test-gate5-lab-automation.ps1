@@ -185,6 +185,29 @@ It 'evidencia sai do guest por canal serial de mao unica' {
     ($guest -match 'GATE5-EVIDENCE-BEGIN')
 }
 
+It 'midia e canais sao validados ANTES de pedir o power-on' {
+    # Um gate humano gasto com midia invalida foi exatamente o que aconteceu com
+    # o Autounattend sem <ProductKey>: a instalacao parou numa tela.
+    $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
+    $iMidia  = $boot.IndexOf('Test-Gate5UnattendMedia')
+    $iSerial = $boot.IndexOf('SERIAL_CHANNEL_NOT_READY')
+    $iGate   = $boot.IndexOf("Stop-Gate5Human -Action 'POWER_ON_VM'")
+    ($iMidia -gt 0) -and ($iSerial -gt 0) -and ($iGate -gt $iMidia) -and ($iGate -gt $iSerial) -and
+    ($boot -match 'UNATTEND_MEDIA_INVALID') -and ($boot -match 'VNC_NOT_LOCAL')
+}
+
+It 'validador da midia le a estrutura real da ISO' {
+    # Nao basta procurar bytes soltos: e preciso provar que o Autounattend esta
+    # na RAIZ do namespace que o Windows Setup usa (Joliet), e que os nomes com
+    # sufixo de versao ';1' do ISO9660 sao normalizados.
+    $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    # Substring literal em aspas simples: escapar isto como regex e fragil.
+    ($comm -match 'function Get-Gate5IsoEntries') -and
+    $comm.Contains('\d+$') -and
+    ($comm -match 'BigEndianUnicode') -and
+    ($comm -match 'autounattend_na_raiz')
+}
+
 It 'power-on de VM criptografada e gate humano com validacao automatica' {
     $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
     ($boot -match "Stop-Gate5Human -Action 'POWER_ON_VM'") -and
@@ -415,6 +438,24 @@ It 'Set-Gate5VmxEntry preserva o restante do arquivo' {
         ((Get-Gate5VmxValue 'a.b' -VmxPath $fake) -eq '1') -and
         ((Get-Gate5VmxValue 'e.f' -VmxPath $fake) -eq '3') -and
         ((Get-Gate5VmxValue 'g.h' -VmxPath $fake) -eq 'novo')
+    } finally { $script:Gate5VmxPath = $original }
+}
+
+It 'Set-Gate5VmxEntry nao reescreve quando o valor ja e o desejado' {
+    # Evita tocar no .vmx de uma VM aberta na interface do VMware (que mantem a
+    # configuracao em cache) quando nao ha nada a mudar.
+    $fake = Join-Path $tmp 'noop.vmx'
+    Set-Gate5TextFile -Path $fake -Lines @('a.b = "1"', 'c.d = "2"')
+    $original = $script:Gate5VmxPath
+    try {
+        $script:Gate5VmxPath = $fake
+        $antes = (Get-Item $fake).LastWriteTimeUtc
+        Start-Sleep -Milliseconds 1100
+        Set-Gate5VmxEntry -Name 'c.d' -Value '2'      # mesmo valor: no-op
+        $semMudanca = ((Get-Item $fake).LastWriteTimeUtc -eq $antes)
+        Set-Gate5VmxEntry -Name 'c.d' -Value '3'      # valor novo: grava
+        $comMudanca = ((Get-Gate5VmxValue 'c.d' -VmxPath $fake) -eq '3')
+        $semMudanca -and $comMudanca
     } finally { $script:Gate5VmxPath = $original }
 }
 

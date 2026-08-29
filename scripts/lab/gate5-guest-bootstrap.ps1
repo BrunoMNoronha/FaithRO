@@ -228,6 +228,28 @@ public static class Gate5IsoWriter {
         if (-not (Test-Gate5VmPoweredOn)) {
             $ev = Get-Gate5SerialEvidence
             if ($ev) { Write-Gate5Log 'Guest ja reportou evidencia pela serial; instalacao concluida.'; exit 0 }
+
+            # Fail-closed antes de pedir o power-on: uma midia invalida faria a
+            # instalacao parar numa tela e desperdicaria o gate humano - foi
+            # exatamente o que aconteceu com o Autounattend sem <ProductKey>.
+            $midia = Test-Gate5UnattendMedia
+            $ruins = @($midia.PSObject.Properties |
+                       Where-Object { $_.Name -ne 'iso_bytes' -and $_.Value -ne $true } |
+                       ForEach-Object { $_.Name })
+            if ($ruins.Count -gt 0) {
+                Stop-Gate5Blocked -Blocker 'UNATTEND_MEDIA_INVALID' -Detail ("controles reprovados: " + ($ruins -join ', '))
+            }
+            Write-Gate5Log ("Midia de unattend validada ({0:N1} MB): Autounattend na raiz, chave vazia, payload completo." -f ($midia.iso_bytes / 1MB))
+
+            # O canal serial precisa estar pronto para receber a evidencia.
+            if ((Get-Gate5VmxValue 'serial0.fileType') -ne 'file' -or
+                (Get-Gate5VmxValue 'serial0.fileName') -ne $script:Gate5EvidenceSerial) {
+                Stop-Gate5Blocked -Blocker 'SERIAL_CHANNEL_NOT_READY' -Detail 'porta serial da VM nao aponta para o arquivo de evidencia do host'
+            }
+            if ((Get-Gate5VmxValue 'RemoteDisplay.vnc.ip') -ne '127.0.0.1') {
+                Stop-Gate5Blocked -Blocker 'VNC_NOT_LOCAL' -Detail 'console temporario precisa estar preso a 127.0.0.1'
+            }
+
             Stop-Gate5Human -Action 'POWER_ON_VM' -Detail @'
 Ligue a VM na interface do VMware Workstation:
   1. abrir C:\VMs\FaithRO-GATE5-LAB\FaithRO-GATE5-LAB.vmx
