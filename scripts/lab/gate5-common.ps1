@@ -97,7 +97,11 @@ function Write-Gate5Log {
     param([Parameter(Mandatory)][string]$Message, [string]$Level = 'INFO')
     $line = '{0}Z [{1}] {2}' -f [DateTime]::UtcNow.ToString('s'), $Level, $Message
     Write-Host $line
-    if ($script:Gate5LogFile) { Add-Content -Path $script:Gate5LogFile -Value $line -Encoding utf8 }
+    # Sob Set-StrictMode, ler uma variavel nunca atribuida LANCA. Qualquer helper
+    # que registre log antes de Initialize-Gate5Log quebraria por isso, entao a
+    # existencia e verificada em vez de assumida.
+    $arquivo = Get-Variable -Name Gate5LogFile -Scope Script -ValueOnly -ErrorAction SilentlyContinue
+    if ($arquivo) { Add-Content -Path $arquivo -Value $line -Encoding utf8 }
 }
 
 # --- Estado / checkpoints -----------------------------------------------------
@@ -133,12 +137,21 @@ function Test-Gate5Phase {
 }
 
 function Complete-Gate5Phase {
+    # RELE o estado do disco antes de gravar. O entrypoint carrega o estado uma
+    # vez no inicio, mas as fases rodam em processos filhos que gravam suas
+    # proprias notas (boot_key_sent, installation_stage). Salvar o objeto que o
+    # pai tem em memoria sobrescrevia essas notas com valores velhos - na pratica
+    # apagava a marca anti-loop do boot optico logo apos ela ser definida.
     param([Parameter(Mandatory)]$State, [Parameter(Mandatory)][string]$Phase)
-    if (-not (Test-Gate5Phase -State $State -Phase $Phase)) {
-        $State.completed = @($State.completed) + $Phase
-        Save-Gate5State -State $State
+    $atual = Get-Gate5State
+    if (-not (Test-Gate5Phase -State $atual -Phase $Phase)) {
+        $atual.completed = @($atual.completed) + $Phase
+        Save-Gate5State -State $atual
         Write-Gate5Log "CHECKPOINT alcancado: $Phase"
     }
+    # Mantem o objeto do chamador alinhado com o que ficou no disco.
+    $State.completed = @($atual.completed)
+    $State.notes     = $atual.notes
 }
 
 # --- Saidas padronizadas (fail-closed) ---------------------------------------

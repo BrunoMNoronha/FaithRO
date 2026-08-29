@@ -251,6 +251,37 @@ It 'console local oferece teclado, combinacao e ponteiro' {
     ($comm -match 'PointerEvent')
 }
 
+It 'checkpoint do pai nao apaga notas gravadas pelas fases filhas' {
+    # Regressao real: o entrypoint carrega o estado uma vez e as fases rodam em
+    # processos filhos. Salvar o objeto em memoria do pai sobrescrevia
+    # boot_key_sent/installation_stage com valores velhos - apagando a marca
+    # anti-loop do boot optico logo depois de ela ser definida.
+    $original = $script:Gate5StateFile
+    try {
+        $script:Gate5StateFile = Join-Path $tmp 'state-teste.json'
+        $pai = Get-Gate5State                      # pai carrega cedo
+        $filho = Get-Gate5State                    # filho grava sua nota depois
+        $filho.notes | Add-Member -NotePropertyName boot_key_sent -NotePropertyValue $true -Force
+        Save-Gate5State $filho
+        Complete-Gate5Phase $pai 'GUEST_INSTALLED' # pai registra o checkpoint
+        $disco = Get-Gate5State
+        ($disco.notes.boot_key_sent -eq $true) -and
+        (@($disco.completed) -contains 'GUEST_INSTALLED') -and
+        ($pai.notes.boot_key_sent -eq $true)       # objeto do pai realinhado
+    } finally { $script:Gate5StateFile = $original }
+}
+
+It 'entrypoint nao roda fases obsoletas que exigiriam vmrun no guest' {
+    # Windows Update, Defender e sanitize rodam DENTRO do guest pelo payload e
+    # chegam pela serial. Mante-las no entrypoint so produzia
+    # ENCRYPTED_VM_REQUIRES_HUMAN_POWER_OP logo apos a instalacao.
+    $prov = Get-Content (Join-Path $labDir 'gate5-provision.ps1') -Raw
+    ($prov -notmatch "Sub = @\('Updates'\)") -and
+    ($prov -notmatch "Sub = @\('Defender'\)") -and
+    ($prov -notmatch "Sub = @\('Sanitize'\)") -and
+    ($prov -match "Sub = @\('Unattend', 'InstallWait'\)")
+}
+
 It 'payload emite batimentos de progresso pela serial' {
     # Sem batimento o host so recebia sinal no FIM de tudo e nao distinguia
     # "payload trabalhando" de "payload morto" - foi preciso pericia de tela.

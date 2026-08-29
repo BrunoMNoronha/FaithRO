@@ -170,13 +170,16 @@ if (-not (Test-Gate5Phase $state 'VM_CREATED')) {
 # =============================================================================
 # FASES 5..10: bootstrap do guest (checkpoint por sub-fase)
 # =============================================================================
+# Windows Update, Defender, YARA, ruleset e sanitize sao executados DENTRO do
+# guest pelo payload da midia controlada, e chegam ao host pelo canal serial:
+# em VM criptografada nao ha guest operations do vmrun (docs/48 §12). As fases
+# 'Updates', 'Defender' e 'Sanitize' do bootstrap ficaram obsoletas - mante-las
+# aqui so produzia ENCRYPTED_VM_REQUIRES_HUMAN_POWER_OP logo apos a instalacao.
+# 'Yara' e 'Rules' seguem, mas como preparo de artefatos NO HOST para a midia.
 $guestPhases = @(
-    @{ Checkpoint = 'GUEST_INSTALLED'; Sub = @('Unattend', 'InstallWait') },
-    @{ Checkpoint = 'GUEST_UPDATED';   Sub = @('Updates') },
-    @{ Checkpoint = 'DEFENDER_READY';  Sub = @('Defender') },
     @{ Checkpoint = 'YARA_READY';      Sub = @('Yara') },
     @{ Checkpoint = 'RULESET_READY';   Sub = @('Rules') },
-    @{ Checkpoint = 'SANITIZED';       Sub = @('Sanitize') }
+    @{ Checkpoint = 'GUEST_INSTALLED'; Sub = @('Unattend', 'InstallWait') }
 )
 foreach ($gp in $guestPhases) {
     if (-not (Test-Gate5Phase $state $gp.Checkpoint)) {
