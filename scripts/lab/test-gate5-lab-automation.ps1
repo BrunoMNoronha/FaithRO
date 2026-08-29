@@ -1473,7 +1473,11 @@ It 'a ordem de boot e aplicada ANTES do gate humano de power-on' {
 It 'a ordem de boot NAO e reimposta nos reboots do proprio Setup' {
     # Depois que o boot optico disparou, o boot pelo disco e o comportamento
     # correto: reimpor o CD faria o Setup recomecar do zero a cada reboot.
-    $bootTxt -match 'if \(-not \$bootKeySent\) \{ Set-Gate5OpticalBootFirst \}'
+    # A chamada precisa estar DENTRO do guarda, e nao pode haver nenhuma outra
+    # fora dele - por isso a contagem, e nao so a presenca do trecho.
+    $guardada = [regex]::Match($bootTxt, '(?s)if \(-not \$bootKeySent\) \{.*?Set-Gate5OpticalBootFirst').Value
+    ($guardada.Length -gt 0) -and
+    (([regex]::Matches($bootTxt, 'Set-Gate5OpticalBootFirst')).Count -eq 1)
 }
 
 It 'boot pelo disco vira BOOT_MEDIA_NOT_ENTERED, e nao espera cega de 10 minutos' {
@@ -1504,6 +1508,90 @@ It 'NVRAM e vTPM nao sao tocados pela correcao da ordem de boot' {
     $trecho = [regex]::Match($comm, '(?s)function Set-Gate5OpticalBootFirst \{.*?\r?\n\}').Value
     ($trecho -notmatch 'Remove-Item') -and ($trecho -notmatch '\.nvram') -and
     ($trecho -notmatch 'vtpm\.') -and ($trecho -notmatch 'Set-Gate5TextFile')
+}
+
+Write-Host 'T-L: a ordem de boot precisa chegar ao FIRMWARE, nao so ao arquivo'
+
+# RAIZ da terceira reprovacao da RUN-02: a interface do VMware Workstation
+# carrega a configuracao ao abrir a VM e REESCREVE o .vmx no Power On a partir
+# dessa copia. A automacao gravou efi.bootOrder as 16:02:38Z e releu com
+# sucesso; o vmware-vmx leu o DICT as 16:02:55.782Z ja sem a chave. A escrita
+# "passou" e mesmo assim o firmware nunca a viu.
+
+It 'Get-Gate5VmwareLogDictValue le o valor do dump DICT' {
+    $log = Join-Path $tmp 'dict.log'
+    Set-Content -LiteralPath $log -Encoding ascii -Value @(
+        '2026-08-29T16:02:55.782Z -INFO vmware-vmx.exe 20368 [ws@4413 threadName="vmx"] DICT    RemoteDisplay.vnc.port = "5943"',
+        '2026-08-29T16:02:55.782Z -INFO vmware-vmx.exe 20368 [ws@4413 threadName="vmx"] DICT           efi.bootOrder = "cdrom,hdd"'
+    )
+    ((Get-Gate5VmwareLogDictValue -Key 'efi.bootOrder' -LogPath $log) -eq 'cdrom,hdd') -and
+    ((Get-Gate5VmwareLogDictValue -Key 'RemoteDisplay.vnc.port' -LogPath $log) -eq '5943')
+}
+
+It 'Get-Gate5VmwareLogDictValue devolve null quando a chave nao chegou ao firmware' {
+    # Cenario exato da tentativa 3: o .vmx tinha a chave, o DICT nao.
+    $log = Join-Path $tmp 'dict-sem-chave.log'
+    Set-Content -LiteralPath $log -Encoding ascii -Value @(
+        '2026-08-29T16:02:55.782Z ... DICT    RemoteDisplay.vnc.port = "5943"'
+    )
+    ($null -eq (Get-Gate5VmwareLogDictValue -Key 'efi.bootOrder' -LogPath $log)) -and
+    ($null -eq (Get-Gate5VmwareLogDictValue -Key 'efi.bootOrder' -LogPath (Join-Path $tmp 'nao-existe.log')))
+}
+
+It 'Get-Gate5VmwareLogDictValue nao confunde chave com prefixo de outra' {
+    $log = Join-Path $tmp 'dict-prefixo.log'
+    Set-Content -LiteralPath $log -Encoding ascii -Value @(
+        '2026-08-29T16:02:55.782Z ... DICT    efi.bootOrder.extra = "lixo"'
+    )
+    $null -eq (Get-Gate5VmwareLogDictValue -Key 'efi.bootOrder' -LogPath $log)
+}
+
+It 'Set-Gate5OpticalBootFirst recusa gravar com a interface do VMware aberta' {
+    # Gravar ali PASSA e a chave e descartada em silencio: falhar antes vale
+    # mais do que gastar um gate humano de power-on para descobrir depois.
+    $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    $trecho = [regex]::Match($comm, '(?s)function Set-Gate5OpticalBootFirst \{.*?\r?\n\}').Value
+    $iUi    = $trecho.IndexOf('Test-Gate5VmwareUiRunning')
+    $iGrava = $trecho.IndexOf('Set-Gate5VmxEntry')
+    ($iUi -gt 0) -and ($iGrava -gt $iUi)
+}
+
+It 'gate CLOSE_VMWARE_UI vem antes da gravacao da ordem de boot' {
+    $iGate  = $bootTxt.IndexOf('action=CLOSE_VMWARE_UI')
+    $iOrdem = $bootTxt.IndexOf('Set-Gate5OpticalBootFirst')
+    ($iGate -gt 0) -and ($iOrdem -gt $iGate) -and
+    ($bootTxt -match 'WAITING_VMWARE_UI_CLOSE') -and
+    # e espera de verdade a interface sumir, em vez de so avisar
+    ($bootTxt -match 'while \(\[DateTime\]::UtcNow -lt \$ateUi -and \(Test-Gate5VmwareUiRunning\)\)')
+}
+
+It 'gate CLOSE_VMWARE_UI so vale enquanto o boot optico nao disparou' {
+    # Depois que o Setup comeca, o boot pelo disco e o correto e nao faz sentido
+    # pedir para fechar a interface a cada reboot.
+    $trecho = [regex]::Match($bootTxt, '(?s)if \(-not \$bootKeySent\) \{.*?action=CLOSE_VMWARE_UI').Value
+    $trecho.Length -gt 0
+}
+
+It 'chave ausente no DICT vira BOOT_ORDER_NOT_APPLIED, nao culpa o firmware' {
+    # Os dois blockers precisam ser distinguiveis: um acusa a interface que
+    # descartou a chave, o outro um firmware que a recebeu e ignorou.
+    ($bootTxt -match "Stop-Gate5Blocked -Blocker 'BOOT_ORDER_NOT_APPLIED'") -and
+    ($bootTxt -match 'if \(-not \$efi\.IsOptical -and -not \$ordemNoFirmware\)') -and
+    ($bootTxt -match 'boot-order-not-applied\.png')
+}
+
+It 'BOOT_MEDIA_NOT_ENTERED so acusa o firmware quando ele RECEBEU a chave' {
+    $iOrdem = $bootTxt.IndexOf("Stop-Gate5Blocked -Blocker 'BOOT_ORDER_NOT_APPLIED'")
+    $iMidia = $bootTxt.IndexOf("Stop-Gate5Blocked -Blocker 'BOOT_MEDIA_NOT_ENTERED'")
+    ($iOrdem -gt 0) -and ($iMidia -gt $iOrdem) -and
+    ($bootTxt -match 'RECEBEU efi\.bootOrder neste power-on')
+}
+
+It 'a prova da ordem vem do DICT, e nao do .vmx em disco' {
+    # Conferir o arquivo nao responde nada: ele pode ter sido reescrito por cima
+    # entre a gravacao e o power-on - foi exatamente o que aconteceu.
+    ($bootTxt -match "Get-Gate5VmwareLogDictValue -Key 'efi\.bootOrder'") -and
+    ($bootTxt -notmatch "ordemNoFirmware = Get-Gate5VmxValue")
 }
 
 } finally {

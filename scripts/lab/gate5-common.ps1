@@ -624,6 +624,42 @@ function Get-Gate5EfiBootDevice {
     } finally { $fs.Dispose() }
 }
 
+function Test-Gate5VmwareUiRunning {
+    # A interface do VMware Workstation ('vmware.exe') carrega a configuracao da
+    # VM ao abri-la e REESCREVE o .vmx a partir dessa copia em cache no Power On.
+    # Qualquer chave acrescentada ao arquivo depois disso e descartada em
+    # silencio - a escrita e a releitura da automacao passam, e o firmware ainda
+    # assim nunca ve a chave. Provado na RUN-02 tentativa 3: efi.bootOrder foi
+    # gravada as 16:02:38Z e o vmware-vmx leu o DICT as 16:02:55.782Z ja sem ela,
+    # enquanto RemoteDisplay.vnc.port - gravada antes de a interface abrir a VM -
+    # sobreviveu.
+    return [bool](@(Get-Process -Name 'vmware' -ErrorAction SilentlyContinue).Count)
+}
+
+function Get-Gate5VmwareLogDictValue {
+    # Le um valor do dump DICT que o vmware-vmx imprime no vmware.log ao ligar.
+    # E a prova de que a chave chegou de fato ao firmware: o .vmx em disco pode
+    # ter sido reescrito por cima depois, e conferi-lo ali nao demonstra nada.
+    param(
+        [Parameter(Mandatory)][string]$Key,
+        [string]$LogPath = (Join-Path $script:Gate5VmDir 'vmware.log')
+    )
+    if (-not (Test-Path -LiteralPath $LogPath)) { return $null }
+    $fs = [System.IO.File]::Open($LogPath, 'Open', 'Read', 'ReadWrite')
+    try {
+        $reader = New-Object System.IO.StreamReader($fs)
+        try {
+            $padrao = 'DICT\s+{0}\s*=\s*"(.*)"\s*$' -f [regex]::Escape($Key)
+            $valor = $null
+            while (-not $reader.EndOfStream) {
+                $linha = $reader.ReadLine()
+                if ($linha -match $padrao) { $valor = $Matches[1] }
+            }
+            return $valor
+        } finally { $reader.Dispose() }
+    } finally { $fs.Dispose() }
+}
+
 function Set-Gate5OpticalBootFirst {
     # Poe a unidade optica na frente do disco na ordem de boot do firmware.
     #
@@ -650,6 +686,12 @@ function Set-Gate5OpticalBootFirst {
     # desligar: gravar com a VM ligada nao teria efeito e ainda seria perdido.
     if (Test-Gate5VmPoweredOn) {
         throw 'GATE5: a ordem de boot so pode ser ajustada com a VM desligada.'
+    }
+    # Com a interface aberta a escrita PASSA e mesmo assim nao chega ao firmware
+    # (ver Test-Gate5VmwareUiRunning). Falhar aqui e melhor do que gravar, reler
+    # com sucesso e so descobrir o descarte depois de gastar um gate de power-on.
+    if (Test-Gate5VmwareUiRunning) {
+        throw 'GATE5: a interface do VMware esta aberta e descartaria a ordem de boot no Power On.'
     }
     Set-Gate5VmxEntry -Name 'efi.bootOrder' -Value $Value
     $lido = Get-Gate5VmxValue -Key 'efi.bootOrder'

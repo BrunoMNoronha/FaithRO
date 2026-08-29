@@ -362,7 +362,30 @@ public static class Gate5IsoWriter {
             # boota direto e o prompt optico nunca chega a ser exibido - nenhuma
             # tecla adiantaria. So enquanto o boot optico ainda nao disparou: nos
             # reboots do proprio Setup o boot pelo disco e o comportamento certo.
-            if (-not $bootKeySent) { Set-Gate5OpticalBootFirst }
+            if (-not $bootKeySent) {
+                # A interface do VMware precisa estar FECHADA: com a VM aberta numa
+                # aba ela reescreve o .vmx no Power On a partir da copia que
+                # carregou, e a chave gravada agora seria descartada em silencio.
+                # Fechar a interface e a unica forma de faze-la reler o arquivo.
+                if (Test-Gate5VmwareUiRunning) {
+                    Write-Gate5Log 'HUMAN_ACTION_REQUIRED CLOSE_VMWARE_UI' 'GATE'
+                    Write-Host ''
+                    Write-Host 'HUMAN_ACTION_REQUIRED'
+                    Write-Host 'action=CLOSE_VMWARE_UI'
+                    Write-Host 'Feche a janela do VMware Workstation por completo (a VM ja esta desligada).'
+                    Write-Host 'A interface mantem a configuracao em cache e descartaria a ordem de boot.'
+                    Write-Host 'A automacao grava a correcao sozinha e avisa quando reabrir e ligar.'
+                    Write-Host ''
+                    Set-Gate5InstallNote 'installation_stage' 'WAITING_VMWARE_UI_CLOSE'
+                    $ateUi = [DateTime]::UtcNow.AddMinutes(30)
+                    while ([DateTime]::UtcNow -lt $ateUi -and (Test-Gate5VmwareUiRunning)) { Start-Sleep -Seconds 3 }
+                    if (Test-Gate5VmwareUiRunning) {
+                        Stop-Gate5Human -Action 'CLOSE_VMWARE_UI' -Detail 'A interface do VMware nao foi fechada em 30 minutos. Reexecute gate5-provision.ps1 quando puder faze-lo.'
+                    }
+                    Write-Gate5Log 'Interface do VMware fechada; gravando a ordem de boot no .vmx.'
+                }
+                Set-Gate5OpticalBootFirst
+            }
             Write-Gate5Log 'HUMAN_ACTION_REQUIRED POWER_ON_VM' 'GATE'
             Write-Host ''
             Write-Host 'HUMAN_ACTION_REQUIRED'
@@ -395,8 +418,31 @@ public static class Gate5IsoWriter {
                 if ($efi) { break }
                 Start-Sleep -Seconds 2
             }
+            # A chave chegou ao firmware, ou o .vmx foi reescrito por cima?
+            # Conferir o arquivo em disco nao responde isso: quem decide e o
+            # dump DICT que o vmware-vmx imprime ao ligar. Sem essa distincao o
+            # blocker culpa o firmware por algo que a interface descartou.
+            $ordemNoFirmware = Get-Gate5VmwareLogDictValue -Key 'efi.bootOrder'
+            if ($ordemNoFirmware) {
+                Write-Gate5Log ("Ordem de boot recebida pelo firmware: efi.bootOrder='{0}'." -f $ordemNoFirmware)
+            } else {
+                Write-Gate5Log 'O firmware NAO recebeu efi.bootOrder: o .vmx foi reescrito depois da gravacao.' 'WARN'
+            }
             if ($efi) {
                 Write-Gate5Log ("Firmware escolheu o dispositivo de boot: {0}" -f $efi.Device)
+                if (-not $efi.IsOptical -and -not $ordemNoFirmware) {
+                    $telaOrdem = Join-Path (Get-Gate5RunDir) 'boot-order-not-applied.png'
+                    $capOrdem  = Save-Gate5VncScreenshot -Path $telaOrdem
+                    Set-Gate5InstallNote 'installation_stage' 'BOOT_ORDER_NOT_APPLIED'
+                    Stop-Gate5Blocked -Blocker 'BOOT_ORDER_NOT_APPLIED' -Detail (@'
+A ordem de boot foi gravada no .vmx mas nao chegou ao firmware: o dump DICT deste
+power-on nao traz efi.bootOrder, e a VM bootou "{0}". A interface do VMware
+reescreve o .vmx no Power On a partir da configuracao que carregou ao abrir a VM,
+descartando o que foi acrescentado depois - por isso ela precisa estar FECHADA no
+momento da gravacao. Refaca com a interface fechada quando a automacao pedir.
+Evidencia: {1} (captura: {2})
+'@ -f $efi.Device, (Join-Path $script:Gate5VmDir 'vmware.log'), $capOrdem)
+                }
                 if (-not $efi.IsOptical) {
                     # Evidencia da tela no momento exato, para correlacionar com o log.
                     $telaFalha = Join-Path (Get-Gate5RunDir) 'boot-media-not-entered.png'
@@ -405,9 +451,9 @@ public static class Gate5IsoWriter {
                     Stop-Gate5Blocked -Blocker 'BOOT_MEDIA_NOT_ENTERED' -Detail (@'
 O firmware EFI nao entrou na midia: bootou "{0}" em {1}. O prompt "Press any key
 to boot from CD or DVD" nunca chegou a existir, entao nenhuma tecla poderia ter
-ajudado. A ordem de boot foi fixada em efi.bootOrder="cdrom,hdd" com a VM
-desligada; se este bloqueio se repetir, o firmware esta ignorando essa chave e a
-ordem precisa ser corrigida no Boot Manager do proprio firmware.
+ajudado. O firmware RECEBEU efi.bootOrder neste power-on (consta do dump DICT) e
+ainda assim preferiu o disco: a chave nao esta sendo respeitada, e a ordem
+precisa ser corrigida no Boot Manager do proprio firmware.
 Evidencia: {2} (captura: {3})
 '@ -f $efi.Device, $(if ($efi.WhenUtc) { $efi.WhenUtc.ToString('o') } else { 'horario nao registrado' }), (Join-Path $script:Gate5VmDir 'vmware.log'), $capFalha)
                 }
