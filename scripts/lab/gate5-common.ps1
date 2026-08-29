@@ -637,6 +637,20 @@ function Save-Gate5VncScreenshot {
     # captureScreenshot' exige a senha da criptografia em VM criptografada, e
     # essa senha nunca passa pela automacao (docs/48 §12). Retorna 'OK' ou o erro.
     param([Parameter(Mandatory)][string]$Path, [int]$Port = $script:Gate5VncPort)
+
+    # System.Drawing nao e carregado sozinho em 'powershell -NoProfile
+    # -NonInteractive', que e como as fases rodam: sem isto a captura falhava
+    # silenciosamente no watcher e o detector nunca tinha imagem para analisar.
+    Add-Type -AssemblyName System.Drawing -ErrorAction SilentlyContinue
+    # O diretorio de trabalho do .NET nao acompanha o do PowerShell, entao um
+    # caminho relativo gravaria em outro lugar (ou falharia com "erro generico
+    # de GDI+"). Resolvemos para absoluto e garantimos o diretorio.
+    if (-not [System.IO.Path]::IsPathRooted($Path)) { $Path = Join-Path (Get-Location).Path $Path }
+    $destDir = Split-Path -Parent $Path
+    if ($destDir -and -not (Test-Path -LiteralPath $destDir)) {
+        New-Item -ItemType Directory -Force $destDir | Out-Null
+    }
+
     $client = New-Object System.Net.Sockets.TcpClient
     try {
         $client.Connect('127.0.0.1', $Port)

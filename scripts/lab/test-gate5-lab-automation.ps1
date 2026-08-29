@@ -179,6 +179,19 @@ It 'tecla de boot nunca depende do tamanho do VMDK' {
     ($boot -match 'Get-VmUptimeSeconds')
 }
 
+It 'captura de tela carrega System.Drawing e resolve caminho relativo' {
+    # Regressao: as fases rodam com 'powershell -NoProfile -NonInteractive',
+    # onde System.Drawing nao e carregado sozinho, e o diretorio de trabalho do
+    # .NET nao acompanha o do PowerShell. As capturas falhavam silenciosamente e
+    # o watcher perdia a janela do prompt de boot por falta de imagem.
+    $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    $i = $comm.IndexOf('function Save-Gate5VncScreenshot')
+    $trecho = $comm.Substring($i, [Math]::Min(1800, $comm.Length - $i))
+    ($trecho -match "Add-Type -AssemblyName System\.Drawing") -and
+    ($trecho -match 'IsPathRooted') -and
+    ($trecho -match 'New-Item -ItemType Directory')
+}
+
 It 'tecla de boot so e enviada com o firmware na tela' {
     # No Windows Setup uma tecla poderia acionar um botao em foco; a tecla so
     # sai quando o framebuffer mostra a fase de firmware (tela preta de texto).
