@@ -243,6 +243,55 @@ It 'vTPM nao e dado como valido pela chave de auto-adicao' {
     ($boot -match 'VTPM_AUTOMATION_NOT_SUPPORTED')
 }
 
+It 'nenhuma escrita pos-criptografia reescreve o .vmx inteiro' {
+    # A partir do vTPM a VM esta criptografada. As tres rotinas que gravam no
+    # .vmx depois desse ponto (anexo do unattend, isolamento final e console VNC)
+    # precisam gravar chave a chave por Set-Gate5VmxEntry, que usa a API do
+    # VMware quando ha criptografia. Set-Gate5TextFile sobre o .vmx so pode
+    # sobreviver na criacao/reparacao, que e barrada em VM criptografada.
+    $prov = Get-Content (Join-Path $labDir 'gate5-provision.ps1') -Raw
+    $boot = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
+    $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    $reescreveVmx = { param($t) $t -match 'Set-Gate5TextFile\s+-Path\s+\$script:Gate5VmxPath' }
+    (-not (& $reescreveVmx $prov)) -and
+    (-not (& $reescreveVmx $boot)) -and
+    ($prov -match 'Set-Gate5VmxEntry') -and ($boot -match 'Set-Gate5VmxEntry') -and
+    ($comm -match "ConfigParams', 'SetEntry'")
+}
+
+It 'Set-Gate5VmxEntry preserva o restante do arquivo' {
+    $fake = Join-Path $tmp 'entry.vmx'
+    Set-Gate5TextFile -Path $fake -Lines @('a.b = "1"', 'c.d = "2"', 'e.f = "3"')
+    $original = $script:Gate5VmxPath
+    try {
+        $script:Gate5VmxPath = $fake
+        Set-Gate5VmxEntry -Name 'c.d' -Value '9'      # sobrescreve
+        Set-Gate5VmxEntry -Name 'g.h' -Value 'novo'   # acrescenta
+        $linhas = @(Get-Content $fake)
+        (@($linhas | Where-Object { $_ -match '^c\.d' }).Count -eq 1) -and
+        ((Get-Gate5VmxValue 'c.d' -VmxPath $fake) -eq '9') -and
+        ((Get-Gate5VmxValue 'a.b' -VmxPath $fake) -eq '1') -and
+        ((Get-Gate5VmxValue 'e.f' -VmxPath $fake) -eq '3') -and
+        ((Get-Gate5VmxValue 'g.h' -VmxPath $fake) -eq 'novo')
+    } finally { $script:Gate5VmxPath = $original }
+}
+
+It 'Get-Gate5VmEncryptionState respeita o caminho informado' {
+    # Regressao: o helper lia firmware/Secure Boot do caminho GLOBAL, e nao do
+    # arquivo consultado, podendo reportar o estado de outra VM.
+    $outro = Join-Path $tmp 'outro.vmx'
+    Set-Gate5TextFile -Path $outro -Lines @('firmware = "bios"', 'uefi.secureBoot.enabled = "FALSE"')
+    $st = Get-Gate5VmEncryptionState -VmxPath $outro
+    ($st.Firmware -eq 'bios') -and (-not $st.SecureBoot) -and (-not $st.Encrypted)
+}
+
+It 'isolamento confere listener real, nao apenas o .vmx' {
+    $prov = Get-Content (Join-Path $labDir 'gate5-provision.ps1') -Raw
+    $ver  = Get-Content (Join-Path $labDir 'gate5-verify-baseline.ps1') -Raw
+    ($prov -match 'ISOLATION_VNC_LISTENER_ACTIVE') -and ($prov -match 'Get-NetTCPConnection') -and
+    ($ver  -match 'console-vnc-sem-listener') -and ($ver -match 'Get-NetTCPConnection')
+}
+
 It 'console VNC e local, temporario e verificado como removido' {
     # A tecla do prompt "Press any key to boot from CD" so chega ao guest por um
     # console conectado; o console VNC do VMware e esse canal. Ele precisa ficar
@@ -250,11 +299,11 @@ It 'console VNC e local, temporario e verificado como removido' {
     $common = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
     $prov   = Get-Content (Join-Path $labDir 'gate5-provision.ps1') -Raw
     $ver    = Get-Content (Join-Path $labDir 'gate5-verify-baseline.ps1') -Raw
-    ($common -match 'RemoteDisplay\.vnc\.ip = "127\.0\.0\.1"') -and
-    ($common -notmatch 'RemoteDisplay\.vnc\.ip = "0\.0\.0\.0"') -and
-    ($prov   -match "notmatch '\^RemoteDisplay\\\.vnc\\\.'") -and
+    ($common -match "'RemoteDisplay\.vnc\.ip'\s+-Value\s+'127\.0\.0\.1'") -and
+    ($common -notmatch '0\.0\.0\.0') -and
+    ($prov   -match 'Set-Gate5VncConsole -Enabled \$false') -and
     ($prov   -match "Get-Gate5VmxValue 'RemoteDisplay\.vnc\.enabled'") -and
-    ($ver    -match 'console-vnc-removido')
+    ($ver    -match 'console-vnc-desligado')
 }
 
 It 'entrega da tecla de boot falha fechado se o console nao responder' {
@@ -328,7 +377,8 @@ It 'snapshot baseline so e criado apos a fase de isolamento' {
 
 It 'VM final fica com NIC desconectada e sem autoconectar' {
     $prov = Get-Content (Join-Path $labDir 'gate5-provision.ps1') -Raw
-    ($prov -match 'ethernet0\.startConnected = "FALSE"') -and ($prov -match 'ethernet0\.connected = "FALSE"')
+    ($prov -match "'ethernet0\.startConnected'\s+-Value\s+'FALSE'") -and
+    ($prov -match "'ethernet0\.connected'\s+-Value\s+'FALSE'")
 }
 
 It 'validador exige todos os controles do baseline' {

@@ -319,9 +319,44 @@ function Get-Gate5VmEncryptionState {
     $state.MaterialPropertyNames = @($names | Sort-Object -Unique)
     $state.Encrypted   = [bool](@($names | Where-Object { $_ -like 'encryption.*' }).Count)
     $state.VtpmPresent = [bool](@($names | Where-Object { $_ -like 'vtpm.*' }).Count)
-    $state.Firmware    = Get-Gate5VmxValue -Key 'firmware'
-    $state.SecureBoot  = ((Get-Gate5VmxValue -Key 'uefi.secureBoot.enabled') -eq 'TRUE')
+    # Ler do MESMO arquivo inspecionado acima: usar o caminho global aqui faria
+    # o helper reportar firmware/Secure Boot de outra VM que nao a consultada.
+    $state.Firmware    = Get-Gate5VmxValue -Key 'firmware' -VmxPath $VmxPath
+    $state.SecureBoot  = ((Get-Gate5VmxValue -Key 'uefi.secureBoot.enabled' -VmxPath $VmxPath) -eq 'TRUE')
     return $state
+}
+
+function Set-Gate5VmxEntry {
+    # Grava UMA chave no .vmx preservando tudo o mais.
+    #
+    # Depois que o operador adiciona o vTPM, o VMware criptografa a VM e o
+    # material de chave fica amarrado ao conteudo do .vmx: reescrever o arquivo
+    # inteiro (mesmo so para mexer numa chave) destroi essa associacao e leva o
+    # vTPM junto. Nesse estado usamos 'vmcli ConfigParams SetEntry', que e a API
+    # do proprio VMware e trata a VM criptografada corretamente. Enquanto nao ha
+    # criptografia, a edicao direta do arquivo continua valendo.
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [Parameter(Mandatory)][string]$Value,
+        $Vmware
+    )
+    if (-not (Test-Path $script:Gate5VmxPath)) { throw 'GATE5: VMX inexistente ao gravar configuracao.' }
+    if ((Get-Gate5VmEncryptionState).Encrypted) {
+        if (-not $Vmware) { $Vmware = Find-Gate5VmwareInstall }
+        if (-not $Vmware) { throw 'GATE5: VMware nao localizado para editar VM criptografada.' }
+        $vmcli = Join-Path $Vmware.InstallDir 'vmcli.exe'
+        if (-not (Test-Path $vmcli)) { throw "GATE5: vmcli.exe ausente em $($Vmware.InstallDir); VM criptografada nao pode ser editada com seguranca." }
+        $r = Invoke-Gate5Native -FilePath $vmcli -Arguments @($script:Gate5VmxPath, 'ConfigParams', 'SetEntry', $Name, $Value)
+        if ($r.ExitCode -ne 0) {
+            throw ("GATE5: 'vmcli ConfigParams SetEntry {0}' falhou (exit {1}): {2}" -f $Name, $r.ExitCode, ($r.Output -join '; '))
+        }
+        Write-Gate5Log ("VMX (criptografado) via vmcli: {0} = {1}" -f $Name, $Value)
+    } else {
+        $lines = @(Get-Content -LiteralPath $script:Gate5VmxPath |
+                   Where-Object { $_ -notmatch ('^\s*{0}\s*=' -f [regex]::Escape($Name)) })
+        $lines += ('{0} = "{1}"' -f $Name, $Value)
+        Set-Gate5TextFile -Path $script:Gate5VmxPath -Lines $lines
+    }
 }
 
 function Set-Gate5VncConsole {
@@ -330,14 +365,20 @@ function Set-Gate5VncConsole {
     # somente durante a instalacao do guest; a fase de isolamento o remove.
     param([Parameter(Mandatory)][bool]$Enabled)
     if (-not (Test-Path $script:Gate5VmxPath)) { throw 'GATE5: VMX inexistente ao configurar o console VNC.' }
-    $lines = @(Get-Content -LiteralPath $script:Gate5VmxPath | Where-Object { $_ -notmatch '^RemoteDisplay\.vnc\.' })
     if ($Enabled) {
-        $lines += 'RemoteDisplay.vnc.enabled = "TRUE"'
-        $lines += ('RemoteDisplay.vnc.port = "{0}"' -f $script:Gate5VncPort)
-        $lines += 'RemoteDisplay.vnc.ip = "127.0.0.1"'
+        Set-Gate5VmxEntry -Name 'RemoteDisplay.vnc.enabled' -Value 'TRUE'
+        Set-Gate5VmxEntry -Name 'RemoteDisplay.vnc.port'    -Value ([string]$script:Gate5VncPort)
+        Set-Gate5VmxEntry -Name 'RemoteDisplay.vnc.ip'      -Value '127.0.0.1'
+    } elseif ((Get-Gate5VmEncryptionState).Encrypted) {
+        # Em VM criptografada nao se remove linha (o arquivo nao pode ser
+        # reescrito); desligar o console tem o mesmo efeito e o validador
+        # aceita ausente OU FALSE, alem de conferir o listener real no host.
+        Set-Gate5VmxEntry -Name 'RemoteDisplay.vnc.enabled' -Value 'FALSE'
+    } else {
+        $lines = @(Get-Content -LiteralPath $script:Gate5VmxPath | Where-Object { $_ -notmatch '^RemoteDisplay\.vnc\.' })
+        Set-Gate5TextFile -Path $script:Gate5VmxPath -Lines $lines
     }
-    Set-Gate5TextFile -Path $script:Gate5VmxPath -Lines $lines
-    Write-Gate5Log ("Console VNC local {0} (127.0.0.1:{1})." -f $(if ($Enabled) { 'HABILITADO' } else { 'REMOVIDO' }), $script:Gate5VncPort)
+    Write-Gate5Log ("Console VNC local {0} (127.0.0.1:{1})." -f $(if ($Enabled) { 'HABILITADO' } else { 'DESLIGADO' }), $script:Gate5VncPort)
 }
 
 function Send-Gate5VncKey {
@@ -395,9 +436,10 @@ function Send-Gate5VncKey {
 }
 
 function Get-Gate5VmxValue {
-    param([Parameter(Mandatory)][string]$Key)
-    if (-not (Test-Path $script:Gate5VmxPath)) { return $null }
-    $line = Select-String -LiteralPath $script:Gate5VmxPath -Pattern ('^{0}\s*=\s*"(.*)"' -f [regex]::Escape($Key)) | Select-Object -First 1
+    param([Parameter(Mandatory)][string]$Key, [string]$VmxPath)
+    if (-not $VmxPath) { $VmxPath = $script:Gate5VmxPath }
+    if (-not (Test-Path $VmxPath)) { return $null }
+    $line = Select-String -LiteralPath $VmxPath -Pattern ('^{0}\s*=\s*"(.*)"' -f [regex]::Escape($Key)) | Select-Object -First 1
     if ($line) { return $line.Matches[0].Groups[1].Value }
     return $null
 }

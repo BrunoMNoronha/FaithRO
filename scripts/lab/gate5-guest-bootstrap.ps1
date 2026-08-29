@@ -152,16 +152,14 @@ public static class Gate5IsoWriter {
         Write-Gate5Log "ISO de unattend gerada: $unattendIso (sera destruida na fase Sanitize)."
 
         # 4) Anexar como segundo CD-ROM no VMX (VM precisa estar desligada)
+        # Chave a chave: se a VM ja estiver criptografada (vTPM adicionado), o
+        # .vmx nao pode ser reescrito por inteiro sem destruir a criptografia.
         $cd = $script:Gate5CdUnattend
-        if (-not (Select-String -LiteralPath $script:Gate5VmxPath -Pattern ('^{0}\.present' -f [regex]::Escape($cd)) -Quiet)) {
-            $vmxLines = @(Get-Content -LiteralPath $script:Gate5VmxPath) + @(
-                ('{0}.present = "TRUE"' -f $cd)
-                ('{0}.deviceType = "cdrom-image"' -f $cd)
-                ('{0}.fileName = "{1}"' -f $cd, $unattendIso)
-                ('{0}.startConnected = "TRUE"' -f $cd)
-            )
-            Set-Gate5TextFile -Path $script:Gate5VmxPath -Lines $vmxLines
-        }
+        Set-Gate5VmxEntry -Name ('{0}.present' -f $cd)         -Value 'TRUE'          -Vmware $vmware
+        Set-Gate5VmxEntry -Name ('{0}.deviceType' -f $cd)      -Value 'cdrom-image'   -Vmware $vmware
+        Set-Gate5VmxEntry -Name ('{0}.fileName' -f $cd)        -Value $unattendIso    -Vmware $vmware
+        Set-Gate5VmxEntry -Name ('{0}.startConnected' -f $cd)  -Value 'TRUE'          -Vmware $vmware
+        Write-Gate5Log "ISO de unattend anexada em $cd."
         exit 0
     }
 

@@ -200,31 +200,34 @@ if (-not (Test-Gate5Phase $state 'ISOLATED')) {
         Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('stop', $script:Gate5VmxPath, 'soft') -AllowFailure | Out-Null
         Start-Sleep -Seconds 30
     }
-    # Editar VMX com a VM desligada: NIC permanece presente, porem desconectada
-    # Desconecta a NIC (sem remove-la) e o CD do sistema; o CD do unattend e
-    # retirado por completo, pois sua ISO e destruida na fase Sanitize.
-    $osCd  = [regex]::Escape($script:Gate5CdOs)
-    $unCd  = [regex]::Escape($script:Gate5CdUnattend)
-    $vmx = Get-Content $script:Gate5VmxPath
-    $vmx = $vmx | Where-Object {
-        $_ -notmatch '^ethernet0\.(startConnected|connected)\s*=' -and
-        $_ -notmatch ('^{0}\.startConnected\s*=' -f $osCd) -and
-        $_ -notmatch ('^{0}\.' -f $unCd) -and
-        # Canal temporario de teclado (console VNC local) removido aqui: ele so
-        # existe para vencer o prompt de boot pelo CD durante a instalacao.
-        $_ -notmatch '^RemoteDisplay\.vnc\.'
-    }
-    $vmx += 'ethernet0.startConnected = "FALSE"'
-    $vmx += 'ethernet0.connected = "FALSE"'
-    $vmx += ('{0}.startConnected = "FALSE"' -f $script:Gate5CdOs)
-    Set-Gate5TextFile -Path $script:Gate5VmxPath -Lines $vmx
+    # Isolamento com a VM desligada. A NIC permanece PRESENTE porem desconectada
+    # (para permitir uma decisao humana futura), o CD do sistema e desconectado e
+    # o CD do unattend e desligado, pois sua ISO e destruida na fase Sanitize.
+    #
+    # Cada chave e gravada individualmente: neste ponto a VM ja esta criptografada
+    # (o vTPM exige criptografia) e reescrever o .vmx inteiro destruiria a
+    # associacao da criptografia junto com o vTPM. Set-Gate5VmxEntry usa a API do
+    # proprio VMware quando ha criptografia.
+    Set-Gate5VmxEntry -Name 'ethernet0.startConnected' -Value 'FALSE' -Vmware $vmware
+    Set-Gate5VmxEntry -Name 'ethernet0.connected'      -Value 'FALSE' -Vmware $vmware
+    Set-Gate5VmxEntry -Name ('{0}.startConnected' -f $script:Gate5CdOs)       -Value 'FALSE' -Vmware $vmware
+    Set-Gate5VmxEntry -Name ('{0}.startConnected' -f $script:Gate5CdUnattend) -Value 'FALSE' -Vmware $vmware
+    Set-Gate5VmxEntry -Name ('{0}.present' -f $script:Gate5CdUnattend)        -Value 'FALSE' -Vmware $vmware
+    # Canal temporario de teclado (console VNC local) encerrado aqui: ele so
+    # existe para vencer o prompt de boot pelo CD durante a instalacao.
+    Set-Gate5VncConsole -Enabled $false
     foreach ($pair in @(
         @('isolation.tools.copy.disable', 'TRUE'), @('isolation.tools.paste.disable', 'TRUE'),
         @('isolation.tools.dnd.disable', 'TRUE'), @('isolation.tools.hgfs.disable', 'TRUE'))) {
         if ((Get-Gate5VmxValue $pair[0]) -ne $pair[1]) { Stop-Gate5Blocked -Blocker 'ISOLATION_VMX_INVALID' -Detail $pair[0] }
     }
     if ((Get-Gate5VmxValue 'ethernet0.startConnected') -ne 'FALSE') { Stop-Gate5Blocked -Blocker 'ISOLATION_VMX_INVALID' -Detail 'ethernet0.startConnected' }
-    if ($null -ne (Get-Gate5VmxValue 'RemoteDisplay.vnc.enabled')) { Stop-Gate5Blocked -Blocker 'ISOLATION_VMX_INVALID' -Detail 'console VNC temporario ainda presente' }
+    $vncCfg = Get-Gate5VmxValue 'RemoteDisplay.vnc.enabled'
+    if ($null -ne $vncCfg -and $vncCfg -ne 'FALSE') { Stop-Gate5Blocked -Blocker 'ISOLATION_VMX_INVALID' -Detail 'console VNC temporario ainda habilitado' }
+    # Nao basta o .vmx: conferir que nenhum listener temporario sobrou no host.
+    $vncListen = @(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue |
+                   Where-Object { $_.LocalPort -eq $script:Gate5VncPort })
+    if ($vncListen.Count -gt 0) { Stop-Gate5Blocked -Blocker 'ISOLATION_VNC_LISTENER_ACTIVE' -Detail ("porta {0} ainda ouvindo no host" -f $script:Gate5VncPort) }
     Write-Gate5Log 'Isolamento aplicado e verificado no VMX.'
     Complete-Gate5Phase $state 'ISOLATED'
 }

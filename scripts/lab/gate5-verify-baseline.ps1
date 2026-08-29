@@ -39,8 +39,14 @@ if (Test-Path $script:Gate5VmxPath) {
     Check 'hgfs-off' ((Get-Gate5VmxValue 'isolation.tools.hgfs.disable') -eq 'TRUE')
     Check 'usb-off'  ((Get-Gate5VmxValue 'usb.present') -ne 'TRUE')
     # O console VNC e um canal de administracao LOCAL e TEMPORARIO da instalacao;
-    # nao pode sobreviver ao baseline.
-    Check 'console-vnc-removido' ($null -eq (Get-Gate5VmxValue 'RemoteDisplay.vnc.enabled'))
+    # nao pode sobreviver ao baseline. Em VM criptografada a chave e desligada em
+    # vez de removida (o .vmx nao pode ser reescrito), entao vale ausente OU FALSE.
+    $vncCfg = Get-Gate5VmxValue 'RemoteDisplay.vnc.enabled'
+    Check 'console-vnc-desligado' ($null -eq $vncCfg -or $vncCfg -eq 'FALSE') "valor=$vncCfg"
+    # Prova independente do .vmx: nenhum listener na porta temporaria do host.
+    $vncListen = @(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue |
+                   Where-Object { $_.LocalPort -eq $script:Gate5VncPort })
+    Check 'console-vnc-sem-listener' ($vncListen.Count -eq 0) ("porta=" + $script:Gate5VncPort)
     $vmdk = Join-Path $script:Gate5VmDir 'FaithRO-GATE5-LAB.vmdk'
     Check 'disk-60gb-existe' (Test-Path $vmdk)
 }
