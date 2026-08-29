@@ -3,8 +3,8 @@
 > **Etapa:** 2P-E-C5-LAB-AUTOPROVISION  
 > **Predecessor:** 2P-E-C5-LAB-PROVISION-EXEC (resultado: bloqueado — host sem VMware Workstation Pro 26H1 e sem ISO oficial do Windows 11)  
 > **Especificação de base:** [doc 47](47-provisao-laboratorio-gate-5.md)  
-> **Estado desta etapa:** `LAB_AUTOPROVISION_BLOCKED` — os dois downloads do operador foram concluídos e a automação avançou até a criação da VM; agora bloqueia em `VTPM_AUTOMATION_NOT_SUPPORTED` (ver §11)  
-> **Data:** 2026-08-28 (execução real em 2026-08-29 UTC)
+> **Estado desta etapa:** `LAB_AUTOPROVISION_BLOCKED` — VMware, ISO e VM prontos; o boot da ISO foi **resolvido e comprovado**; resta um único gate humano: adicionar o vTPM pela interface do Workstation (ver §11)  
+> **Data:** 2026-08-28; execução real e recuperação em 2026-08-29 (etapa 2P-E-C5-LAB-VTPM-BOOT-RECOVERY)
 
 ```text
 target_materialized=false
@@ -30,7 +30,7 @@ Dois insumos exigem ação humana legítima e **não são automatizáveis** (lic
 1. **Instalador VMware Workstation Pro 26H1** — download autenticado no Broadcom Support Portal; salvar como `VMware-workstation-full-<versao>.exe` em `C:\Installers`. A automação valida assinatura Authenticode (publisher VMware/Broadcom), versão 26.x e registra SHA-256.
 2. **ISO oficial Windows 11 x64** (preferência 25H2, pt-BR) — download em `https://www.microsoft.com/software-download/windows11`; salvar em `C:\ISO` junto com um sidecar `<iso>.sha256.official` contendo o SHA-256 oficial exibido pela Microsoft ("Verify your download"). Sem o sidecar, a automação bloqueia com `WINDOWS_ISO_PROVENANCE_UNVERIFIED` (fail-closed; ISO sem procedência comprovada nunca é aceita).
 
-Além disso, o entrypoint deve rodar em **PowerShell elevado** (validado no pré-flight).
+A elevação (**PowerShell como Administrador**) é exigida **apenas** para instalar o VMware e criar `C:\VMs\FaithRO-GATE5-LAB\`. Depois disso — verificado nesta máquina — `vmrun`, `vmcli` e o diretório da VM são acessíveis pela conta de trabalho comum, e o pré-flight deixa de exigir privilégio administrativo. Rodar sem elevação é o estado preferível (menor privilégio) e evita que os segredos de bootstrap fiquem presos à conta administrativa via DPAPI.
 
 ## 3. Arquivos
 
@@ -71,12 +71,13 @@ Pontos técnicos principais:
 
 - **VM:** `C:\VMs\FaithRO-GATE5-LAB\`, 2 vCPU, 4096 MB, disco 60 GB thin (`vmware-vdiskmanager -c -s 60GB -a nvme -t 0`), `firmware=efi`, `uefi.secureBoot.enabled=TRUE`. O `.vmx` é escrito a partir de um conjunto **canônico** de chaves e reparado de forma idempotente (chaves geradas pelo VMware, como `uuid.bios`, são preservadas). O conjunto inclui as pontes PCIe (`pciBridge0/4/5/6/7`) e `virtualHW.version="22"`, conferidos contra a saída de `vmcli VM Create` desta instalação — sem as pontes não há slot PCIe para a NIC e o `vmware-vmx` aborta antes de ligar.
 - **vTPM:** `managedvm.autoAddVTPM="software"` é declarado, mas **não basta**: essa chave é honrada pelo fluxo gerenciado do Workstation e não por `vmrun start` sobre um `.vmx` escrito a mão. A automação exige **evidência** de um dispositivo TPM (chave `vtpm.present` materializada ou registro no `vmware.log`) e, na ausência dela, para com `VTPM_AUTOMATION_NOT_SUPPORTED` — nunca improvisa chaves `.vmx` nem contorna o requisito de TPM do Windows 11. Ver §11.
+- **Boot da ISO:** a ISO oficial da Microsoft usa o carregador com o prompt *"Press any key to boot from CD or DVD"*. Sem uma tecla, o firmware registra `Status upon boot failure: Time out`, desiste do CD e a VM fica presa no Boot Manager — o Setup nunca inicia. `vmcli MKS sendKeyEvent`/`sendKeySequence` retornam sucesso mas **a tecla não chega ao guest** sem um console conectado, e `vmrun start ... gui` bloqueia. A automação usa então o **console VNC do próprio VMware** como canal **local e temporário** (preso a `127.0.0.1`), com um cliente RFB 3.8 mínimo embutido, e para de teclar assim que o disco cresce (prova de que o Setup começou a gravar). O canal é removido na fase de isolamento e sua ausência é conferida pelo validador antes do snapshot; se o console não responder, a etapa falha fechada com `BOOT_KEY_CHANNEL_UNAVAILABLE`.
 - **Windows Setup:** `Autounattend.xml` (pt-BR, ABNT2, fuso E. South America, `FAITHRO-GATE5`), entregue por ISO auxiliar gerada com IMAPI2FS (COM nativo), fluxo legítimo sem chave de produto (edição por `IMAGE/NAME`). Conta local `gate5boot` só de bootstrap, com senha aleatória de runtime; removida da configuração e sanitizada antes do snapshot.
 - **Integrações host/guest:** desabilitadas no VMX desde a criação (`isolation.tools.copy/paste/dnd/hgfs.disable=TRUE`, `sharedFolder.maxNum=0`, `usb.present=FALSE`).
 - **Windows Update:** COM `Microsoft.Update.Session` no guest, com reboot somente do guest, até zero atualizações aplicáveis (máx. 6 ciclos).
 - **Defender:** `Update-MpSignature`, evidência com plataforma/engine/assinaturas e SHA-256 do `MpCmdRun.exe`; permanece com antivírus e realtime habilitados.
 - **YARA 4.5.5:** download host-side dos metadados/asset win64 da release oficial `VirusTotal/yara v4.5.5`, verificação de tamanho/versão/SHA-256, cópia para `C:\Tools\YARA` no guest e reverificação dentro do guest.
-- **Ruleset:** SHA-40 da branch default de `Yara-Rules/rules` resolvido **uma vez** pela API oficial do GitHub e pinado, com o conteúdo materializado pelo *zipball* daquele commit exato (sem depender de `git` no `PATH`: o provisionamento roda elevado sob outra conta administradora, onde uma instalação per-user do git não existe) (`.local\...\evidence\ruleset-pin.json`); categorias incluídas `malware, packers, antidebug_antivm, capabilities, crypto`; excluídas `email, mobile_malware, webshells, maldocs`; licença GPL-2.0 preservada; compilação por arquivo com `yarac64` (exclusão individual documentada apenas para regra que não compila em 4.5.5); índice `gate5-index.yar` compilado com 0 erros; hashes individuais + aggregate SHA-256 determinístico (manifesto `<path>\t<sha256>\n`, UTF-8 sem BOM, ordenação ordinal).
+- **Ruleset:** SHA-40 da branch default de `Yara-Rules/rules` resolvido **uma vez** pela API oficial do GitHub e pinado, com o conteúdo materializado pelo *zipball* daquele commit exato (sem depender de `git` no `PATH`, que não existe em toda conta capaz de rodar o provisionamento — uma instalação per-user do git não é visível para outra conta) (`.local\...\evidence\ruleset-pin.json`); categorias incluídas `malware, packers, antidebug_antivm, capabilities, crypto`; excluídas `email, mobile_malware, webshells, maldocs`; licença GPL-2.0 preservada; compilação por arquivo com `yarac64` (exclusão individual documentada apenas para regra que não compila em 4.5.5); índice `gate5-index.yar` compilado com 0 erros; hashes individuais + aggregate SHA-256 determinístico (manifesto `<path>\t<sha256>\n`, UTF-8 sem BOM, ordenação ordinal).
 - **Isolamento final:** VM desligada → `ethernet0.connected=FALSE`, `ethernet0.startConnected=FALSE`, ISO desanexada — só então o snapshot `BASELINE_GATE5_ISOLATED` é criado (nunca com egress ativo).
 - **Verificação pós-snapshot:** a VM é ligada isolada e o guest comprova `Confirm-SecureBootUEFI`, `Get-Tpm`, Defender ativo, YARA 4.5.5, índice de regras, 0 NICs ativas e ausência de artefatos WARP; depois é desligada. A rede não é reconectada.
 
@@ -128,6 +129,10 @@ A execução real expôs defeitos que a etapa anterior não podia detectar. Todo
 | D12 | Reparo do `.vmx` preservava `*.pciSlotNumber` da topologia antiga | a NIC herdava um slot inválido e o power-on falhava de novo |
 | D13 | NVRAM de um power-on que falhou | o firmware deixou de enumerar o CD do sistema; descartada quando o disco ainda está vazio |
 | D14 | Verificação do vTPM aceitava a própria chave escrita pela automação | falso positivo: registrava "vTPM confirmado" sem TPM algum |
+| D15 | Boot da ISO expirava no prompt "Press any key" e a tecla não chegava ao guest | Setup nunca iniciava; resolvido com console VNC local temporário + cliente RFB (§4) |
+| D16 | Pré-flight exigia elevação em toda execução | impedia a retomada depois que o VMware já estava instalado, sem ganho de segurança |
+| D17 | Credencial de bootstrap protegida por DPAPI de outra conta | ao deixar de rodar elevado, o arquivo fica ilegível; agora é regerada antes da instalação ou falha fechada depois dela |
+| D18 | Reparo do `.vmx` reescreveria uma VM já criptografada | destruiria a associação da criptografia e, com ela, o vTPM; nesse estado a automação apenas confere |
 
 Evidências brutas ficam em `.local\gate5-lab\evidence\` (não versionadas): `vmware-crash-pci-noslotavail.log` e capturas de tela do firmware do guest.
 
@@ -147,30 +152,35 @@ Herdados do prompt/doc 47: R1 instalador adulterado (assinatura+SHA-256+fonte of
 1. ~~Download autenticado do instalador VMware 26H1 (Broadcom)~~ — **concluído**;
 2. ~~Download da ISO oficial + cópia do SHA-256 oficial da Microsoft (sidecar)~~ — **concluído**;
 3. **Adicionar o vTPM pela interface do Workstation** (ver §11) — pendente;
-4. **Aprovação de UAC** a cada execução: nesta máquina a conta de trabalho não pertence ao grupo de administradores, e a elevação usa outra conta administrativa. O provisionamento só avança enquanto o operador aprovar o prompt do Windows; a senha nunca é manipulada pela automação. Como consequência, os segredos de bootstrap ficam protegidos por DPAPI **da conta elevada** — todas as execuções devem usar a mesma conta;
+4. ~~Aprovação de UAC a cada execução~~ — **não é mais necessária**: com o VMware já instalado e o diretório da VM gravável, a automação roda pela conta de trabalho comum (§2). Nesta máquina a conta de trabalho não pertence ao grupo de administradores e a elevação usaria outra conta administrativa, o que prenderia os segredos de bootstrap ao DPAPI dela — rodar sem elevação é o estado preferível e evita esse acoplamento;
 5. Reboot do host, se exigido pelo instalador VMware (não foi necessário nesta instalação);
 6. Decisões posteriores da cadeia GATE 5 (materialização/scan do alvo) — **fora do escopo desta automação**, que termina no snapshot `BASELINE_GATE5_ISOLATED`.
 
-## 11. Bloqueio atual: vTPM e boot do instalador
+## 11. Bloqueio atual: gate humano do vTPM
 
-**Bloqueador:** `VTPM_AUTOMATION_NOT_SUPPORTED`.
+**Bloqueador:** `HUMAN_GATE_REQUIRED — VMWARE_VTPM`.
 
-Constatado empiricamente nesta instalação do Workstation 26.0.0:
+Constatado empiricamente nesta instalação do Workstation 26.0.0: `managedvm.autoAddVTPM="software"` aparece no `DICT` do `vmware.log` mas **nenhum dispositivo TPM é criado** por `vmrun start` sobre um `.vmx` escrito à mão; `vmrun` não expõe comando de TPM; `vmcli` não possui módulo de TPM nem de criptografia. O vTPM do Workstation exige criptografia da VM, cujo material de chave só o próprio VMware gera — inventar essas chaves, copiar identidade TPM de outra VM ou contornar o requisito de TPM do Windows 11 são ações **proibidas** nesta etapa.
 
-- `managedvm.autoAddVTPM="software"` aparece no `DICT` do `vmware.log`, mas **nenhum dispositivo TPM é criado** quando a VM é ligada por `vmrun start` sobre um `.vmx` escrito a mão;
-- `vmrun` não expõe comando de TPM;
-- `vmcli` não possui módulo de TPM nem de criptografia (módulos disponíveis: `Chipset, ConfigParams, Disk, Ethernet, Guest, HGFS, MKS, Nvme, Power, Sata, Serial, Snapshot, Tools, VM`);
-- o vTPM do Workstation exige criptografia (ao menos parcial) da VM, cujo material de chave só o próprio VMware gera — **inventar essas chaves é proibido por esta etapa**, assim como contornar o requisito de TPM do Windows 11.
+Além disso, a VM ficou **ligada sob a conta administrativa** usada nas execuções elevadas anteriores (processo `vmware-vmx` órfão), e a conta de trabalho não consegue encerrá-la.
 
-**Único passo humano necessário:** abrir o VMware Workstation, abrir `C:\VMs\FaithRO-GATE5-LAB\FaithRO-GATE5-LAB.vmx`, `VM Settings → Add → Trusted Platform Module`, aceitar a criptografia proposta pelo produto (a senha **não** deve ser versionada nem registrada em log) e fechar. Em seguida reexecutar, em PowerShell elevado:
+**Passos humanos necessários (nesta ordem):**
+
+1. Encerrar a VM órfã: Gerenciador de Tarefas → finalizar `vmware-vmx.exe` (ou reiniciar o host).
+2. Avisar, para que a automação aplique a configuração canônica no `.vmx` **antes** da criptografia (depois dela o arquivo não pode mais ser reescrito).
+3. Abrir o VMware Workstation → abrir `C:\VMs\FaithRO-GATE5-LAB\FaithRO-GATE5-LAB.vmx` → `VM Settings` → `Add` → `Trusted Platform Module` → aceitar a criptografia proposta pelo produto → fechar.
+
+A senha de criptografia é definida e mantida **exclusivamente pelo operador**: não deve ser digitada no terminal, versionada nem registrada em log.
+
+Depois disso, retomar com:
 
 ```powershell
 .\scripts\lab\gate5-provision.ps1
 ```
 
-A automação retoma do checkpoint `VM_CREATED` sem refazer o que já está pronto.
+sem elevação — o pré-flight já não a exige (§2) e a retomada parte do checkpoint `VM_CREATED`.
 
-**Pendência não resolvida (verificar na próxima execução):** com a NVRAM anterior descartada, o Boot Manager do firmware passou a enumerar todos os dispositivos (`NVME Namespace`, dois `SATA CDROM Drive`, `Network`), mas a tentativa de boot pelo CD do sistema terminou em `Status upon boot failure: No Media` e o Windows Setup não iniciou (disco virtual permaneceu vazio). As correções D11–D13 (pontes PCIe, recálculo dos slots PCI, descarte da NVRAM obsoleta), a mudança do CD do sistema para a porta `sata0:0` e o envio de teclas para o prompt "Press any key to boot from CD" foram aplicadas, **mas ainda não puderam ser verificadas fim-a-fim** porque a elevação deixou de ser concedida. Se o `No Media` persistir após a adição do vTPM, o próximo passo de diagnóstico é comparar o `.vmx` com o de uma VM criada inteiramente pela interface do Workstation com a mesma ISO anexada.
+**Não é mais bloqueio:** o boot da ISO. Ele foi diagnosticado e resolvido nesta etapa, com o Windows 11 Setup em pt-BR comprovadamente iniciando (§4, §7-D15).
 
 ## 12. Próxima etapa
 
