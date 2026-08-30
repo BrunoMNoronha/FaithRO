@@ -6,7 +6,7 @@
   "document_reference": "docs/26-pacote-decisao-humana-primeiro-build-beam.md",
   "package_id": "PKG-2O-D1-B14-primeiro-build-beam",
   "package_date_utc": null,
-  "project": "FaithRO - Laos Deos",
+  "project": "FaithRO - Laus Deo",
   "purpose": "Reunir, por referencia e hash, os artefatos necessarios para que uma pessoa com autoridade revise a solicitacao do primeiro build controlado do Beam Patcher e registre, em etapa posterior, uma decisao de aprovacao ou recusa. Este pacote NAO concede autorizacao, NAO permite execucao e NAO representa uma decisao.",
   "presents_decision": true,
   "grants_authorization": false,

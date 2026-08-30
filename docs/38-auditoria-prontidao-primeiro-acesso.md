@@ -22,7 +22,7 @@
 
 Consolidar, em um único registro rastreável, o resultado da auditoria de
 compatibilidade cliente-servidor e de prontidão do primeiro acesso do FaithRO -
-Laos Deos, **reconfirmando por evidência de runtime** o estado do servidor e
+Laus Deo, **reconfirmando por evidência de runtime** o estado do servidor e
 **registrando as lacunas** que ainda impedem uma homologação controlada do
 primeiro login. O documento evita repetir integralmente as matrizes e
 procedimentos já documentados; onde a informação já existe, aponta para a fonte

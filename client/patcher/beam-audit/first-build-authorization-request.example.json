@@ -9,7 +9,7 @@
   "evidence_reference": "client/patcher/beam-audit/first-build-execution-evidence.example.json",
   "request_id": "REQ-2O-D1-B12-primeiro-build-beam",
   "request_status": "PENDING_HUMAN_DECISION",
-  "project": "FaithRO - Laos Deos",
+  "project": "FaithRO - Laus Deo",
   "requested_operation": "primeiro build controlado do Beam Patcher",
   "authorization_granted": false,
   "execution_permitted": false,

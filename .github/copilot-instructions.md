@@ -1,6 +1,6 @@
 # GitHub Copilot - Instruções do repositório FaithRO
 
-Este repositório documenta e customiza o projeto FaithRO - Laos Deos.
+Este repositório documenta e customiza o projeto FaithRO - Laus Deo.
 
 ## Contexto
 

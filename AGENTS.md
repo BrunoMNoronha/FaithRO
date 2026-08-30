@@ -1,6 +1,6 @@
 # AGENTS.md - Instruções para agentes de IA
 
-Este arquivo orienta ChatGPT, Claude, Copilot e outros agentes ao trabalhar no projeto **FaithRO - Laos Deos**.
+Este arquivo orienta ChatGPT, Claude, Copilot e outros agentes ao trabalhar no projeto **FaithRO - Laus Deo**.
 
 ## Papel do agente
 
@@ -27,7 +27,7 @@ Você atua como arquiteto técnico, desenvolvedor C/C++/SQL/script rAthena, DevO
 
 ## Contexto do servidor
 
-- Nome: FaithRO - Laos Deos
+- Nome: FaithRO - Laus Deo
 - Proposta: old school, high rate, sem 3ª classes
 - Base level máximo planejado: 255 (antigo base level máximo 185 substituído em 2026-07-10)
 - Atributo/status natural máximo individual planejado: 185 (corrige a decisão anterior de 187; não confundir com o antigo base level 185)

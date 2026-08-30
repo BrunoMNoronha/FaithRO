@@ -10,7 +10,7 @@
 ## Objetivo
 
 Explicar, de forma segura e rastreável, como um jogador prepara uma instalação
-**legítima** do cliente e realiza o primeiro acesso ao FaithRO - Laos Deos, sem
+**legítima** do cliente e realiza o primeiro acesso ao FaithRO - Laus Deo, sem
 que o projeto redistribua qualquer conteúdo proprietário da Gravity ou de
 terceiros sem licença.
 
