@@ -47,8 +47,11 @@ if (Test-Path $script:Gate5VmxPath) {
     $vncListen = @(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue |
                    Where-Object { $_.LocalPort -eq $script:Gate5VncPort })
     Check 'console-vnc-sem-listener' ($vncListen.Count -eq 0) ("porta=" + $script:Gate5VncPort)
+    # Override de instalacao nao pode sobreviver ao baseline: a VM final depende
+    # da ordem normal registrada pelo UEFI/Windows Boot Manager.
+    Check 'sem-override-de-boot' (($null -eq (Get-Gate5VmxValue 'bios.bootOrder')) -and ($null -eq (Get-Gate5VmxValue 'efi.bootOrder')))
     $vmdk = Join-Path $script:Gate5VmDir 'FaithRO-GATE5-LAB.vmdk'
-    Check 'disk-60gb-existe' (Test-Path $vmdk)
+    Check 'disk-70gb-existe' (Test-Path $vmdk)
 }
 
 # --- Snapshot -----------------------------------------------------------------

@@ -38,7 +38,7 @@ A elevação (**PowerShell como Administrador**) é exigida **apenas** para inst
 scripts/lab/gate5-provision.ps1          # entrypoint (máquina de estados, retomável)
 scripts/lab/gate5-common.ps1             # helpers: log UTC, estado, hashes, vmrun, VMX
 scripts/lab/gate5-host-preflight.ps1     # pré-flight do host (somente leitura)
-scripts/lab/gate5-create-vm.ps1          # VMX + VMDK thin 60 GB (UEFI/Secure Boot/vTPM)
+scripts/lab/gate5-create-vm.ps1          # VMX + VMDK thin 70 GB (UEFI/Secure Boot/vTPM)
 scripts/lab/gate5-guest-bootstrap.ps1    # fases do guest: Unattend/InstallWait/Updates/Defender/Yara/Rules/Sanitize
 scripts/lab/gate5-verify-baseline.ps1    # validador final (exit 0 só com todos os controles)
 scripts/lab/templates/Autounattend.template.xml  # sem secrets ({{BOOTSTRAP_PASSWORD}} renderizado em runtime)
@@ -69,7 +69,7 @@ RULESET_READY → SANITIZED → ISOLATED → SNAPSHOT_CREATED → BASELINE_VERIF
 
 Pontos técnicos principais:
 
-- **VM:** `C:\VMs\FaithRO-GATE5-LAB\`, 2 vCPU, 4096 MB, disco 60 GB thin (`vmware-vdiskmanager -c -s 60GB -a nvme -t 0`), `firmware=efi`, `uefi.secureBoot.enabled=TRUE`. O `.vmx` é escrito a partir de um conjunto **canônico** de chaves e reparado de forma idempotente (chaves geradas pelo VMware, como `uuid.bios`, são preservadas). O conjunto inclui as pontes PCIe (`pciBridge0/4/5/6/7`) e `virtualHW.version="22"`, conferidos contra a saída de `vmcli VM Create` desta instalação — sem as pontes não há slot PCIe para a NIC e o `vmware-vmx` aborta antes de ligar.
+- **VM:** `C:\VMs\FaithRO-GATE5-LAB\`, 2 vCPU, 4096 MB, disco 70 GB thin (`vmware-vdiskmanager -c -s 70GB -a nvme -t 0`), `firmware=efi`, `uefi.secureBoot.enabled=TRUE`. O `.vmx` é escrito a partir de um conjunto **canônico** de chaves e reparado de forma idempotente (chaves geradas pelo VMware, como `uuid.bios`, são preservadas). O conjunto inclui as pontes PCIe (`pciBridge0/4/5/6/7`) e `virtualHW.version="22"`, conferidos contra a saída de `vmcli VM Create` desta instalação — sem as pontes não há slot PCIe para a NIC e o `vmware-vmx` aborta antes de ligar.
 - **vTPM:** `managedvm.autoAddVTPM="software"` é declarado, mas **não basta**: essa chave é honrada pelo fluxo gerenciado do Workstation e não por `vmrun start` sobre um `.vmx` escrito a mão. A automação exige **evidência** de um dispositivo TPM (chave `vtpm.present` materializada ou registro no `vmware.log`) e, na ausência dela, para com `VTPM_AUTOMATION_NOT_SUPPORTED` — nunca improvisa chaves `.vmx` nem contorna o requisito de TPM do Windows 11. Ver §11.
 - **Boot da ISO:** a ISO oficial da Microsoft usa o carregador com o prompt *"Press any key to boot from CD or DVD"*. Sem uma tecla, o firmware registra `Status upon boot failure: Time out`, desiste do CD e a VM fica presa no Boot Manager — o Setup nunca inicia. `vmcli MKS sendKeyEvent`/`sendKeySequence` retornam sucesso mas **a tecla não chega ao guest** sem um console conectado, e `vmrun start ... gui` bloqueia. A automação usa então o **console VNC do próprio VMware** como canal **local e temporário** (preso a `127.0.0.1`), com um cliente RFB 3.8 mínimo embutido, e para de teclar assim que o disco cresce (prova de que o Setup começou a gravar). O canal é removido na fase de isolamento e sua ausência é conferida pelo validador antes do snapshot; se o console não responder, a etapa falha fechada com `BOOT_KEY_CHANNEL_UNAVAILABLE`.
 - **Windows Setup:** `Autounattend.xml` (pt-BR, ABNT2, fuso E. South America, `FAITHRO-GATE5`), entregue por ISO auxiliar gerada com IMAPI2FS (COM nativo), fluxo legítimo sem chave de produto (edição por `IMAGE/NAME`). Conta local `gate5boot` só de bootstrap, com senha aleatória de runtime; removida da configuração e sanitizada antes do snapshot.
@@ -97,7 +97,7 @@ Com o instalador e a ISO já materializados pelo operador, a automação foi exe
 | `HOST_PREFLIGHT_OK` | PASS — Windows 11 build 26200 x64, i5-1235U, 16,89 GB RAM, ~74,9 GB livres em C:, virtualização disponível (Hyper-V/VBS ativo, **preservado**) |
 | `VMWARE_INSTALLED` | PASS — `VMware-Workstation-Full-26H1-25388281.exe`, Authenticode **Valid** (`CN=Broadcom Inc`), `ProductVersion=26.0.0`, SHA-256 `a0ef9087607d9cad20b08139e73e41242e044ad5bd8cee141d3bad314586737f`; instalado em `C:\Program Files\VMware\VMware Workstation` sem exigir reboot |
 | `ISO_VALIDATED` | PASS — `Win11_25H2_BrazilianPortuguese_x64_v2.iso`, SHA-256 `50fe4703cf0df0072e093d1f5d58ed450e4c49d8ca960433bbe6278d5ef10107` **idêntico** ao sidecar oficial; edição `Windows 11 Pro` confirmada no `install.wim` (índice 4) |
-| `VM_CREATED` | PASS — VMDK thin 60 GB + `.vmx` canônico validado |
+| `VM_CREATED` | PASS — VMDK thin 70 GB + `.vmx` canônico validado |
 | `GUEST_INSTALLED` | **BLOQUEADO** — ver §11 |
 
 Validações do repositório (sessão não elevada):
@@ -133,12 +133,15 @@ A execução real expôs defeitos que a etapa anterior não podia detectar. Todo
 | D16 | Pré-flight exigia elevação em toda execução | impedia a retomada depois que o VMware já estava instalado, sem ganho de segurança |
 | D17 | Credencial de bootstrap protegida por DPAPI de outra conta | ao deixar de rodar elevado, o arquivo fica ilegível; agora é regerada antes da instalação ou falha fechada depois dela |
 | D18 | Reparo do `.vmx` reescreveria uma VM já criptografada | destruiria a associação da criptografia e, com ela, o vTPM; nesse estado a automação apenas confere |
+| D19 | Ordem de boot gravada em `efi.bootOrder` | o firmware respondeu `Unrecognized efi.bootOrder` aos tokens que recebeu e bootou pelo disco: o Setup nunca iniciava (§15) |
+| D20 | Override de instalação sobreviveria ao baseline | a VM final ficaria com "CD antes do disco" gravado no `.vmx`; a chave passou a ser **removida** na fase `ISOLATED` e a ausência é conferida pelo validador |
+| D21 | O self-test chamava `Set-Gate5OpticalBootFirst` com um valor válido sem redirecionar `$script:Gate5VmxPath` | com a VM desligada e a interface fechada não há guarda: em 2026-08-31 a suite gravou `bios.bootOrder` no `.vmx` do laboratório **real**. A chamada passou a rodar contra um `.vmx` descartável e a suite confere o carimbo do arquivo real na saída |
 
 Evidências brutas ficam em `.local\gate5-lab\evidence\` (não versionadas): `vmware-crash-pci-noslotavail.log` e capturas de tela do firmware do guest.
 
 ## 8. Riscos e mitigações
 
-Herdados do prompt/doc 47: R1 instalador adulterado (assinatura+SHA-256+fonte oficial), R2 ISO adulterada (sidecar com hash oficial Microsoft, obrigatório), R3 escape host↔guest (integrações off desde a criação), R4 segredo persistente (senha runtime + DPAPI + fase Sanitize + snapshot só depois), R5 egress pós-baseline (NIC disconnected + startConnected=false + prova pós-snapshot), R6 automação não idempotente (checkpoints + redetecção), R7 disco (pré-flight exige ≥40 GB livres antes do VMDK), R8 Hyper-V/VBS (nunca alterado automaticamente; conflito real → `HOST_VIRTUALIZATION_CONFLICT_REQUIRES_DECISION`).
+Herdados do prompt/doc 47: R1 instalador adulterado (assinatura+SHA-256+fonte oficial), R2 ISO adulterada (sidecar com hash oficial Microsoft, obrigatório), R3 escape host↔guest (integrações off desde a criação), R4 segredo persistente (senha runtime + DPAPI + fase Sanitize + snapshot só depois), R5 egress pós-baseline (NIC disconnected + startConnected=false + prova pós-snapshot), R6 automação não idempotente (checkpoints + redetecção), R7 disco (pré-flight exige margem livre em C: antes do VMDK; o disco é thin e cresce sob demanda), R8 Hyper-V/VBS (nunca alterado automaticamente; conflito real → `HOST_VIRTUALIZATION_CONFLICT_REQUIRES_DECISION`).
 
 ## 9. Rollback
 
@@ -162,7 +165,7 @@ Herdados do prompt/doc 47: R1 instalador adulterado (assinatura+SHA-256+fonte of
 
 Constatado empiricamente nesta instalação do Workstation 26.0.0: `managedvm.autoAddVTPM="software"` aparece no `DICT` do `vmware.log` mas **nenhum dispositivo TPM é criado** por `vmrun start` sobre um `.vmx` escrito à mão; `vmrun` não expõe comando de TPM; `vmcli` não possui módulo de TPM nem de criptografia. O vTPM do Workstation exige criptografia da VM, cujo material de chave só o próprio VMware gera — inventar essas chaves, copiar identidade TPM de outra VM ou contornar o requisito de TPM do Windows 11 são ações **proibidas** nesta etapa.
 
-**Estado em 2026-08-29 (`PRE_VTPM_READY`):** a VM órfã que ficara ligada sob a conta administrativa foi encerrada pelo operador (confirmado por abertura exclusiva do VMDK, não apenas por `vmrun`), os resíduos do hard power-off foram removidos com a VM comprovadamente parada, e a configuração canônica foi aplicada **antes** da criptografia — `virtualHW.version=22`, `numvcpus=2`, `memsize=4096`, `firmware=efi`, Secure Boot ligado, disco 60 GB thin em NVMe, ISO do Windows em `sata0:0`, ISO de unattend em `sata0:1`, shared folders/clipboard/drag-and-drop/USB desabilitados, identidade da VM (`uuid.bios`, MAC gerado) preservada.
+**Estado em 2026-08-29 (`PRE_VTPM_READY`):** a VM órfã que ficara ligada sob a conta administrativa foi encerrada pelo operador (confirmado por abertura exclusiva do VMDK, não apenas por `vmrun`), os resíduos do hard power-off foram removidos com a VM comprovadamente parada, e a configuração canônica foi aplicada **antes** da criptografia — `virtualHW.version=22`, `numvcpus=2`, `memsize=4096`, `firmware=efi`, Secure Boot ligado, disco 70 GB thin em NVMe, ISO do Windows em `sata0:0`, ISO de unattend em `sata0:1`, shared folders/clipboard/drag-and-drop/USB desabilitados, identidade da VM (`uuid.bios`, MAC gerado) preservada.
 
 **Passo humano restante:** abrir o VMware Workstation → abrir `C:\VMs\FaithRO-GATE5-LAB\FaithRO-GATE5-LAB.vmx` → com a VM desligada → `VM Settings` → `Add` → `Trusted Platform Module` → aceitar a criptografia proposta pelo produto → fechar `VM Settings` → **não iniciar a VM manualmente**.
 
@@ -257,6 +260,74 @@ A *allowlist* de downloads do laboratório foi estendida para `aka.ms/vs/<n>/rel
 **Rollback.** Reverter o commit desta correção restaura o pipeline anterior, que instala YARA sem runtime e volta a reprovar `yara_4_5_5`; nada no host é alterado além de `.local/gate5-lab/` (fora do Git) e a VM não é tocada. Para descartar apenas o artefato: apagar `.local/gate5-lab/vcredist-stage/` e `evidence/vcruntime-pin.json`.
 
 **Impossibilidade de aplicar ao guest atual.** O único canal de entrega controlado é a mídia, consumida pelo Windows Setup no primeiro logon; o payload da instalação atual já concluiu (`stage=DONE`, tarefa de retomada removida) e a VM criptografada não oferece *guest operations*. Injetar o runtime manualmente no guest atual quebraria a reprodutibilidade do baseline. Logo, a correção exige **nova mídia e nova instalação limpa**, com a VM desligada — um único ciclo, com o watcher já maduro.
+
+## 15. Decisão técnica: ordem de boot pela chave documentada, com fallback oficial de firmware
+
+**Defeito (D19).** A automação precisa fazer o firmware preferir a mídia óptica no
+primeiro boot: depois de uma instalação anterior o Windows grava `Windows Boot
+Manager` na NVRAM e o firmware passa a bootá-lo direto, sem sequer exibir *"Press
+any key to boot from CD or DVD"*. A RUN-02 tentou impor a ordem por
+`efi.bootOrder` e o próprio firmware recusou os tokens recebidos:
+
+```
+2026-08-29T16:39:18.628Z ... DICT             efi.bootOrder = "cdrom,hdd"
+2026-08-29T16:39:25.602Z ... Unrecognized efi.bootOrder: "cdrom".
+2026-08-29T16:39:25.602Z ... Unrecognized efi.bootOrder: "hdd".
+2026-08-29T16:39:26.302Z ... Guest: About to do EFI boot: Windows Boot Manager
+```
+
+**Fonte normativa.** A correção **não** parte de vírgulas descobertas por inspeção do
+binário do hipervisor. Strings, offsets e disassembly de `vmware-vmx.exe` **não são
+especificação**: descrevem um parser interno não documentado, que pode mudar entre
+builds sem aviso. A ordem de precedência adotada daqui em diante é:
+
+1. documentação oficial VMware/Broadcom para o Workstation;
+2. comportamento **observável** do Workstation 26H1 (o que o `vmware.log` registra);
+3. fallback pela interface oficial (*Power On to Firmware*).
+
+A tentativa anterior confundiu (2) com uma especificação: o log provava apenas que
+`cdrom`/`hdd` haviam sido recusados naquele caminho, não qual vocabulário seria o
+correto. A tabela de tokens extraída do executável permanece registrada em
+`.local\\gate5-lab\\evidence\\run-02-clean-install\\` **como diagnóstico histórico**, e
+não como contrato.
+
+**Correção.** `Set-Gate5OpticalBootFirst` passa a gravar `bios.bootOrder = "cdrom,hdd"`
+— a única chave de ordem de boot cujo vocabulário (`cdrom`, `hdd`, `floppy`,
+`ethernet`) o Workstation documenta para instalação por ISO. A chave `efi.bootOrder`
+é **removida** do `.vmx` (`Remove-Gate5VmxEntry`, com a mesma garantia fail-closed de
+preservação do material `encryption.*`/`vtpm.*`), para que o próximo power-on não
+carregue ao lado um valor que o firmware já reprovou.
+
+**`vmcli` não serve nesta VM.** `vmcli ConfigParams SetEntry <name> <value> <vmx>`
+existe nesta instalação (26H1) e seria a interface oficial, mas em VM criptografada
+exige a senha pela entrada padrão (`Something went wrong while getting password from
+stdin`) — e essa senha é exclusiva do operador. Confirmado também em modo leitura
+(`ConfigParams query`). A automação segue usando `Set-Gate5VmxEntry`, que troca a
+linha **no lugar** e reverte a escrita se qualquer linha `encryption.*`/`vtpm.*`
+mudar.
+
+**Limitação observada e fallback oficial.** Se o firmware receber `bios.bootOrder`
+(conferido no dump `DICT` do `vmware.log`, não no arquivo em disco) e ainda assim
+bootar pelo disco, isso **não** é defeito da automação nem ambiente corrompido: é uma
+limitação desta instalação do Workstation. Nesse caso o pipeline emite um **gate
+humano**, não um blocker:
+
+```
+HUMAN_ACTION_REQUIRED
+action=SELECT_WINDOWS_ISO_IN_UEFI_BOOT_MENU
+```
+
+O operador faz **uma vez**, com a VM desligada: `VM → Power → Power On to Firmware` e
+escolhe o CD/DVD com a ISO do Windows (`sata0:0`). Depois do primeiro boot pela
+mídia a automação retoma sozinha. Continuam **proibidos** como contorno: trocar UEFI
+por BIOS legado, desabilitar Secure Boot, remover o vTPM, apagar a NVRAM ou repetir
+power cycles à procura de tokens.
+
+**Override não sobrevive ao baseline (D20).** `bios.bootOrder` existe só durante a
+instalação. A fase `ISOLATED` remove `bios.bootOrder` e `efi.bootOrder` do `.vmx`,
+falha fechada (`ISOLATION_VMX_INVALID`) se alguma sobrar, e `gate5-verify-baseline.ps1`
+confere `sem-override-de-boot` antes do snapshot. A VM do baseline boota pela ordem
+normal registrada pelo UEFI/Windows Boot Manager.
 
 ## 14. Próxima etapa
 

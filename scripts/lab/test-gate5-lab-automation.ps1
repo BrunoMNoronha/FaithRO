@@ -33,6 +33,16 @@ function It {
 $tmp = Join-Path $env:TEMP ('gate5-selftest-' + [Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Force $tmp | Out-Null
 
+# A suite exercita primitivas que ESCREVEM no .vmx apontado por
+# $script:Gate5VmxPath. Se um teste esquecer de redirecionar esse caminho, ele
+# reescreve a VM do laboratorio real - ja aconteceu em 2026-08-31, quando o
+# self-test gravou bios.bootOrder na VM de verdade. O carimbo abaixo e tirado
+# antes de qualquer teste e conferido no fim.
+$script:vmxRealAntes = $null
+if (Test-Path -LiteralPath $script:Gate5VmxPath) {
+    $script:vmxRealAntes = (Get-Item -LiteralPath $script:Gate5VmxPath).LastWriteTimeUtc
+}
+
 try {
 Write-Host 'T-A: primitivas de gate5-common.ps1'
 
@@ -1437,21 +1447,30 @@ It 'Get-Gate5EfiBootDevice le o log aberto pelo vmware-vmx (share read/write)' {
     $d.Device -eq 'Windows Boot Manager'
 }
 
-It 'Set-Gate5OpticalBootFirst recusa tokens fora da tabela do firmware' {
-    # O vmware-vmx rejeita o valor com "Unrecognized efi.bootOrder" e a VM nem
-    # liga: melhor falhar aqui do que gastar um gate humano de power-on.
+It 'Set-Gate5OpticalBootFirst recusa tokens fora da tabela documentada' {
+    # Token fora do vocabulario documentado do Workstation nao chega a ser
+    # gravado: melhor falhar aqui do que gastar um gate humano de power-on.
     $erro = $null
     try { Set-Gate5OpticalBootFirst -Value 'usb,cdrom' } catch { $erro = $_.Exception.Message }
     ($null -ne $erro) -and ($erro -match 'token invalido')
 }
 
-It 'gate5-common define a ordem de boot pela chave EFI, nao pela de BIOS' {
-    # A VM roda com firmware = "efi"; 'bios.bootOrder' e a chave do BIOS legado.
+It 'gate5-common usa bios.bootOrder, a unica chave com vocabulario documentado' {
+    # O Workstation documenta 'bios.bootOrder' com os tokens cdrom/hdd para
+    # priorizar o meio optico durante a instalacao.
     $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
-    ($comm -match "Set-Gate5VmxEntry -Name 'efi\.bootOrder'") -and
-    ($comm -notmatch "Set-Gate5VmxEntry -Name 'bios\.bootOrder'") -and
-    # e com o vocabulario do caminho EFI, nao o do BIOS legado
-    ($comm -match "'net', 'pcmcia', 'cd', 'hd', 'fd', 'efishell', 'any'")
+    ($comm -match "Set-Gate5VmxEntry -Name 'bios\.bootOrder'") -and
+    ($comm -notmatch "Set-Gate5VmxEntry -Name 'efi\.bootOrder'") -and
+    ($comm -match "'cdrom', 'hdd', 'floppy', 'ethernet'")
+}
+
+It 'a chave efi.bootOrder e REMOVIDA do .vmx, nao deixada com valor reprovado' {
+    # Regressao da RUN-02: o firmware recusou os tokens que recebeu em
+    # 'efi.bootOrder'. Deixar a chave no arquivo poluiria o proximo power-on.
+    $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    $trecho = [regex]::Match($comm, '(?s)function Set-Gate5OpticalBootFirst \{.*?\r?\n\}').Value
+    ($trecho -match "Remove-Gate5VmxEntry -Name 'efi\.bootOrder'") -and
+    ($comm -match 'function Remove-Gate5VmxEntry')
 }
 
 It 'ordem de boot so e gravada com a VM desligada' {
@@ -1483,8 +1502,8 @@ It 'a ordem de boot NAO e reimposta nos reboots do proprio Setup' {
     (([regex]::Matches($bootTxt, '(?m)^\s*Set-Gate5OpticalBootFirst\s*$')).Count -eq 1)
 }
 
-It 'boot pelo disco vira BOOT_MEDIA_NOT_ENTERED, e nao espera cega de 10 minutos' {
-    ($bootTxt -match "Stop-Gate5Blocked -Blocker 'BOOT_MEDIA_NOT_ENTERED'") -and
+It 'boot pelo disco vira gate de firmware, e nao espera cega de 10 minutos' {
+    ($bootTxt -match "Stop-Gate5Human -Action 'SELECT_WINDOWS_ISO_IN_UEFI_BOOT_MENU'") -and
     ($bootTxt -match 'if \(-not \$efi\.IsOptical\)') -and
     # correlacao exigida pela FASE D: log do firmware + captura da tela
     ($bootTxt -match 'boot-media-not-entered\.png') -and
@@ -1525,9 +1544,9 @@ It 'Get-Gate5VmwareLogDictValue le o valor do dump DICT' {
     $log = Join-Path $tmp 'dict.log'
     Set-Content -LiteralPath $log -Encoding ascii -Value @(
         '2026-08-29T16:02:55.782Z -INFO vmware-vmx.exe 20368 [ws@4413 threadName="vmx"] DICT    RemoteDisplay.vnc.port = "5943"',
-        '2026-08-29T16:02:55.782Z -INFO vmware-vmx.exe 20368 [ws@4413 threadName="vmx"] DICT           efi.bootOrder = "cdrom,hdd"'
+        '2026-08-29T16:02:55.782Z -INFO vmware-vmx.exe 20368 [ws@4413 threadName="vmx"] DICT          bios.bootOrder = "cdrom,hdd"'
     )
-    ((Get-Gate5VmwareLogDictValue -Key 'efi.bootOrder' -LogPath $log) -eq 'cdrom,hdd') -and
+    ((Get-Gate5VmwareLogDictValue -Key 'bios.bootOrder' -LogPath $log) -eq 'cdrom,hdd') -and
     ((Get-Gate5VmwareLogDictValue -Key 'RemoteDisplay.vnc.port' -LogPath $log) -eq '5943')
 }
 
@@ -1583,17 +1602,19 @@ It 'chave ausente no DICT vira BOOT_ORDER_NOT_APPLIED, nao culpa o firmware' {
     ($bootTxt -match 'boot-order-not-applied\.png')
 }
 
-It 'BOOT_MEDIA_NOT_ENTERED so acusa o firmware quando ele RECEBEU a chave' {
+It 'o gate de firmware so e pedido quando o firmware RECEBEU a chave' {
+    # Se a chave nem chegou ao DICT o defeito e outro (BOOT_ORDER_NOT_APPLIED):
+    # mandar o operador ao menu do firmware ali seria mandar ao lugar errado.
     $iOrdem = $bootTxt.IndexOf("Stop-Gate5Blocked -Blocker 'BOOT_ORDER_NOT_APPLIED'")
-    $iMidia = $bootTxt.IndexOf("Stop-Gate5Blocked -Blocker 'BOOT_MEDIA_NOT_ENTERED'")
+    $iMidia = $bootTxt.IndexOf("Stop-Gate5Human -Action 'SELECT_WINDOWS_ISO_IN_UEFI_BOOT_MENU'")
     ($iOrdem -gt 0) -and ($iMidia -gt $iOrdem) -and
-    ($bootTxt -match 'RECEBEU efi\.bootOrder neste power-on')
+    ($bootTxt -match 'RECEBEU bios\.bootOrder neste power-on')
 }
 
 It 'a prova da ordem vem do DICT, e nao do .vmx em disco' {
     # Conferir o arquivo nao responde nada: ele pode ter sido reescrito por cima
     # entre a gravacao e o power-on - foi exatamente o que aconteceu.
-    ($bootTxt -match "Get-Gate5VmwareLogDictValue -Key 'efi\.bootOrder'") -and
+    ($bootTxt -match "Get-Gate5VmwareLogDictValue -Key 'bios\.bootOrder'") -and
     ($bootTxt -notmatch "ordemNoFirmware = Get-Gate5VmxValue")
 }
 
@@ -1609,33 +1630,76 @@ It 'o pedido de power-cycle ja avisa para fechar a interface' {
     ($trecho -match 'aguarde desligar, e Power on\.')
 }
 
-Write-Host 'T-M: vocabulario do efi.bootOrder (defeito BOOT_ORDER_TOKEN_REJECTED)'
+Write-Host 'T-M: ordem de boot por bios.bootOrder (correcao de BOOT_ORDER_TOKEN_REJECTED)'
 
-# RAIZ da quarta reprovacao da RUN-02: a chave chegou ao firmware, que respondeu
-# 'Unrecognized efi.bootOrder: "cdrom"' / '"hdd"' e bootou pelo disco. A tabela
-# FLOPPY/HDD/CDROM/EFISHELL que vive no mesmo binario pertence a bios.bootOrder;
-# o caminho EFI usa net/pcmcia/cd/hd/fd/efishell/any - a unidade optica e 'cd'.
+# RAIZ da quarta reprovacao da RUN-02: a automacao gravou 'efi.bootOrder' e o
+# firmware respondeu 'Unrecognized efi.bootOrder: "cdrom"' / '"hdd"', bootando
+# pelo disco. A correcao NAO e um vocabulario alternativo descoberto por
+# tentativa: e usar 'bios.bootOrder', a unica chave de ordem de boot cujo
+# vocabulario (cdrom/hdd) o Workstation documenta para instalacao por ISO. Se
+# nem ela funcionar nesta instalacao, o caminho suportado e Power On to Firmware.
 
-It 'o valor padrao usa os tokens do caminho EFI' {
+It 'o valor padrao usa os tokens documentados cdrom/hdd' {
     $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
     $trecho = [regex]::Match($comm, '(?s)function Set-Gate5OpticalBootFirst \{.*?\r?\n\}').Value
-    ($trecho -match "\[string\]\`$Value = 'cd,hd'") -and
-    # o vocabulario do BIOS legado nao pode voltar como valor padrao
-    ($trecho -notmatch "\`$Value = 'cdrom,hdd'")
+    ($trecho -match "\[string\]\`$Value = 'cdrom,hdd'") -and
+    # o vocabulario inferido na tentativa anterior nao pode voltar como padrao
+    ($trecho -notmatch "\`$Value = 'cd,hd'")
 }
 
-It 'Set-Gate5OpticalBootFirst aceita os tokens EFI e recusa os do BIOS' {
-    $erroBios = $null
-    try { Set-Gate5OpticalBootFirst -Value 'cdrom,hdd' } catch { $erroBios = $_.Exception.Message }
-    $erroEfi = $null
-    try { Set-Gate5OpticalBootFirst -Value 'cd,hd' } catch { $erroEfi = $_.Exception.Message }
-    # 'cdrom' reprova no vocabulario; 'cd,hd' passa dele e so para na guarda
-    # seguinte (VM ligada ou interface aberta), nunca por token invalido.
-    ($erroBios -match 'token invalido') -and ($erroEfi -notmatch 'token invalido')
+It 'REGRESSAO: efi.bootOrder = "cd,hd" nao pode reaparecer em lugar nenhum' {
+    # Guarda explicita do defeito: qualquer script do laboratorio que volte a
+    # gravar a chave EFI ou o par de tokens 'cd,hd' reprova aqui.
+    $arquivos = @(Get-ChildItem -LiteralPath $labDir -Filter '*.ps1' -Recurse |
+                  Where-Object { $_.Name -ne 'test-gate5-lab-automation.ps1' })
+    $reincidentes = @($arquivos | Where-Object {
+        $txt = Get-Content $_.FullName -Raw
+        ($txt -match "Set-Gate5VmxEntry -Name 'efi\.bootOrder'") -or
+        ($txt -match "bootOrder' -Value 'cd,hd'") -or
+        ($txt -match "\`$Value = 'cd,hd'") -or
+        ($txt -match "'net', 'pcmcia', 'cd', 'hd'")
+    })
+    $reincidentes.Count -eq 0
+}
+
+It 'Set-Gate5OpticalBootFirst aceita os tokens documentados e recusa os inferidos' {
+    # O valor documentado atravessa a validacao e CHEGA A GRAVAR quando a VM esta
+    # desligada e a interface fechada - que e o estado normal de quem roda os
+    # testes. Sem redirecionar o caminho, o proprio self-test reescreveria o .vmx
+    # do laboratorio real. Ja aconteceu: em 2026-08-31 a suite gravou
+    # bios.bootOrder na VM de verdade.
+    $original = $script:Gate5VmxPath
+    try {
+        $fake = Join-Path $tmp 'boot-order-sandbox.vmx'
+        Set-Content -LiteralPath $fake -Encoding ascii -Value @(
+            '.encoding = "UTF-8"', 'displayName = "sandbox"',
+            'encryption.keySafe = "vmware:key/list/(pair/(x))"', 'vtpm.present = "TRUE"')
+        $script:Gate5VmxPath = $fake
+
+        $erroInferido = $null
+        try { Set-Gate5OpticalBootFirst -Value 'cd,hd' } catch { $erroInferido = $_.Exception.Message }
+        $erroDoc = $null
+        try { Set-Gate5OpticalBootFirst -Value 'cdrom,hdd' } catch { $erroDoc = $_.Exception.Message }
+        $gravado = Get-Gate5VmxValue -Key 'bios.bootOrder' -VmxPath $fake
+        $cripto  = @(Get-Content -LiteralPath $fake | Where-Object { $_ -match '^(encryption\.|vtpm\.)' })
+
+        # 'cd' reprova no vocabulario e nao chega a gravar; 'cdrom,hdd' passa e
+        # grava, sem tocar no material criptografico.
+        ($erroInferido -match 'token invalido') -and ($erroDoc -notmatch 'token invalido') -and
+        ($gravado -eq 'cdrom,hdd') -and ($cripto.Count -eq 2)
+    } finally { $script:Gate5VmxPath = $original }
+}
+
+
+It 'a ordem gravada e conferida contra o dump DICT pela chave bios.bootOrder' {
+    # Conferir o .vmx nao prova nada: quem decide e o DICT do power-on.
+    ($bootTxt -match "Get-Gate5VmwareLogDictValue -Key 'bios\.bootOrder'") -and
+    ($bootTxt -notmatch "Get-Gate5VmwareLogDictValue -Key 'efi\.bootOrder'")
 }
 
 It 'Get-Gate5EfiBootOrderRejections lista os tokens recusados, sem repetir' {
-    # O firmware repete a recusa a cada passagem: o que importa e o conjunto.
+    # Detector de regressao: o firmware repete a recusa a cada passagem, entao o
+    # que importa e o conjunto.
     $log = Join-Path $tmp 'efi-recusa.log'
     Set-Content -LiteralPath $log -Encoding ascii -Value @(
         '2026-08-29T16:39:25.602Z ... Unrecognized efi.bootOrder: "cdrom".',
@@ -1647,30 +1711,70 @@ It 'Get-Gate5EfiBootOrderRejections lista os tokens recusados, sem repetir' {
     ($r.Count -eq 2) -and ($r -contains 'cdrom') -and ($r -contains 'hdd')
 }
 
-It 'Get-Gate5EfiBootOrderRejections devolve vazio quando o firmware aceitou' {
+It 'Get-Gate5EfiBootOrderRejections devolve vazio quando nao ha recusa' {
     $log = Join-Path $tmp 'efi-aceito.log'
     Set-Content -LiteralPath $log -Encoding ascii -Value @(
-        '2026-08-29T16:39:18.628Z ... DICT             efi.bootOrder = "cd,hd"'
+        '2026-08-29T16:39:18.628Z ... DICT            bios.bootOrder = "cdrom,hdd"'
     )
     (@(Get-Gate5EfiBootOrderRejections -LogPath $log).Count -eq 0) -and
     (@(Get-Gate5EfiBootOrderRejections -LogPath (Join-Path $tmp 'nao-existe.log')).Count -eq 0)
 }
 
-It 'token recusado vira BOOT_ORDER_TOKEN_REJECTED, e nao acusa o firmware' {
-    # Recebida-e-recusada e um defeito NOSSO; recebida-e-ignorada seria do
-    # firmware. Confundir os dois manda o operador procurar no lugar errado.
+It 'recusa de token vira BOOT_ORDER_TOKEN_REJECTED e aponta a chave reintroduzida' {
     ($bootTxt -match "Stop-Gate5Blocked -Blocker 'BOOT_ORDER_TOKEN_REJECTED'") -and
     ($bootTxt -match 'Get-Gate5EfiBootOrderRejections') -and
-    ($bootTxt -match 'net, pcmcia, cd, hd,') -and
-    ($bootTxt -match 'nenhuma acao na VM resolve isto')
+    ($bootTxt -match 'reintroduzida fora da automacao') -and
+    # e NAO ensina um vocabulario alternativo descoberto por tentativa
+    ($bootTxt -notmatch 'net, pcmcia, cd, hd,')
 }
 
-It 'a recusa de token e avaliada ANTES dos blockers de dispositivo' {
-    # Um token recusado explica os outros dois sintomas: precisa vir primeiro.
+It 'firmware que ignora a ordem vira GATE HUMANO oficial, nao blocker' {
+    # bios.bootOrder e o mecanismo documentado; se esta instalacao do Workstation
+    # nao o honrar, o caminho suportado e Power On to Firmware com selecao manual
+    # da ISO - uma acao humana pontual, nao uma falha do ambiente.
+    ($bootTxt -match "Stop-Gate5Human -Action 'SELECT_WINDOWS_ISO_IN_UEFI_BOOT_MENU'") -and
+    ($bootTxt -match 'Power On to Firmware') -and
+    ($bootTxt -match 'FIRMWARE_BOOT_SELECTION_REQUIRED') -and
+    ($bootTxt -notmatch "Blocker 'BOOT_MEDIA_NOT_ENTERED'") -and
+    # e sem sugerir trocar firmware/Secure Boot/vTPM/NVRAM para contornar
+    ($bootTxt -match 'NAO altere firmware, Secure Boot, vTPM ou NVRAM')
+}
+
+It 'a recusa de token e avaliada ANTES dos demais desfechos de boot' {
+    # Um token recusado explica os outros sintomas: precisa vir primeiro.
     $iToken = $bootTxt.IndexOf("Stop-Gate5Blocked -Blocker 'BOOT_ORDER_TOKEN_REJECTED'")
     $iOrdem = $bootTxt.IndexOf("Stop-Gate5Blocked -Blocker 'BOOT_ORDER_NOT_APPLIED'")
-    $iMidia = $bootTxt.IndexOf("Stop-Gate5Blocked -Blocker 'BOOT_MEDIA_NOT_ENTERED'")
+    $iMidia = $bootTxt.IndexOf("Stop-Gate5Human -Action 'SELECT_WINDOWS_ISO_IN_UEFI_BOOT_MENU'")
     ($iToken -gt 0) -and ($iOrdem -gt $iToken) -and ($iMidia -gt $iOrdem)
+}
+
+It 'a override de boot e retirada antes do baseline' {
+    # Secao 18: o baseline nao pode carregar "instalacao primeiro"; a VM final
+    # depende da ordem normal registrada pelo UEFI/Windows Boot Manager.
+    $prov  = Get-Content (Join-Path $labDir 'gate5-provision.ps1') -Raw
+    $verif = Get-Content (Join-Path $labDir 'gate5-verify-baseline.ps1') -Raw
+    ($prov -match "Remove-Gate5VmxEntry -Name 'bios\.bootOrder'") -and
+    ($prov -match "Remove-Gate5VmxEntry -Name 'efi\.bootOrder'") -and
+    ($prov -match 'override de boot temporaria ainda no \.vmx') -and
+    ($verif -match "Check 'sem-override-de-boot'")
+}
+
+It 'Remove-Gate5VmxEntry preserva o material criptografico do .vmx' {
+    $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    $trecho = [regex]::Match($comm, '(?s)function Remove-Gate5VmxEntry \{.*?\r?\n\}').Value
+    ($trecho -match 'encryption') -and ($trecho -match 'vtpm') -and
+    ($trecho -match 'alteracao revertida') -and
+    # remocao seletiva por linha, nunca reescrita a partir de template
+    ($trecho -notmatch 'Set-Gate5TextFile') -and ($trecho -notmatch 'Remove-Item')
+}
+
+It 'a suite nao escreveu no .vmx do laboratorio real' {
+    # Guarda de runtime (nao heuristica): o arquivo da VM real precisa sair da
+    # suite com o mesmo carimbo com que entrou. Em maquina sem o laboratorio o
+    # arquivo nao existe e o teste passa por vacuidade.
+    if ($null -eq $script:vmxRealAntes) { return $true }
+    if (-not (Test-Path -LiteralPath $script:Gate5VmxPath)) { return $false }
+    (Get-Item -LiteralPath $script:Gate5VmxPath).LastWriteTimeUtc -eq $script:vmxRealAntes
 }
 
 } finally {

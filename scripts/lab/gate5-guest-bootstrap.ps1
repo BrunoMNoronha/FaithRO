@@ -434,25 +434,27 @@ public static class Gate5IsoWriter {
             # Conferir o arquivo em disco nao responde isso: quem decide e o
             # dump DICT que o vmware-vmx imprime ao ligar. Sem essa distincao o
             # blocker culpa o firmware por algo que a interface descartou.
-            $ordemNoFirmware = Get-Gate5VmwareLogDictValue -Key 'efi.bootOrder'
+            $ordemNoFirmware = Get-Gate5VmwareLogDictValue -Key 'bios.bootOrder'
             if ($ordemNoFirmware) {
-                Write-Gate5Log ("Ordem de boot recebida pelo firmware: efi.bootOrder='{0}'." -f $ordemNoFirmware)
+                Write-Gate5Log ("Ordem de boot recebida pelo firmware: bios.bootOrder='{0}'." -f $ordemNoFirmware)
             } else {
-                Write-Gate5Log 'O firmware NAO recebeu efi.bootOrder: o .vmx foi reescrito depois da gravacao.' 'WARN'
+                Write-Gate5Log 'O firmware NAO recebeu bios.bootOrder: o .vmx foi reescrito depois da gravacao.' 'WARN'
             }
-            # O firmware recusou algum token? Recebida-e-recusada nao e o mesmo
-            # que recebida-e-ignorada: a primeira e vocabulario errado do nosso
-            # lado, e precisa dizer isso em vez de acusar o firmware.
+            # Detector de regressao: a automacao nao grava mais 'efi.bootOrder'
+            # (Set-Gate5OpticalBootFirst ate a remove do .vmx). Se o firmware
+            # ainda recusar tokens dela, alguem reintroduziu a chave.
             $recusados = @(Get-Gate5EfiBootOrderRejections)
             if ($recusados.Count -gt 0) {
                 $telaToken = Join-Path (Get-Gate5RunDir) 'boot-order-token-rejected.png'
                 $capToken  = Save-Gate5VncScreenshot -Path $telaToken
                 Set-Gate5InstallNote 'installation_stage' 'BOOT_ORDER_TOKEN_REJECTED'
                 Stop-Gate5Blocked -Blocker 'BOOT_ORDER_TOKEN_REJECTED' -Detail (@'
-O firmware recebeu efi.bootOrder mas RECUSOU os tokens: {0}. O vocabulario do
-caminho EFI nao e o do BIOS legado - os tokens aceitos sao net, pcmcia, cd, hd,
-fd, efishell e any (a unidade optica e "cd", nao "cdrom"). Corrija o valor em
-Set-Gate5OpticalBootFirst; nenhuma acao na VM resolve isto.
+O firmware recebeu 'efi.bootOrder' e RECUSOU os tokens: {0}. Esta automacao nao
+grava mais essa chave - ela usa 'bios.bootOrder' (tokens documentados cdrom/hdd)
+e remove 'efi.bootOrder' do .vmx. A presenca das recusas indica que a chave foi
+reintroduzida fora da automacao: retire-a do .vmx e reexecute. Nao substitua o
+valor por tokens descobertos empiricamente; se a ordem programatica nao
+funcionar, o caminho suportado e Power -> Power On to Firmware.
 Evidencia: {1} (captura: {2})
 '@ -f ($recusados -join ', '), (Join-Path $script:Gate5VmDir 'vmware.log'), $capToken)
             }
@@ -464,7 +466,7 @@ Evidencia: {1} (captura: {2})
                     Set-Gate5InstallNote 'installation_stage' 'BOOT_ORDER_NOT_APPLIED'
                     Stop-Gate5Blocked -Blocker 'BOOT_ORDER_NOT_APPLIED' -Detail (@'
 A ordem de boot foi gravada no .vmx mas nao chegou ao firmware: o dump DICT deste
-power-on nao traz efi.bootOrder, e a VM bootou "{0}". A interface do VMware
+power-on nao traz bios.bootOrder, e a VM bootou "{0}". A interface do VMware
 reescreve o .vmx no Power On a partir da configuracao que carregou ao abrir a VM,
 descartando o que foi acrescentado depois - por isso ela precisa estar FECHADA no
 momento da gravacao. Refaca com a interface fechada quando a automacao pedir.
@@ -475,13 +477,24 @@ Evidencia: {1} (captura: {2})
                     # Evidencia da tela no momento exato, para correlacionar com o log.
                     $telaFalha = Join-Path (Get-Gate5RunDir) 'boot-media-not-entered.png'
                     $capFalha  = Save-Gate5VncScreenshot -Path $telaFalha
-                    Set-Gate5InstallNote 'installation_stage' 'BOOT_MEDIA_NOT_ENTERED'
-                    Stop-Gate5Blocked -Blocker 'BOOT_MEDIA_NOT_ENTERED' -Detail (@'
-O firmware EFI nao entrou na midia: bootou "{0}" em {1}. O prompt "Press any key
-to boot from CD or DVD" nunca chegou a existir, entao nenhuma tecla poderia ter
-ajudado. O firmware RECEBEU efi.bootOrder neste power-on (consta do dump DICT) e
-ainda assim preferiu o disco: a chave nao esta sendo respeitada, e a ordem
-precisa ser corrigida no Boot Manager do proprio firmware.
+                    Set-Gate5InstallNote 'installation_stage' 'FIRMWARE_BOOT_SELECTION_REQUIRED'
+                    # O firmware RECEBEU a ordem e ainda assim bootou pelo disco.
+                    # Isto nao e defeito da automacao nem ambiente corrompido: e a
+                    # limitacao desta instalacao do Workstation. O caminho suportado
+                    # e o menu de firmware da propria interface - um gate humano,
+                    # nao um blocker. Depois do primeiro boot pela midia a
+                    # automacao segue sozinha.
+                    Stop-Gate5Human -Action 'SELECT_WINDOWS_ISO_IN_UEFI_BOOT_MENU' -Detail (@'
+O firmware nao entrou na midia: bootou "{0}" em {1}. O prompt "Press any key to
+boot from CD or DVD" nunca chegou a existir, entao nenhuma tecla poderia ter
+ajudado. O firmware RECEBEU bios.bootOrder neste power-on (consta do dump DICT) e
+ainda assim preferiu o disco.
+
+Faca UMA vez, na interface do VMware, com a VM desligada:
+  VM -> Power -> Power On to Firmware
+  no menu do firmware, escolha o CD/DVD com a ISO do Windows (sata0:0).
+Depois disso reexecute gate5-provision.ps1: a automacao retoma sozinha.
+NAO altere firmware, Secure Boot, vTPM ou NVRAM para contornar isto.
 Evidencia: {2} (captura: {3})
 '@ -f $efi.Device, $(if ($efi.WhenUtc) { $efi.WhenUtc.ToString('o') } else { 'horario nao registrado' }), (Join-Path $script:Gate5VmDir 'vmware.log'), $capFalha)
                 }

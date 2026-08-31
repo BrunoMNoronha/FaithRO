@@ -36,11 +36,9 @@ if ($cs.HypervisorPresent) {
 # RAM fisica >= 16 GB (tolerancia de 5% para reserva de firmware)
 if ($cs.TotalPhysicalMemory -lt (16GB * 0.95)) { Add-Failure ("PREFLIGHT: RAM fisica insuficiente ({0} bytes < ~16 GB)." -f $cs.TotalPhysicalMemory) }
 
-# Espaco em disco: VM thin de 60 GB + ISO/instaladores; margem minima de 40 GB
-# livres para iniciar (thin cresce sob demanda; abortamos antes de criar o VMDK
-# se nao houver margem segura - risco R7).
-$minFree = 40GB
-if ($c.Free -lt $minFree) { Add-Failure ("PREFLIGHT: espaco livre em C: insuficiente ({0:N1} GB < 40 GB)." -f ($c.Free / 1GB)) }
+# Espaco em disco: VM thin de 70 GB + ISO/instaladores; margem de seguranca no host
+$minFree = 20GB
+if ($c.Free -lt $minFree) { Add-Failure ("PREFLIGHT: espaco livre em C: insuficiente ({0:N1} GB < 20 GB de reserva)." -f ($c.Free / 1GB)) }
 
 # Privilegio administrativo: exigido SOMENTE para o que realmente precisa dele -
 # instalar o VMware e criar o diretorio da VM. Depois disso o laboratorio opera

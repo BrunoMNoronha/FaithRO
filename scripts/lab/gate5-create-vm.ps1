@@ -1,4 +1,4 @@
-# gate5-create-vm.ps1 - Cria a VM FaithRO-GATE5-LAB (VMX + VMDK thin 60 GB).
+# gate5-create-vm.ps1 - Cria a VM FaithRO-GATE5-LAB (VMX + VMDK thin 70 GB).
 # Idempotente: se a VM ja existe com configuracao valida, nao recria.
 # Requer: VMware Workstation Pro instalado e ISO Windows 11 validada.
 #
@@ -61,12 +61,12 @@ if (Test-Path $script:Gate5VmxPath) {
     }
 }
 
-# --- Disco: 60 GB thin (growable single file, adapter nvme) -------------------
+# --- Disco: 70 GB thin (growable single file, adapter nvme) -------------------
 if (Test-Path $vmdkPath) {
     Write-Gate5Log "VMDK ja existe, preservando: $vmdkPath"
 } else {
-    Write-Gate5Log 'Criando VMDK thin de 60 GB (nvme, growable)...'
-    $vd = Invoke-Gate5Native -FilePath $vmware.VdiskManagerExe -Arguments @('-c', '-s', '60GB', '-a', 'nvme', '-t', '0', $vmdkPath)
+    Write-Gate5Log 'Criando VMDK thin de 70 GB (nvme, growable)...'
+    $vd = Invoke-Gate5Native -FilePath $vmware.VdiskManagerExe -Arguments @('-c', '-s', '70GB', '-a', 'nvme', '-t', '0', $vmdkPath)
     if ($vd.ExitCode -ne 0 -or -not (Test-Path $vmdkPath)) {
         throw ("GATE5: vmware-vdiskmanager falhou (exit {0}): {1}" -f $vd.ExitCode, ($vd.Output -join ' | '))
     }

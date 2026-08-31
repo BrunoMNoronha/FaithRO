@@ -227,12 +227,22 @@ if (-not (Test-Gate5Phase $state 'ISOLATED')) {
     # Canal temporario de teclado (console VNC local) encerrado aqui: ele so
     # existe para vencer o prompt de boot pelo CD durante a instalacao.
     Set-Gate5VncConsole -Enabled $false
+    # A override de ordem de boot tambem era temporaria: existia para o firmware
+    # preferir a ISO durante a instalacao. O baseline nao pode carregar
+    # "instalacao primeiro" - a VM final boota pela ordem normal registrada pelo
+    # UEFI/Windows Boot Manager. A chave e removida (nao invertida) para que nada
+    # no .vmx continue disputando a decisao do firmware.
+    Remove-Gate5VmxEntry -Name 'bios.bootOrder'
+    Remove-Gate5VmxEntry -Name 'efi.bootOrder'
     foreach ($pair in @(
         @('isolation.tools.copy.disable', 'TRUE'), @('isolation.tools.paste.disable', 'TRUE'),
         @('isolation.tools.dnd.disable', 'TRUE'), @('isolation.tools.hgfs.disable', 'TRUE'))) {
         if ((Get-Gate5VmxValue $pair[0]) -ne $pair[1]) { Stop-Gate5Blocked -Blocker 'ISOLATION_VMX_INVALID' -Detail $pair[0] }
     }
     if ((Get-Gate5VmxValue 'ethernet0.startConnected') -ne 'FALSE') { Stop-Gate5Blocked -Blocker 'ISOLATION_VMX_INVALID' -Detail 'ethernet0.startConnected' }
+    foreach ($chaveBoot in @('bios.bootOrder', 'efi.bootOrder')) {
+        if ($null -ne (Get-Gate5VmxValue $chaveBoot)) { Stop-Gate5Blocked -Blocker 'ISOLATION_VMX_INVALID' -Detail ("override de boot temporaria ainda no .vmx: {0}" -f $chaveBoot) }
+    }
     $vncCfg = Get-Gate5VmxValue 'RemoteDisplay.vnc.enabled'
     if ($null -ne $vncCfg -and $vncCfg -ne 'FALSE') { Stop-Gate5Blocked -Blocker 'ISOLATION_VMX_INVALID' -Detail 'console VNC temporario ainda habilitado' }
     # Nao basta o .vmx: conferir que nenhum listener temporario sobrou no host.

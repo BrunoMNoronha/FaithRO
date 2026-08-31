@@ -575,6 +575,39 @@ function Set-Gate5VmxEntry {
     }
 }
 
+function Remove-Gate5VmxEntry {
+    # Apaga UMA chave do .vmx preservando tudo o mais, com a mesma garantia
+    # fail-closed de Set-Gate5VmxEntry: as linhas 'encryption.*'/'vtpm.*' saem
+    # verbatim ou a escrita e revertida. Existe para retirar chaves de ordem de
+    # boot que ja nao valem, em vez de deixar no arquivo um valor que o firmware
+    # reprovou e que so polui o proximo power-on.
+    param([Parameter(Mandatory)][string]$Name)
+    if (-not (Test-Path $script:Gate5VmxPath)) { throw 'GATE5: VMX inexistente ao remover configuracao.' }
+    if ($null -eq (Get-Gate5VmxValue -Key $Name)) { return }
+
+    $encoding = New-Object System.Text.UTF8Encoding($false)
+    $before   = @([System.IO.File]::ReadAllLines($script:Gate5VmxPath))
+    $sensivel = '^\s*(encryption\.|vtpm\.)'
+    $antes    = @($before | Where-Object { $_ -match $sensivel })
+
+    $pattern = '^\s*{0}\s*=' -f [regex]::Escape($Name)
+    $saida   = @($before | Where-Object { $_ -notmatch $pattern })
+    [System.IO.File]::WriteAllText($script:Gate5VmxPath, (($saida -join "`r`n") + "`r`n"), $encoding)
+
+    $depois  = @([System.IO.File]::ReadAllLines($script:Gate5VmxPath) | Where-Object { $_ -match $sensivel })
+    $intacto = ($antes.Count -eq $depois.Count)
+    if ($intacto) {
+        for ($i = 0; $i -lt $antes.Count; $i++) {
+            if ($antes[$i] -cne $depois[$i]) { $intacto = $false; break }
+        }
+    }
+    if (-not $intacto) {
+        [System.IO.File]::WriteAllText($script:Gate5VmxPath, (($before -join "`r`n") + "`r`n"), $encoding)
+        throw ("GATE5: a remocao de '{0}' teria alterado material criptografico do .vmx; alteracao revertida." -f $Name)
+    }
+    Write-Gate5Log ("Chave '{0}' removida do .vmx." -f $Name)
+}
+
 function Get-Gate5EfiBootDevice {
     # Le do vmware.log qual dispositivo o firmware EFI escolheu de fato, na forma
     #   ...Z ... Guest: About to do EFI boot: Windows Boot Manager
@@ -664,9 +697,10 @@ function Get-Gate5EfiBootOrderRejections {
     # Tokens de efi.bootOrder que o FIRMWARE recusou neste power-on, na forma
     #   ...Z ... Unrecognized efi.bootOrder: "cdrom".
     #
-    # Sem isso, um vocabulario errado se disfarca de "o firmware ignorou a
-    # chave": foi o que aconteceu com 'cdrom,hdd', que o firmware recebeu,
-    # recusou token a token e substituiu pelo boot do disco.
+    # Detector de regressao: a automacao nao grava mais 'efi.bootOrder' (ver
+    # Set-Gate5OpticalBootFirst, que ate a remove do .vmx). Se estas linhas
+    # voltarem a aparecer, alguem reintroduziu a chave e o boot vai falhar em
+    # silencio, parecendo "o firmware ignorou a ordem".
     param([string]$LogPath = (Join-Path $script:Gate5VmDir 'vmware.log'))
     if (-not (Test-Path -LiteralPath $LogPath)) { return @() }
     $fs = [System.IO.File]::Open($LogPath, 'Open', 'Read', 'ReadWrite')
@@ -696,19 +730,22 @@ function Set-Gate5OpticalBootFirst {
     # poderia ter ajudado, porque prompt nenhum chegou a existir (vmware.log:
     # 'About to do EFI boot: Windows Boot Manager', 3,6 s apos o power-on).
     #
-    # 'efi.bootOrder' e a chave lida pelo firmware EFI, e o seu vocabulario NAO
-    # e o de 'bios.bootOrder'. A tabela do BIOS legado (FLOPPY/HDD/CDROM/EFISHELL)
-    # fica no mesmo binario e induz ao erro: com 'cdrom,hdd' o firmware respondeu
-    # 'Unrecognized efi.bootOrder: "cdrom"' / '"hdd"' e bootou pelo disco. Os
-    # tokens do caminho EFI sao os abaixo, extraidos do vmware-vmx.exe.
+    # O Workstation documenta 'bios.bootOrder' com os tokens cdrom/hdd para
+    # priorizacao do meio optico durante a instalacao. E a unica chave de ordem
+    # de boot com vocabulario documentado, e por isso a usada aqui.
+    #
+    # Se esta instalacao do Workstation nao honrar a chave, o caminho suportado e
+    # o menu de firmware da propria interface (Power -> Power On to Firmware),
+    # com selecao manual do CD/DVD neste primeiro boot - NAO um vocabulario
+    # alternativo descoberto por tentativa. Ver docs/48 (limitacao observada).
     #
     # A NVRAM nao e tocada nem removida: a ordem e imposta por cima dela na
     # inicializacao do firmware, e o vTPM depende daquele arquivo.
-    param([string]$Value = 'cd,hd')
-    $validos = @('net', 'pcmcia', 'cd', 'hd', 'fd', 'efishell', 'any')
+    param([string]$Value = 'cdrom,hdd')
+    $validos = @('cdrom', 'hdd', 'floppy', 'ethernet')
     foreach ($t in ($Value -split ',')) {
         if ($validos -notcontains $t.Trim().ToLowerInvariant()) {
-            throw ("GATE5: token invalido em efi.bootOrder: '{0}'." -f $t)
+            throw ("GATE5: token invalido em bios.bootOrder: '{0}'." -f $t)
         }
     }
     # A configuracao so e lida no power-on, e o VMware reescreve o .vmx ao
@@ -722,10 +759,14 @@ function Set-Gate5OpticalBootFirst {
     if (Test-Gate5VmwareUiRunning) {
         throw 'GATE5: a interface do VMware esta aberta e descartaria a ordem de boot no Power On.'
     }
-    Set-Gate5VmxEntry -Name 'efi.bootOrder' -Value $Value
-    $lido = Get-Gate5VmxValue -Key 'efi.bootOrder'
+    # 'efi.bootOrder' foi tentada na RUN-02 e o firmware recusou os tokens que
+    # recebeu ('Unrecognized efi.bootOrder'). A chave sai do .vmx para que o
+    # proximo power-on teste 'bios.bootOrder' sem um valor ja reprovado ao lado.
+    Remove-Gate5VmxEntry -Name 'efi.bootOrder'
+    Set-Gate5VmxEntry -Name 'bios.bootOrder' -Value $Value
+    $lido = Get-Gate5VmxValue -Key 'bios.bootOrder'
     if ($lido -ne $Value) {
-        throw ("GATE5: efi.bootOrder nao persistiu no .vmx (lido '{0}', esperado '{1}')." -f $lido, $Value)
+        throw ("GATE5: bios.bootOrder nao persistiu no .vmx (lido '{0}', esperado '{1}')." -f $lido, $Value)
     }
     Write-Gate5Log ("Ordem de boot do firmware fixada em '{0}': a midia optica vem antes do disco." -f $Value)
 }
