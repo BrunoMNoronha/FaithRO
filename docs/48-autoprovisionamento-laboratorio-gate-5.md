@@ -137,6 +137,7 @@ A execução real expôs defeitos que a etapa anterior não podia detectar. Todo
 | D20 | Override de instalação sobreviveria ao baseline | a VM final ficaria com "CD antes do disco" gravado no `.vmx`; a chave passou a ser **removida** na fase `ISOLATED` e a ausência é conferida pelo validador |
 | D21 | O self-test chamava `Set-Gate5OpticalBootFirst` com um valor válido sem redirecionar `$script:Gate5VmxPath` | com a VM desligada e a interface fechada não há guarda: em 2026-08-31 a suite gravou `bios.bootOrder` no `.vmx` do laboratório **real**. A chamada passou a rodar contra um `.vmx` descartável e a suite confere o carimbo do arquivo real na saída |
 | D22 | A override de boot só era retirada na fase `ISOLATED`, no fim do provisionamento | um run que aborta antes dela deixa `cdrom,hdd` no `.vmx` indefinidamente. Na RUN-02 foram **seis** reboots tentando o CD antes do disco, cada um uma chance de bootar o Windows Setup por engano. Passou a existir uma transição de saída simétrica (`Remove-Gate5BootOverride`), guardada pela mesma flag `boot_key_sent` e aplicada antes do gate de power-on (§15) |
+| D23 | Um caminho FIXO de arquivo servia ao mesmo tempo de evidência persistente e de sink reutilizável da porta serial | o VMware trunca `serial0.fileName` a cada power-on (não a cada reboot: `vmware-1.log` tem 19 boots EFI sob o mesmo PID, com a serial acumulando). O power-on de validação de 2026-09-01 zerou a evidência do guest da RUN-02 (3232 → 0 bytes) e não havia cópia no host. Cada power-on passou a receber um sink próprio em `<run-dir>\serialoot-NNNN.txt`, criado atomicamente na alocação (§16) |
 
 Evidências brutas ficam em `.local\gate5-lab\evidence\` (não versionadas): `vmware-crash-pci-noslotavail.log` e capturas de tela do firmware do guest.
 
@@ -380,6 +381,90 @@ power-on de validação, porque o host havia abortado antes de copiá-la para o
 diretório do run — a cópia para `guest-evidence.json` só acontece com o orquestrador
 vivo (`Get-Gate5SerialEvidence`). Enquanto isso não for endereçado, **um run abortado
 perde a evidência serial no power-on seguinte**.
+
+## 16. Incidente: um sink serial por power-on
+
+**Incidente.** Durante os power-ons de validação do boot fix (2026-09-01), o arquivo
+de evidência serial passou de **3232 bytes para 0**. Ele continha o testemunho do
+guest da RUN-02 — o bloco `GATE5-EVIDENCE` de `2026-08-31T21:24:45Z`, com
+`blockers:[]` e `sanitize_pass:true`. Não havia cópia no host.
+
+**Causa.** O VMware abre o arquivo apontado por `serial0.fileName` em modo destrutivo
+a **cada power-on** — não a cada reboot do guest. A distinção é o ponto todo, e é
+verificável: `vmware-1.log` (a sessão de instalação da RUN-02) registra **19 boots EFI
+sob um único PID** `vmware-vmx.exe 4184`, e ao longo deles a serial *acumulou* os 3232
+bytes. Reboot do guest preserva; power-on trunca.
+
+Enquanto um **caminho fixo** (`C:\VMs\FaithRO-GATE5-LAB\gate5-evidence-serial.txt`)
+serviu de sink para todos os power-ons, um arquivo tratado como evidência persistente
+era simultaneamente o sink ativo e reutilizável da porta serial. Cada power-on novo
+apagava a evidência do anterior. A cópia para o artefato derivado
+`guest-evidence.json` só acontece com o orquestrador vivo (`Get-Gate5SerialEvidence`),
+e a RUN-02 havia abortado antes disso — em `GUEST_PHASE_FAILED_INSTALLWAIT`.
+
+**Invariante novo.**
+
+```
+UM ARQUIVO SERIAL JÁ UTILIZADO EM UM POWER-ON
+NUNCA MAIS PODE SER UTILIZADO COMO SINK DE OUTRO POWER-ON.
+```
+
+**Ciclo de vida.** Não existe mais caminho fixo de sink. Cada power-on recebe um sink
+próprio, dentro do diretório da execução:
+
+```
+.local\gate5-lab\evidence\<run-id>\serial\
+    boot-0001.txt      <- power-on 1 (todos os reboots do Setup daquele power-on)
+    boot-0002.txt      <- power-on 2
+    boot-0003.txt      <- power-on 3
+```
+
+| momento | antes | agora |
+| --- | --- | --- |
+| fase `Unattend` | habilitava o dispositivo **e** fixava `serial0.fileName`; apagava o arquivo | habilita apenas o dispositivo (`present`/`fileType`/`startConnected`/`yieldOnMsrRead`); não apaga nada |
+| antes de cada power-on | nada | `New-Gate5SerialSink` aloca `boot-NNNN.txt` e aponta `serial0.fileName` para ele |
+| leitura | um único caminho fixo | `Get-Gate5SerialEvidence` varre todos os sinks da execução, do mais recente para o mais antigo |
+
+`New-Gate5SerialSink` tem as **mesmas guardas** de `Set-Gate5OpticalBootFirst`: VM
+desligada e interface do VMware fechada. A segunda é indispensável — se a interface
+descartasse a escrita, a VM ligaria apontando para o sink **anterior** e o truncaria,
+que é exatamente o incidente. Por isso o gate `CLOSE_VMWARE_UI` deixou de ser
+exclusivo do primeiro boot pela mídia e passou a cobrir as duas gravações que
+precedem qualquer power-on (ordem de boot e sink). Ele continua não aparecendo nos
+reboots do Setup: aqueles acontecem com a VM ligada, e o bloco inteiro só roda com ela
+desligada.
+
+**Múltiplos boots e crash/restart.** O arquivo é criado **vazio na alocação**, e não
+deixado para o VMware criar no power-on. É isso que torna a sequência durável: o
+próximo número é deduzido do **diretório**, nunca do `state.json`. Um orquestrador que
+morra e volte não reaponta para um sink já usado — que seria a reincidência do
+incidente. A criação usa `FileMode.CreateNew`, atômica: se o nome já existir, a
+sequência avança em vez de sobrescrever. Nenhum arquivo existente é aberto para
+escrita pela automação.
+
+**Execuções seladas.** `Get-Gate5SerialSinkDir` passa por `Get-Gate5RunDir`, que falha
+fechado com `RUN_EVIDENCE_SEALED` numa execução já selada. Nenhum sink pode ser
+alocado dentro de evidência fechada, e nenhuma RUN histórica é destino de escrita. Uma
+nova tentativa exige `notes.run_id` novo.
+
+**Fonte versus derivado.** Os sinks `boot-NNNN.txt` são o artefato-**fonte**;
+`guest-evidence.json` é **derivado** deles. `gate5-verify-baseline.ps1` passou a
+exigir os dois (`evidencia-guest-serial` **e** `sinks-seriais-preservados`): um
+baseline não pode ser aprovado por uma evidência derivada cuja fonte desapareceu — que
+é precisamente o estado em que a RUN-02 terminou. Nenhuma consolidação substitui ou
+destrói os arquivos-fonte.
+
+**A evidência perdida da RUN-02 NÃO foi reconstruída.** O conteúdo do bloco
+`GATE5-EVIDENCE` existia no transcript da sessão que observou o incidente, e
+reconstruí-lo a partir dali seria fabricar evidência. O selo
+`run-02-clean-install/sealed.json` registra a perda explicitamente
+(`serial_evidence_preserved: false`), com `serial_bytes: 0` e a explicação da causa. A
+RUN-02 permanece classificada como `PROVISIONAMENTO_INCOMPLETO` e byte-idêntica.
+
+**Rollback.** A mudança é isolada num commit: `git revert <commit>`. Não há estado
+externo a desfazer — nenhum artefato histórico foi tocado, a `.nvram` não é restaurada
+e o `.vmx` do laboratório não é alterado por esta etapa. Ao voltar atrás, a automação
+retoma o caminho fixo e o risco de truncamento junto com ele.
 
 ## 14. Próxima etapa
 

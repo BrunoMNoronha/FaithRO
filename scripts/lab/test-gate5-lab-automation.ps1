@@ -322,9 +322,12 @@ It 'evidencia sai do guest por canal serial de mao unica' {
     $common = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
     $boot   = Get-Content (Join-Path $labDir 'gate5-guest-bootstrap.ps1') -Raw
     $guest  = Get-Content (Join-Path $labDir 'guest\gate5-payload.ps1') -Raw
-    ($common -match 'Gate5EvidenceSerial') -and ($common -match 'GATE5-EVIDENCE-BEGIN') -and
+    ($common -match 'function New-Gate5SerialSink') -and ($common -match 'GATE5-EVIDENCE-BEGIN') -and
     ($boot -match "'serial0\.fileType'\s+-Value\s+'file'") -and
-    ($guest -match 'GATE5-EVIDENCE-BEGIN')
+    ($guest -match 'GATE5-EVIDENCE-BEGIN') -and
+    # o caminho FIXO de sink nao pode voltar a existir: era ele que o VMware
+    # truncava a cada power-on, apagando a evidencia do boot anterior
+    ($common -notmatch 'Gate5EvidenceSerial') -and ($boot -notmatch 'Gate5EvidenceSerial')
 }
 
 It 'midia e canais sao validados ANTES de pedir o power-on' {
@@ -1587,11 +1590,18 @@ It 'gate CLOSE_VMWARE_UI vem antes da gravacao da ordem de boot' {
     ($bootTxt -match 'while \(\[DateTime\]::UtcNow -lt \$ateUi -and \(Test-Gate5VmwareUiRunning\)\)')
 }
 
-It 'gate CLOSE_VMWARE_UI so vale enquanto o boot optico nao disparou' {
-    # Depois que o Setup comeca, o boot pelo disco e o correto e nao faz sentido
-    # pedir para fechar a interface a cada reboot.
-    $trecho = [regex]::Match($bootTxt, '(?s)if \(-not \$bootKeySent\) \{.*?action=CLOSE_VMWARE_UI').Value
-    $trecho.Length -gt 0
+It 'gate CLOSE_VMWARE_UI nao aparece nos reboots do proprio Setup' {
+    # O gate deixou de ser exclusivo do primeiro boot pela midia: TODO power-on
+    # grava no .vmx agora, porque cada um recebe um sink serial proprio. O que
+    # continua valendo e que ele nunca e pedido nos reboots do Setup - aqueles
+    # acontecem com a VM LIGADA, e o bloco inteiro esta sob a guarda de VM
+    # desligada.
+    $bloco = [regex]::Match($bootTxt,
+        '(?s)if \(-not \(Test-Gate5VmPoweredOn\)\) \{.*?action=POWER_ON_VM').Value
+    ($bloco -match 'action=CLOSE_VMWARE_UI') -and
+    # uma unica ocorrencia do gate no arquivo inteiro: nada dele fora da guarda
+    (([regex]::Matches($bootTxt, 'action=CLOSE_VMWARE_UI')).Count -eq 1) -and
+    ($bootTxt -match 'WAITING_VMWARE_UI_CLOSE')
 }
 
 It 'chave ausente no DICT vira BOOT_ORDER_NOT_APPLIED, nao culpa o firmware' {
@@ -1830,16 +1840,22 @@ It 'a override e retirada ANTES do gate humano de power-on' {
     ($iClear -gt 0) -and ($iGate -gt $iClear)
 }
 
-It 'a remocao com a interface aberta e adiada, e nao gasta um gate humano' {
-    # Com a interface aberta a remocao seria descartada no Power On. A
-    # consequencia e apenas o firmware tentar o CD antes do disco (que expira),
-    # e nao uma falha de instalacao: adiar vale mais do que parar o run.
-    $trecho = [regex]::Match($bootTxt,
-        '(?s)\} elseif \(\$overrideDeBootNoVmx\) \{.*?\r?\n\s{12}\}').Value
-    ($trecho -match 'if \(Test-Gate5VmwareUiRunning\)') -and
-    ($trecho -match 'adiada') -and
-    ($trecho -notmatch 'Stop-Gate5Human') -and
-    ($trecho -notmatch 'Stop-Gate5Blocked')
+It 'as duas gravacoes pre-power-on acontecem DEPOIS do gate de interface fechada' {
+    # A ordem de boot e o sink serial sao gravados no .vmx; com a interface
+    # aberta as duas seriam descartadas no Power On. O sink descartado e o pior
+    # dos dois casos: a VM bootaria com o sink ANTERIOR e o truncaria - o
+    # incidente da RUN-02. Por isso o gate vem antes de ambas, e nenhuma delas
+    # tem caminho de "adiar".
+    # Indices tomados sobre as CHAMADAS (sozinhas na linha), nao sobre mencoes ao
+    # nome da funcao em comentario - senao o teste quebra ao documentar melhor.
+    $iGate  = $bootTxt.IndexOf('action=CLOSE_VMWARE_UI')
+    $iOrdem = [regex]::Match($bootTxt, '(?m)^\s*Set-Gate5OpticalBootFirst\s*$').Index
+    $iSink  = [regex]::Match($bootTxt, '(?m)^\s*New-Gate5SerialSink \| Out-Null\s*$').Index
+    $iPower = $bootTxt.IndexOf("HUMAN_ACTION_REQUIRED POWER_ON_VM' 'GATE'")
+    ($iGate -gt 0) -and ($iOrdem -gt $iGate) -and ($iSink -gt $iOrdem) -and ($iPower -gt $iSink) -and
+    # uma unica alocacao por passagem pelo bloco
+    (([regex]::Matches($bootTxt, '(?m)^\s*New-Gate5SerialSink \| Out-Null\s*$')).Count -eq 1) -and
+    ($bootTxt -notmatch 'remocao da override de boot adiada')
 }
 
 It 'Remove-Gate5VmxEntry preserva o material criptografico do .vmx' {
@@ -1849,6 +1865,267 @@ It 'Remove-Gate5VmxEntry preserva o material criptografico do .vmx' {
     ($trecho -match 'alteracao revertida') -and
     # remocao seletiva por linha, nunca reescrita a partir de template
     ($trecho -notmatch 'Set-Gate5TextFile') -and ($trecho -notmatch 'Remove-Item')
+}
+
+Write-Host 'T-N: sink serial por power-on (incidente do truncamento da RUN-02)'
+
+# RAIZ: o VMware abre 'serial0.fileName' em modo destrutivo a CADA power-on
+# (processo vmware-vmx novo), nao a cada reboot do guest. Provado no
+# vmware-1.log da RUN-02: 19 boots EFI sob o mesmo PID 4184, com a serial
+# ACUMULANDO 3232 bytes. Enquanto um unico caminho serviu de sink para todos os
+# power-ons, cada power-on novo zerava a evidencia do anterior.
+
+function New-Gate5SinkSandbox {
+    # Redireciona evidencia + estado para um diretorio descartavel. NENHUM teste
+    # desta secao pode tocar o .local real nem o .vmx do laboratorio.
+    param([string]$Nome, [string]$RunId = 'run-sandbox')
+    $raiz = Join-Path $tmp $Nome
+    New-Item -ItemType Directory -Force (Join-Path $raiz 'evidence') | Out-Null
+    $orig = [pscustomobject]@{
+        Ev    = $script:Gate5EvidenceDir
+        State = $script:Gate5StateFile
+        Vmx   = $script:Gate5VmxPath
+    }
+    $script:Gate5EvidenceDir = Join-Path $raiz 'evidence'
+    $script:Gate5StateFile   = Join-Path $raiz 'state.json'
+    $script:Gate5VmxPath     = Join-Path $raiz 'sandbox.vmx'
+    Set-Content -LiteralPath $script:Gate5VmxPath -Encoding ascii -Value @(
+        '.encoding = "UTF-8"', 'displayName = "sandbox"', 'firmware = "efi"',
+        'uefi.secureBoot.enabled = "TRUE"', 'nvme0:0.present = "TRUE"',
+        'encryption.keySafe = "vmware:key/list/(pair/(x))"', 'vtpm.present = "TRUE"')
+    Save-Gate5SandboxRunId $RunId
+    return $orig
+}
+function Save-Gate5SandboxRunId {
+    param([string]$RunId)
+    $st = [pscustomobject]@{
+        schema    = 'gate5-lab-autoprovision-state/v1'
+        completed = @()
+        notes     = [pscustomobject]@{ run_id = $RunId }
+    }
+    ($st | ConvertTo-Json -Depth 8) | Out-File -FilePath $script:Gate5StateFile -Encoding utf8
+}
+function Restore-Gate5SinkSandbox {
+    param($Orig)
+    $script:Gate5EvidenceDir = $Orig.Ev
+    $script:Gate5StateFile   = $Orig.State
+    $script:Gate5VmxPath     = $Orig.Vmx
+}
+function Invoke-Gate5VmwareTruncate {
+    # Reproduz o que o VMware faz ao ligar: abre o sink em modo destrutivo.
+    param([Parameter(Mandatory)][string]$Path)
+    $fs = [System.IO.File]::Open($Path, 'Create', 'Write', 'ReadWrite')
+    $fs.Dispose()
+}
+
+It 'T1/T2 cada power-on recebe um sink serial NOVO e sequencial' {
+    $o = New-Gate5SinkSandbox -Nome 'sink-t12'
+    try {
+        $s1 = New-Gate5SerialSink
+        $s2 = New-Gate5SerialSink
+        $s3 = New-Gate5SerialSink
+        ((Split-Path -Leaf $s1) -eq 'boot-0001.txt') -and
+        ((Split-Path -Leaf $s2) -eq 'boot-0002.txt') -and
+        ((Split-Path -Leaf $s3) -eq 'boot-0003.txt') -and
+        ($s1 -ne $s2) -and ($s2 -ne $s3) -and
+        ((Get-Gate5VmxValue -Key 'serial0.fileName') -eq $s3) -and
+        ((Get-Gate5ActiveSerialSink) -eq $s3)
+    } finally { Restore-Gate5SinkSandbox $o }
+}
+
+It 'T3 o sink do boot anterior sobrevive byte-identico ao truncamento do seguinte' {
+    # Prova direta do incidente: com um sink por power-on, o comportamento
+    # destrutivo do VMware atinge apenas o arquivo do boot NOVO.
+    $o = New-Gate5SinkSandbox -Nome 'sink-t3'
+    try {
+        $s1 = New-Gate5SerialSink
+        $conteudo = '<<<GATE5-STAGE:PAYLOAD_STARTED|2026-09-01T10:00:00Z>>>' +
+                    '<<<GATE5-EVIDENCE-BEGIN>>>{"os_build":"26200","blockers":[]}<<<GATE5-EVIDENCE-END>>>'
+        Set-Content -LiteralPath $s1 -Encoding ascii -Value $conteudo -NoNewline
+        $antes = (Get-FileHash -LiteralPath $s1 -Algorithm SHA256).Hash
+
+        $s2 = New-Gate5SerialSink
+        Invoke-Gate5VmwareTruncate -Path $s2
+
+        $depois = (Get-FileHash -LiteralPath $s1 -Algorithm SHA256).Hash
+        ($antes -eq $depois) -and
+        ((Get-Item -LiteralPath $s1).Length -eq $conteudo.Length) -and
+        ((Get-Item -LiteralPath $s2).Length -eq 0) -and
+        ((Get-Gate5SerialEvidence).os_build -eq '26200')
+    } finally { Restore-Gate5SinkSandbox $o }
+}
+
+It 'T4 uma RUN diferente nunca reutiliza o sink de outra RUN' {
+    $o = New-Gate5SinkSandbox -Nome 'sink-t4' -RunId 'run-A'
+    try {
+        $a1 = New-Gate5SerialSink
+        Set-Content -LiteralPath $a1 -Encoding ascii -Value 'RUN-A' -NoNewline
+        $hashA = (Get-FileHash -LiteralPath $a1 -Algorithm SHA256).Hash
+
+        Save-Gate5SandboxRunId 'run-B'
+
+        $b1 = New-Gate5SerialSink
+        ($a1 -ne $b1) -and
+        ((Split-Path -Leaf $b1) -eq 'boot-0001.txt') -and
+        ((Split-Path -Parent $a1) -ne (Split-Path -Parent $b1)) -and
+        ((Get-FileHash -LiteralPath $a1 -Algorithm SHA256).Hash -eq $hashA)
+    } finally { Restore-Gate5SinkSandbox $o }
+}
+
+It 'T5 um caminho ja ocupado faz a sequencia avancar, nunca sobrescrever' {
+    $o = New-Gate5SinkSandbox -Nome 'sink-t5'
+    try {
+        $dir = Get-Gate5SerialSinkDir
+        $intruso = Join-Path $dir 'boot-0001.txt'
+        Set-Content -LiteralPath $intruso -Encoding ascii -Value 'NAO PODE SUMIR' -NoNewline
+        $hash = (Get-FileHash -LiteralPath $intruso -Algorithm SHA256).Hash
+
+        $novo = New-Gate5SerialSink
+        ((Split-Path -Leaf $novo) -eq 'boot-0002.txt') -and
+        (Test-Path -LiteralPath $novo) -and
+        ((Get-Item -LiteralPath $novo).Length -eq 0) -and
+        ((Get-FileHash -LiteralPath $intruso -Algorithm SHA256).Hash -eq $hash) -and
+        ((Get-Content -LiteralPath $intruso -Raw) -eq 'NAO PODE SUMIR')
+    } finally { Restore-Gate5SinkSandbox $o }
+}
+
+It 'T6 execucao SELADA e fail-closed: nenhum sink novo, nenhuma mutacao' {
+    # Get-Gate5RunDir termina o processo com exit 2 (RUN_EVIDENCE_SEALED), entao
+    # a prova corre num processo filho - e o codigo de saida e parte da prova.
+    $raiz = Join-Path $tmp 'sink-t6'
+    $serialDir = Join-Path $raiz 'evidence\run-selada\serial'
+    New-Item -ItemType Directory -Force $serialDir | Out-Null
+    Set-Content -LiteralPath (Join-Path $raiz 'evidence\run-selada\sealed.json') -Encoding ascii -Value '{}'
+    $comum = Join-Path $labDir 'gate5-common.ps1'
+    $script = Join-Path $raiz 'tentar.ps1'
+    Set-Content -LiteralPath $script -Encoding ascii -Value @(
+        ('. "{0}"' -f $comum),
+        ('$script:Gate5EvidenceDir = "{0}\evidence"' -f $raiz),
+        ('$script:Gate5StateFile   = "{0}\state.json"' -f $raiz),
+        ('$script:Gate5VmxPath     = "{0}\x.vmx"' -f $raiz),
+        'Set-Content -LiteralPath $script:Gate5VmxPath -Value ''.encoding = "UTF-8"''',
+        'New-Gate5SerialSink -RunId ''run-selada'' | Out-Null',
+        'exit 0')
+    $saida = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $script 2>&1
+    $code  = $LASTEXITCODE
+    $sinks = @(Get-ChildItem -LiteralPath $serialDir -File -ErrorAction SilentlyContinue)
+    ($code -eq 2) -and (($saida -join ' ') -match 'RUN_EVIDENCE_SEALED') -and ($sinks.Count -eq 0)
+}
+
+It 'T7 apos reinicio do orquestrador a sequencia continua pelo filesystem' {
+    # O numero do proximo sink NAO vem do state.json: se ele se perder, o
+    # diretorio continua sabendo quais sinks existem. Sem isso um orquestrador
+    # reiniciado voltaria a apontar para boot-0001 e o truncaria.
+    $o = New-Gate5SinkSandbox -Nome 'sink-t7'
+    try {
+        $s1 = New-Gate5SerialSink
+        $s2 = New-Gate5SerialSink
+        Set-Content -LiteralPath $s1 -Encoding ascii -Value 'B1' -NoNewline
+        Set-Content -LiteralPath $s2 -Encoding ascii -Value 'B2' -NoNewline
+        $h1 = (Get-FileHash -LiteralPath $s1 -Algorithm SHA256).Hash
+
+        # "crash": estado perdido por completo, evidencia intacta
+        Remove-Item -LiteralPath $script:Gate5StateFile -Force
+        Save-Gate5SandboxRunId 'run-sandbox'
+
+        $s3 = New-Gate5SerialSink
+        ((Split-Path -Leaf $s3) -eq 'boot-0003.txt') -and
+        ((Get-FileHash -LiteralPath $s1 -Algorithm SHA256).Hash -eq $h1) -and
+        ((Get-Content -LiteralPath $s2 -Raw) -eq 'B2')
+    } finally { Restore-Gate5SinkSandbox $o }
+}
+
+It 'T9 os parsers agregam os eventos de TODOS os sinks da execucao' {
+    # A instalacao atravessa varios power-ons: os batimentos ficam espalhados
+    # pelos sinks e a evidencia final pode estar em qualquer um deles.
+    $o = New-Gate5SinkSandbox -Nome 'sink-t9'
+    try {
+        $s1 = New-Gate5SerialSink
+        Set-Content -LiteralPath $s1 -Encoding ascii -NoNewline -Value '<<<GATE5-STAGE:PAYLOAD_STARTED|t1>>>'
+        $s2 = New-Gate5SerialSink
+        Set-Content -LiteralPath $s2 -Encoding ascii -NoNewline -Value '<<<GATE5-STAGE:UPDATE|t2>>>'
+        $s3 = New-Gate5SerialSink
+        Set-Content -LiteralPath $s3 -Encoding ascii -NoNewline -Value (
+            '<<<GATE5-STAGE:EVIDENCE|t3>>><<<GATE5-EVIDENCE-BEGIN>>>{"os_build":"26200"}<<<GATE5-EVIDENCE-END>>>')
+
+        $estagios = @(Get-Gate5SerialStages)
+        $ev = Get-Gate5SerialEvidence
+        ($estagios.Count -eq 3) -and
+        ($estagios[0].Stage -eq 'PAYLOAD_STARTED') -and ($estagios[2].Stage -eq 'EVIDENCE') -and
+        ($null -ne $ev) -and ($ev.os_build -eq '26200') -and
+        ((Get-Gate5SerialReadOrder)[0] -eq $s3)
+    } finally { Restore-Gate5SinkSandbox $o }
+}
+
+It 'T10 o validador exige o artefato-FONTE, e nao so o derivado' {
+    # guest-evidence.json e derivado dos sinks. Aprovar um baseline com o
+    # derivado presente e a fonte ausente foi o que o incidente tornou possivel.
+    $verif = Get-Content (Join-Path $labDir 'gate5-verify-baseline.ps1') -Raw
+    ($verif -match "Check 'evidencia-guest-serial'") -and
+    ($verif -match "Check 'sinks-seriais-preservados'") -and
+    ($verif -match 'Get-Gate5SerialSinks')
+}
+
+It 'T11/T12 os selos historicos (RUN-01/RUN-02) continuam validaveis e intactos' {
+    # Em maquina sem o laboratorio o teste passa por vacuidade.
+    $ok = $true
+    foreach ($run in @('run-01-clean-install','run-02-clean-install')) {
+        $dir = Join-Path $script:Gate5EvidenceDir $run
+        $sf  = Join-Path $dir 'sealed.json'
+        if (-not (Test-Path -LiteralPath $sf)) { continue }
+        $selo = Get-Content -LiteralPath $sf -Raw | ConvertFrom-Json
+        foreach ($a in $selo.arquivos) {
+            $f = Join-Path $dir $a.file
+            if (-not (Test-Path -LiteralPath $f)) { $ok = $false; break }
+            if ((Get-FileHash -LiteralPath $f -Algorithm SHA256).Hash.ToLowerInvariant() -ne $a.sha256) { $ok = $false; break }
+            if ((Get-Item -LiteralPath $f).Length -ne $a.bytes) { $ok = $false; break }
+        }
+    }
+    $ok
+}
+
+It 'T13 o ciclo de ordem de boot corrigido continua intacto' {
+    # instalacao -> cdrom,hdd ; operacional -> chave AUSENTE.
+    $comm  = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    $verif = Get-Content (Join-Path $labDir 'gate5-verify-baseline.ps1') -Raw
+    ($comm -match 'function Remove-Gate5BootOverride') -and
+    ($comm -match "'cdrom,hdd'") -and
+    ($verif -match "Check 'sem-override-de-boot'") -and
+    ($comm -notmatch "bios\.bootOrder' -Value 'hdd'")
+}
+
+It 'T14 a troca de sink nao toca firmware, Secure Boot, vTPM, NVRAM nem disco' {
+    $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    $trecho = [regex]::Match($comm, '(?s)function New-Gate5SerialSink \{.*?\r?\n\}').Value
+    ($trecho.Length -gt 0) -and
+    ($trecho -notmatch '\.nvram') -and ($trecho -notmatch 'vtpm\.') -and
+    ($trecho -notmatch 'firmware') -and ($trecho -notmatch 'secureBoot') -and
+    ($trecho -notmatch 'nvme') -and ($trecho -notmatch 'Remove-Item') -and
+    ($trecho -notmatch 'Set-Gate5TextFile') -and
+    ($trecho -match 'if \(Test-Gate5VmPoweredOn\)') -and
+    ($trecho -match 'if \(Test-Gate5VmwareUiRunning\)')
+}
+
+It 'T15 alocar sinks repetidamente nunca destroi nem duplica evidencia' {
+    $o = New-Gate5SinkSandbox -Nome 'sink-t15'
+    try {
+        $hashes = @{}
+        foreach ($i in 1..5) {
+            $s = New-Gate5SerialSink
+            Set-Content -LiteralPath $s -Encoding ascii -NoNewline -Value ("boot-$i")
+            $hashes[$s] = (Get-FileHash -LiteralPath $s -Algorithm SHA256).Hash
+        }
+        foreach ($i in 1..3) { New-Gate5SerialSink | Out-Null }
+        $intactos = @($hashes.Keys | Where-Object {
+            (Test-Path -LiteralPath $_) -and ((Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash -eq $hashes[$_]) })
+        $todos = @(Get-Gate5SerialSinks)
+        # os 5 com conteudo continuam byte-identicos; os 3 novos sao vazios e
+        # distintos - nenhuma alocacao reaproveitou um nome ja usado
+        ($intactos.Count -eq 5) -and
+        ($todos.Count -eq 8) -and
+        (@($todos | Sort-Object -Unique).Count -eq 8) -and
+        (@($todos | Where-Object { (Get-Item -LiteralPath $_).Length -eq 0 }).Count -eq 3)
+    } finally { Restore-Gate5SinkSandbox $o }
 }
 
 It 'a suite nao escreveu no .vmx do laboratorio real' {

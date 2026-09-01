@@ -270,13 +270,16 @@ public static class Gate5IsoWriter {
         # E um canal de SAIDA de mao unica (o guest escreve, o host le), que
         # substitui as guest operations indisponiveis na VM criptografada. Nao
         # transporta segredo - apenas metadados de validacao.
-        Set-Gate5VmxEntry -Name 'serial0.present'        -Value 'TRUE'                       -Vmware $vmware
-        Set-Gate5VmxEntry -Name 'serial0.fileType'       -Value 'file'                       -Vmware $vmware
-        Set-Gate5VmxEntry -Name 'serial0.fileName'       -Value $script:Gate5EvidenceSerial  -Vmware $vmware
-        Set-Gate5VmxEntry -Name 'serial0.startConnected' -Value 'TRUE'                       -Vmware $vmware
-        Set-Gate5VmxEntry -Name 'serial0.yieldOnMsrRead' -Value 'TRUE'                       -Vmware $vmware
-        if (Test-Path $script:Gate5EvidenceSerial) { Remove-Item $script:Gate5EvidenceSerial -Force }
-        Write-Gate5Log "Canal serial de evidencia: $($script:Gate5EvidenceSerial)"
+        # O DISPOSITIVO e habilitado aqui; o ARQUIVO de destino, nao. O sink e
+        # alocado imediatamente antes de cada power-on (New-Gate5SerialSink), ja
+        # que o VMware trunca 'serial0.fileName' a cada power-on e um caminho
+        # reutilizado destruiria a evidencia do boot anterior. Nenhum arquivo de
+        # evidencia e apagado nesta fase.
+        Set-Gate5VmxEntry -Name 'serial0.present'        -Value 'TRUE'  -Vmware $vmware
+        Set-Gate5VmxEntry -Name 'serial0.fileType'       -Value 'file'  -Vmware $vmware
+        Set-Gate5VmxEntry -Name 'serial0.startConnected' -Value 'TRUE'  -Vmware $vmware
+        Set-Gate5VmxEntry -Name 'serial0.yieldOnMsrRead' -Value 'TRUE'  -Vmware $vmware
+        Write-Gate5Log "Canal serial de evidencia: um sink por power-on em $(Join-Path (Get-Gate5RunDir) 'serial')"
         exit 0
     }
 
@@ -313,9 +316,15 @@ public static class Gate5IsoWriter {
             if ($ruins.Count -gt 0) {
                 Stop-Gate5Blocked -Blocker 'UNATTEND_MEDIA_INVALID' -Detail ("controles reprovados: " + ($ruins -join ', '))
             }
+            # O sink precisa pertencer a ESTA execucao. Apontar para um caminho
+            # fora do diretorio da RUN corrente significaria que o proximo
+            # power-on truncaria evidencia que nao e desta execucao.
+            $sinkDir  = Join-Path (Get-Gate5RunDir) 'serial'
+            $sinkAtivo = Get-Gate5ActiveSerialSink
             if ((Get-Gate5VmxValue 'serial0.fileType') -ne 'file' -or
-                (Get-Gate5VmxValue 'serial0.fileName') -ne $script:Gate5EvidenceSerial) {
-                Stop-Gate5Blocked -Blocker 'SERIAL_CHANNEL_NOT_READY' -Detail 'porta serial da VM nao aponta para o arquivo de evidencia do host'
+                (-not $sinkAtivo) -or
+                ((Split-Path -Parent $sinkAtivo) -ne $sinkDir)) {
+                Stop-Gate5Blocked -Blocker 'SERIAL_CHANNEL_NOT_READY' -Detail ("porta serial da VM nao aponta para um sink desta execucao (atual: '{0}'; esperado sob '{1}')" -f $sinkAtivo, $sinkDir)
             }
             if ((Get-Gate5VmxValue 'RemoteDisplay.vnc.ip') -ne '127.0.0.1') {
                 Stop-Gate5Blocked -Blocker 'VNC_NOT_LOCAL' -Detail 'console temporario precisa estar preso a 127.0.0.1'
@@ -369,6 +378,36 @@ public static class Gate5IsoWriter {
         # --- 2) Aguardar o power-on -------------------------------------------
         if (-not (Test-Gate5VmPoweredOn)) {
             if ((Get-Gate5State).notes.installation_stage -ne 'WAITING_POWER_CYCLE') { Assert-Gate5PreConditions }
+            # A interface do VMware precisa estar FECHADA antes de qualquer
+            # gravacao no .vmx: com a VM aberta numa aba ela reescreve o arquivo
+            # no Power On a partir da copia que carregou, e o que foi gravado
+            # agora seria descartado em silencio. Fechar a interface e a unica
+            # forma de faze-la reler o arquivo.
+            #
+            # O gate cobre AS DUAS gravacoes que precedem o power-on: a ordem de
+            # boot e o sink serial. O sink e alocado em TODO power-on, entao o
+            # gate deixou de ser exclusivo do primeiro boot pela midia. Ele
+            # continua nao aparecendo nos reboots do proprio Setup: aqueles
+            # acontecem com a VM LIGADA, e este bloco so roda com ela desligada.
+            if (Test-Gate5VmwareUiRunning) {
+                Write-Gate5Log 'HUMAN_ACTION_REQUIRED CLOSE_VMWARE_UI' 'GATE'
+                Write-Host ''
+                Write-Host 'HUMAN_ACTION_REQUIRED'
+                Write-Host 'action=CLOSE_VMWARE_UI'
+                Write-Host 'Feche a janela do VMware Workstation por completo (a VM ja esta desligada).'
+                Write-Host 'A interface mantem a configuracao em cache e descartaria a ordem de boot'
+                Write-Host 'e o arquivo de evidencia serial deste power-on.'
+                Write-Host 'A automacao grava a correcao sozinha e avisa quando reabrir e ligar.'
+                Write-Host ''
+                Set-Gate5InstallNote 'installation_stage' 'WAITING_VMWARE_UI_CLOSE'
+                $ateUi = [DateTime]::UtcNow.AddMinutes(30)
+                while ([DateTime]::UtcNow -lt $ateUi -and (Test-Gate5VmwareUiRunning)) { Start-Sleep -Seconds 3 }
+                if (Test-Gate5VmwareUiRunning) {
+                    Stop-Gate5Human -Action 'CLOSE_VMWARE_UI' -Detail 'A interface do VMware nao foi fechada em 30 minutos. Reexecute gate5-provision.ps1 quando puder faze-lo.'
+                }
+                Write-Gate5Log 'Interface do VMware fechada; gravando a configuracao deste power-on no .vmx.'
+            }
+
             # Com a VM desligada, e ANTES de gastar um gate humano: garantir que o
             # firmware vai mesmo TENTAR a midia. Sem isso o Windows ja instalado
             # boota direto e o prompt optico nunca chega a ser exibido - nenhuma
@@ -385,40 +424,18 @@ public static class Gate5IsoWriter {
             # antes do disco. Ver Remove-Gate5BootOverride.
             $overrideDeBootNoVmx = ($null -ne (Get-Gate5VmxValue -Key 'bios.bootOrder'))
             if (-not $bootKeySent) {
-                # A interface do VMware precisa estar FECHADA: com a VM aberta numa
-                # aba ela reescreve o .vmx no Power On a partir da copia que
-                # carregou, e a chave gravada agora seria descartada em silencio.
-                # Fechar a interface e a unica forma de faze-la reler o arquivo.
-                if (Test-Gate5VmwareUiRunning) {
-                    Write-Gate5Log 'HUMAN_ACTION_REQUIRED CLOSE_VMWARE_UI' 'GATE'
-                    Write-Host ''
-                    Write-Host 'HUMAN_ACTION_REQUIRED'
-                    Write-Host 'action=CLOSE_VMWARE_UI'
-                    Write-Host 'Feche a janela do VMware Workstation por completo (a VM ja esta desligada).'
-                    Write-Host 'A interface mantem a configuracao em cache e descartaria a ordem de boot.'
-                    Write-Host 'A automacao grava a correcao sozinha e avisa quando reabrir e ligar.'
-                    Write-Host ''
-                    Set-Gate5InstallNote 'installation_stage' 'WAITING_VMWARE_UI_CLOSE'
-                    $ateUi = [DateTime]::UtcNow.AddMinutes(30)
-                    while ([DateTime]::UtcNow -lt $ateUi -and (Test-Gate5VmwareUiRunning)) { Start-Sleep -Seconds 3 }
-                    if (Test-Gate5VmwareUiRunning) {
-                        Stop-Gate5Human -Action 'CLOSE_VMWARE_UI' -Detail 'A interface do VMware nao foi fechada em 30 minutos. Reexecute gate5-provision.ps1 quando puder faze-lo.'
-                    }
-                    Write-Gate5Log 'Interface do VMware fechada; gravando a ordem de boot no .vmx.'
-                }
                 Set-Gate5OpticalBootFirst
             } elseif ($overrideDeBootNoVmx) {
-                # O boot optico ja disparou: a override cumpriu o seu papel e sai
-                # do arquivo antes do proximo power-on. Com a interface aberta a
-                # remocao seria descartada em silencio; ali ela e ADIADA em vez de
-                # gastar um gate humano, porque a consequencia e apenas o firmware
-                # tentar o CD antes do disco - e nao uma falha de instalacao.
-                if (Test-Gate5VmwareUiRunning) {
-                    Write-Gate5Log 'Interface do VMware aberta: remocao da override de boot adiada (seria descartada no Power On).' 'WARN'
-                } else {
-                    Remove-Gate5BootOverride
-                }
+                Remove-Gate5BootOverride
             }
+
+            # Sink serial EXCLUSIVO deste power-on. O VMware trunca o arquivo de
+            # 'serial0.fileName' ao ligar; apontar de novo para o sink anterior
+            # apagaria a evidencia daquele boot - foi assim que a evidencia da
+            # RUN-02 se perdeu. A alocacao e fail-closed (nunca devolve caminho
+            # existente) e nao ha o que "adiar": o gate acima ja garantiu a
+            # interface fechada.
+            New-Gate5SerialSink | Out-Null
             Write-Gate5Log 'HUMAN_ACTION_REQUIRED POWER_ON_VM' 'GATE'
             Write-Host ''
             Write-Host 'HUMAN_ACTION_REQUIRED'

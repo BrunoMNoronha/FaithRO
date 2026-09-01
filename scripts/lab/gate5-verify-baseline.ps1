@@ -144,6 +144,12 @@ $warp = @(Get-ChildItem C:\ -Recurse -Depth 3 -Filter "WARP*" -ErrorAction Silen
 # anterior fica preservada no diretorio dela e nunca aprova a atual.
 $serialEv = Join-Path (Join-Path $script:Gate5EvidenceDir (Get-Gate5RunId)) 'guest-evidence.json'
 Check 'evidencia-guest-serial' (Test-Path $serialEv)
+# 'guest-evidence.json' e um artefato DERIVADO. O testemunho BRUTO sao os sinks
+# seriais preservados em <run-dir>\serial, um por power-on. Exigir os dois
+# impede que uma evidencia derivada aprove um baseline cujo original sumiu -
+# que e exatamente o estado em que a RUN-02 terminou (docs/48 §16).
+$sinksSeriais = @(Get-Gate5SerialSinks)
+Check 'sinks-seriais-preservados' ($sinksSeriais.Count -gt 0) ("sinks=" + $sinksSeriais.Count)
 if (Test-Path $serialEv) {
     $g = Get-Content $serialEv -Raw | ConvertFrom-Json
     $campos = @($g.PSObject.Properties.Name)

@@ -56,9 +56,15 @@ $script:Gate5CdUnattend = 'sata0:1'   # ISO auxiliar com o Autounattend.xml
 $script:Gate5VncPort = 5943
 
 # Canal de SAIDA de mao unica do guest para o host: a porta serial da VM grava
-# neste arquivo. Substitui as guest operations do vmrun, indisponiveis em VM
-# criptografada (docs/48 §12). Trafega apenas metadados de validacao.
-$script:Gate5EvidenceSerial = Join-Path $script:Gate5VmDir 'gate5-evidence-serial.txt'
+# num arquivo do host. Substitui as guest operations do vmrun, indisponiveis em
+# VM criptografada (docs/48 §12). Trafega apenas metadados de validacao.
+#
+# NAO existe mais um caminho FIXO de sink serial, e isto e deliberado. O VMware
+# abre 'serial0.fileName' em modo destrutivo a cada power-on: enquanto um unico
+# caminho serviu de sink para todos os power-ons, cada novo power-on zerava a
+# evidencia do anterior - foi assim que a evidencia da RUN-02 se perdeu. Cada
+# power-on passa a receber um sink PROPRIO, alocado por New-Gate5SerialSink em
+# <run-dir>\serial\boot-NNNN.txt. Ver docs/48 §16.
 
 $script:Gate5StagingDirs = @('C:\Users\bruno\Downloads', 'C:\Installers', 'C:\ISO', 'C:\VMs', 'C:\Tools')
 $script:Gate5YaraDir    = 'C:\Tools\YARA'
@@ -249,30 +255,176 @@ function Test-Gate5VmPoweredOn {
     return (($proc.Count -gt 0) -and ($lockDirs.Count -gt 0))
 }
 
-function Get-Gate5SerialEvidence {
-    # Le a evidencia que o guest escreveu na porta serial. Retorna $null enquanto
-    # o bloco completo (com marcadores de inicio e fim) nao tiver chegado.
-    param([string]$Path = $script:Gate5EvidenceSerial)
+function Get-Gate5SerialSinkDir {
+    # Diretorio dos sinks seriais da execucao corrente: <run-dir>\serial.
+    #
+    # Fica DENTRO do diretorio da RUN de proposito: Get-Gate5RunDir falha fechado
+    # numa execucao ja selada (RUN_EVIDENCE_SEALED), e com isso nenhum sink novo
+    # pode ser alocado dentro de evidencia fechada.
+    param([string]$RunId)
+    $dir = Join-Path (Get-Gate5RunDir -RunId $RunId) 'serial'
+    if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Force $dir | Out-Null }
+    return $dir
+}
+
+function Get-Gate5SerialSinks {
+    # Sinks seriais ja alocados na execucao, do mais ANTIGO para o mais recente.
+    # A ordem vem do numero no nome (boot-0001, boot-0002, ...), nao do carimbo
+    # de tempo do arquivo: o VMware reescreve o mtime a cada power-on.
+    param([string]$RunId)
+    if (-not $RunId) { $RunId = Get-Gate5RunId }
+    $dir = Join-Path (Join-Path $script:Gate5EvidenceDir $RunId) 'serial'
+    if (-not (Test-Path -LiteralPath $dir)) { return @() }
+    return @(Get-ChildItem -LiteralPath $dir -File -Filter 'boot-*.txt' -ErrorAction SilentlyContinue |
+             Where-Object { $_.Name -match '^boot-(\d{4})\.txt$' } |
+             Sort-Object { [int]([regex]::Match($_.Name, '^boot-(\d{4})\.txt$').Groups[1].Value) } |
+             ForEach-Object { $_.FullName })
+}
+
+function New-Gate5SerialSink {
+    # Aloca um sink serial NOVO para o proximo power-on e aponta a porta serial
+    # da VM para ele.
+    #
+    # RAIZ DO INCIDENTE: o VMware abre o arquivo de 'serial0.fileName' em modo
+    # destrutivo a CADA power-on (processo vmware-vmx novo) - nao a cada reboot
+    # do guest. Provado no vmware-1.log da RUN-02: 19 boots EFI sob o mesmo PID
+    # 4184, com a serial ACUMULANDO 3232 bytes. Enquanto o mesmo caminho serviu
+    # de sink para todos os power-ons, cada novo power-on zerou a evidencia do
+    # anterior - foi assim que a evidencia da RUN-02 (blockers:[]) se perdeu.
+    #
+    # INVARIANTE: um sink ja usado num power-on NUNCA volta a ser sink de outro.
+    # O numero de sequencia e derivado do PROPRIO diretorio, e nao do state.json:
+    # se o orquestrador morrer e for reiniciado, o filesystem continua sabendo
+    # quais sinks existem, e a alocacao segue do maior numero presente. Um
+    # arquivo existente jamais e reaproveitado nem truncado por esta funcao.
+    param([string]$RunId, $Vmware)
+
+    # As mesmas guardas da ordem de boot: a configuracao so e lida no power-on, e
+    # com a interface aberta a escrita PASSA no arquivo e e descartada no Power On
+    # a partir da copia em cache - a VM bootaria com o sink ANTIGO e o truncaria.
+    if (Test-Gate5VmPoweredOn) {
+        throw 'GATE5: o sink serial so pode ser trocado com a VM desligada.'
+    }
+    if (Test-Gate5VmwareUiRunning) {
+        throw 'GATE5: a interface do VMware esta aberta e descartaria a troca do sink serial no Power On.'
+    }
+
+    $dir = Get-Gate5SerialSinkDir -RunId $RunId
+    $usados = @(Get-Gate5SerialSinks -RunId $RunId)
+    $n = 0
+    foreach ($u in $usados) {
+        $m = [regex]::Match((Split-Path -Leaf $u), '^boot-(\d{4})\.txt$')
+        if ($m.Success) { $v = [int]$m.Groups[1].Value; if ($v -gt $n) { $n = $v } }
+    }
+    # O arquivo e criado VAZIO aqui, na alocacao, em vez de ser deixado para o
+    # VMware criar no power-on. E isso que torna a sequencia DURAVEL: o proximo
+    # sink e deduzido do diretorio, e nao do state.json, entao um orquestrador
+    # que morra e volte nao reaponta para um sink ja usado. Truncar um arquivo
+    # recem-criado e vazio nao custa nada; truncar o do boot anterior custou a
+    # evidencia da RUN-02.
+    #
+    # 'CreateNew' e ATOMICO: se o nome ja existir a criacao falha e a sequencia
+    # avanca, em vez de sobrescrever evidencia. Nenhum arquivo existente e
+    # aberto para escrita por esta funcao.
+    $sink = $null
+    while ($null -eq $sink) {
+        $n++
+        if ($n -gt 9999) { throw 'GATE5: sequencia de sinks seriais esgotada (boot-9999).' }
+        $candidato = Join-Path $dir ('boot-{0:D4}.txt' -f $n)
+        try {
+            $fs = [System.IO.File]::Open($candidato, 'CreateNew', 'Write', 'None')
+            $fs.Dispose()
+            $sink = $candidato
+        } catch [System.IO.IOException] {
+            # nome ja ocupado: seguir para o proximo da sequencia
+        }
+    }
+
+    Set-Gate5VmxEntry -Name 'serial0.present'        -Value 'TRUE'  -Vmware $Vmware
+    Set-Gate5VmxEntry -Name 'serial0.fileType'       -Value 'file'  -Vmware $Vmware
+    Set-Gate5VmxEntry -Name 'serial0.fileName'       -Value $sink   -Vmware $Vmware
+    Set-Gate5VmxEntry -Name 'serial0.startConnected' -Value 'TRUE'  -Vmware $Vmware
+    Set-Gate5VmxEntry -Name 'serial0.yieldOnMsrRead' -Value 'TRUE'  -Vmware $Vmware
+    $lido = Get-Gate5VmxValue -Key 'serial0.fileName'
+    if ($lido -ne $sink) {
+        throw ("GATE5: serial0.fileName nao persistiu no .vmx (lido '{0}', esperado '{1}')." -f $lido, $sink)
+    }
+
+    # Vinculo boot -> arquivo, auditavel fora do nome do arquivo.
+    try {
+        $st = Get-Gate5State
+        $hist = @()
+        if ($st.notes.PSObject.Properties['serial_sinks']) { $hist = @($st.notes.serial_sinks) }
+        $hist += [pscustomobject]@{ sink = (Split-Path -Leaf $sink); alocado_utc = [DateTime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ') }
+        $st.notes | Add-Member -NotePropertyName 'serial_sinks' -NotePropertyValue $hist -Force
+        Save-Gate5State $st
+    } catch { Write-Gate5Log "historico de sinks seriais nao registrado no estado: $($_.Exception.Message)" 'WARN' }
+
+    Write-Gate5Log ("Sink serial deste power-on: {0} (os anteriores permanecem intactos)." -f $sink)
+    return $sink
+}
+
+function Get-Gate5ActiveSerialSink {
+    # Sink para onde a porta serial da VM aponta AGORA, segundo o .vmx.
+    return (Get-Gate5VmxValue -Key 'serial0.fileName')
+}
+
+function Read-Gate5SerialText {
+    # Le um sink serial com compartilhamento total: o vmware-vmx mantem o arquivo
+    # aberto para escrita enquanto a VM esta ligada.
+    param([Parameter(Mandatory)][string]$Path)
     if (-not (Test-Path -LiteralPath $Path)) { return $null }
     try {
         $fs = [System.IO.File]::Open($Path, 'Open', 'Read', 'ReadWrite')
-        try { $texto = (New-Object System.IO.StreamReader($fs)).ReadToEnd() } finally { $fs.Close() }
+        try { return (New-Object System.IO.StreamReader($fs)).ReadToEnd() } finally { $fs.Close() }
     } catch { return $null }
-    $m = [regex]::Match($texto, '<<<GATE5-EVIDENCE-BEGIN>>>(?<j>.*?)<<<GATE5-EVIDENCE-END>>>', 'Singleline')
-    if (-not $m.Success) { return $null }
-    try { return ($m.Groups['j'].Value -replace '[\r\n]', '') | ConvertFrom-Json } catch { return $null }
+}
+
+function Get-Gate5SerialReadOrder {
+    # Sinks a consultar, do mais RECENTE para o mais antigo.
+    #
+    # Varrer todos, e nao apenas o sink ativo, e o que torna a leitura robusta a
+    # um reinicio do orquestrador: a evidencia pode ter chegado num power-on
+    # anterior. Antes, ela so era encontrada enquanto o caminho fixo ainda a
+    # contivesse - que e exatamente o que o truncamento destruia.
+    param([string]$RunId)
+    $sinks = @(Get-Gate5SerialSinks -RunId $RunId)
+    [array]::Reverse($sinks)
+    return @($sinks)
+}
+
+function Get-Gate5SerialEvidence {
+    # Le a evidencia que o guest escreveu na porta serial. Retorna $null enquanto
+    # o bloco completo (com marcadores de inicio e fim) nao tiver chegado.
+    # Sem -Path, procura em todos os sinks da execucao (mais recente primeiro).
+    param([string]$Path, [string]$RunId)
+    $alvos = @()
+    if ($Path) { $alvos = @($Path) } else { $alvos = @(Get-Gate5SerialReadOrder -RunId $RunId) }
+    foreach ($alvo in $alvos) {
+        $texto = Read-Gate5SerialText -Path $alvo
+        if ($null -eq $texto) { continue }
+        $m = [regex]::Match($texto, '<<<GATE5-EVIDENCE-BEGIN>>>(?<j>.*?)<<<GATE5-EVIDENCE-END>>>', 'Singleline')
+        if (-not $m.Success) { continue }
+        try { return ($m.Groups['j'].Value -replace '[\r\n]', '') | ConvertFrom-Json } catch { continue }
+    }
+    return $null
 }
 
 function Get-Gate5SerialStages {
     # Batimentos de progresso do payload. Servem para saber SE o guest esta
     # trabalhando; nao substituem a evidencia, que continua exigindo o bloco
     # completo START->END em Get-Gate5SerialEvidence (fail-closed inalterado).
-    param([string]$Path = $script:Gate5EvidenceSerial)
-    if (-not (Test-Path -LiteralPath $Path)) { return @() }
-    try {
-        $fs = [System.IO.File]::Open($Path, 'Open', 'Read', 'ReadWrite')
-        try { $texto = (New-Object System.IO.StreamReader($fs)).ReadToEnd() } finally { $fs.Close() }
-    } catch { return @() }
+    # Sem -Path, agrega os batimentos de TODOS os sinks da execucao, do mais
+    # antigo para o mais recente: a instalacao atravessa varios power-ons.
+    param([string]$Path, [string]$RunId)
+    $alvos = @()
+    if ($Path) { $alvos = @($Path) } else { $alvos = @(Get-Gate5SerialSinks -RunId $RunId) }
+    $texto = ''
+    foreach ($alvo in $alvos) {
+        $t = Read-Gate5SerialText -Path $alvo
+        if ($t) { $texto = $texto + $t + [Environment]::NewLine }
+    }
+    if (-not $texto) { return @() }
     $saida = @()
     foreach ($m in [regex]::Matches($texto, '<<<GATE5-STAGE:(?<n>[^|>]+)\|(?<t>[^|>]+)(\|(?<d>[^>]*))?>>>')) {
         $saida += [pscustomobject]@{
