@@ -1759,6 +1759,89 @@ It 'a override de boot e retirada antes do baseline' {
     ($verif -match "Check 'sem-override-de-boot'")
 }
 
+It 'Remove-Gate5BootOverride retira as duas chaves e e IDEMPOTENTE' {
+    # Estado operacional da VM provisionada = AUSENCIA das chaves de ordem de
+    # boot. Rodar a finalizacao duas vezes nao pode corromper o .vmx, duplicar
+    # propriedades, perder outras configuracoes nem reintroduzir optical-first.
+    $original = $script:Gate5VmxPath
+    try {
+        $fake = Join-Path $tmp 'boot-clear-sandbox.vmx'
+        Set-Content -LiteralPath $fake -Encoding ascii -Value @(
+            '.encoding = "UTF-8"', 'displayName = "sandbox"', 'firmware = "efi"',
+            'uefi.secureBoot.enabled = "TRUE"', 'nvme0:0.present = "TRUE"',
+            'bios.bootOrder = "cdrom,hdd"', 'efi.bootOrder = "cdrom"',
+            'encryption.keySafe = "vmware:key/list/(pair/(x))"', 'vtpm.present = "TRUE"')
+        $script:Gate5VmxPath = $fake
+
+        Remove-Gate5BootOverride
+        $depois1 = [System.IO.File]::ReadAllText($fake)
+        Remove-Gate5BootOverride              # segunda passada: no-op
+        $depois2 = [System.IO.File]::ReadAllText($fake)
+
+        $linhas = @(Get-Content -LiteralPath $fake)
+        (($null -eq (Get-Gate5VmxValue -Key 'bios.bootOrder' -VmxPath $fake))) -and
+        (($null -eq (Get-Gate5VmxValue -Key 'efi.bootOrder'  -VmxPath $fake))) -and
+        # idempotencia byte a byte
+        ($depois1 -ceq $depois2) -and
+        # nada mais se perdeu, nada duplicou
+        ((Get-Gate5VmxValue -Key 'firmware' -VmxPath $fake) -eq 'efi') -and
+        ((Get-Gate5VmxValue -Key 'uefi.secureBoot.enabled' -VmxPath $fake) -eq 'TRUE') -and
+        ((Get-Gate5VmxValue -Key 'nvme0:0.present' -VmxPath $fake) -eq 'TRUE') -and
+        ($linhas.Count -eq 7) -and
+        (@($linhas | Where-Object { $_ -match '^(encryption\.|vtpm\.)' }).Count -eq 2)
+    } finally { $script:Gate5VmxPath = $original }
+}
+
+It 'Remove-Gate5BootOverride tem as mesmas guardas da escrita e nao toca NVRAM/vTPM' {
+    # Gravar OU remover com a VM ligada nao teria efeito (o VMware reescreve o
+    # .vmx no power-off) e com a interface aberta seria descartado no Power On.
+    # A NVRAM guarda o vTPM e a entrada 'Windows Boot Manager': nunca e tocada.
+    $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
+    $trecho = [regex]::Match($comm, '(?s)function Remove-Gate5BootOverride \{.*?\r?\n\}').Value
+    $iLigada = $trecho.IndexOf('if (Test-Gate5VmPoweredOn)')
+    $iUi     = $trecho.IndexOf('if (Test-Gate5VmwareUiRunning)')
+    $iRemove = $trecho.IndexOf('Remove-Gate5VmxEntry')
+    ($iLigada -gt 0) -and ($iUi -gt $iLigada) -and ($iRemove -gt $iUi) -and
+    ($trecho -notmatch '\.nvram') -and ($trecho -notmatch 'Remove-Item') -and
+    ($trecho -notmatch 'vtpm\.') -and ($trecho -notmatch 'Set-Gate5TextFile') -and
+    # remove, nao inverte para 'hdd' - o baseline exige AUSENCIA da chave
+    ($trecho -notmatch "Set-Gate5VmxEntry -Name 'bios\.bootOrder'")
+}
+
+It 'a transicao de saida e simetrica a de entrada e guardada pelo mesmo boot_key_sent' {
+    # FASE DE INSTALACAO   -> optico na frente  (Set-Gate5OpticalBootFirst)
+    # FASE OPERACIONAL     -> override retirada (Remove-Gate5BootOverride)
+    # As duas no MESMO bloco de VM desligada, decididas pela mesma flag: a
+    # instalacao continua possivel e a VM provisionada nao fica optical-first.
+    $simetria = [regex]::Match($bootTxt,
+        '(?s)if \(-not \$bootKeySent\) \{.*?Set-Gate5OpticalBootFirst\s*\r?\n\s*\} elseif \(\$overrideDeBootNoVmx\) \{.*?Remove-Gate5BootOverride').Value
+    ($simetria.Length -gt 0) -and
+    # a leitura do estado atual precede a decisao
+    ($bootTxt -match '\$overrideDeBootNoVmx = \(\$null -ne \(Get-Gate5VmxValue -Key ''bios\.bootOrder''\)\)') -and
+    # uma unica chamada de cada, sozinhas na linha
+    (([regex]::Matches($bootTxt, '(?m)^\s*Remove-Gate5BootOverride\s*$')).Count -eq 1)
+}
+
+It 'a override e retirada ANTES do gate humano de power-on' {
+    # Depois do power-on seria tarde: o firmware ja escolheu o dispositivo - e
+    # teria escolhido o CD.
+    $iClear = $bootTxt.IndexOf('Remove-Gate5BootOverride')
+    $iGate  = $bootTxt.IndexOf("HUMAN_ACTION_REQUIRED POWER_ON_VM' 'GATE'")
+    ($iClear -gt 0) -and ($iGate -gt $iClear)
+}
+
+It 'a remocao com a interface aberta e adiada, e nao gasta um gate humano' {
+    # Com a interface aberta a remocao seria descartada no Power On. A
+    # consequencia e apenas o firmware tentar o CD antes do disco (que expira),
+    # e nao uma falha de instalacao: adiar vale mais do que parar o run.
+    $trecho = [regex]::Match($bootTxt,
+        '(?s)\} elseif \(\$overrideDeBootNoVmx\) \{.*?\r?\n\s{12}\}').Value
+    ($trecho -match 'if \(Test-Gate5VmwareUiRunning\)') -and
+    ($trecho -match 'adiada') -and
+    ($trecho -notmatch 'Stop-Gate5Human') -and
+    ($trecho -notmatch 'Stop-Gate5Blocked')
+}
+
 It 'Remove-Gate5VmxEntry preserva o material criptografico do .vmx' {
     $comm = Get-Content (Join-Path $labDir 'gate5-common.ps1') -Raw
     $trecho = [regex]::Match($comm, '(?s)function Remove-Gate5VmxEntry \{.*?\r?\n\}').Value

@@ -374,6 +374,16 @@ public static class Gate5IsoWriter {
             # boota direto e o prompt optico nunca chega a ser exibido - nenhuma
             # tecla adiantaria. So enquanto o boot optico ainda nao disparou: nos
             # reboots do proprio Setup o boot pelo disco e o comportamento certo.
+            # 'boot_key_sent' decide as DUAS transicoes simetricas da ordem de
+            # boot, e ambas so podem ser gravadas aqui: com a VM desligada e
+            # ANTES do gate de power-on.
+            #   ainda nao bootou pela midia -> optico na frente  (instalacao)
+            #   ja bootou pela midia        -> override retirada (operacao)
+            # Sem a segunda a override temporaria sobrevive a todos os reboots do
+            # Setup ate a fase de isolamento e, se o run abortar antes dela, fica
+            # no .vmx indefinidamente - cada power-on volta a tentar o instalador
+            # antes do disco. Ver Remove-Gate5BootOverride.
+            $overrideDeBootNoVmx = ($null -ne (Get-Gate5VmxValue -Key 'bios.bootOrder'))
             if (-not $bootKeySent) {
                 # A interface do VMware precisa estar FECHADA: com a VM aberta numa
                 # aba ela reescreve o .vmx no Power On a partir da copia que
@@ -397,6 +407,17 @@ public static class Gate5IsoWriter {
                     Write-Gate5Log 'Interface do VMware fechada; gravando a ordem de boot no .vmx.'
                 }
                 Set-Gate5OpticalBootFirst
+            } elseif ($overrideDeBootNoVmx) {
+                # O boot optico ja disparou: a override cumpriu o seu papel e sai
+                # do arquivo antes do proximo power-on. Com a interface aberta a
+                # remocao seria descartada em silencio; ali ela e ADIADA em vez de
+                # gastar um gate humano, porque a consequencia e apenas o firmware
+                # tentar o CD antes do disco - e nao uma falha de instalacao.
+                if (Test-Gate5VmwareUiRunning) {
+                    Write-Gate5Log 'Interface do VMware aberta: remocao da override de boot adiada (seria descartada no Power On).' 'WARN'
+                } else {
+                    Remove-Gate5BootOverride
+                }
             }
             Write-Gate5Log 'HUMAN_ACTION_REQUIRED POWER_ON_VM' 'GATE'
             Write-Host ''

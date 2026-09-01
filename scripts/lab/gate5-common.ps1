@@ -771,6 +771,47 @@ function Set-Gate5OpticalBootFirst {
     Write-Gate5Log ("Ordem de boot do firmware fixada em '{0}': a midia optica vem antes do disco." -f $Value)
 }
 
+function Remove-Gate5BootOverride {
+    # Transicao simetrica de Set-Gate5OpticalBootFirst: retira do .vmx a override
+    # de ordem de boot depois que ela ja cumpriu o seu papel.
+    #
+    # A override existe para UM boot - o primeiro, pela midia de instalacao. Dali
+    # em diante o estado operacional correto e a AUSENCIA da chave: o firmware
+    # segue a entrada 'Windows Boot Manager' que o Windows gravou na NVRAM. E o
+    # mesmo estado que a fase de isolamento impoe (gate5-provision.ps1, FASE 11) e
+    # que o validador do baseline confere em 'sem-override-de-boot'. A chave e
+    # REMOVIDA, e nao invertida para 'hdd', para que nada no .vmx continue
+    # disputando a decisao do firmware.
+    #
+    # Sem esta transicao a override sobrevive a todos os reboots do Setup e, se o
+    # run abortar antes da FASE 11, fica no arquivo indefinidamente. Foi o que
+    # aconteceu na RUN-02: o run parou em GUEST_PHASE_FAILED_INSTALLWAIT e os seis
+    # reboots seguintes registraram 'About to do EFI boot: EFI VMware Virtual SATA
+    # CDROM Drive' ANTES do 'Windows Boot Manager'. Nenhum chegou a bootar o
+    # instalador porque o prompt "Press any key" expirou - seis vezes seguidas.
+    #
+    # A NVRAM nao e tocada nem removida: o vTPM depende daquele arquivo.
+    if (Test-Gate5VmPoweredOn) {
+        throw 'GATE5: a ordem de boot so pode ser ajustada com a VM desligada.'
+    }
+    # Mesma armadilha da escrita: com a interface aberta a remocao PASSA no
+    # arquivo e e descartada no Power On, a partir da copia em cache.
+    if (Test-Gate5VmwareUiRunning) {
+        throw 'GATE5: a interface do VMware esta aberta e descartaria a remocao da ordem de boot no Power On.'
+    }
+    Remove-Gate5VmxEntry -Name 'bios.bootOrder'
+    Remove-Gate5VmxEntry -Name 'efi.bootOrder'
+    # Idempotente: chamar de novo com as chaves ja ausentes nao reescreve o .vmx
+    # (Remove-Gate5VmxEntry retorna cedo) e ainda assim reconfere o estado.
+    foreach ($chave in @('bios.bootOrder', 'efi.bootOrder')) {
+        $lido = Get-Gate5VmxValue -Key $chave
+        if ($null -ne $lido) {
+            throw ("GATE5: '{0}' continua no .vmx apos a remocao (valor '{1}')." -f $chave, $lido)
+        }
+    }
+    Write-Gate5Log 'Override de ordem de boot retirada do .vmx: a VM volta a bootar pela ordem registrada no UEFI/NVRAM.'
+}
+
 function Set-Gate5VncConsole {
     # Liga/desliga o console VNC local do VMware no VMX (VM deve estar desligada).
     # Nunca define senha porque o socket fica preso a 127.0.0.1 e o canal existe

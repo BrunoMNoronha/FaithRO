@@ -136,6 +136,7 @@ A execução real expôs defeitos que a etapa anterior não podia detectar. Todo
 | D19 | Ordem de boot gravada em `efi.bootOrder` | o firmware respondeu `Unrecognized efi.bootOrder` aos tokens que recebeu e bootou pelo disco: o Setup nunca iniciava (§15) |
 | D20 | Override de instalação sobreviveria ao baseline | a VM final ficaria com "CD antes do disco" gravado no `.vmx`; a chave passou a ser **removida** na fase `ISOLATED` e a ausência é conferida pelo validador |
 | D21 | O self-test chamava `Set-Gate5OpticalBootFirst` com um valor válido sem redirecionar `$script:Gate5VmxPath` | com a VM desligada e a interface fechada não há guarda: em 2026-08-31 a suite gravou `bios.bootOrder` no `.vmx` do laboratório **real**. A chamada passou a rodar contra um `.vmx` descartável e a suite confere o carimbo do arquivo real na saída |
+| D22 | A override de boot só era retirada na fase `ISOLATED`, no fim do provisionamento | um run que aborta antes dela deixa `cdrom,hdd` no `.vmx` indefinidamente. Na RUN-02 foram **seis** reboots tentando o CD antes do disco, cada um uma chance de bootar o Windows Setup por engano. Passou a existir uma transição de saída simétrica (`Remove-Gate5BootOverride`), guardada pela mesma flag `boot_key_sent` e aplicada antes do gate de power-on (§15) |
 
 Evidências brutas ficam em `.local\gate5-lab\evidence\` (não versionadas): `vmware-crash-pci-noslotavail.log` e capturas de tela do firmware do guest.
 
@@ -328,6 +329,57 @@ instalação. A fase `ISOLATED` remove `bios.bootOrder` e `efi.bootOrder` do `.v
 falha fechada (`ISOLATION_VMX_INVALID`) se alguma sobrar, e `gate5-verify-baseline.ps1`
 confere `sem-override-de-boot` antes do snapshot. A VM do baseline boota pela ordem
 normal registrada pelo UEFI/Windows Boot Manager.
+
+**Transição de saída explícita (D22).** A remoção descrita acima só acontece na fase
+`ISOLATED`, no fim do provisionamento. Entre o primeiro boot pela mídia e aquele
+ponto existem dezenas de reboots do Setup, e **se o run abortar antes de `ISOLATED` a
+override fica no `.vmx` indefinidamente**. Foi o que aconteceu na RUN-02: o host parou
+em `GUEST_PHASE_FAILED_INSTALLWAIT` e os seis reboots seguintes registraram, cada um,
+a tentativa pelo CD antes do disco:
+
+```
+20:24:42.970Z ... Guest: About to do EFI boot: EFI VMware Virtual SATA CDROM Drive (0.0)
+20:24:46.741Z ... Guest: About to do EFI boot: EFI VMware Virtual SATA CDROM Drive (0.0)
+20:24:50.446Z ... Guest: About to do EFI boot: Windows Boot Manager
+```
+
+Nenhum chegou a bootar o instalador porque o prompt `Press any key to boot from CD or
+DVD` expirou — seis vezes seguidas, por sorte e não por desenho.
+
+A correção é uma transição de saída **simétrica** à de entrada, decidida pela mesma
+flag `boot_key_sent` e no mesmo bloco de VM desligada, antes do gate de power-on
+(`gate5-guest-bootstrap.ps1`, fase `InstallWait`):
+
+| `boot_key_sent` | fase | ação |
+| --- | --- | --- |
+| `false` | instalação | `Set-Gate5OpticalBootFirst` → `bios.bootOrder = "cdrom,hdd"` |
+| `true` (e a chave ainda no `.vmx`) | operacional | `Remove-Gate5BootOverride` → chave **removida** |
+
+`Remove-Gate5BootOverride` (`gate5-common.ps1`) tem as mesmas guardas da escrita — VM
+desligada e interface do VMware fechada — é idempotente e não toca NVRAM nem vTPM. A
+chave é **removida, nunca invertida para `"hdd"`**: o estado operacional canônico é a
+ausência, que é o que `ISOLATED` impõe e o que `sem-override-de-boot` confere. A
+remoção na fase `ISOLATED` permanece como defesa em profundidade.
+
+Com a interface do VMware aberta a remoção seria descartada no Power On; ali ela é
+**adiada com `WARN`** em vez de gastar um gate humano, porque a consequência é apenas
+o firmware tentar o CD antes do disco (que expira) — e não uma falha de instalação.
+
+**Validação (2026-09-01).** Com a chave ausente, dois power-ons consecutivos da VM já
+provisionada registraram um único evento de boot cada, direto pelo disco, sem
+intervenção manual:
+
+```
+2026-09-01T08:42:19.124Z ... Guest: About to do EFI boot: Windows Boot Manager
+```
+
+**Perda de evidência observada.** O VMware abre o arquivo da porta serial em modo
+*write*, não *append*: **todo power-on trunca `gate5-evidence-serial.txt`**. A
+evidência do guest da RUN-02 (que reportou `blockers:[]` às 21:24:45Z) foi zerada pelo
+power-on de validação, porque o host havia abortado antes de copiá-la para o
+diretório do run — a cópia para `guest-evidence.json` só acontece com o orquestrador
+vivo (`Get-Gate5SerialEvidence`). Enquanto isso não for endereçado, **um run abortado
+perde a evidência serial no power-on seguinte**.
 
 ## 14. Próxima etapa
 
