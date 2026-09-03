@@ -286,7 +286,7 @@ A cadeia histórica permanece estritamente íntegra e sem qualquer desvio (zero 
 
 ## 12. Próximos passos
 
-1. O operador humano deve executar o provisionamento prático da VM conforme o runbook da Seção 7;
+1. O operador humano deve executar o provisionamento prático da VM conforme o runbook da Seção 7 — automatizado pela etapa 2P-E-C5-LAB-AUTOPROVISION via `scripts/lab/gate5-provision.ps1` ([doc 48](48-autoprovisionamento-laboratorio-gate-5.md));
 2. Disponibilizar a VM isolada com snapshot, YARA 4.5.5 e rulesets compilados;
 3. Executar a etapa dedicada `ETAPA 2P-E-C5-REAL-EXEC-PREFLIGHT-RERUN` para validar os 4 requisitos e produzir o manifesto do laboratório;
 4. Somente após `PREFLIGHT_PASS` formal no rerun e aprovação humana separada será avaliada a etapa de varredura estática real.
