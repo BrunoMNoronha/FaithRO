@@ -39,7 +39,7 @@ $script:Gate5RunIdDefault = 'run-02-clean-install'
 $script:Gate5VmName     = 'FaithRO-GATE5-LAB'
 $script:Gate5VmDir      = 'C:\VMs\FaithRO-GATE5-LAB'
 $script:Gate5VmxPath    = Join-Path $script:Gate5VmDir 'FaithRO-GATE5-LAB.vmx'
-$script:Gate5SnapshotName = 'BASELINE_GATE5_ISOLATED'
+$script:Gate5SnapshotName = 'GATE5-Baseline'
 
 # Portas de CD-ROM da VM, definidas em um unico lugar porque tres scripts as
 # referenciam (criacao, anexo do unattend e isolamento final). O VMware numera
