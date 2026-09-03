@@ -306,6 +306,7 @@ public static class Gate5IsoWriter {
             Save-Gate5State $state
         }
         function Assert-Gate5PreConditions {
+            param([switch]$RequireCurrentSink)
             # Fail-closed antes de gastar um gate humano: midia invalida faria a
             # instalacao parar numa tela, como ja aconteceu com o Autounattend
             # sem <ProductKey>.
@@ -321,10 +322,12 @@ public static class Gate5IsoWriter {
             # power-on truncaria evidencia que nao e desta execucao.
             $sinkDir  = Join-Path (Get-Gate5RunDir) 'serial'
             $sinkAtivo = Get-Gate5ActiveSerialSink
-            if ((Get-Gate5VmxValue 'serial0.fileType') -ne 'file' -or
-                (-not $sinkAtivo) -or
-                ((Split-Path -Parent $sinkAtivo) -ne $sinkDir)) {
-                Stop-Gate5Blocked -Blocker 'SERIAL_CHANNEL_NOT_READY' -Detail ("porta serial da VM nao aponta para um sink desta execucao (atual: '{0}'; esperado sob '{1}')" -f $sinkAtivo, $sinkDir)
+            if ($RequireCurrentSink) {
+                if ((Get-Gate5VmxValue 'serial0.fileType') -ne 'file' -or
+                    (-not $sinkAtivo) -or
+                    ((Split-Path -Parent $sinkAtivo) -ne $sinkDir)) {
+                    Stop-Gate5Blocked -Blocker 'SERIAL_CHANNEL_NOT_READY' -Detail ("porta serial da VM nao aponta para um sink desta execucao (atual: '{0}'; esperado sob '{1}')" -f $sinkAtivo, $sinkDir)
+                }
             }
             if ((Get-Gate5VmxValue 'RemoteDisplay.vnc.ip') -ne '127.0.0.1') {
                 Stop-Gate5Blocked -Blocker 'VNC_NOT_LOCAL' -Detail 'console temporario precisa estar preso a 127.0.0.1'
@@ -436,6 +439,7 @@ public static class Gate5IsoWriter {
             # existente) e nao ha o que "adiar": o gate acima ja garantiu a
             # interface fechada.
             New-Gate5SerialSink | Out-Null
+            Assert-Gate5PreConditions -RequireCurrentSink
             Write-Gate5Log 'HUMAN_ACTION_REQUIRED POWER_ON_VM' 'GATE'
             Write-Host ''
             Write-Host 'HUMAN_ACTION_REQUIRED'

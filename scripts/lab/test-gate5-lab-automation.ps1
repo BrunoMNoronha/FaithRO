@@ -2128,6 +2128,55 @@ It 'T15 alocar sinks repetidamente nunca destroi nem duplica evidencia' {
     } finally { Restore-Gate5SinkSandbox $o }
 }
 
+It 'Get-Gate5Snapshots extrai displayNames de .vmsd em VM criptografada' {
+    $vmsdFake = Join-Path $tmp 'fake-vm.vmsd'
+    $vmxFake  = Join-Path $tmp 'fake-vm.vmx'
+    Set-Content $vmxFake -Value @'
+.encoding = "UTF-8"
+encryption.keySafe = "fake-key"
+vtpm.present = "TRUE"
+'@
+    Set-Content $vmsdFake -Value @'
+.encoding = "UTF-8"
+snapshot.numSnapshots = "2"
+snapshot0.uid = "1"
+snapshot0.filename = "fake-vm-Snapshot1.vmsn"
+snapshot0.displayName = "BASELINE_GATE5_ISOLATED"
+snapshot1.uid = "2"
+snapshot1.filename = "fake-vm-Snapshot2.vmsn"
+snapshot1.displayName = "ANOTHER_SNAPSHOT"
+'@
+    $snaps = Get-Gate5Snapshots -VmxPath $vmxFake
+    ($snaps.Count -eq 2) -and
+    ($snaps -contains 'BASELINE_GATE5_ISOLATED') -and
+    ($snaps -contains 'ANOTHER_SNAPSHOT')
+}
+
+It 'Test-Gate5SnapshotExists identifica presenca ou ausencia de snapshot' {
+    $vmsdFake = Join-Path $tmp 'fake-vm2.vmsd'
+    $vmxFake  = Join-Path $tmp 'fake-vm2.vmx'
+    Set-Content $vmxFake -Value @'
+.encoding = "UTF-8"
+encryption.keySafe = "fake-key"
+vtpm.present = "TRUE"
+'@
+    Set-Content $vmsdFake -Value @'
+.encoding = "UTF-8"
+snapshot.numSnapshots = "1"
+snapshot0.displayName = "BASELINE_GATE5_ISOLATED"
+'@
+    $existe = Test-Gate5SnapshotExists -SnapshotName 'BASELINE_GATE5_ISOLATED' -VmxPath $vmxFake
+    $naoExiste = Test-Gate5SnapshotExists -SnapshotName 'SNAPSHOT_INEXISTENTE' -VmxPath $vmxFake
+    $existe -and (-not $naoExiste)
+}
+
+It 'gate5-verify-baseline usa Test-Gate5SnapshotExists e protege guest operations em VM criptografada' {
+    $verif = Get-Content (Join-Path $labDir 'gate5-verify-baseline.ps1') -Raw
+    ($verif -match 'Test-Gate5SnapshotExists') -and
+    ($verif -match '\(Get-Gate5VmEncryptionState\)\.Encrypted') -and
+    ($verif -notmatch 'listSnapshots')
+}
+
 It 'a suite nao escreveu no .vmx do laboratorio real' {
     # Guarda de runtime (nao heuristica): o arquivo da VM real precisa sair da
     # suite com o mesmo carimbo com que entrou. Em maquina sem o laboratorio o
