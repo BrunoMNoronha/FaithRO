@@ -143,7 +143,7 @@ BLOCKED — CLIENT CONFIGURATION METHOD NOT AUTHORIZED
 ## 6. Próxima ação recomendada
 
 Para avançar com segurança e conformidade para a validação empírica completa dos checkpoints H2 a H7:
-1. Concluir a execução do laboratório isolado do WARP (**GATE 5** — já especificado e autoprovisionado no PR #75), sob autorização humana explícita.
+1. Concluir a execução do laboratório isolado do WARP (**GATE 5** — já especificado e autoprovisionado no PR #75), sob autorização humana explícita (ver auditoria da etapa 2P-I em [Doc 51](51-gate5-preparacao-controlada-cliente.md)).
 2. Gerar a cópia de laboratório preparada do `Ragexe.exe` aplicando estritamente os patches mínimos necessários (`DataFolderFirst`, `RestoreClientInfo`, `LangType`).
 3. Executar o handshake de login real (H2 a H7) utilizando o executável de laboratório preparado e as credenciais de homologação já existentes.
 
