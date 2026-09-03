@@ -1,77 +1,157 @@
-# Primeiro acesso do cliente e reconciliação de runtime (Etapa 2P-G)
+# Primeiro acesso do cliente e reconciliação de runtime (Etapas 2P-G e 2P-H)
 
-> **Escopo:** registro técnico de reconciliação de drift de runtime (Base Level 185 e Packet Obfuscation) e prontidão para o handshake de login do cliente no FaithRO - Laos Deos. Nenhum binário proprietário, GRF, chave privada, segredo ou dado de jogador é registrado ou distribuído.
+> **Escopo:** registro técnico de reconciliação de drift de runtime (Base Level 185 e Packet Obfuscation), localização do executável autorizado na estação do operador, validação de conectividade de rede e firewall, e diagnóstico do mecanismo de configuração de conexão para o primeiro acesso ao FaithRO - Laos Deos. Nenhum binário proprietário, GRF, chave privada, segredo ou dado de jogador é registrado ou distribuído.
 
-## 1. Objetivo
+---
 
-Conduzir o processo de reconciliação de drift do servidor rAthena (`7f080871c`), reconfirmar empiricamente o comportamento de PACKETVER e de Packet Obfuscation, alinhar o limite de Base Level para 185 sem 3ª classe, e validar a prontidão server-side para o primeiro acesso do cliente autorizado.
+## 1. Histórico e contexto inicial (Etapa 2P-G)
 
-## 2. Estado inicial
+Na etapa 2P-G, foi conduzido o processo de reconciliação de drift do servidor rAthena (`7f080871c8b3bbe7a79027194633201c63422ee1`):
+1. **Base Level 185:** Reconciliado de 255 para 185 em `deploy/rathena-overlay/db/import/job_stats.yml` e na VPS (`/opt/faithro/rathena/db/import/job_stats.yml`), com validador determinístico [`scripts/validate-progression-overrides.py`](../scripts/validate-progression-overrides.py) aprovado.
+2. **Packet Obfuscation:** Classificado como `ZERO_KEY_NO_EFFECT` (chaves zero, pacotes em formato plano sem impacto de criptografia).
+3. **PACKETVER do servidor:** `20211103` (Pre-Renewal com macro `PACKETVER_RE` automática no intervalo `[20200902, 20211118]`).
+4. **Desfecho 2P-G:** Encerrou com `BLOCKED — AUTHORIZED CLIENT NOT PRESENT` pois a busca havia sido restrita ao repositório git do workspace, onde executáveis proprietários não são versionados por política de segurança.
 
-- **VPS:** Ubuntu 22.04.5 LTS (`faithro-vps`), 1 vCPU, 2 GB RAM, 50 GB disco.
-- **MariaDB:** Ativo em `127.0.0.1:3306` com databases `faithro` e `faithro_log`.
-- **Serviços de jogo:** `faithro-login.service` (6900/tcp), `faithro-char.service` (6121/tcp) e `faithro-map.service` (5121/tcp) ativos e integrados.
-- **Uptime dos serviços:** Estável (> 20 dias).
+---
 
-## 3. Reconciliação de drift
+## 2. Validação empírica do primeiro acesso e localização do cliente (Etapa 2P-H)
 
-### 3.1 Base Level 255 × Requisito FaithRO 185
+- **Data de execução:** 2026-09-03
+- **Operador / Estação:** Windows Workstation do operador
+- **Alvo:** Servidor FaithRO na VPS (`129.121.46.11`)
 
-- **Diagnóstico:** A configuração versionada em `deploy/rathena-overlay/db/import/job_stats.yml` e na VPS continha `MaxBaseLevel: 255` herdada de proposta preliminar de expansão. O requisito oficial do FaithRO estabelece Base Level máximo de 185 para todas as classes sem 3ª classe.
-- **Ação executada:**
-  - Alteração de `MaxBaseLevel: 255` para `MaxBaseLevel: 185` nos dois grupos de classes (classes não-trans e classes trans) em `deploy/rathena-overlay/db/import/job_stats.yml` e em `/opt/faithro/rathena/db/import/job_stats.yml` na VPS.
-  - Atualização do validador determinístico [`scripts/validate-progression-overrides.py`](../scripts/validate-progression-overrides.py) para exigir estritamente `MaxBaseLevel == 185` em todos os blocos de classes.
-  - Reinício controlado do `faithro-map.service` na VPS com recarga limpa das tabelas de EXP e confirmação de inicialização normal.
+### 2.1 Localização do cliente autorizado na estação
 
-### 3.2 Packet Obfuscation
-
-- **Diagnóstico:** O startup do map-server emite `Packet Obfuscation: Enabled. Keys: 0x00000000, 0x00000000, 0x00000000`.
-- **Análise do código-fonte (`7f080871c`):**
-  - Em `src/config/packets.hpp`: `#define PACKET_OBFUSCATION` é ativado para `PACKETVER >= 20110817`.
-  - Em `src/map/clif_obfuscation.hpp`: Para `PACKETVER > 20180307`, as chaves oficiais são `#define packet_keys(0x00000000, 0x00000000, 0x00000000)`.
-  - Em `src/map/clif.cpp`: A operação de decodificação `cmd = (cmd ^ ((((0 * 0) + 0) >> 16) & 0x7FFF))` resulta em `cmd ^ 0 == cmd` (transformação identidade / no-op).
-- **Classificação técnica:** **`ZERO_KEY_NO_EFFECT`** (macro de compilação ativada no código, mas operação matemática nula devido às chaves zero, transmitindo pacotes em formato plano/não-obfustado, compatível com o cliente pós-2018).
-
-## 4. PACKETVER comprovado
-
-- **PACKETVER do servidor:** `20211103`
-- **Macro interna:** `PACKETVER_RE` ativada automaticamente pelo rAthena no intervalo `[20200902, 20211118]`.
-- **Compatibilidade do cliente 2021-11-05:** `PROVÁVEL` (conforme documentado em `docs/29`, toda a janela `[20211103, 20211118]` compartilha as mesmas estruturas de pacotes e shuffle de pacotes no commit `7f080871c`).
-
-## 5. Perfil de conexão do cliente
+A busca em diretórios locais na estação do operador localizou a instalação oficial de cliente em:
 
 ```text
-CLIENT_CONNECTION_PROFILE
-server_name: FaithRO
-login_host: 129.121.46.11
-login_port: 6900
-char_port: 6121
-map_port: 5121
-packetver: 20211103
-expected_client_date: 2021-11-03 / 2021-11-05 (Ragexe)
-packet_obfuscation: ZERO_KEY_NO_EFFECT (chaves zero, pacotes planos)
-mode: Pre-Renewal (sem 3ª classes)
-level_cap_base: 185
-level_cap_stat: 185
-max_aspd: 197
-new_account: no (contas gerenciadas via MariaDB)
+CLIENT_PRESENT: YES
+CLIENT_ROOT: C:\Gravity\Ragnarok
+CLIENT_EXECUTABLE_NAME: Ragexe.exe
+CLIENT_EXECUTABLE_DATE: 2021-11-05 01:31:18 UTC (PE link timestamp)
+CLIENT_ARCH: x86 (IMAGE_FILE_MACHINE_I386 / PE32)
+CLIENT_AUTHENTICODE: Válida — "GRAVITY Co., Ltd." (binário oficial limpo, não modificado)
+CLIENT_SHA256: 8990A9A9CD6623E173BCC8B406A311AF32773EB881E539082126B768C14E95A0
+CLIENT_ORIGIN: Instalador oficial RAG_SETUP_211105 (ver Doc 29 §2)
 ```
 
-## 6. Estado do cliente no workspace
+**Resultado do GATE 1:** `PASS` (`CLIENT_PRESENT: YES`).
 
-- Em estrito cumprimento à política de não versionar nem distribuir executáveis proprietários ou assets com copyright Gravity (AGENTS.md Regra 4 e Docs 16/29), o repositório contém apenas modelos de configuração (`client/templates/clientinfo.xml.example`) e documentação.
-- Nenhum cliente proprietário modificado/hexado foi baixado ou executado neste ambiente automatizado.
+---
 
-## 7. Testes executados
+### 2.2 Compatibilidade técnica de protocolo
 
-- `python scripts/validate-progression-overrides.py`: `PASS` (Base EXP: 157, Stat points: 55, Cap Base: 185, Stat: 185, ASPD: 197).
-- `python scripts/validate-warp-audit.py`: `PASS`.
-- `git diff --check`: `PASS`.
-- `systemctl is-active mariadb faithro-login faithro-char faithro-map`: `PASS` (todos `active`).
-- `ss -lntp`: `PASS` (portas 6900, 6121, 5121 escutando).
-- Map server reload: `PASS` (1265 mapas, 13036 NPCs, conexão com char-server restabelecida com sucesso).
+- **Target do servidor:** `PACKETVER = 20211103`
+- **Build do executável:** `2021-11-05 01:31:18 UTC`
+- **Análise do rAthena (`7f080871c`):** Conforme demonstrado no [Doc 29](29-compatibilidade-cliente-2021-11-05-packetver.md), todo o intervalo `[20211103, 20211118]` no ramo RE compartilha idênticas estruturas de pacote e o mesmo shuffle de opcodes (guards chaveados em `PACKETVER_RE_NUM >= 20211103`).
+- **Classificação de compatibilidade:** `PROBABLY_COMPATIBLE`.
 
-## 8. Rollback
+---
 
-- Reverter `deploy/rathena-overlay/db/import/job_stats.yml` e `scripts/validate-progression-overrides.py` via Git (`git revert`).
-- Na VPS, restaurar o arquivo `job_stats.yml` anterior e executar `sudo systemctl restart faithro-map.service`.
+### 2.3 Mecanismo de configuração de conexão (Fase E)
+
+A inspeção detalhada da instalação local em `C:\Gravity\Ragnarok` determinou:
+
+```text
+CLIENTINFO_SOURCE: NONE_IDENTIFIED
+CLIENTINFO_LOAD_PATH: NOT_CONFIGURED
+CONNECTION_CURRENT_HOST: ropatch.gnjoy.com / kRO oficial (hardcoded / patch client)
+CONNECTION_CURRENT_PORT: oficial kRO
+```
+
+- **Diagnóstico:** O executável localizado é o binário original limpo da Gravity com assinatura digital válida. Ele **não lê** arquivos externos `data\clientinfo.xml` nem arquivos de configuração em texto da pasta local; seu fluxo nativo aponta para a infraestrutura coreana da Gravity e depende de GameGuard (`GameGuard.des`, `v3hunt.dll`).
+- **Restrição de segurança:** A preparação do executável para aceitar conexão externa (ex.: patches `DataFolderFirst` e `RestoreClientInfo` via WARP) exige modificação de executável proprietário (hex/diff), o que é expressamente **proibido** nesta etapa e depende da trilha de autorização e laboratório do WARP (Docs 28, 46, 47 e 48).
+- **Classificação:** Bloqueio em `L2 CLIENT_CONFIGURATION`.
+
+---
+
+### 2.4 IP público do operador e Firewall (Fase F e Gate 2)
+
+- **IP público do operador detectado:** `189.6.11.60`
+- **IP anterior nas regras UFW:** `179.255.39.153` (`MISMATCH`)
+- **Ação executada no firewall da VPS:**
+  - Adicionadas regras específicas para as portas do jogo (`6900/tcp`, `6121/tcp`, `5121/tcp`) a partir do IP `189.6.11.60`.
+  - Removidas as regras obsoletas de `179.255.39.153`.
+  - Mantidas as políticas `default deny incoming` e restrição estrita do MariaDB a `127.0.0.1:3306`.
+  - Status pós-mudança: `MATCH`.
+
+---
+
+### 2.5 Testes de conectividade de rede (Checkpoints H1 a H7)
+
+| Checkpoint | Alvo | Resultado | Evidência empírica |
+|---|---|:---:|---|
+| **H1 — TCP (Login)** | `129.121.46.11:6900` | **PASS** | `TcpTestSucceeded: True` da estação; VPS log: `login-server: Closed connection from '189.6.11.60'`. |
+| **H1 — TCP (Char)** | `129.121.46.11:6121` | **PASS** | `TcpTestSucceeded: True` da estação. |
+| **H1 — TCP (Map)** | `129.121.46.11:5121` | **PASS** | `TcpTestSucceeded: True` da estação; VPS log: `map-server: Closed connection from '189.6.11.60'`. |
+| **H2 — Packet Handshake** | Login protocol | *NOT REACHED* | Bloqueado pelo mecanismo de configuração do cliente (L2). |
+| **H3 — Autenticação** | Credenciais homologação | *NOT REACHED* | Bloqueado pelo mecanismo de configuração do cliente (L2). |
+| **H4 — Login → Char** | Seleção de personagem | *NOT REACHED* | Bloqueado pelo mecanismo de configuração do cliente (L2). |
+| **H5 — Seleção de Personagem** | Carregamento de char | *NOT REACHED* | Bloqueado pelo mecanismo de configuração do cliente (L2). |
+| **H6 — Char → Map** | Handoff de mapa | *NOT REACHED* | Bloqueado pelo mecanismo de configuração do cliente (L2). |
+| **H7 — In-Game** | Movimentação / UI | *NOT REACHED* | Bloqueado pelo mecanismo de configuração do cliente (L2). |
+
+---
+
+### 2.6 Saúde do runtime após o teste
+
+```text
+mariadb.service:       active (running)
+faithro-login.service: active (running)
+faithro-char.service:  active (running)
+faithro-map.service:   active (running)
+Portas em escuta:      6900, 6121, 5121 em 0.0.0.0; 3306 em 127.0.0.1
+Erros de servidor:     Nenhum (zero segfaults, zero asserts, zero SQL errors)
+```
+
+---
+
+## 3. Matriz de resultado consolidada
+
+```text
+CLIENT_PRESENT:           YES (C:\Gravity\Ragnarok\Ragexe.exe)
+CLIENT_COMPATIBILITY:     PROBABLY_COMPATIBLE (PACKETVER 20211103)
+OPERATOR_PUBLIC_IP_MATCH: MATCH (189.6.11.60 atualizado no UFW)
+H1_TCP:                   PASS (6900, 6121, 5121 alcançáveis e respondendo)
+H2_PACKET_HANDSHAKE:      NOT_REACHED
+H3_AUTH:                  NOT_REACHED
+H4_LOGIN_TO_CHAR:         NOT_REACHED
+H5_CHARACTER_SELECTION:   NOT_REACHED
+H6_CHAR_TO_MAP:           NOT_REACHED
+H7_INGAME:                NOT_REACHED
+SERVICES_AFTER_TEST:      ACTIVE_HEALTHY
+SERVER_ERRORS:            NONE
+```
+
+---
+
+## 4. Classificação de falha
+
+- **Camada primária de bloqueio:** **`L2 CLIENT_CONFIGURATION`**
+- **Justificativa:** O cliente legítimo e compatível está fisicamente presente na estação do operador (`CLIENT_PRESENT: YES`) e a camada de rede/firewall está comprovadamente operacional (`H1_TCP: PASS`), mas o binário é original da Gravity sem mecanismo local autorizado para receber o apontamento de `address` e `port` do FaithRO sem alteração de executável proprietário por hex patch.
+
+---
+
+## 5. Decisão
+
+```text
+BLOCKED — CLIENT CONFIGURATION METHOD NOT AUTHORIZED
+```
+
+---
+
+## 6. Próxima ação recomendada
+
+Para avançar com segurança e conformidade para a validação empírica completa dos checkpoints H2 a H7:
+1. Concluir a execução do laboratório isolado do WARP (**GATE 5** — já especificado e autoprovisionado no PR #75), sob autorização humana explícita.
+2. Gerar a cópia de laboratório preparada do `Ragexe.exe` aplicando estritamente os patches mínimos necessários (`DataFolderFirst`, `RestoreClientInfo`, `LangType`).
+3. Executar o handshake de login real (H2 a H7) utilizando o executável de laboratório preparado e as credenciais de homologação já existentes.
+
+---
+
+## 7. Rollback
+
+- **Cliente local:** Nenhum arquivo local foi alterado; executável preservado intacto.
+- **Firewall:** Se necessário reverter a regra de IP do operador, restaurar `179.255.39.153` no UFW da VPS.
+- **Servidor:** Nenhum arquivo ou configuração do servidor rAthena foi alterado nesta etapa. Base Level 185 mantido como baseline autoritativa.
+- **Git:** Reverter o commit desta etapa via `git revert`.
