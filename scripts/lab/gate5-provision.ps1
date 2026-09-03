@@ -258,15 +258,28 @@ if (-not (Test-Gate5Phase $state 'ISOLATED')) {
 # =============================================================================
 if (-not (Test-Gate5Phase $state 'SNAPSHOT_CREATED')) {
     Write-Gate5Log "FASE: snapshot $($script:Gate5SnapshotName)"
-    $vmware = Find-Gate5VmwareInstall
-    $snaps = (Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('listSnapshots', $script:Gate5VmxPath) -AllowFailure).Output
-    if ($snaps -match [regex]::Escape($script:Gate5SnapshotName)) {
+    if (Test-Gate5SnapshotExists -SnapshotName $script:Gate5SnapshotName) {
         Write-Gate5Log 'Snapshot baseline ja existe.'
+        Complete-Gate5Phase $state 'SNAPSHOT_CREATED'
+    } elseif ((Get-Gate5VmEncryptionState).Encrypted) {
+        # Em VM criptografada, criar snapshot exige a senha do operador.
+        # E um gate humano formal na interface do VMware Workstation (docs/48 §12).
+        Write-Gate5Log 'HUMAN_ACTION_REQUIRED CREATE_SNAPSHOT_BASELINE' 'GATE'
+        Write-Host ''
+        Write-Host 'HUMAN_ACTION_REQUIRED'
+        Write-Host 'action=CREATE_SNAPSHOT_BASELINE'
+        Write-Host "Na interface do VMware Workstation, com a VM desligada:"
+        Write-Host "  VM -> Snapshot -> Take Snapshot..."
+        Write-Host "  Nome do snapshot: $script:Gate5SnapshotName"
+        Write-Host "Depois reexecute gate5-provision.ps1 (a automacao confere o .vmsd sozinha)."
+        Write-Host ''
+        Stop-Gate5Human -Action 'CREATE_SNAPSHOT_BASELINE' -Detail "Crie o snapshot '$script:Gate5SnapshotName' pela interface do VMware Workstation."
     } else {
+        $vmware = Find-Gate5VmwareInstall
         Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('snapshot', $script:Gate5VmxPath, $script:Gate5SnapshotName) | Out-Null
         Write-Gate5Log 'Snapshot baseline criado.'
+        Complete-Gate5Phase $state 'SNAPSHOT_CREATED'
     }
-    Complete-Gate5Phase $state 'SNAPSHOT_CREATED'
 }
 
 # =============================================================================

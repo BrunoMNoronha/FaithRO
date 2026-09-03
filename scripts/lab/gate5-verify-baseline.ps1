@@ -55,9 +55,8 @@ if (Test-Path $script:Gate5VmxPath) {
 }
 
 # --- Snapshot -----------------------------------------------------------------
-if ($vmware -and (Test-Path $script:Gate5VmxPath)) {
-    $snaps = (Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('listSnapshots', $script:Gate5VmxPath) -AllowFailure).Output
-    Check 'snapshot-baseline' ($snaps -match [regex]::Escape($script:Gate5SnapshotName))
+if (Test-Path $script:Gate5VmxPath) {
+    Check 'snapshot-baseline' (Test-Gate5SnapshotExists -SnapshotName $script:Gate5SnapshotName -VmxPath $script:Gate5VmxPath -Vmware $vmware)
 }
 
 # --- Evidencias de tooling (host-side, geradas pelo bootstrap) ----------------
@@ -81,19 +80,23 @@ $guestProof = $null
 # A prova no guest roda mesmo com falhas ja registradas no host: interromper
 # aqui esconderia o estado real do guest justamente no relatorio de diagnostico.
 if ($vmware -and (Test-Path $script:Gate5VmxPath)) {
-    $credFile = Join-Path $script:Gate5SecretDir 'guest-credential.xml'
-    if (-not (Test-Path $credFile)) {
-        Check 'guest-proof' $false 'credencial de verificacao ausente (esperada em .local; nunca versionada)'
+    if ((Get-Gate5VmEncryptionState).Encrypted) {
+        # Em VM criptografada nao ha guest operations (docs/48 §12).
+        # A prova primaria e o testemunho reportado pelo guest pela serial (ver § abaixo).
     } else {
-        $cred  = Import-Clixml $credFile
-        $plain = $cred.GetNetworkCredential().Password
-        $wasRunning = ((Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('list') -AllowFailure).Output -match [regex]::Escape($script:Gate5VmxPath))
-        if (-not $wasRunning -and -not $SkipPowerCycle) {
-            Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('start', $script:Gate5VmxPath, 'nogui') | Out-Null
-            Start-Sleep -Seconds 90
-        }
-        $proofScript = Join-Path $script:Gate5LocalDir 'gate5-proof.ps1'
-        Set-Content -Path $proofScript -Encoding utf8 -Value @'
+        $credFile = Join-Path $script:Gate5SecretDir 'guest-credential.xml'
+        if (-not (Test-Path $credFile)) {
+            Check 'guest-proof' $false 'credencial de verificacao ausente (esperada em .local; nunca versionada)'
+        } else {
+            $cred  = Import-Clixml $credFile
+            $plain = $cred.GetNetworkCredential().Password
+            $wasRunning = ((Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('list') -AllowFailure).Output -match [regex]::Escape($script:Gate5VmxPath))
+            if (-not $wasRunning -and -not $SkipPowerCycle) {
+                Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('start', $script:Gate5VmxPath, 'nogui') | Out-Null
+                Start-Sleep -Seconds 90
+            }
+            $proofScript = Join-Path $script:Gate5LocalDir 'gate5-proof.ps1'
+            Set-Content -Path $proofScript -Encoding utf8 -Value @'
 $tpm = Get-Tpm
 $sb  = $false; try { $sb = Confirm-SecureBootUEFI } catch {}
 $mp  = Get-MpComputerStatus
@@ -113,24 +116,25 @@ $warp = @(Get-ChildItem C:\ -Recurse -Depth 3 -Filter "WARP*" -ErrorAction Silen
     os_arch      = $env:PROCESSOR_ARCHITECTURE
 } | ConvertTo-Json | Out-File C:\Users\Public\gate5-proof.json -Encoding utf8
 '@
-        Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('-gu', $cred.UserName, '-gp', $plain, 'CopyFileFromHostToGuest', $script:Gate5VmxPath, $proofScript, 'C:\Users\Public\gate5-proof.ps1') | Out-Null
-        Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('-gu', $cred.UserName, '-gp', $plain, 'runProgramInGuest', $script:Gate5VmxPath, 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', 'C:\Users\Public\gate5-proof.ps1') -AllowFailure | Out-Null
-        $proofOut = Join-Path $script:Gate5EvidenceDir 'guest-baseline-proof.json'
-        Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('-gu', $cred.UserName, '-gp', $plain, 'CopyFileFromGuestToHost', $script:Gate5VmxPath, 'C:\Users\Public\gate5-proof.json', $proofOut) | Out-Null
-        Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('-gu', $cred.UserName, '-gp', $plain, 'runProgramInGuest', $script:Gate5VmxPath, 'C:\Windows\System32\cmd.exe', '/c', 'del /f C:\Users\Public\gate5-proof.ps1 C:\Users\Public\gate5-proof.json') -AllowFailure | Out-Null
-        Remove-Item $proofScript -Force -ErrorAction SilentlyContinue
-        $guestProof = Get-Content $proofOut -Raw | ConvertFrom-Json
-        Check 'guest-secureboot' ([bool]$guestProof.secure_boot)
-        Check 'guest-tpm-present' ([bool]$guestProof.tpm_present)
-        Check 'guest-tpm-ready' ([bool]$guestProof.tpm_ready)
-        Check 'guest-defender' ([bool]$guestProof.defender_av -and [bool]$guestProof.defender_rt)
-        Check 'guest-yara-4.5.5' ($guestProof.yara_version -eq '4.5.5')
-        Check 'guest-rules-index' ([bool]$guestProof.rules_index)
-        Check 'guest-nic-down' ($guestProof.nics_up -eq 0) "nics_up=$($guestProof.nics_up)"
-        Check 'guest-target-absent' ($guestProof.warp_artifacts -eq 0) "warp_artifacts=$($guestProof.warp_artifacts)"
-        Check 'guest-x64' ($guestProof.os_arch -eq 'AMD64')
-        if (-not $wasRunning -and -not $SkipPowerCycle) {
-            Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('stop', $script:Gate5VmxPath, 'soft') -AllowFailure | Out-Null
+            Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('-gu', $cred.UserName, '-gp', $plain, 'CopyFileFromHostToGuest', $script:Gate5VmxPath, $proofScript, 'C:\Users\Public\gate5-proof.ps1') | Out-Null
+            Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('-gu', $cred.UserName, '-gp', $plain, 'runProgramInGuest', $script:Gate5VmxPath, 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', 'C:\Users\Public\gate5-proof.ps1') -AllowFailure | Out-Null
+            $proofOut = Join-Path $script:Gate5EvidenceDir 'guest-baseline-proof.json'
+            Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('-gu', $cred.UserName, '-gp', $plain, 'CopyFileFromGuestToHost', $script:Gate5VmxPath, 'C:\Users\Public\gate5-proof.json', $proofOut) | Out-Null
+            Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('-gu', $cred.UserName, '-gp', $plain, 'runProgramInGuest', $script:Gate5VmxPath, 'C:\Windows\System32\cmd.exe', '/c', 'del /f C:\Users\Public\gate5-proof.ps1 C:\Users\Public\gate5-proof.json') -AllowFailure | Out-Null
+            Remove-Item $proofScript -Force -ErrorAction SilentlyContinue
+            $guestProof = Get-Content $proofOut -Raw | ConvertFrom-Json
+            Check 'guest-secureboot' ([bool]$guestProof.secure_boot)
+            Check 'guest-tpm-present' ([bool]$guestProof.tpm_present)
+            Check 'guest-tpm-ready' ([bool]$guestProof.tpm_ready)
+            Check 'guest-defender' ([bool]$guestProof.defender_av -and [bool]$guestProof.defender_rt)
+            Check 'guest-yara-4.5.5' ($guestProof.yara_version -eq '4.5.5')
+            Check 'guest-rules-index' ([bool]$guestProof.rules_index)
+            Check 'guest-nic-down' ($guestProof.nics_up -eq 0) "nics_up=$($guestProof.nics_up)"
+            Check 'guest-target-absent' ($guestProof.warp_artifacts -eq 0) "warp_artifacts=$($guestProof.warp_artifacts)"
+            Check 'guest-x64' ($guestProof.os_arch -eq 'AMD64')
+            if (-not $wasRunning -and -not $SkipPowerCycle) {
+                Invoke-Gate5Vmrun -Vmware $vmware -Arguments @('stop', $script:Gate5VmxPath, 'soft') -AllowFailure | Out-Null
+            }
         }
     }
 }

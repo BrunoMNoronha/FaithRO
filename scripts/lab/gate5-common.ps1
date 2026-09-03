@@ -664,6 +664,52 @@ function Get-Gate5VmEncryptionState {
     return $state
 }
 
+function Get-Gate5Snapshots {
+    # Lista os nomes de snapshots da VM.
+    # Em VM criptografada (exigencia do vTPM), 'vmrun' nao pode operar sem a
+    # senha da criptografia (-vp), que pertence exclusivamente ao operador.
+    # Porem, o VMware Workstation registra a arvore de snapshots em TEXTO PLANO
+    # no arquivo .vmsd ao lado do .vmx. Lemos o .vmsd diretamente quando criptografada.
+    # Em VM nao criptografada, recorre a vmrun listSnapshots.
+    param(
+        [string]$VmxPath = $script:Gate5VmxPath,
+        [object]$Vmware
+    )
+    if (-not (Test-Path -LiteralPath $VmxPath)) { return @() }
+    $enc = Get-Gate5VmEncryptionState -VmxPath $VmxPath
+    if ($enc.Encrypted) {
+        $vmsd = [System.IO.Path]::ChangeExtension($VmxPath, '.vmsd')
+        if (-not (Test-Path -LiteralPath $vmsd)) { return @() }
+        $lines = Get-Content -LiteralPath $vmsd -ErrorAction SilentlyContinue
+        $names = @()
+        foreach ($line in $lines) {
+            if ($line -match '(?i)^\s*snapshot\d+\.displayName\s*=\s*"([^"]+)"') {
+                $names += $Matches[1]
+            }
+        }
+        return @($names)
+    }
+    if (-not $Vmware) { $Vmware = Find-Gate5VmwareInstall }
+    if ($Vmware) {
+        $r = Invoke-Gate5Vmrun -Vmware $Vmware -Arguments @('listSnapshots', $VmxPath) -AllowFailure
+        if ($r -and $r.Output) {
+            return @($r.Output | Where-Object { $_ -and $_ -notmatch '^Total snapshots:' })
+        }
+    }
+    return @()
+}
+
+function Test-Gate5SnapshotExists {
+    # Verifica de forma deterministica e segura se um snapshot especifico existe.
+    param(
+        [string]$SnapshotName = $script:Gate5SnapshotName,
+        [string]$VmxPath = $script:Gate5VmxPath,
+        [object]$Vmware
+    )
+    $snaps = Get-Gate5Snapshots -VmxPath $VmxPath -Vmware $Vmware
+    return [bool]($snaps -match ('^' + [regex]::Escape($SnapshotName) + '$'))
+}
+
 function Set-Gate5VmxEntry {
     # Grava UMA chave no .vmx preservando tudo o mais.
     #
