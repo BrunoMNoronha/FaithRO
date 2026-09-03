@@ -64,6 +64,7 @@ apenas os organiza por categoria e registra estado e dependências.
 | [47-provisao-laboratorio-gate-5.md](47-provisao-laboratorio-gate-5.md) | Especificação, runbook e auditoria de prontidão da provisão do laboratório isolado para o GATE 5 (VM Windows descartável, isolamento externo de rede, YARA 4.5.5, Yara-Rules/rules pinado); registra pré-condições e bloqueios BLK-01..BLK-04 | Infra/segurança/auditoria | validado | em andamento (bloqueios registrados; alvo não materializado) | 16, 33, 40, 44, 45, 46 | 2026-08-28 |
 | [48-autoprovisionamento-laboratorio-gate-5.md](48-autoprovisionamento-laboratorio-gate-5.md) | Especificação e automação fail-closed de autoprovisionamento do laboratório GATE 5 | Infra/segurança/automação | validado | implantado | 47 | 2026-09-03 |
 | [49-prontidao-operacional-runtime-primeiro-acesso.md](49-prontidao-operacional-runtime-primeiro-acesso.md) | Homologação e validação da prontidão de runtime do servidor (login, char, map, MariaDB, systemd, firewall e perfil de conexão) para o primeiro acesso | Infra/operação | validado | implantado | 04, 11, 13, 29, 38 | 2026-09-03 |
+| [50-primeiro-acesso-cliente.md](50-primeiro-acesso-cliente.md) | Reconciliação de drift (Base Level 185, Packet Obfuscation) e prontidão para o handshake de primeiro acesso do cliente | Infra/operação | validado | implantado | 04, 11, 13, 29, 49 | 2026-09-03 |
 | [99-checklists.md](99-checklists.md) | Listas de verificação para deploy, rollback e manutenção. | Todos | validado | não aplicável | — | 2026-07-10 |
 
 [^1]: No documento 03, "parcialmente implantado" significa apenas que a
@@ -84,7 +85,8 @@ apenas os organiza por categoria e registra estado e dependências.
   [13-credenciais-sql-rathena.md](13-credenciais-sql-rathena.md),
   [47-provisao-laboratorio-gate-5.md](47-provisao-laboratorio-gate-5.md),
   [48-autoprovisionamento-laboratorio-gate-5.md](48-autoprovisionamento-laboratorio-gate-5.md),
-  [49-prontidao-operacional-runtime-primeiro-acesso.md](49-prontidao-operacional-runtime-primeiro-acesso.md).
+  [49-prontidao-operacional-runtime-primeiro-acesso.md](49-prontidao-operacional-runtime-primeiro-acesso.md),
+  [50-primeiro-acesso-cliente.md](50-primeiro-acesso-cliente.md).
 - **Gameplay e balanceamento:** [03](03-configuracao-alvo.md) (mecânica
   Pre-Renewal, base level 255, atributos máximos 185, ASPD máxima 197 e
   rates, ver também [00](00-base-conhecimento.md)),

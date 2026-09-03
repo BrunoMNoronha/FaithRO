@@ -10,7 +10,7 @@ Validador determinístico dos overrides de progressão do FaithRO (ETAPA 2N-C, i
 Verifica:
   * conf/import/battle_conf.txt  -> max_parameter/max_trans_parameter/max_aspd
   * db/import/statpoint.yml       -> 55 níveis (201..255), marcos, monotonicidade
-  * db/import/job_stats.yml       -> Base EXP 99..255 (157), marcos, MaxBaseLevel 255,
+  * db/import/job_stats.yml       -> Base EXP 99..255 (157), marcos, MaxBaseLevel 185,
                                      ordem MaxBaseLevel antes de BaseExp, sem MaxJobLevel,
                                      sem classes de 3ª/4ª geração
   * ausência de db/import/job_exp.yml (arquivo errado)
@@ -206,7 +206,7 @@ def validate_jobstats():
         if re.search(r"(?m)^\s*%s\s*:\s*true\s*$" % re.escape(tok), code):
             fail("job_stats.yml: classe não autorizada detectada: %s" % tok)
 
-    # Ordem MaxBaseLevel antes de BaseExp, e MaxBaseLevel == 255 em cada grupo.
+    # Ordem MaxBaseLevel antes de BaseExp, e MaxBaseLevel == 185 em cada grupo.
     groups = 0
     for block in re.split(r"(?m)^\s*-\s*Jobs:\s*$", code)[1:]:
         groups += 1
@@ -214,8 +214,8 @@ def validate_jobstats():
         bex = block.find("BaseExp:")
         if not mbl:
             fail("job_stats.yml: grupo %d sem MaxBaseLevel" % groups); continue
-        if int(mbl.group(1)) != 255:
-            fail("job_stats.yml: grupo %d MaxBaseLevel != 255" % groups)
+        if int(mbl.group(1)) != 185:
+            fail("job_stats.yml: grupo %d MaxBaseLevel != 185" % groups)
         if bex == -1:
             fail("job_stats.yml: grupo %d sem BaseExp" % groups); continue
         if block.find("MaxBaseLevel") > bex:
@@ -269,7 +269,7 @@ def main():
     print("Progression overrides: OK")
     print("Base EXP entries: %d" % be)
     print("Stat point entries: %d" % sp)
-    print("Base level cap: 255")
+    print("Base level cap: 185")
     print("Natural stat cap: %d" % vals.get("max_parameter"))
     print("Trans stat cap: %d" % vals.get("max_trans_parameter"))
     print("ASPD cap: %d" % vals.get("max_aspd"))
