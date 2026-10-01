@@ -55,11 +55,11 @@ O manifesto referencia, por caminho relativo e **SHA-256 (LF)**, os seis artefat
 
 | Papel | SHA-256 (LF) |
 | --- | --- |
-| pacote de decisão | `e217bd25b592e404cb2fce70520529a92289637a9e2c8e8cd48f13d29eb11a87` |
+| pacote de decisão | `4e00ad9bd4dc8f51379e2ae5d42566141f98bf7c91648f1874651dcef76777ba` |
 | registro de decisão | `63f74bc71b0415da6036a71bc02e7db5c4881fce24f56c4c1cdce29c6e5127f4` |
-| solicitação | `cc57edff417b6da27f8b1a8b3bf8e833a9906f6a8de0dc0fc7389556fdba4f90` |
-| runbook | `83c701e1e79644f86e5581c8062abacd5e8f2bdf763422ad584807bc5e6c83ed` |
-| plano | `5b64f9462e238ba450b40fe431f05ef4d9f04bb81b7daaba504dae722e67094c` |
+| solicitação | `172657723770426b650edacce9056005380c56793cd87d5e318606762895abc8` |
+| runbook | `dc14a0e9db332cbff2eabc4070483cf20f66b94121a836c154c2034326c32de7` |
+| plano | `c92437db29a775c44d299d325932b4e412d3121174703d980d6775b0d5fe9535` |
 | template de autorização | `d057434d3aa1d59f32aa80f360f08aa144c5f58559f699e939fe84edb3705f5b` |
 
 Os hashes foram calculados **sobre os bytes LF** dos arquivos já existentes. O validador **recomputa** cada hash e **rejeita** divergência ou fim de linha CRLF.
@@ -124,3 +124,12 @@ Etapa documental. Antes do merge: **fechar o PR e excluir a branch**, mantendo o
 - **Nenhum download/build/binário/dependência**; nenhum `Cargo.lock`/`target`.
 - Rust `1.77.2` continua padrão; `1.85.0` apenas nomeada; sem override ou `PATH` permanente.
 - Nenhuma VPS ou deploy; nenhum cliente ou asset proprietário manipulado.
+
+## Integração em 2026-10-01
+
+Conflitos com a dev resolvidos preservando o índice completo e as regras LF.
+O nome FaithRO - Laus Deo e os hashes do manifesto e das referências foram
+reconciliados com a PR #60. Os validadores de solicitação, decisão e apresentação
+passaram; os estados de decisão e execução continuam pendentes. Esta integração
+não executa build, apresentação, cliente ou deploy. Rollback: reverter o merge
+da PR #41 por commit de reversão.
