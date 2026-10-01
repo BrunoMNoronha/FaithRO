@@ -65,10 +65,10 @@ O pacote registra, sem duplicar integralmente os arquivos: identificação (proj
 
 | Papel | Caminho | SHA-256 (LF) |
 | --- | --- | --- |
-| solicitação | `client/patcher/beam-audit/first-build-authorization-request.example.json` | `cc57edff417b6da27f8b1a8b3bf8e833a9906f6a8de0dc0fc7389556fdba4f90` |
-| runbook | `client/patcher/beam-audit/first-build-runbook.example.json` | `83c701e1e79644f86e5581c8062abacd5e8f2bdf763422ad584807bc5e6c83ed` |
+| solicitação | `client/patcher/beam-audit/first-build-authorization-request.example.json` | `172657723770426b650edacce9056005380c56793cd87d5e318606762895abc8` |
+| runbook | `client/patcher/beam-audit/first-build-runbook.example.json` | `dc14a0e9db332cbff2eabc4070483cf20f66b94121a836c154c2034326c32de7` |
 | autorização | `client/patcher/beam-audit/first-build-authorization.example.json` | `d057434d3aa1d59f32aa80f360f08aa144c5f58559f699e939fe84edb3705f5b` |
-| plano | `client/patcher/beam-audit/first-build-plan.example.json` | `5b64f9462e238ba450b40fe431f05ef4d9f04bb81b7daaba504dae722e67094c` |
+| plano | `client/patcher/beam-audit/first-build-plan.example.json` | `c92437db29a775c44d299d325932b4e412d3121174703d980d6775b0d5fe9535` |
 
 Os hashes foram calculados **sobre os bytes LF** dos arquivos já existentes. O validador **recomputa** cada hash e **rejeita** divergência ou fim de linha CRLF.
 

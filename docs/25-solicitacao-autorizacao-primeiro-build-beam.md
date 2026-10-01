@@ -66,7 +66,7 @@ O commit de referência é o ponto de integração do runbook; o vínculo forte 
 - **Operação solicitada:** primeiro build controlado do Beam Patcher.
 - **SHA de referência do FaithRO:** `0c7e3c78a15605e44d4618c26ecf0e169d36e475`.
 - **Runbook submetido:** `client/patcher/beam-audit/first-build-runbook.example.json`
-  - **SHA-256:** `83c701e1e79644f86e5581c8062abacd5e8f2bdf763422ad584807bc5e6c83ed`
+  - **SHA-256:** `dc14a0e9db332cbff2eabc4070483cf20f66b94121a836c154c2034326c32de7`
 - **Modelo de autorização vinculado:** `client/patcher/beam-audit/first-build-authorization.example.json`
   - **SHA-256:** `d057434d3aa1d59f32aa80f360f08aa144c5f58559f699e939fe84edb3705f5b`
 - **Toolchain requerida:** `1.85.0-x86_64-pc-windows-msvc` (invocação sempre por nome completo).
