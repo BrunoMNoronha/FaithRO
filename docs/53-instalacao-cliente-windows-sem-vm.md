@@ -5,6 +5,14 @@
 > O procedimento de conexão ainda depende de homologação da ferramenta e dos
 > patches no host. Este guia não comprova instalação, patch ou login executados.
 
+## Download direto do cliente oficial
+
+[Baixar RAG_SETUP_211105.exe — instalador oficial da Gravity](https://rofull.gnjoy.com/RAG_SETUP_211105.exe)
+
+Tamanho informado pelo servidor: **3,43 GB** (3.427.631.040 bytes).
+Link verificado em 2026-10-01. Após o download, confira assinatura e SHA-256
+conforme os passos 2 e 3 antes de executar o instalador.
+
 ## Objetivo e contexto
 
 Instalar ou reaproveitar o cliente oficial, preservar o original e preparar uma
