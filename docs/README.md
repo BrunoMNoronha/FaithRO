@@ -1,5 +1,10 @@
 # Índice da documentação — FaithRO - Laus Deo
 
+> **Primeiro acesso — decisão vigente em 2026-10-01:** preparação e teste diretamente
+> no Windows do operador, sem VM. Laboratório e snapshot deixam de ser dependências
+> desse fluxo; a ferramenta e o cliente preparado ainda precisam de validação.
+> Ver [decisão e próximos passos no documento 52](52-gate5-validacao-pos-snapshot-baseline-preparacao-cliente.md#decisao-vigente-primeiro-acesso-no-windows-sem-vm).
+
 Índice central da base de conhecimento técnica do projeto. Toda a documentação
 está em português brasileiro. Este índice não renumera os documentos existentes;
 apenas os organiza por categoria e registra estado e dependências.
@@ -8,6 +13,7 @@ apenas os organiza por categoria e registra estado e dependências.
 
 - Comece por [00-base-conhecimento.md](00-base-conhecimento.md) para a visão do
   projeto.
+- Para instalar e preparar o cliente no Windows sem VM, veja [53-instalacao-cliente-windows-sem-vm.md](53-instalacao-cliente-windows-sem-vm.md).
 - Para cliente/protocolo, veja [09-cliente-baseline-protocolo.md](09-cliente-baseline-protocolo.md).
 - Para a política de fontes, veja [10-fontes-comunitarias-rathena.md](10-fontes-comunitarias-rathena.md).
 
@@ -68,6 +74,7 @@ apenas os organiza por categoria e registra estado e dependências.
 | [50-primeiro-acesso-cliente.md](50-primeiro-acesso-cliente.md) | Reconciliação de drift (Base Level 185, Packet Obfuscation) e prontidão para o handshake de primeiro acesso do cliente | Infra/operação | validado | implantado | 04, 11, 13, 29, 49 | 2026-09-03 |
 | [51-gate5-preparacao-controlada-cliente.md](51-gate5-preparacao-controlada-cliente.md) | Preparação controlada do cliente e auditoria de laboratório GATE 5 (Etapa 2P-I) | Cliente/build/segurança | validado | implantado | 16, 28, 47, 48, 50 | 2026-09-03 |
 | [52-gate5-validacao-pos-snapshot-baseline-preparacao-cliente.md](52-gate5-validacao-pos-snapshot-baseline-preparacao-cliente.md) | Validação pós-snapshot GATE5-Baseline e preparação controlada do cliente (Etapa 2P-M-R2) | Cliente/infra/segurança | validado | implantado | 16, 28, 47, 48, 50, 51 | 2026-09-03 |
+| [53-instalacao-cliente-windows-sem-vm.md](53-instalacao-cliente-windows-sem-vm.md) | Passo a passo de instalação oficial, cópia preservada e preparação do primeiro acesso no Windows sem VM | Cliente/operação | planejado | não iniciado (conexão pendente de homologação) | 09, 16, 29, 50, 52 | 2026-10-01 |
 | [99-checklists.md](99-checklists.md) | Listas de verificação para deploy, rollback e manutenção. | Todos | validado | não aplicável | — | 2026-07-10 |
 
 [^1]: No documento 03, "parcialmente implantado" significa apenas que a

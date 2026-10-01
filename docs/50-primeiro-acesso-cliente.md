@@ -1,5 +1,12 @@
 # Primeiro acesso do cliente e reconciliação de runtime (Etapas 2P-G e 2P-H)
 
+> **Decisão vigente — 2026-10-01:** o primeiro acesso será preparado diretamente
+> no Windows do operador, **sem VM**. Os requisitos de laboratório VMware,
+> guest e snapshot descritos nesta etapa são históricos e não são dependências
+> do novo fluxo. Ver a decisão e os próximos passos no
+> [documento 52](52-gate5-validacao-pos-snapshot-baseline-preparacao-cliente.md#decisao-vigente-primeiro-acesso-no-windows-sem-vm).
+
+
 > **Escopo:** registro técnico de reconciliação de drift de runtime (Base Level 185 e Packet Obfuscation), localização do executável autorizado na estação do operador, validação de conectividade de rede e firewall, e diagnóstico do mecanismo de configuração de conexão para o primeiro acesso ao FaithRO - Laos Deos. Nenhum binário proprietário, GRF, chave privada, segredo ou dado de jogador é registrado ou distribuído.
 
 ---

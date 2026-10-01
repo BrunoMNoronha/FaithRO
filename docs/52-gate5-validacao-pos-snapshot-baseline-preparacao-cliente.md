@@ -1,5 +1,9 @@
 # Validação pós-snapshot `GATE5-Baseline` e preparação controlada do cliente (Etapa 2P-M-R2)
 
+> **Atualização em 2026-10-01:** os resultados de setembro abaixo são históricos.
+> A decisão vigente é preparar o primeiro acesso no Windows do operador, sem VM.
+> A seção final substitui o encaminhamento para laboratório isolado da seção 12.
+
 > **Escopo:** registro técnico da validação física e lógica do snapshot baseline `GATE5-Baseline` no laboratório isolado `FaithRO-GATE5-LAB`, inventário exaustivo de integridade do cliente oficial autorizado em `C:\Gravity\Ragnarok`, reconciliação da suíte de automação do laboratório (181 PASS / 0 FAIL) e validadores do repositório, preparação controlada do arquivo de configuração próprio `clientinfo.xml` e definição do runbook de sanidade e rollback. Nenhum binário proprietário, GRF, chave privada, segredo ou dado de jogador é registrado ou versionado.
 
 ---
@@ -241,3 +245,81 @@ Avançar para a **ETAPA 2P-M-R3 — Preparação e Aplicação do Perfil Mínimo
 1. Ativar o diretório `data\` no cliente e copiar o `clientinfo.xml` homologado.
 2. Executar dentro da sandbox do laboratório a aplicação estrita do perfil mínimo homologado (`DataFolderFirst`, `CallKoreaClientInfo`, `LangType`).
 3. Validar a inicialização do executável preparado e o handshake de rede com o login server (`129.121.46.11:6900`).
+
+## Decisao vigente: primeiro acesso no Windows sem VM
+
+### Objetivo e decisão
+
+Em 2026-10-01, o usuário determinou: “não vamos Confirmar a prontidão completa
+do laboratório. não vamos utilizar VM”. A preparação e o teste do primeiro
+acesso passam a ocorrer diretamente no Windows do operador, sem máquina virtual.
+A decisão substitui, para esse primeiro acesso, a exigência de prontidão do
+laboratório VMware, execução no guest e snapshot como pré-condições.
+Os documentos 47–51 e as evidências de setembro permanecem como histórico;
+a VM e seus artefatos não devem ser apagados ou alterados por esta decisão.
+
+**Estado:** decisão de procedimento registrada; preparação no host e login real
+**ainda não executados nem comprovados nesta atualização**. A aprovação e o merge
+da PR #81 comprovaram integração documental e checks, não entrada no jogo.
+
+### Escopo, arquivos e impacto esperado
+
+- Alvo: Windows do operador e uma cópia separada de teste do cliente existente.
+- Preservar a instalação original em `C:\Gravity\Ragnarok`; verificar seus hashes
+  antes de qualquer preparação. O destino da cópia e das evidências é **TBD**:
+  deve ser escolhido e verificado antes da execução, fora dos arquivos versionados.
+- Revisar o procedimento e a ferramenta de preparação para execução no host.
+  Os scripts `scripts/lab/` continuam específicos à VM; não foram adaptados e não
+  constituem automação aprovada para o novo fluxo.
+- Snapshot deixa de ser dependência; recuperação da cópia usa os arquivos originais.
+  Sem isolamento por VM, falhas da ferramenta podem afetar a estação do operador.
+- A decisão não autoriza desativar Defender ou anticheat, injetar DLLs, distribuir
+  executáveis/GRFs/assets, expor credenciais ou alterar a VPS.
+
+### Próximos passos
+
+1. Conferir origem, versão, licença, integridade e comportamento da ferramenta
+   candidata (WARP), inclusive seu núcleo prebuilt. Prontidão no Windows host
+   permanece pendente; não tratar auditoria estática como execução homologada.
+2. Confirmar o destino da cópia separada e o local de evidências; registrar hashes
+   e preservar os originais. Não executar a ferramenta sobre a instalação original.
+3. Reconciliar o perfil mínimo de patches: `DataFolderFirst` e
+   `CallKoreaClientInfo` são candidatos no documento 51; `RestoreClientInfo` foi
+   adiado e `LangType` aparece em encaminhamentos posteriores. Nenhuma lista deve
+   ser considerada suficiente ou homologada sem teste no executável real.
+4. Preparar a cópia para ler a configuração de conexão do FaithRO, validar o
+   `clientinfo.xml` e registrar exatamente as alterações realizadas.
+5. Revalidar serviços, protocolo, portas e IP autorizado no firewall, e confirmar
+   a conta de homologação sem revelar credenciais. As evidências de 03/09/2026
+   não comprovam a saúde atual. Qualquer mudança na VPS exige escopo e autorização
+   próprios, além de backup e janela de manutenção quando aplicável.
+6. Executar os checkpoints H2–H7: handshake, autenticação, login → char,
+   seleção/criação de personagem, char → map e movimentação dentro do jogo;
+   acompanhar logs sanitizados e registrar o resultado de cada checkpoint.
+
+### Testes e critérios de aceite
+
+- Original preservado, com hash conferido antes e depois.
+- Ferramenta identificada e verificada; alterações limitadas à cópia separada.
+- Nenhum segredo ou arquivo proprietário versionado; Defender permanece ativo.
+- H2–H7 comprovados; falhas classificadas por camada, sem contornos não autorizados.
+- Documentar a baseline efetiva de progressão: a decisão de base 255 e os registros
+  de runtime/base 185 continuam divergentes. Esta atualização não altera limites.
+- CI, validação textual e conectividade TCP não substituem a prova dentro do jogo.
+
+### Riscos e rollback
+
+Executar a ferramenta no host amplia o impacto possível sobre a estação; uma cópia
+separada preserva o cliente original, mas não oferece isolamento equivalente a VM.
+Se a preparação falhar, interromper, preservar evidências e restaurar somente a
+cópia de teste a partir do original verificado. Não usar reversão manual de bytes.
+Não restaurar snapshot, excluir a VM ou alterar servidor/banco como parte desse
+rollback. A reversão documental pode ser feita por commit de reversão específico;
+não apagar registros de decisões ou evidências históricas.
+
+### Guia operacional
+
+O [documento 53](53-instalacao-cliente-windows-sem-vm.md) detalha a instalação
+oficial, verificação de integridade, cópia separada, configuração e checkpoints
+do primeiro acesso no Windows. A aplicação de patches continua pendente de
+homologação; o guia não registra execução.

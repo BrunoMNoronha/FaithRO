@@ -73,6 +73,11 @@ Ver [docs/06-plano-execucao-inicial.md](docs/06-plano-execucao-inicial.md) para 
 
 ## Documentação
 
+Para instalar e preparar o cliente, consulte o
+[guia passo a passo no Windows, sem VM](docs/53-instalacao-cliente-windows-sem-vm.md).
+O guia inclui verificação de integridade, cópia separada e testes do primeiro
+acesso; a preparação com patches permanece pendente de homologação.
+
 O índice central da base de conhecimento está em
 [docs/README.md](docs/README.md). Para cliente e protocolo, ver
 [docs/09-cliente-baseline-protocolo.md](docs/09-cliente-baseline-protocolo.md);

@@ -1,5 +1,8 @@
 # Cliente do FaithRO: primeiro acesso (planejado)
 
+> **Operador do primeiro teste:** use o [guia passo a passo no Windows sem VM](53-instalacao-cliente-windows-sem-vm.md).
+> Este documento mantém o planejamento do fluxo futuro para jogadores.
+
 > **Escopo:** documento de referência e planejamento. Nenhuma alteração de
 > código, banco ou configuração operacional é executada por este documento.
 > Nenhum cliente completo, executável, GRF ou asset proprietário é

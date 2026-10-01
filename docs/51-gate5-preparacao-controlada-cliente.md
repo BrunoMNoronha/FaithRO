@@ -1,5 +1,12 @@
 # Preparação controlada do cliente e auditoria de laboratório GATE 5 (Etapa 2P-I)
 
+> **Decisão vigente — 2026-10-01:** o primeiro acesso será preparado diretamente
+> no Windows do operador, **sem VM**. Os requisitos de laboratório VMware,
+> guest e snapshot descritos nesta etapa são históricos e não são dependências
+> do novo fluxo. Ver a decisão e os próximos passos no
+> [documento 52](52-gate5-validacao-pos-snapshot-baseline-preparacao-cliente.md#decisao-vigente-primeiro-acesso-no-windows-sem-vm).
+
+
 > **Escopo:** registro técnico da auditoria do ecossistema WARP/GATE 5, reconciliação de integridade do executável oficial da Gravity, diagnóstico de prontidão do laboratório isolado de preparação de cliente, validação do perfil mínimo de patches e comprovação de conectividade de rede para o servidor FaithRO - Laos Deos. Nenhum binário proprietário, GRF, chave privada, segredo ou dado de jogador é registrado ou versionado.
 
 ---
