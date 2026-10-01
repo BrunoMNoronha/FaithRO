@@ -65,6 +65,8 @@ apenas os organiza por categoria e registra estado e dependências.
 | [48-autoprovisionamento-laboratorio-gate-5.md](48-autoprovisionamento-laboratorio-gate-5.md) | Especificação e automação fail-closed de autoprovisionamento do laboratório GATE 5 | Infra/segurança/automação | validado | implantado | 47 | 2026-09-03 |
 | [49-prontidao-operacional-runtime-primeiro-acesso.md](49-prontidao-operacional-runtime-primeiro-acesso.md) | Homologação e validação da prontidão de runtime do servidor (login, char, map, MariaDB, systemd, firewall e perfil de conexão) para o primeiro acesso | Infra/operação | validado | implantado | 04, 11, 13, 29, 38 | 2026-09-03 |
 | [50-primeiro-acesso-cliente.md](50-primeiro-acesso-cliente.md) | Reconciliação de drift (Base Level 185, Packet Obfuscation) e prontidão para o handshake de primeiro acesso do cliente | Infra/operação | validado | implantado | 04, 11, 13, 29, 49 | 2026-09-03 |
+| [51-gate5-preparacao-controlada-cliente.md](51-gate5-preparacao-controlada-cliente.md) | Preparação controlada do cliente e auditoria de laboratório GATE 5 (Etapa 2P-I) | Cliente/build/segurança | validado | implantado | 16, 28, 47, 48, 50 | 2026-09-03 |
+| [52-gate5-validacao-pos-snapshot-baseline-preparacao-cliente.md](52-gate5-validacao-pos-snapshot-baseline-preparacao-cliente.md) | Validação pós-snapshot GATE5-Baseline e preparação controlada do cliente (Etapa 2P-M-R2) | Cliente/infra/segurança | validado | implantado | 16, 28, 47, 48, 50, 51 | 2026-09-03 |
 | [99-checklists.md](99-checklists.md) | Listas de verificação para deploy, rollback e manutenção. | Todos | validado | não aplicável | — | 2026-07-10 |
 
 [^1]: No documento 03, "parcialmente implantado" significa apenas que a
@@ -86,7 +88,9 @@ apenas os organiza por categoria e registra estado e dependências.
   [47-provisao-laboratorio-gate-5.md](47-provisao-laboratorio-gate-5.md),
   [48-autoprovisionamento-laboratorio-gate-5.md](48-autoprovisionamento-laboratorio-gate-5.md),
   [49-prontidao-operacional-runtime-primeiro-acesso.md](49-prontidao-operacional-runtime-primeiro-acesso.md),
-  [50-primeiro-acesso-cliente.md](50-primeiro-acesso-cliente.md).
+  [50-primeiro-acesso-cliente.md](50-primeiro-acesso-cliente.md),
+  [51-gate5-preparacao-controlada-cliente.md](51-gate5-preparacao-controlada-cliente.md),
+  [52-gate5-validacao-pos-snapshot-baseline-preparacao-cliente.md](52-gate5-validacao-pos-snapshot-baseline-preparacao-cliente.md).
 - **Gameplay e balanceamento:** [03](03-configuracao-alvo.md) (mecânica
   Pre-Renewal, base level 255, atributos máximos 185, ASPD máxima 197 e
   rates, ver também [00](00-base-conhecimento.md)),
@@ -145,7 +149,11 @@ apenas os organiza por categoria e registra estado e dependências.
   [46](46-decisao-execucao-real-gate-5-verificacoes-locais.md) (registro da decisão
   humana real de autorização condicional da execução real do GATE 5),
   [47](47-provisao-laboratorio-gate-5.md) (especificação, runbook e auditoria de
-  prontidão do laboratório isolado para o GATE 5; bloqueios BLK-01..BLK-04).
+  prontidão do laboratório isolado para o GATE 5; bloqueios BLK-01..BLK-04),
+  [51](51-gate5-preparacao-controlada-cliente.md) (preparação controlada do
+  cliente e auditoria de laboratório GATE 5 — Etapa 2P-I),
+  [52](52-gate5-validacao-pos-snapshot-baseline-preparacao-cliente.md) (validação
+  pós-snapshot GATE5-Baseline e preparação controlada do cliente — Etapa 2P-M-R2).
 - **Patcher e build auditável do Beam:**
   [23](23-planejamento-primeiro-build-controlado-beam.md) (planejamento do
   primeiro build controlado; build ainda não autorizado),
