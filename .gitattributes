@@ -72,3 +72,12 @@ scripts/test-warp-audit-gate-05.py text eol=lf
 # Windows com core.autocrlf=true, para que o conteudo versionado seja
 # byte-identico em qualquer maquina que reexecute a automacao. Ver docs/48.
 scripts/lab/** text eol=lf
+
+# O manifesto de apresentacao (D1-B16) persiste o SHA-256 dos artefatos
+# apresentados e sera, ele proprio, referenciado por hash em etapa posterior
+# (D1-B17). O manifesto e o comprovante DEVEM permanecer com LF para que os
+# hashes fixados sejam reproduziveis em qualquer plataforma, conforme o
+# validador scripts/validate-beam-first-build-human-presentation.py. Ver
+# docs/27-apresentacao-controlada-pacote-decisao-beam.md.
+client/patcher/beam-audit/first-build-human-presentation-manifest.example.json text eol=lf
+client/patcher/beam-audit/first-build-human-presentation-receipt.example.json text eol=lf

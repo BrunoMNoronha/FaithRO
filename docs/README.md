@@ -45,6 +45,7 @@ apenas os organiza por categoria e registra estado e dependências.
 | [24-runbook-primeiro-build-controlado-beam.md](24-runbook-primeiro-build-controlado-beam.md) | Runbook operacional, modelo de autorização humana e template de evidência do primeiro build (build bloqueado; autorização não concedida) | Cliente/build/segurança | validado | não iniciado (autorização não concedida) | 19, 20, 21, 22, 23 | 2026-07-25 |
 | [25-solicitacao-autorizacao-primeiro-build-beam.md](25-solicitacao-autorizacao-primeiro-build-beam.md) | Solicitação formal de autorização humana do primeiro build (pendente de decisão; não concede autorização; merge do PR não equivale à autorização) | Cliente/build/segurança | validado | não iniciado (decisão humana pendente) | 19, 20, 21, 22, 23, 24 | 2026-07-26 |
 | [26-pacote-decisao-humana-primeiro-build-beam.md](26-pacote-decisao-humana-primeiro-build-beam.md) | Pacote de decisão humana e registro de decisão em branco do primeiro build (decisão não tomada; não concede autorização; decisão não executa o build) | Cliente/build/segurança | validado | não iniciado (decisão humana pendente) | 19, 20, 21, 22, 23, 24, 25 | 2026-07-26 |
+| [27-apresentacao-controlada-pacote-decisao-beam.md](27-apresentacao-controlada-pacote-decisao-beam.md) | Manifesto de apresentação e comprovante em branco do pacote de decisão (não apresentado; sem canal/identidade/decisão; merge não equivale à apresentação) | Cliente/build/segurança | validado | não iniciado (apresentação não realizada) | 19, 20, 21, 22, 23, 24, 25, 26 | 2026-07-26 |
 | [28-decisao-ferramenta-preparacao-cliente.md](28-decisao-ferramenta-preparacao-cliente.md) | Decisão da ferramenta de preparação (hex) do executável do cliente: WARP `APROVAR COM RESTRIÇÕES`, NEMO atual (4144) `REJEITADO` por licença ausente; não autoriza execução | Cliente/segurança | validado | não iniciado (autorização humana pendente) | 09, 16, 17, 29 | 2026-07-27 |
 | [29-compatibilidade-cliente-2021-11-05-packetver.md](29-compatibilidade-cliente-2021-11-05-packetver.md) | Reconciliação do cliente 2021-11-05 com `PACKETVER=20211103`: compatibilidade `PROVÁVEL`, sem rebuild do servidor; teste de login controlado pendente | Cliente/protocolo | validado | não iniciado | 09, 12 | 2026-07-27 |
 | [30-auditoria-estatica-warp.md](30-auditoria-estatica-warp.md) | Auditoria estática aprofundada do WARP (commit fixado) e laboratório vazio: `BLOQUEADO PARA BUILD DO FONTE` (núcleo só prebuilt no commit — W1) e `APROVADO COM RESTRIÇÕES` apenas para decidir o caminho do núcleo (2P-E-A); patches sensíveis fora do mínimo; não autoriza build/execução/uso do prebuilt/modificação do cliente | Cliente/build/segurança | validado | não iniciado (build não autorizado) | 16, 28, 29 | 2026-07-31 |
@@ -68,3 +69,114 @@ apenas os organiza por categoria e registra estado e dependências.
 | [51-gate5-preparacao-controlada-cliente.md](51-gate5-preparacao-controlada-cliente.md) | Preparação controlada do cliente e auditoria de laboratório GATE 5 (Etapa 2P-I) | Cliente/build/segurança | validado | implantado | 16, 28, 47, 48, 50 | 2026-09-03 |
 | [52-gate5-validacao-pos-snapshot-baseline-preparacao-cliente.md](52-gate5-validacao-pos-snapshot-baseline-preparacao-cliente.md) | Validação pós-snapshot GATE5-Baseline e preparação controlada do cliente (Etapa 2P-M-R2) | Cliente/infra/segurança | validado | implantado | 16, 28, 47, 48, 50, 51 | 2026-09-03 |
 | [99-checklists.md](99-checklists.md) | Listas de verificação para deploy, rollback e manutenção. | Todos | validado | não aplicável | — | 2026-07-10 |
+
+[^1]: No documento 03, "parcialmente implantado" significa apenas que a
+    configuração registrada do build está alinhada com Pre-Renewal. Base
+    level 255, atributos naturais máximos 185, ASPD máxima 197, rates,
+    classes e conteúdo continuam pendentes de implantação e validação.
+
+## Índice por categoria
+
+- **Visão geral e decisões:** [00](00-base-conhecimento.md),
+  [01](01-decisao-tecnica.md), [05](05-governanca.md).
+- **Planejamento e processo:** [02](02-roadmap.md),
+  [06](06-plano-execucao-inicial.md), [07](07-fluxo-pull-request.md),
+  [99](99-checklists.md).
+- **Infraestrutura e operação:** [04](04-operacao-vps.md),
+  [08-preparar-vps-ubuntu-2204.md](08-preparar-vps-ubuntu-2204.md),
+  [11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md),
+  [13-credenciais-sql-rathena.md](13-credenciais-sql-rathena.md),
+  [47-provisao-laboratorio-gate-5.md](47-provisao-laboratorio-gate-5.md),
+  [48-autoprovisionamento-laboratorio-gate-5.md](48-autoprovisionamento-laboratorio-gate-5.md),
+  [49-prontidao-operacional-runtime-primeiro-acesso.md](49-prontidao-operacional-runtime-primeiro-acesso.md),
+  [50-primeiro-acesso-cliente.md](50-primeiro-acesso-cliente.md),
+  [51-gate5-preparacao-controlada-cliente.md](51-gate5-preparacao-controlada-cliente.md),
+  [52-gate5-validacao-pos-snapshot-baseline-preparacao-cliente.md](52-gate5-validacao-pos-snapshot-baseline-preparacao-cliente.md).
+- **Gameplay e balanceamento:** [03](03-configuracao-alvo.md) (mecânica
+  Pre-Renewal, base level 255, atributos máximos 185, ASPD máxima 197 e
+  rates, ver também [00](00-base-conhecimento.md)),
+  [14](14-progressao-base-255-overrides.md) (overrides versionados de
+  progressão; ainda não implantados).
+- **Cliente e protocolo:** [09](09-cliente-baseline-protocolo.md),
+  [12](12-configuracao-packetver.md),
+  [29](29-compatibilidade-cliente-2021-11-05-packetver.md) (cliente 2021-11-05 ×
+  `PACKETVER=20211103`, compatibilidade `PROVÁVEL`, sem rebuild),
+  [38](38-auditoria-prontidao-primeiro-acesso.md) (registro consolidado da
+  auditoria de prontidão do primeiro acesso; runtime reconfirmado; `new_account:
+  no` como decisão de segurança; cadeia WARP no GATE 2; `BLOQUEADO PARA
+  HOMOLOGAÇÃO`).
+- **Preparação do executável do cliente:**
+  [28](28-decisao-ferramenta-preparacao-cliente.md) (decisão da ferramenta de
+  hex: WARP aprovado com restrições; NEMO atual rejeitado por licença ausente;
+  não autoriza execução),
+  [30](30-auditoria-estatica-warp.md) (auditoria estática aprofundada do WARP no
+  commit fixado e laboratório vazio; `BLOQUEADO PARA BUILD DO FONTE` e `APROVADO
+  COM RESTRIÇÕES` apenas para decidir o caminho do núcleo (2P-E-A); não autoriza
+  build, execução, uso do prebuilt nem modificação do cliente),
+  [31](31-decisao-caminho-nucleo-warp.md) (investigação do caminho do núcleo e
+  pacote de decisão humana; fonte não localizada, prebuilt com proveniência
+  parcial; nenhuma opção selecionada, nenhuma autorização),
+  [32](32-registro-decisao-caminho-nucleo-warp.md) (registro da decisão humana:
+  `PREBUILT_PATH` selecionado **apenas para planejamento** da auditoria binária
+  offline; prebuilt não materializado nem executado; flags operacionais `false`;
+  merge não autoriza a próxima ação),
+  [33](33-plano-auditoria-binaria-offline-warp.md) (plano da auditoria binária
+  offline em 17 gates independentes; `PLANO CRIADO — NENHUMA MATERIALIZAÇÃO
+  AUTORIZADA`; nada materializado/executado; merge não autoriza o GATE 1),
+  [34](34-registro-autorizacao-gate-0-proveniencia-warp.md) (registro da autorização
+  humana **exclusiva do GATE 0** — reconfirmação de proveniência por metadados;
+  `GATE 0 AUTORIZADO — AINDA NÃO INICIADO`; nenhuma consulta upstream nesta etapa;
+  GATE 1 proibido; merge não executa o GATE 0),
+  [35](35-resultado-gate-0-proveniencia-warp.md) (resultado da execução do GATE 0 por
+  metadados oficiais; `GATE 0 CONCLUÍDO — APROVADO POR METADADOS` — proveniência
+  consistente; nada baixado/materializado/executado; Git object ID ≠ SHA-256 local;
+  GATE 1 exige nova decisão humana),
+  [36](36-registro-autorizacao-gate-1-materializacao-warp.md) (registro da autorização
+  do GATE 1 — materialização),
+  [37](37-resultado-gate-2-materializacao-integridade-warp.md) (resultado do GATE 2 —
+  integridade local e hashing),
+  [39](39-resultado-gate-3-identidade-assinatura-warp.md) (resultado do GATE 3 —
+  identidade e assinatura estática offline),
+  [40](40-preparacao-gate-4-inventario-pe-estatico-warp.md) (preparação da ferramenta
+  do GATE 4 — inventário PE estático),
+  [42](42-autorizacao-execucao-gate-4-inventario-pe-warp.md) (autorização da execução
+  do GATE 4),
+  [43](43-resultado-gate-4-inventario-pe-estatico-warp.md) (resultado da execução do
+  GATE 4 — COMPLETED_PASS),
+  [44](44-gate-5-decisao-e-plano.md) (preparação da decisão e plano de controle do
+  GATE 5 — verificações locais de segurança),
+  [45](45-gate-5-preparacao-operacional.md) (preparação operacional do GATE 5 —
+  orquestrador, schemas, testes sintéticos),
+  [46](46-decisao-execucao-real-gate-5-verificacoes-locais.md) (registro da decisão
+  humana real de autorização condicional da execução real do GATE 5),
+  [47](47-provisao-laboratorio-gate-5.md) (especificação, runbook e auditoria de
+  prontidão do laboratório isolado para o GATE 5; bloqueios BLK-01..BLK-04),
+  [51](51-gate5-preparacao-controlada-cliente.md) (preparação controlada do
+  cliente e auditoria de laboratório GATE 5 — Etapa 2P-I),
+  [52](52-gate5-validacao-pos-snapshot-baseline-preparacao-cliente.md) (validação
+  pós-snapshot GATE5-Baseline e preparação controlada do cliente — Etapa 2P-M-R2).
+- **Patcher e build auditável do Beam:**
+  [27](27-apresentacao-controlada-pacote-decisao-beam.md) (manifesto e comprovante em branco; apresentação não realizada),
+  [23](23-planejamento-primeiro-build-controlado-beam.md) (planejamento do
+  primeiro build controlado; build ainda não autorizado),
+  [24](24-runbook-primeiro-build-controlado-beam.md) (runbook operacional,
+  autorização humana e evidência; autorização não concedida),
+  [25](25-solicitacao-autorizacao-primeiro-build-beam.md) (solicitação formal
+  de autorização humana; pendente de decisão, não concede autorização),
+  [26](26-pacote-decisao-humana-primeiro-build-beam.md) (pacote de decisão
+  humana e registro em branco; decisão não tomada, não concede autorização).
+- **Fontes comunitárias:** [10](10-fontes-comunitarias-rathena.md).
+- **Templates:** [templates/ADR.md](templates/ADR.md),
+  [templates/PULL_REQUEST_TEMPLATE.md](templates/PULL_REQUEST_TEMPLATE.md).
+
+## Convenções
+
+- Numeração `NN-nome.md`; próximos documentos usam o próximo número livre (a
+  partir de `11`), sem renumerar os existentes.
+- Documentos de procedimento técnico devem conter: Objetivo, Contexto e
+  premissas, Arquivos afetados, Passos, Testes, Riscos, Rollback, Referências.
+- Distinguir sempre: fato oficial, fato confirmado no código, decisão do projeto,
+  recomendação comunitária, hipótese e pendência.
+- Não versionar segredos nem material proprietário (ver
+  [../SECURITY.md](../SECURITY.md) e [05-governanca.md](05-governanca.md)).
+</content>
