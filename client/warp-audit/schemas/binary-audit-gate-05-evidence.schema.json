@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "binary-audit-gate-05-evidence.schema.json",
+  "title": "Contrato de evidencia do GATE 5 (WARP) — preparacao",
+  "description": "CONVENCAO (2P-E-C5-TOOLING-PREP) para a evidencia FUTURA do orquestrador estatico do GATE 5. Schema FECHADO. Nesta etapa a evidencia so pode resultar de FIXTURE SINTETICA (outcome FIXTURE_VALIDATION_PASS) ou validacao de configuracao (CONFIG_VALIDATION_PASS); NUNCA GATE_PASSED sobre o artefato real. artifact_executed/network_access const:false; flags de autorizacao const:false.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "record_type",
+    "gate_id",
+    "gate_name",
+    "mode",
+    "tool",
+    "identity",
+    "environment",
+    "adapter_results",
+    "procedural_classification",
+    "outcome",
+    "artifact_executed",
+    "network_access",
+    "authorization_flags",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "record_type": { "type": "string", "const": "warp-audit-gate-05-evidence" },
+    "gate_id": { "type": "integer", "const": 5 },
+    "gate_name": { "type": "string", "const": "Verificacoes locais de seguranca" },
+    "mode": { "type": "string", "enum": ["validate-only", "fixture"] },
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": { "type": "string", "const": "warp-audit-gate-05" },
+        "version": { "type": "string", "minLength": 1 }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["logical_path", "sha256", "size_bytes", "started_utc", "finished_utc"],
+      "properties": {
+        "logical_path": { "type": "string" },
+        "sha256": { "type": "string", "pattern": "^([0-9a-f]{64})?$" },
+        "size_bytes": { "type": "integer", "minimum": 0 },
+        "started_utc": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
+        "finished_utc": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["os_family", "python_version", "logical_working_directory", "network_policy", "adapters_enabled", "timeout_seconds"],
+      "properties": {
+        "os_family": { "type": "string", "minLength": 1 },
+        "python_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "logical_working_directory": { "type": "string", "const": "<repo>" },
+        "network_policy": { "type": "string", "const": "blocked" },
+        "adapters_enabled": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "timeout_seconds": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "adapter_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["adapter", "availability", "command_id", "timeout_seconds", "exit_code", "classification", "stdout_sanitized", "stderr_sanitized", "duration_ms", "limitations"],
+        "properties": {
+          "adapter": { "type": "string", "minLength": 1 },
+          "availability": { "type": "string", "enum": ["available", "unavailable", "simulated", "not_run"] },
+          "command_id": { "type": "string" },
+          "timeout_seconds": { "type": "integer", "minimum": 0 },
+          "exit_code": { },
+          "classification": { "type": "string", "enum": ["NOT_RUN", "PASS", "FINDING", "ERROR", "TIMEOUT", "STOP_PATH"] },
+          "stdout_sanitized": { "type": "string" },
+          "stderr_sanitized": { "type": "string" },
+          "duration_ms": { "type": "integer", "minimum": 0 },
+          "limitations": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "procedural_classification": { "type": "string", "enum": ["FIXTURE_VALIDATION_PASS", "CONFIG_VALIDATION_PASS"] },
+    "outcome": { "type": "string", "enum": ["FIXTURE_VALIDATION_PASS", "CONFIG_VALIDATION_PASS"] },
+    "artifact_executed": { "type": "boolean", "const": false },
+    "network_access": { "type": "boolean", "const": false },
+    "authorization_flags": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gate_5_authorized", "execution_authorized", "local_security_scan_authorized", "external_reputation_upload_authorized", "client_preparation_authorized"],
+      "properties": {
+        "gate_5_authorized": { "type": "boolean", "const": false },
+        "execution_authorized": { "type": "boolean", "const": false },
+        "local_security_scan_authorized": { "type": "boolean", "const": false },
+        "external_reputation_upload_authorized": { "type": "boolean", "const": false },
+        "client_preparation_authorized": { "type": "boolean", "const": false }
+      }
+    },
+    "limitations": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+  }
+}

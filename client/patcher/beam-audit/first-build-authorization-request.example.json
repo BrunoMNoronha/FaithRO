@@ -29,7 +29,7 @@
     "faithro_reference_commit": "0c7e3c78a15605e44d4618c26ecf0e169d36e475",
     "runbook_path": "client/patcher/beam-audit/first-build-runbook.example.json",
     "runbook_version": "1.0.0",
-    "runbook_sha256": "83c701e1e79644f86e5581c8062abacd5e8f2bdf763422ad584807bc5e6c83ed",
+    "runbook_sha256": "dc14a0e9db332cbff2eabc4070483cf20f66b94121a836c154c2034326c32de7",
     "authorization_template_path": "client/patcher/beam-audit/first-build-authorization.example.json",
     "authorization_template_sha256": "d057434d3aa1d59f32aa80f360f08aa144c5f58559f699e939fe84edb3705f5b",
     "required_toolchain": "1.85.0-x86_64-pc-windows-msvc",

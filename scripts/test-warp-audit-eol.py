@@ -46,6 +46,14 @@ GATE4_SCRIPTS = [
     "scripts/test-warp-pe-static.py",
 ]
 
+# ETAPA 2P-E-C5-TOOLING-PREP: orquestrador estatico do GATE 5 e seus testes. Como no
+# GATE 4, valida-se apenas atributos Git efetivos e bytes (sem BOM/CR), SEM fixar hash
+# (nao ha saida real do GATE 5).
+GATE5_SCRIPTS = [
+    "scripts/warp-audit-gate-05.py",
+    "scripts/test-warp-audit-gate-05.py",
+]
+
 EXPECTED = {
     "output_sha256": "932968244170200b303dfd9674215ea1358a549b3e71f8034a7fb5ba4ce0f816",
     "output_git_blob_oid": "c1e66885850811a49395a5cae613c20cf4abb7a3",
@@ -149,6 +157,27 @@ def main():
 
     # 4) GATE 4 (2P-E-C4-PREP): atributos LF + bytes (sem BOM/CR), sem fixar hash.
     for rel in GATE4_SCRIPTS:
+        text, eol, err = check_attr(rel)
+        if err:
+            bad(f"check-attr {rel}", err)
+        elif text == "set" and eol == "lf":
+            ok(f"atributos LF (text=set, eol=lf): {rel}")
+        else:
+            bad(f"atributos de {rel}", f"text={text!r} eol={eol!r} (esperado set/lf)")
+        try:
+            data = read_bytes(rel)
+        except OSError as exc:
+            bad(f"leitura de {rel}", str(exc))
+            continue
+        if data.startswith(b"\xef\xbb\xbf"):
+            bad(f"{rel}: BOM UTF-8 proibido")
+        elif b"\r" in data:
+            bad(f"{rel}: byte CR proibido (checkout converteu LF->CRLF?)")
+        else:
+            ok(f"sem BOM e sem CR: {rel}")
+
+    # 5) GATE 5 (2P-E-C5-TOOLING-PREP): atributos LF + bytes (sem BOM/CR), sem fixar hash.
+    for rel in GATE5_SCRIPTS:
         text, eol, err = check_attr(rel)
         if err:
             bad(f"check-attr {rel}", err)

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "gate_id": 5,
+  "gate_name": "Verificacoes locais de seguranca",
+  "mode": "fixture",
+  "input_path": "fixtures/synthetic/gate-05-synthetic-pass.bin",
+  "output_directory": "out/gate-05",
+  "timeout_seconds": 30,
+  "enabled_adapters": ["synthetic-local"],
+  "network_policy": "blocked",
+  "execution_policy": "artifact_never_executed",
+  "modification_policy": "input_never_modified",
+  "decision_ref": "PENDING_HUMAN_DECISION (docs/44; execucao real exige PR separado)",
+  "authorization_flags": {
+    "gate_5_authorized": false,
+    "execution_authorized": false,
+    "local_security_scan_authorized": false,
+    "external_reputation_upload_authorized": false,
+    "client_preparation_authorized": false
+  }
+}

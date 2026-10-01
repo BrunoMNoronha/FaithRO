@@ -5,7 +5,7 @@
 #   db/job_stats.yml -> db/pre-re/job_exp.yml -> db/import/job_stats.yml (por ultimo, sobrescreve)
 # NAO usar db/import/job_exp.yml: nao pertence a cadeia de importacao validada.
 #
-# Este override altera SOMENTE MaxBaseLevel (99 -> 255) e a tabela BaseExp a
+# Este override altera SOMENTE MaxBaseLevel (99 -> 185) e a tabela BaseExp a
 # partir do nivel 99, para os dois grupos de Base EXP do Pre-Renewal. Os demais
 # campos do grupo (limite de job level, tabela de job EXP, HP/SP, etc.) sao
 # preservados pelo merge por classe e NAO sao redefinidos aqui.
@@ -74,7 +74,7 @@ Body:
       Star_Gladiator: true
       Star_Gladiator2: true
       Soul_Linker: true
-    MaxBaseLevel: 255
+    MaxBaseLevel: 185
     BaseExp:
       - Level: 99
         Exp: 100000000
@@ -414,7 +414,7 @@ Body:
       Clown: true
       Gypsy: true
       Paladin2: true
-    MaxBaseLevel: 255
+    MaxBaseLevel: 185
     BaseExp:
       - Level: 99
         Exp: 100000000
