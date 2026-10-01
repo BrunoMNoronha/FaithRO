@@ -46,7 +46,7 @@ METADADOS`), cujo squash é `219b96b0688d9e5b71ae555b23e4166ef136424d` (base `de
 ## 4. Decisor e autoridade
 
 Decisor `BrunoMNoronha`; função/autoridade "Responsável técnico e mantenedor do
-projeto FaithRO - Laos Deos". Canal "Claude Code — conversa do projeto FaithRO".
+projeto FaithRO - Laus Deo". Canal "Claude Code — conversa do projeto FaithRO".
 
 ## 5. Pré-condição (GATE 0)
 

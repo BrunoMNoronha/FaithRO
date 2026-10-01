@@ -9,7 +9,7 @@
 
 ## Objetivo
 
-Registrar a arquitetura das credenciais SQL do rAthena no FaithRO - Laos Deos,
+Registrar a arquitetura das credenciais SQL do rAthena no FaithRO - Laus Deo,
 o método seguro de auditoria e rotação da senha do usuário de banco, as
 validações obrigatórias, os riscos, o rollback e o troubleshooting — para que
 qualquer operador rotacione a credencial sem expor segredos e sem derrubar os

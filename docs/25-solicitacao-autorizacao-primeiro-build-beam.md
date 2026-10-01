@@ -62,7 +62,7 @@ O commit de referência é o ponto de integração do runbook; o vínculo forte 
 
 ## 6. Identificação técnica
 
-- **Projeto:** FaithRO — Laos Deos.
+- **Projeto:** FaithRO — Laus Deo.
 - **Operação solicitada:** primeiro build controlado do Beam Patcher.
 - **SHA de referência do FaithRO:** `0c7e3c78a15605e44d4618c26ecf0e169d36e475`.
 - **Runbook submetido:** `client/patcher/beam-audit/first-build-runbook.example.json`

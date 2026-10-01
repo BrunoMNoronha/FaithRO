@@ -57,12 +57,12 @@ LAB_MARKER = "LAB-METADATA.json"
 SETTINGS_BEFORE = {
     "environment": "synthetic-lab",
     "feature_flag": False,
-    "server": "FaithRO - Laos Deos",
+    "server": "FaithRO - Laus Deo",
 }
 SETTINGS_AFTER = {
     "environment": "synthetic-lab",
     "feature_flag": True,
-    "server": "FaithRO - Laos Deos",
+    "server": "FaithRO - Laus Deo",
 }
 VERSION_BEFORE = "0\n"
 VERSION_AFTER = "1\n"

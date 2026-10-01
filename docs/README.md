@@ -1,4 +1,4 @@
-# Índice da documentação — FaithRO - Laos Deos
+# Índice da documentação — FaithRO - Laus Deo
 
 Índice central da base de conhecimento técnica do projeto. Toda a documentação
 está em português brasileiro. Este índice não renumera os documentos existentes;

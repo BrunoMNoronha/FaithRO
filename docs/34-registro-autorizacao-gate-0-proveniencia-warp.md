@@ -35,7 +35,7 @@ por metadados), a ser executado em etapa futura e separada. Registro real:
 ## 4. Decisor e autoridade
 
 Decisor `BrunoMNoronha`; função/autoridade "Responsável técnico e mantenedor do
-projeto FaithRO - Laos Deos".
+projeto FaithRO - Laus Deo".
 
 ## 5. Data e canal
 

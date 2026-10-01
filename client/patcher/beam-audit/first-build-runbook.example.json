@@ -7,7 +7,7 @@
   "plan_reference": "client/patcher/beam-audit/first-build-plan.example.json",
   "authorization_reference": "client/patcher/beam-audit/first-build-authorization.example.json",
   "evidence_reference": "client/patcher/beam-audit/first-build-execution-evidence.example.json",
-  "project": "FaithRO - Laos Deos",
+  "project": "FaithRO - Laus Deo",
   "source_branch": "dev",
   "governance_commit": "4c6a908e09cad84d7ad275267c9b4f912c56b76e",
   "runbook_version": "1.0.0",

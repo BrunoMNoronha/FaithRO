@@ -1,4 +1,4 @@
-# FaithRO - Laos Deos
+# FaithRO - Laus Deo
 
 Servidor sem fins lucrativos inspirado em Ragnarok Online, com proposta **old school**, **high rate**, sem 3ª classes e com progressão customizada até o nível base 255 (atributo/status natural máximo individual planejado: 185; ASPD máxima planejada: 197).
 

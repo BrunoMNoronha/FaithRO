@@ -21,7 +21,7 @@
     <servicetype>&lt;SERVICETYPE_HOMOLOGADO&gt;</servicetype>
     <servertype>&lt;SERVERTYPE_HOMOLOGADO&gt;</servertype>
     <connection>
-        <display>FaithRO - Laos Deos</display>
+        <display>FaithRO - Laus Deo</display>
         <address>&lt;HOST_PUBLICO_FAITHRO&gt;</address>
         <port>&lt;PORTA_LOGIN&gt;</port>
         <version>&lt;VERSAO_CLIENTE&gt;</version>

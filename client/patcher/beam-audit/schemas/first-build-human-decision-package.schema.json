@@ -51,7 +51,7 @@
     "document_reference": { "type": "string", "const": "docs/26-pacote-decisao-humana-primeiro-build-beam.md" },
     "package_id": { "type": "string", "pattern": "^PKG-[0-9A-Za-z-]+$" },
     "package_date_utc": { "type": "null" },
-    "project": { "type": "string", "const": "FaithRO - Laos Deos" },
+    "project": { "type": "string", "const": "FaithRO - Laus Deo" },
     "purpose": { "type": "string", "minLength": 1, "maxLength": 800 },
     "presents_decision": { "type": "boolean", "const": true },
     "grants_authorization": { "type": "boolean", "const": false },

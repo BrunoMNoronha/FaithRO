@@ -2,7 +2,7 @@
 
 ## Visão
 
-FaithRO - Laos Deos será um servidor old school/high rate, sem fins lucrativos, com foco em nostalgia e comunidade.
+FaithRO - Laus Deo será um servidor old school/high rate, sem fins lucrativos, com foco em nostalgia e comunidade.
 
 ## Definição de old school no projeto
 

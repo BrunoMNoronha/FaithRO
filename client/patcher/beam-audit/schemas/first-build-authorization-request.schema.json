@@ -47,7 +47,7 @@
     "evidence_reference": { "type": "string", "const": "client/patcher/beam-audit/first-build-execution-evidence.example.json" },
     "request_id": { "type": "string", "pattern": "^REQ-[0-9A-Za-z-]+$" },
     "request_status": { "type": "string", "const": "PENDING_HUMAN_DECISION" },
-    "project": { "type": "string", "const": "FaithRO - Laos Deos" },
+    "project": { "type": "string", "const": "FaithRO - Laus Deo" },
     "requested_operation": { "type": "string", "minLength": 1 },
     "authorization_granted": { "type": "boolean", "const": false },
     "execution_permitted": { "type": "boolean", "const": false },

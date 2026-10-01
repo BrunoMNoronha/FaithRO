@@ -62,7 +62,7 @@
     "manifest_id": { "type": "string", "pattern": "^MAN-[0-9A-Za-z-]+$" },
     "package_id": { "type": "string", "pattern": "^PKG-[0-9A-Za-z-]+$" },
     "request_id": { "type": "string", "pattern": "^REQ-[0-9A-Za-z-]+$" },
-    "project": { "type": "string", "const": "FaithRO - Laos Deos" },
+    "project": { "type": "string", "const": "FaithRO - Laus Deo" },
     "purpose": { "type": "string", "minLength": 1, "maxLength": 900 },
     "presentation_status": { "type": "string", "const": "NOT_PRESENTED" },
     "presentation_prepared": { "type": "boolean", "const": true },
