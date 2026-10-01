@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:warp-audit/upstream-manifest",
+  "title": "WARP upstream manifest",
+  "description": "Manifesto deterministico da origem upstream do WARP para auditoria estatica pre-build (ETAPA 2P-D). Nao contem fonte de terceiros nem segredos.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "project",
+    "repository",
+    "official_source",
+    "branch",
+    "commit",
+    "license_expression",
+    "source_acquired",
+    "source_executed",
+    "source_built",
+    "binary_created",
+    "client_modified",
+    "audit_scope",
+    "core_cpp_source_present_at_commit",
+    "build_recipe_present",
+    "core_build_possible_with_pinned_commit",
+    "prebuilt_use_authorized",
+    "tree_digest_algorithm",
+    "tree_digest",
+    "critical_files"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "project": { "type": "string", "const": "WARP" },
+    "repository": { "type": "string", "pattern": "^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$" },
+    "official_source": { "type": "string", "pattern": "^https://github\\.com/Neo-Mind/WARP" },
+    "branch": { "type": "string", "minLength": 1 },
+    "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "commit_short": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+    "license_expression": { "type": "string", "minLength": 1 },
+    "source_acquired": { "type": "boolean" },
+    "source_executed": { "type": "boolean", "const": false },
+    "source_built": { "type": "boolean", "const": false },
+    "binary_created": { "type": "boolean", "const": false },
+    "client_modified": { "type": "boolean", "const": false },
+    "audit_scope": { "type": "string", "const": "static-pre-build" },
+    "core_cpp_source_present_at_commit": { "type": "boolean", "const": false },
+    "build_recipe_present": { "type": "boolean", "const": false },
+    "core_build_possible_with_pinned_commit": { "type": "boolean", "const": false },
+    "prebuilt_use_authorized": { "type": "boolean", "const": false },
+    "tree_object_sha1": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "tree_digest_algorithm": { "type": "string", "const": "sha256" },
+    "tree_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "file_count": { "type": "integer", "minimum": 0 },
+    "tracked_binary_count": { "type": "integer", "minimum": 0 },
+    "submodules": { "type": "array" },
+    "critical_files": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256", "size"],
+        "additionalProperties": false,
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "size": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

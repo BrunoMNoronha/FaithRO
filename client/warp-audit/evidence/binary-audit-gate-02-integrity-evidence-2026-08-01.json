@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "project": "WARP",
+  "stage": "2P-E-C2-A",
+  "record_type": "binary-audit-gate-02-integrity-evidence-real",
+  "status": "COMPLETED_PASS",
+  "gate": { "id": 2, "name": "MATERIALIZATION_AND_LOCAL_INTEGRITY" },
+  "authorization_ref": { "path": "client/warp-audit/decisions/binary-audit-gate-02-decision-record-2026-08-01.json" },
+  "plan_ref": { "path": "client/warp-audit/binary-audit-plan.example.json" },
+  "gate_0_evidence_ref": { "path": "client/warp-audit/evidence/binary-audit-gate-00-provenance-evidence-2026-08-01.json" },
+  "gate_1_decision_ref": { "path": "client/warp-audit/decisions/binary-audit-gate-01-decision-record-2026-08-01.json" },
+  "integration_ref": {
+    "pr": 49,
+    "squash_commit": "6a078f338bc69307e942ba390b565da4008acc40",
+    "base_branch": "dev"
+  },
+  "execution": {
+    "gate_2_started": true,
+    "gate_2_completed": true,
+    "execution_state": "COMPLETED",
+    "started_at": "2026-08-01T14:00:00.288Z",
+    "finished_at": "2026-08-01T14:00:01.273Z",
+    "cleanup_at": "2026-08-01T14:01:09.767Z",
+    "operator": "agente FaithRO (Claude Code) sob autorizacao humana de BrunoMNoronha",
+    "method": "GITHUB_OFFICIAL_GIT_DATA_API_BLOB_BY_OID",
+    "network_scope": "GITHUB_OFFICIAL_ONLY",
+    "timestamps_precision": "horarios reais capturados no momento das operacoes (nao representativos)"
+  },
+  "upstream_expected": {
+    "repository_full_name": "Neo-Mind/WARP",
+    "expected_branch": "rock_win32",
+    "commit_oid": "9b1173e9e4e135c68e150704f01186ab5e763acd",
+    "tree_oid": "1aebae06d5c71a145afc35cc72fcf5c210a08758",
+    "artifact_path": "win32/WARP.exe",
+    "artifact_blob_oid": "c853da42d18dfe090b4e941b435d989311faf3dc",
+    "artifact_blob_size": 1137152
+  },
+  "identity_reconfirmation": {
+    "commit_observed": "9b1173e9e4e135c68e150704f01186ab5e763acd",
+    "tree_observed": "1aebae06d5c71a145afc35cc72fcf5c210a08758",
+    "subdir_win32_tree_oid": "94132cf1876b2a10724c9a27afb8065cdbff65e0",
+    "artifact_path_found": "win32/WARP.exe",
+    "artifact_entry_type": "blob",
+    "artifact_blob_oid_observed": "c853da42d18dfe090b4e941b435d989311faf3dc",
+    "artifact_blob_size_observed": 1137152,
+    "identity_match": true
+  },
+  "materialization": {
+    "materialized_file_count": 1,
+    "artifact_logical_path": "<scratchpad>/warp-gate2/WARP.exe",
+    "temporary_dir_outside_repo": true,
+    "size_bytes_observed": 1137152,
+    "opened": false,
+    "executed": false
+  },
+  "integrity": {
+    "expected_size": 1137152,
+    "observed_size": 1137152,
+    "size_match": true,
+    "git_blob_oid_algorithm": "GIT_OBJECT_ID",
+    "git_blob_oid_representation": "blob <size>\\0<content> (SHA-1)",
+    "git_blob_oid_expected": "c853da42d18dfe090b4e941b435d989311faf3dc",
+    "git_blob_oid_computed": "c853da42d18dfe090b4e941b435d989311faf3dc",
+    "git_blob_oid_match": true,
+    "sha256_algorithm": "SHA-256",
+    "sha256_local": "345f3464ee72a60afc97bde0773410f47348a00d8629182fe52741c5f1a42874",
+    "sha256_length": 64,
+    "sha256_is_not_git_oid": true
+  },
+  "security_assertions": {
+    "blob_content_accessed": true,
+    "binary_materialized": true,
+    "binary_sha256_computed": true,
+    "binary_sha256": "345f3464ee72a60afc97bde0773410f47348a00d8629182fe52741c5f1a42874",
+    "materialized_file_count": 1,
+    "no_execution_performed": true,
+    "no_static_inspection_performed": true,
+    "no_dynamic_analysis_performed": true,
+    "no_sandbox_created": true,
+    "no_client_integration": true,
+    "no_distribution": true,
+    "no_vps_access": true,
+    "no_clone_or_archive": true,
+    "no_release_asset": true,
+    "no_mirror_or_third_party": true,
+    "no_external_service_upload": true,
+    "temporary_file_removed": true,
+    "temporary_dir_removed": true,
+    "binary_versioned": false,
+    "raw_responses_versioned": false,
+    "gate_3_authorized": false
+  },
+  "outcome": "COMPLETED_PASS",
+  "findings": [
+    "O conteudo materializado corresponde exatamente ao objeto Git fixado: Git blob OID recalculado igual ao esperado e tamanho igual ao esperado.",
+    "O SHA-256 local do conteudo foi calculado e registrado; e distinto do Git object ID (finalidades diferentes).",
+    "Exatamente um arquivo foi materializado, fora do repositorio, e removido apos a coleta das evidencias."
+  ],
+  "limitations": [
+    "Correspondencia de hash prova apenas a identidade do conteudo obtido em relacao ao objeto Git fixado; NAO prova seguranca, benignidade, licenca de redistribuicao nem adequacao ao cliente.",
+    "O Git blob OID e a identidade do objeto Git (SHA-1 sobre 'blob <size>\\0<content>'); o SHA-256 e o hash do conteudo. Sao identificadores com finalidades diferentes.",
+    "Nenhuma inspecao estatica (PE, strings, imports, exports, recursos, assinatura) nem analise dinamica foi realizada; o GATE 2 nao substitui essas analises.",
+    "O SHA-256 registrado NAO representa aprovacao de seguranca nem autorizacao de uso, integracao ou distribuicao.",
+    "Retrato pontual de 2026-08-01; a integridade confirma identidade em relacao ao objeto fixado, nao a ausencia de comportamento malicioso."
+  ],
+  "rollback": "Registro documental de evidencia: reverter o commit desta branch (antes do merge) ou abrir PR de reversao (apos integracao). O revert nao apaga o fato de que o conteudo foi obtido e hasheado, nao apaga os hashes observados, nao autoriza nova materializacao, execucao, inspecao ou distribuicao, nao inicia o GATE 3 e nao substitui nova decisao humana. Nenhum binario foi versionado; o arquivo temporario foi removido.",
+  "notes": "GATE 2 concluido com COMPLETED_PASS: materializacao controlada e integridade local confirmadas. O arquivo temporario foi removido. Nenhuma execucao, inspecao estatica/dinamica, sandbox, integracao no cliente, distribuicao ou acesso a VPS ocorreu. O GATE 3 permanece nao autorizado; qualquer avanco exige nova decisao humana."
+}

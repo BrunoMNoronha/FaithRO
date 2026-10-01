@@ -1,0 +1,93 @@
+name: Validate WARP audit
+
+# Valida os artefatos versionados da auditoria estatica do WARP em
+# client/warp-audit/ (manifesto, achados de seguranca, selecao de patches e
+# schemas) em pull requests que toquem esses arquivos, o validador ou este
+# workflow. Nao acessa a VPS, nao compila nem executa o WARP, nao usa secrets e
+# nao redistribui nenhum binario ou asset proprietario.
+
+on:
+  pull_request:
+    paths:
+      - client/warp-audit/**
+      - scripts/validate-warp-audit.py
+      - scripts/test-warp-audit-gate-01.py
+      - scripts/test-warp-audit-gate-02.py
+      - scripts/test-warp-audit-gate-03.py
+      - scripts/test-warp-audit-gate-04.py
+      - scripts/warp-audit-gate-05.py
+      - scripts/test-warp-audit-gate-05.py
+      - scripts/inspect-warp-pe-identity.py
+      - scripts/test-warp-pe-identity.py
+      - scripts/inspect-warp-pe-static.py
+      - scripts/test-warp-pe-static.py
+      - scripts/test-warp-audit-eol.py
+      - .gitattributes
+      - .github/workflows/validate-warp-audit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-warp-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Show Python version
+        run: python --version
+
+      - name: Validate WARP audit artifacts
+        run: python scripts/validate-warp-audit.py
+
+      - name: Run WARP audit GATE 1 tests
+        run: python scripts/test-warp-audit-gate-01.py
+
+      - name: Run WARP audit GATE 2 tests
+        run: python scripts/test-warp-audit-gate-02.py
+
+      - name: Run WARP audit GATE 3 tests
+        run: python scripts/test-warp-audit-gate-03.py
+
+      - name: Run WARP audit GATE 4 preparation tests
+        run: python scripts/test-warp-audit-gate-04.py
+
+      - name: Run WARP audit GATE 5 tooling tests (synthetic fixtures only)
+        run: python scripts/test-warp-audit-gate-05.py
+
+      - name: Run WARP PE identity inspector tests
+        run: python scripts/test-warp-pe-identity.py
+
+      - name: Run WARP PE static inventory tests
+        run: python scripts/test-warp-pe-static.py
+
+      - name: Run WARP audit EOL invariants
+        run: python scripts/test-warp-audit-eol.py
+
+      - name: Regression - validate byte-pinned artifacts under core.autocrlf=true
+        # Prova que as regras `eol=lf` do .gitattributes prevalecem sobre um checkout
+        # com core.autocrlf=true (que, sem elas, converteria LF->CRLF e quebraria a
+        # verificacao byte a byte). Clone LOCAL, sem rede; clone temporario removido
+        # sempre (trap), inclusive em falha.
+        run: |
+          set -euo pipefail
+          TMP="$(mktemp -d)"
+          trap 'rm -rf "$TMP"' EXIT
+          git clone --no-checkout --local . "$TMP/clone"
+          cd "$TMP/clone"
+          git config core.autocrlf true
+          git -c advice.detachedHead=false checkout --detach "$GITHUB_SHA"
+          python scripts/test-warp-audit-eol.py
+          python scripts/validate-warp-audit.py
+          python scripts/test-warp-audit-gate-03.py
+          python scripts/test-warp-audit-gate-04.py
+          python scripts/test-warp-audit-gate-05.py
+          python scripts/test-warp-pe-identity.py
+          python scripts/test-warp-pe-static.py

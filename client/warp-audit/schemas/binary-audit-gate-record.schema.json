@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:warp-audit/binary-audit-gate-record",
+  "title": "WARP binary audit gate decision record (blank template)",
+  "description": "Template EM BRANCO do registro de decisao por gate (ETAPA 2P-E-B-PREBUILT). Campos de decisao null, status PENDING, todas as autorizacoes operacionais false. Autoriza no maximo um gate; sem autorizacao transitiva; o merge do template nao autoriza o gate.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "project", "stage", "record_type", "status", "note",
+    "plan_ref", "gate_id", "gate_name", "decision", "decider", "role",
+    "authority", "channel", "date", "justification", "conditions",
+    "evidence_required", "authorization_scope", "authorizations",
+    "supersedes", "rollback", "notes"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "project": { "type": "string", "const": "WARP" },
+    "stage": { "type": "string", "const": "2P-E-B-PREBUILT" },
+    "record_type": { "type": "string", "const": "binary-audit-gate-record-template" },
+    "status": { "type": "string", "const": "PENDING" },
+    "note": { "type": "string", "minLength": 1 },
+    "plan_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 }
+      }
+    },
+    "gate_id": { "type": "null" },
+    "gate_name": { "type": "null" },
+    "decision": { "type": "null" },
+    "decider": { "type": "null" },
+    "role": { "type": "null" },
+    "authority": { "type": "null" },
+    "channel": { "type": "null" },
+    "date": { "type": "null" },
+    "justification": { "type": "null" },
+    "conditions": { "type": "null" },
+    "evidence_required": { "type": "null" },
+    "authorization_scope": { "type": "string", "const": "single-gate" },
+    "authorizations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "human_decision_required", "human_decision_received", "gate_authorized",
+        "stop_path_selected", "provenance_reconfirmation_authorized",
+        "materialization_authorized", "hashing_authorized",
+        "static_inspection_authorized", "local_security_scan_authorized",
+        "external_reputation_upload_authorized", "sandbox_creation_authorized",
+        "execution_without_client_authorized", "client_copy_provision_authorized",
+        "execution_with_client_copy_authorized", "patch_review_authorized",
+        "patch_application_authorized", "client_preparation_authorized",
+        "vps_access_authorized", "test_account_authorized", "first_login_authorized",
+        "distribution_authorized"
+      ],
+      "properties": {
+        "human_decision_required": { "type": "boolean", "const": true },
+        "human_decision_received": { "type": "boolean", "const": false },
+        "gate_authorized": { "type": "boolean", "const": false },
+        "stop_path_selected": { "type": "boolean", "const": false },
+        "provenance_reconfirmation_authorized": { "type": "boolean", "const": false },
+        "materialization_authorized": { "type": "boolean", "const": false },
+        "hashing_authorized": { "type": "boolean", "const": false },
+        "static_inspection_authorized": { "type": "boolean", "const": false },
+        "local_security_scan_authorized": { "type": "boolean", "const": false },
+        "external_reputation_upload_authorized": { "type": "boolean", "const": false },
+        "sandbox_creation_authorized": { "type": "boolean", "const": false },
+        "execution_without_client_authorized": { "type": "boolean", "const": false },
+        "client_copy_provision_authorized": { "type": "boolean", "const": false },
+        "execution_with_client_copy_authorized": { "type": "boolean", "const": false },
+        "patch_review_authorized": { "type": "boolean", "const": false },
+        "patch_application_authorized": { "type": "boolean", "const": false },
+        "client_preparation_authorized": { "type": "boolean", "const": false },
+        "vps_access_authorized": { "type": "boolean", "const": false },
+        "test_account_authorized": { "type": "boolean", "const": false },
+        "first_login_authorized": { "type": "boolean", "const": false },
+        "distribution_authorized": { "type": "boolean", "const": false }
+      }
+    },
+    "supersedes": { "type": "null" },
+    "rollback": { "type": "null" },
+    "notes": { "type": "null" }
+  }
+}

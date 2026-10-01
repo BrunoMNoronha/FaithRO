@@ -1,0 +1,493 @@
+{
+  "schema_version": 1,
+  "project": "WARP",
+  "stage": "2P-E-B-PREBUILT",
+  "record_type": "binary-audit-plan-template",
+  "status": "PLANNED_NOT_AUTHORIZED",
+  "source_decision_record": "client/warp-audit/decisions/core-path-decision-record-2026-07-31.json",
+  "upstream_project": "WARP",
+  "upstream_commit_pinned": "9b1173e9e4e135c68e150704f01186ab5e763acd",
+  "purpose": "Planejar, de forma auditavel, uma futura auditoria binaria OFFLINE do nucleo prebuilt do WARP em etapas pequenas, reproduziveis e bloqueadas por decisoes humanas independentes. Este e um TEMPLATE de plano: nao materializa, nao baixa, nao extrai, nao calcula hash real, nao inspeciona, nao executa e nao autoriza nada.",
+  "non_authorization_notice": "A selecao de PREBUILT_PATH (ETAPA 2P-E-A2) autoriza SOMENTE a producao deste plano. Nenhuma autorizacao operacional e concedida aqui. Cada gate exige decisao humana propria e independente. O merge do PR desta etapa nao autoriza nenhuma execucao futura, nem o GATE 1.",
+  "non_authorization_chain": [
+    "Autorizacao para materializar nao autoriza executar.",
+    "Autorizacao para inspecao estatica nao autoriza analise dinamica.",
+    "Autorizacao para executar sem cliente nao autoriza fornecer o Ragexe.",
+    "Autorizacao para fornecer uma copia descartavel do Ragexe nao autoriza modificar o cliente original.",
+    "Autorizacao para avaliar patches nao autoriza aplica-los.",
+    "Autorizacao para aplicar um patch nao autoriza outros patches.",
+    "Autorizacao para preparar um cliente nao autoriza o primeiro login.",
+    "Autorizacao para primeiro login nao autoriza distribuicao publica.",
+    "Qualquer gate pode terminar em STOP_PATH.",
+    "O merge do PR desta etapa nao autoriza nenhuma execucao futura."
+  ],
+  "principles": [
+    "Offline por padrao.",
+    "Minimo privilegio.",
+    "Maquina ou sandbox descartavel.",
+    "Rede bloqueada.",
+    "Evidencia antes de decisao.",
+    "Hashes calculados localmente.",
+    "Preservacao do artefato original.",
+    "Copias de trabalho descartaveis.",
+    "Nenhuma alteracao do executavel original.",
+    "Nenhum arquivo proprietario no Git.",
+    "Decisoes humanas independentes.",
+    "Interrupcao automatica em comportamento inesperado.",
+    "STOP_PATH valido em qualquer fase.",
+    "Nenhuma adaptacao do servidor por tentativa.",
+    "Ausencia de confianca implicita no prebuilt."
+  ],
+  "states": [
+    "PLANNED_NOT_AUTHORIZED",
+    "WAITING_HUMAN_DECISION",
+    "AUTHORIZED_FOR_SINGLE_GATE",
+    "IN_PROGRESS",
+    "EVIDENCE_COLLECTED",
+    "GATE_PASSED",
+    "GATE_FAILED",
+    "STOPPED",
+    "SUPERSEDED"
+  ],
+  "gates": [
+    {
+      "gate_id": 0,
+      "gate_name": "Reconfirmacao de proveniencia",
+      "objective": "Reconfirmar, por metadados e conteudo textual, o repositorio oficial, o commit fixado, o caminho exato do blob prebuilt, a ausencia de alteracao upstream relevante e a licenca e o contexto de distribuicao do WARP.",
+      "planned_actions": [
+        "reconfirmar o repositorio oficial identificado nas etapas anteriores",
+        "reconfirmar o commit fixado por metadados",
+        "identificar o caminho exato do blob prebuilt no diretorio de distribuicao Windows do commit",
+        "confirmar ausencia de alteracao upstream relevante desde o commit fixado",
+        "confirmar a licenca declarada e o contexto de distribuicao"
+      ],
+      "does_not_materialize_binary": true,
+      "required_evidence": [
+        "evidencia documental da reconfirmacao (somente metadados e texto)",
+        "decisao de continuar ou STOP_PATH"
+      ],
+      "human_decision_required": true,
+      "exit_options": ["CONTINUE", "STOP_PATH"],
+      "does_not_authorize": [
+        "materializar o binario",
+        "executar",
+        "fornecer cliente"
+      ],
+      "must_remain_false": ["materialization_authorized", "execution_without_client_authorized"]
+    },
+    {
+      "gate_id": 1,
+      "gate_name": "Autorizacao para materializacao",
+      "objective": "Decisao humana exclusiva que podera, no futuro, permitir obter exatamente o blob fixado, sem executar, sem fornecer cliente e sem extrair outros artefatos desnecessarios.",
+      "planned_actions": [
+        "registrar decisao humana especifica de materializacao futura",
+        "delimitar o escopo ao blob fixado exato"
+      ],
+      "does_not_materialize_binary": true,
+      "required_evidence": [
+        "registro de decisao do gate (artefato separado)",
+        "escopo fechado da materializacao futura"
+      ],
+      "human_decision_required": true,
+      "exit_options": ["AUTHORIZE_MATERIALIZATION", "STOP_PATH"],
+      "does_not_authorize": [
+        "executar",
+        "fornecer cliente",
+        "extrair artefatos desnecessarios"
+      ],
+      "must_remain_false": ["execution_without_client_authorized", "client_copy_provision_authorized"]
+    },
+    {
+      "gate_id": 2,
+      "gate_name": "Materializacao e integridade local",
+      "objective": "Planejar a obtencao do blob fixado em diretorio descartavel, com integridade calculada localmente e sem qualquer envio externo. Este gate nao autoriza execucao.",
+      "planned_actions": [
+        "usar diretorio descartavel com permissoes restritas",
+        "registrar origem exata, data e operador",
+        "registrar tamanho do artefato",
+        "calcular SHA-256 localmente com utilitario de hashing",
+        "opcionalmente calcular SHA-512 localmente",
+        "preservar somente enquanto necessario",
+        "nao realizar nenhum upload externo"
+      ],
+      "does_not_materialize_binary": true,
+      "required_evidence": [
+        "metadados da materializacao (origem, data, operador, tamanho)",
+        "resumo de integridade calculado localmente"
+      ],
+      "human_decision_required": true,
+      "exit_options": ["GATE_PASSED", "GATE_FAILED", "STOP_PATH"],
+      "does_not_authorize": ["executar o binario", "enviar o binario a qualquer servico"],
+      "must_remain_false": ["execution_without_client_authorized", "external_reputation_upload_authorized"]
+    },
+    {
+      "gate_id": 3,
+      "gate_name": "Identidade e assinatura",
+      "objective": "Planejar a analise offline de identidade e de assinatura do artefato: nome e formato, tipo PE, arquitetura, timestamp PE (metadado NAO confiavel), versao, informacoes de produto, presenca ou ausencia de assinatura Authenticode, cadeia, validade criptografica, identidade do signatario e alertas.",
+      "planned_actions": [
+        "descrever nome e formato do artefato",
+        "identificar tipo PE e arquitetura",
+        "registrar timestamp PE apenas como metadado nao confiavel",
+        "registrar versao e informacoes de produto",
+        "verificar presenca ou ausencia de assinatura Authenticode com utilitario local",
+        "avaliar cadeia, validade criptografica e identidade do signatario",
+        "registrar alertas e inconsistencias"
+      ],
+      "does_not_materialize_binary": true,
+      "required_evidence": [
+        "descricao de identidade do artefato",
+        "resultado de verificacao de assinatura local (a ser preenchido no futuro)"
+      ],
+      "human_decision_required": true,
+      "exit_options": ["GATE_PASSED", "GATE_FAILED", "STOP_PATH"],
+      "does_not_authorize": ["executar o binario"],
+      "must_remain_false": ["execution_without_client_authorized"],
+      "notes": "Ausencia de assinatura NAO deve ser tratada automaticamente como malware, mas aumenta o risco e exige decisao humana."
+    },
+    {
+      "gate_id": 4,
+      "gate_name": "Inventario PE estatico",
+      "objective": "Planejar inspecao estatica offline do PE, sem execucao.",
+      "planned_actions": [
+        "inspecionar cabecalhos PE e secoes",
+        "avaliar entropia e overlay",
+        "listar imports, exports, recursos e manifest",
+        "verificar TLS callbacks, relocations, debug directory e certificados",
+        "avaliar indicadores de empacotamento e dependencias",
+        "extrair strings relevantes e possiveis URLs, dominios ou caminhos embutidos",
+        "avaliar privilegios solicitados e mecanismos de persistencia aparentes",
+        "avaliar funcoes relacionadas a rede, processo, servico, registro e injecao"
+      ],
+      "does_not_materialize_binary": true,
+      "required_evidence": [
+        "inventario PE estatico (a ser preenchido no futuro)",
+        "lista de indicadores avaliados"
+      ],
+      "human_decision_required": true,
+      "exit_options": ["GATE_PASSED", "GATE_FAILED", "STOP_PATH"],
+      "does_not_authorize": ["executar o binario"],
+      "must_remain_false": ["execution_without_client_authorized"],
+      "notes": "Nenhuma conclusao deve depender apenas de uma metrica isolada."
+    },
+    {
+      "gate_id": 5,
+      "gate_name": "Verificacoes locais de seguranca",
+      "objective": "Planejar uso APENAS de mecanismos locais e autorizados (antivirus local, Defender ou equivalente disponivel, ferramentas estaticas locais, regras YARA locais aprovadas).",
+      "planned_actions": [
+        "executar apenas ferramentas de seguranca locais e autorizadas",
+        "avaliar analise de reputacao somente sob autorizacao humana separada",
+        "nao enviar o binario a nenhum servico externo automaticamente"
+      ],
+      "does_not_materialize_binary": true,
+      "required_evidence": [
+        "resultado das verificacoes locais (a ser preenchido no futuro)",
+        "lista de ferramentas locais utilizadas"
+      ],
+      "human_decision_required": true,
+      "exit_options": ["GATE_PASSED", "GATE_FAILED", "STOP_PATH"],
+      "does_not_authorize": [
+        "enviar o binario a servico externo, sandbox publica, nuvem, LLM, repositorio, issue, chat ou storage externo"
+      ],
+      "must_remain_false": ["external_reputation_upload_authorized"],
+      "notes": "Qualquer envio externo exige gate humano separado com avaliacao de propriedade intelectual e privacidade."
+    },
+    {
+      "gate_id": 6,
+      "gate_name": "Preparacao da sandbox",
+      "objective": "Planejar (sem criar nem iniciar) uma sandbox descartavel e isolada.",
+      "planned_actions": [
+        "definir sandbox descartavel, sem dados pessoais e sem credenciais",
+        "sem acesso a VPS e sem acesso a rede local",
+        "sem clipboard compartilhado, sem pastas compartilhadas, sem sincronizacao em nuvem e sem mounts do host",
+        "definir snapshot inicial e documentacao de relogio, sistema e ferramentas",
+        "definir bloqueio de rede em mais de uma camada quando tecnicamente possivel",
+        "definir politica clara de descarte"
+      ],
+      "does_not_materialize_binary": true,
+      "does_not_create_sandbox": true,
+      "required_evidence": [
+        "especificacao da sandbox (requisitos de isolamento)",
+        "politica de descarte"
+      ],
+      "human_decision_required": true,
+      "exit_options": ["GATE_PASSED", "GATE_FAILED", "STOP_PATH"],
+      "does_not_authorize": ["criar ou iniciar a sandbox nesta etapa", "executar o binario"],
+      "must_remain_false": ["sandbox_creation_authorized", "execution_without_client_authorized"]
+    },
+    {
+      "gate_id": 7,
+      "gate_name": "Baseline dinamico",
+      "objective": "Antes de qualquer execucao futura, planejar a coleta de baseline do ambiente.",
+      "planned_actions": [
+        "coletar baseline de processos, servicos, drivers e tarefas agendadas",
+        "coletar baseline de arquivos, diretorios temporarios e registro",
+        "coletar baseline de conexoes, interfaces e regras de firewall",
+        "coletar baseline de usuarios, grupos, variaveis de ambiente e modulos relevantes",
+        "registrar resumos de integridade das ferramentas de coleta"
+      ],
+      "does_not_materialize_binary": true,
+      "required_evidence": [
+        "baseline documentado (a ser preenchido no futuro)",
+        "lista de ferramentas de coleta"
+      ],
+      "human_decision_required": true,
+      "exit_options": ["GATE_PASSED", "GATE_FAILED", "STOP_PATH"],
+      "does_not_authorize": ["executar o binario"],
+      "must_remain_false": ["execution_without_client_authorized"]
+    },
+    {
+      "gate_id": 8,
+      "gate_name": "Autorizacao para execucao sem cliente",
+      "objective": "Gate humano exclusivo que podera permitir, no maximo, uma execucao controlada do prebuilt sem fornecer Ragexe, sem cliente, sem rede, sem credenciais e sem persistencia fora da sandbox.",
+      "planned_actions": [
+        "registrar decisao humana especifica de execucao sem cliente",
+        "delimitar a UMA execucao controlada",
+        "confirmar rede bloqueada e ausencia de credenciais"
+      ],
+      "does_not_materialize_binary": true,
+      "required_evidence": [
+        "registro de decisao do gate (artefato separado)",
+        "escopo fechado da execucao futura"
+      ],
+      "human_decision_required": true,
+      "exit_options": ["AUTHORIZE_EXECUTION_WITHOUT_CLIENT", "STOP_PATH"],
+      "does_not_authorize": [
+        "fornecer Ragexe",
+        "modificar o cliente",
+        "primeiro login"
+      ],
+      "must_remain_false": ["client_copy_provision_authorized", "client_modification_authorized", "first_login_authorized"]
+    },
+    {
+      "gate_id": 9,
+      "gate_name": "Analise dinamica sem cliente",
+      "objective": "Planejar a observacao controlada do prebuilt sem cliente e sem rede.",
+      "planned_actions": [
+        "observar arvore de processos, processos filhos e modulos carregados",
+        "observar arquivos criados, lidos, alterados e removidos e alteracoes de registro",
+        "observar servicos, tarefas, drivers, named pipes, mutexes e memoria",
+        "observar tentativas de rede, resolucao DNS, sockets e persistencia",
+        "observar comportamento de atualizacao, erros e dependencias ausentes",
+        "observar alteracoes apos o encerramento"
+      ],
+      "does_not_materialize_binary": true,
+      "required_evidence": [
+        "observacao dinamica sem cliente (a ser preenchida no futuro)",
+        "registro de qualquer tentativa de rede"
+      ],
+      "human_decision_required": true,
+      "exit_options": ["GATE_PASSED", "GATE_FAILED", "STOPPED", "STOP_PATH"],
+      "does_not_authorize": ["fornecer o cliente"],
+      "must_remain_false": ["client_copy_provision_authorized"],
+      "notes": "Qualquer tentativa de rede deve interromper o teste, preservar evidencia e retornar a decisao humana."
+    },
+    {
+      "gate_id": 10,
+      "gate_name": "Avaliacao dos resultados sem cliente",
+      "objective": "Definir criterios de avaliacao dos resultados obtidos sem cliente.",
+      "planned_actions": [
+        "classificar como aprovado para proxima avaliacao, inconclusivo, reprovado, risco incompativel, evidencia insuficiente ou STOP_PATH"
+      ],
+      "does_not_materialize_binary": true,
+      "required_evidence": [
+        "parecer de avaliacao (a ser preenchido no futuro)"
+      ],
+      "human_decision_required": true,
+      "exit_options": ["GATE_PASSED", "GATE_FAILED", "STOP_PATH"],
+      "does_not_authorize": ["fornecer o cliente"],
+      "must_remain_false": ["client_copy_provision_authorized"],
+      "notes": "Aprovacao neste gate nao autoriza fornecer o cliente."
+    },
+    {
+      "gate_id": 11,
+      "gate_name": "Autorizacao para copia descartavel do executavel do cliente",
+      "objective": "Gate humano exclusivo que podera considerar, no futuro, o uso de uma copia descartavel do executavel legalmente possuido pelo responsavel, com o original preservado fora do ambiente operacional.",
+      "planned_actions": [
+        "registrar decisao humana especifica de uso de copia descartavel",
+        "confirmar que o original permanece preservado fora do ambiente operacional",
+        "delimitar sem GRF ou outros assets quando nao necessarios, sem credenciais e sem conta real"
+      ],
+      "does_not_materialize_binary": true,
+      "required_evidence": [
+        "registro de decisao do gate (artefato separado)",
+        "confirmacao de preservacao do original"
+      ],
+      "human_decision_required": true,
+      "exit_options": ["AUTHORIZE_CLIENT_COPY", "STOP_PATH"],
+      "does_not_authorize": ["aplicar patch", "primeiro login", "distribuir"],
+      "must_remain_false": ["patch_application_authorized", "first_login_authorized", "distribution_authorized"]
+    },
+    {
+      "gate_id": 12,
+      "gate_name": "Analise com copia descartavel do executavel",
+      "objective": "Planejar a observacao controlada do comportamento do WARP ao receber uma copia descartavel do executavel do cliente.",
+      "planned_actions": [
+        "exigir rede bloqueada e baseline limpo",
+        "registrar resumo de integridade antes e depois",
+        "registrar comparacao binaria e lista de arquivos criados",
+        "registrar argumentos, processos filhos, dependencias e logs",
+        "descartar as copias de trabalho ao final"
+      ],
+      "does_not_materialize_binary": true,
+      "required_evidence": [
+        "observacao com copia descartavel (a ser preenchida no futuro)",
+        "confirmacao de descarte"
+      ],
+      "human_decision_required": true,
+      "exit_options": ["GATE_PASSED", "GATE_FAILED", "STOPPED", "STOP_PATH"],
+      "does_not_authorize": ["versionar, publicar, enviar a VPS ou distribuir o executavel alterado"],
+      "must_remain_false": ["distribution_authorized", "client_modification_authorized"],
+      "notes": "O executavel alterado nao pode ser versionado, publicado, enviado a VPS ou distribuido."
+    },
+    {
+      "gate_id": 13,
+      "gate_name": "Revisao individual de patches",
+      "objective": "Tratar cada patch por uma decisao separada. Uma decisao sobre um patch nao autoriza qualquer outro.",
+      "planned_actions": [
+        "para cada patch: descrever finalidade, bytes ou comportamento afetado e necessidade",
+        "para cada patch: avaliar risco, impacto de seguranca e de compatibilidade",
+        "para cada patch: descrever alternativa sem patch, criterio de teste e rollback",
+        "para cada patch: exigir decisao humana individual"
+      ],
+      "does_not_materialize_binary": true,
+      "blocked_patches": ["CustomDLL", "DisableProtect", "DisableEncr", "EnableProxy"],
+      "reviewed_only_candidates": ["DataFolderFirst", "CallKoreaClientInfo"],
+      "required_evidence": [
+        "ficha de revisao por patch (a ser preenchida no futuro)"
+      ],
+      "human_decision_required": true,
+      "exit_options": ["GATE_PASSED", "GATE_FAILED", "STOP_PATH"],
+      "does_not_authorize": ["aplicar qualquer patch"],
+      "must_remain_false": ["patch_application_authorized"],
+      "notes": "Os patches CustomDLL, DisableProtect, DisableEncr e EnableProxy permanecem bloqueados; DataFolderFirst e CallKoreaClientInfo permanecem somente candidatos revisados."
+    },
+    {
+      "gate_id": 14,
+      "gate_name": "Autorizacao para aplicar patches selecionados",
+      "objective": "Podera existir somente depois da revisao individual e devera registrar uma LISTA FECHADA dos patches autorizados. Lista vazia significa que nenhum patch esta autorizado.",
+      "planned_actions": [
+        "registrar lista fechada de patches autorizados (pode ser vazia)",
+        "nao usar autorizacao generica"
+      ],
+      "does_not_materialize_binary": true,
+      "required_evidence": [
+        "lista fechada de patches autorizados (a ser preenchida no futuro)"
+      ],
+      "human_decision_required": true,
+      "exit_options": ["AUTHORIZE_SELECTED_PATCHES", "STOP_PATH"],
+      "does_not_authorize": ["autorizacao generica de todos os patches"],
+      "must_remain_false": ["patch_application_authorized"],
+      "notes": "Proibida autorizacao generica do tipo all_required_patches_authorized=true."
+    },
+    {
+      "gate_id": 15,
+      "gate_name": "Preparacao controlada do cliente",
+      "objective": "Planejar somente para o futuro a preparacao controlada de uma copia operacional separada do cliente.",
+      "planned_actions": [
+        "usar copia operacional separada com inventario de arquivos, resumos de integridade e permissoes",
+        "aplicar somente configuracao propria/licenciada",
+        "garantir reversibilidade",
+        "nao versionar conteudo proprietario no Git, nao enviar a VPS e nao realizar login"
+      ],
+      "does_not_materialize_binary": true,
+      "required_evidence": [
+        "inventario da preparacao (a ser preenchido no futuro)",
+        "confirmacao de reversibilidade"
+      ],
+      "human_decision_required": true,
+      "exit_options": ["GATE_PASSED", "GATE_FAILED", "STOP_PATH"],
+      "does_not_authorize": ["primeiro login", "distribuir"],
+      "must_remain_false": ["first_login_authorized", "distribution_authorized"]
+    },
+    {
+      "gate_id": 16,
+      "gate_name": "Autorizacao para primeiro login",
+      "objective": "Gate humano separado e final. Podera ser considerado somente depois da conclusao satisfatoria dos gates anteriores, com cliente preparado, servidor estavel, conta descartavel aprovada, janela de teste, logs e rollback, autorizacao para acessar a VPS caso necessaria e validacao de propriedade intelectual.",
+      "planned_actions": [
+        "registrar decisao humana separada e final do primeiro login",
+        "confirmar pre-condicoes (cliente preparado, servidor estavel, conta descartavel, janela, logs, rollback)"
+      ],
+      "does_not_materialize_binary": true,
+      "required_evidence": [
+        "registro de decisao do gate (artefato separado)"
+      ],
+      "human_decision_required": true,
+      "exit_options": ["AUTHORIZE_FIRST_LOGIN", "STOP_PATH"],
+      "does_not_authorize": ["distribuicao publica"],
+      "must_remain_false": ["first_login_authorized", "distribution_authorized", "vps_access_authorized"],
+      "notes": "Esta autorizacao NAO e concedida nesta etapa."
+    }
+  ],
+  "stop_criteria": [
+    "divergencia do commit",
+    "hash instavel",
+    "assinatura invalida ou enganosa",
+    "dependencia inesperada",
+    "privilegio elevado nao explicado",
+    "persistencia",
+    "tentativa de rede",
+    "injecao",
+    "driver inesperado",
+    "alteracao fora do diretorio previsto",
+    "acesso a credenciais",
+    "comportamento anti-analise relevante",
+    "empacotamento nao explicado",
+    "resultado de seguranca grave",
+    "falha no bloqueio de rede",
+    "sandbox contaminada",
+    "evidencia incompleta",
+    "modificacao do original",
+    "tentativa de acessar a VPS",
+    "tentativa de distribuir ou versionar artefatos",
+    "necessidade de patch sensivel nao autorizado"
+  ],
+  "evidence_requirements": {
+    "fields": [
+      "identificador",
+      "gate",
+      "data",
+      "operador",
+      "decisao_humana_associada",
+      "ambiente",
+      "ferramentas",
+      "versoes_das_ferramentas",
+      "resumos_de_integridade_das_ferramentas",
+      "entradas",
+      "comandos_efetivamente_executados_no_futuro",
+      "codigos_de_saida",
+      "resultados",
+      "arquivos_de_evidencia",
+      "resumos_de_integridade_das_evidencias",
+      "achados",
+      "limitacoes",
+      "riscos",
+      "decisao",
+      "rollback_executado",
+      "descarte_confirmado"
+    ],
+    "note": "O plano NAO preenche evidencias reais nesta etapa. Cada campo sera preenchido no futuro, por gate, sob decisao humana."
+  },
+  "blocked_patches": ["CustomDLL", "DisableProtect", "DisableEncr", "EnableProxy"],
+  "reviewed_only_candidates": ["DataFolderFirst", "CallKoreaClientInfo"],
+  "authorizations": {
+    "plan_creation_authorized": true,
+    "plan_created": true,
+    "provenance_reconfirmation_authorized": false,
+    "materialization_authorized": false,
+    "hashing_authorized": false,
+    "static_inspection_authorized": false,
+    "local_security_scan_authorized": false,
+    "external_reputation_upload_authorized": false,
+    "sandbox_creation_authorized": false,
+    "execution_without_client_authorized": false,
+    "client_copy_provision_authorized": false,
+    "execution_with_client_copy_authorized": false,
+    "patch_review_authorized": false,
+    "patch_application_authorized": false,
+    "client_preparation_authorized": false,
+    "vps_access_authorized": false,
+    "test_account_authorized": false,
+    "first_login_authorized": false,
+    "distribution_authorized": false
+  }
+}

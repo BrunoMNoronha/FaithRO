@@ -92,8 +92,51 @@ percorre `client/` e falha (código de saída ≠ 0) se encontrar qualquer arqui
 fora da allowlist textual (por exemplo, um binário ou pacote proprietário).
 Ele usa **apenas a biblioteca padrão** e não acessa nada fora do repositório.
 
+## Preparação do executável (hex) — decisão
+
+A preparação do **executável** do cliente (habilitar `data` folder, `clientinfo`
+de FaithRO, `langtype` etc.) **não** é feita por um patcher de GRF. A ferramenta
+para isso é decidida em
+[`docs/28-decisao-ferramenta-preparacao-cliente.md`](../docs/28-decisao-ferramenta-preparacao-cliente.md)
+(**WARP** — `APROVAR COM RESTRIÇÕES`; NEMO atual **rejeitado** por licença
+ausente). A compatibilidade do cliente 2021-11-05 com o servidor está em
+[`docs/29-compatibilidade-cliente-2021-11-05-packetver.md`](../docs/29-compatibilidade-cliente-2021-11-05-packetver.md)
+(`PROVÁVEL`, sem rebuild). A auditoria estática aprofundada do WARP no commit
+fixado está em [`warp-audit/`](warp-audit/) e
+[`docs/30-auditoria-estatica-warp.md`](../docs/30-auditoria-estatica-warp.md)
+(`BLOQUEADO PARA BUILD DO FONTE` — núcleo só prebuilt no commit — e `APROVADO COM
+RESTRIÇÕES` apenas para decidir o caminho do núcleo). A investigação do caminho do
+núcleo e o pacote de decisão humana estão em
+[`docs/31-decisao-caminho-nucleo-warp.md`](../docs/31-decisao-caminho-nucleo-warp.md)
+(fonte não localizada; prebuilt com proveniência parcial; decisão humana pendente).
+A decisão humana foi registrada em
+[`docs/32-registro-decisao-caminho-nucleo-warp.md`](../docs/32-registro-decisao-caminho-nucleo-warp.md)
+(`PREBUILT_PATH` **selecionado apenas para planejamento** da auditoria binária
+offline; prebuilt não materializado nem executado; flags operacionais `false`; o
+merge não autoriza a próxima ação). O plano dessa auditoria (17 gates independentes,
+ainda sem materialização) está em
+[`docs/33-plano-auditoria-binaria-offline-warp.md`](../docs/33-plano-auditoria-binaria-offline-warp.md)
+(`PLANO CRIADO — NENHUMA MATERIALIZAÇÃO AUTORIZADA`; o merge não autoriza o GATE 1).
+A autorização humana **exclusiva do GATE 0** (reconfirmação de proveniência por
+metadados) está registrada em
+[`docs/34-registro-autorizacao-gate-0-proveniencia-warp.md`](../docs/34-registro-autorizacao-gate-0-proveniencia-warp.md)
+(`GATE 0 AUTORIZADO — AINDA NÃO INICIADO`; nenhuma consulta upstream nesta etapa;
+GATE 1 proibido; merge não executa o GATE 0). O GATE 0 foi então **executado por
+metadados oficiais** — resultado em
+[`docs/35-resultado-gate-0-proveniencia-warp.md`](../docs/35-resultado-gate-0-proveniencia-warp.md)
+(`GATE 0 CONCLUÍDO — APROVADO POR METADADOS`; proveniência consistente; nada baixado,
+materializado ou executado; Git object ID ≠ SHA-256 local; GATE 1 exige nova decisão
+humana). Nenhuma dessas etapas modifica o executável sem autorização humana; nada do
+cliente é versionado aqui.
+
 ## Referências
 
 - [`docs/15-cliente-primeiro-acesso.md`](../docs/15-cliente-primeiro-acesso.md)
 - [`docs/16-politica-distribuicao-cliente.md`](../docs/16-politica-distribuicao-cliente.md)
 - [`docs/09-cliente-baseline-protocolo.md`](../docs/09-cliente-baseline-protocolo.md)
+- [`docs/28-decisao-ferramenta-preparacao-cliente.md`](../docs/28-decisao-ferramenta-preparacao-cliente.md)
+- [`docs/29-compatibilidade-cliente-2021-11-05-packetver.md`](../docs/29-compatibilidade-cliente-2021-11-05-packetver.md)
+- [`docs/32-registro-decisao-caminho-nucleo-warp.md`](../docs/32-registro-decisao-caminho-nucleo-warp.md)
+- [`docs/33-plano-auditoria-binaria-offline-warp.md`](../docs/33-plano-auditoria-binaria-offline-warp.md)
+- [`docs/34-registro-autorizacao-gate-0-proveniencia-warp.md`](../docs/34-registro-autorizacao-gate-0-proveniencia-warp.md)
+- [`docs/35-resultado-gate-0-proveniencia-warp.md`](../docs/35-resultado-gate-0-proveniencia-warp.md)
