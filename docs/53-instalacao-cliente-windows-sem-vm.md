@@ -42,9 +42,11 @@ para jogadores. Não baixe DLLs avulsas para resolver erros.
 ## Passo 2 — Instalar o cliente oficial, se necessário
 
 1. Abra a [página oficial de downloads do kRO/Gravity](https://ro.gnjoy.com/pds/down/).
-   Página consultada em 2026-10-01; disponibilidade da versão antiga não comprovada.
-2. Para reproduzir a baseline, use o instalador oficial `RAG_SETUP_211105` já
-   possuído legitimamente, quando disponível. A página atual pode oferecer outra
+   Para o instalador atual, há também a [página oficial de confirmação do download](https://ro.gnjoy.com/ResService/game/download/gamedownloadpopupV2.asp?game=ro&type=exe).
+2. Para reproduzir a baseline, use o instalador oficial já possuído ou o
+   [RAG_SETUP_211105.exe no servidor oficial da Gravity](https://rofull.gnjoy.com/RAG_SETUP_211105.exe).
+   O endereço histórico respondeu com HTTP 200 em 2026-10-01; não foi baixado
+   nem executado nesta verificação. A página de downloads atual pode oferecer outra
    versão: registre sua identidade e trate a compatibilidade como pendente.
 3. Antes de executar o instalador, abra **Propriedades → Assinaturas Digitais**
    e verifique a assinatura da Gravity. Registre também seu SHA-256:
@@ -107,7 +109,8 @@ de qualquer versão nova. Preserve o resultado na pasta de evidências.
 2. Escolha opções disponíveis e compatíveis com a estação; para o primeiro teste,
    prefira modo janela e uma resolução suportada pelo configurador.
 3. Salve e feche o configurador. Registre qualquer erro e os arquivos alterados.
-4. O OpenSetup é alternativa documentada, mas não é dependência deste guia.
+4. O [OpenSetup na página oficial do autor](https://nn.ai4rei.net/dev/opensetup/)
+   é alternativa documentada, mas não é dependência deste guia.
    Não substitua o configurador sem verificar origem, versão e licença.
 
 ## Passo 6 — Preparar a conexão com o FaithRO (pendente)
@@ -118,7 +121,9 @@ infraestrutura oficial e sua leitura de configuração externa não foi homologa
 
 Antes de aplicar qualquer alteração na cópia:
 
-1. Identifique e verifique a ferramenta WARP, incluindo origem, versão, hash,
+1. Consulte o [repositório oficial do WARP](https://github.com/Neo-Mind/WARP)
+   e a [revisão fixada pelo projeto](https://github.com/Neo-Mind/WARP/tree/9b1173e9e4e135c68e150704f01186ab5e763acd).
+   Identifique e verifique a ferramenta, incluindo origem, versão, hash,
    licença e núcleo prebuilt. Auditoria estática não comprova prontidão no host.
 2. Reconcilie o perfil de patches e comprove seu reconhecimento do executável real.
    `DataFolderFirst` e `CallKoreaClientInfo` são candidatos; `RestoreClientInfo`
@@ -215,6 +220,25 @@ snapshot ou altere a VPS/banco como parte desse rollback.
 - [ ] Original continua intacto; nenhum proprietário ou segredo no Git.
 
 ## Referências
+
+### Links externos verificados em 2026-10-01
+
+| Destino | Resultado da verificação | Limite |
+| --- | --- | --- |
+| [Downloads oficiais kRO/Gravity](https://ro.gnjoy.com/pds/down/) | Página de downloads lida | Versão atual não comprova compatibilidade com FaithRO |
+| [Confirmação do download oficial](https://ro.gnjoy.com/ResService/game/download/gamedownloadpopupV2.asp?game=ro&type=exe) | HTTP 200 | Página de confirmação; não é o instalador histórico |
+| [Instalador histórico RAG_SETUP_211105.exe](https://rofull.gnjoy.com/RAG_SETUP_211105.exe) | HEAD: HTTP 200; `application/x-msdownload`; nome confirmado em `Content-Disposition`; 3.427.631.040 bytes | Conteúdo não baixado; assinatura e hash local ainda devem ser conferidos |
+| [OpenSetup — autor](https://nn.ai4rei.net/dev/opensetup/) | HTTP 200 e HTML identificado como RO OpenSetup | Nenhum pacote baixado ou homologado |
+| [WARP — upstream](https://github.com/Neo-Mind/WARP) | Página do repositório lida | Disponibilidade não comprova segurança da ferramenta |
+| [WARP — commit auditado](https://github.com/Neo-Mind/WARP/tree/9b1173e9e4e135c68e150704f01186ab5e763acd) | HTTP 200 | Preserva a referência; não autoriza usar a versão mais recente |
+
+O servidor do instalador histórico declarou o metadado SHA-256
+`d9067cc9ac62c85fa599ac94bbb19e9e96a1b7529181252806dc1df49e0293aa`.
+Esse valor foi lido no cabeçalho HTTP, **não recalculado a partir do download**.
+A acessibilidade dos links pode mudar; valide origem, assinatura e integridade
+antes de executar qualquer arquivo. Nenhum mirror foi utilizado.
+
+### Documentos e templates do projeto
 
 - [Baseline e protocolo](09-cliente-baseline-protocolo.md).
 - [Primeiro acesso planejado para jogadores](15-cliente-primeiro-acesso.md).
