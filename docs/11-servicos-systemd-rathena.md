@@ -8,7 +8,7 @@
 ## Objetivo
 
 Documentar o estado real dos serviços systemd do rAthena usados pelo FaithRO -
-Laos Deos, confirmado por inspeção direta na VPS, permitindo que qualquer
+Laus Deo, confirmado por inspeção direta na VPS, permitindo que qualquer
 operador identifique as unidades corretas, os binários executados, o usuário
 e diretório de trabalho, consulte estado e logs com segurança, e execute
 start/stop/restart na ordem correta — sem depender do histórico do chat.

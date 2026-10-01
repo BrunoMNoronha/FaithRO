@@ -13,8 +13,8 @@
     {
       "op": "update",
       "path": "config/faithro-settings.json",
-      "sha256": "f602117d8f525727dac3015782478d7024b0bcc38676cc7f4ee97df1365fed43",
-      "size": 96
+      "sha256": "162c7db8ad4548fb3f7b8f0c14fa33c5facb7ac1d7a1c5af5cffba9857ef4f07",
+      "size": 95
     },
     {
       "op": "update",

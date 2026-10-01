@@ -37,7 +37,7 @@ para materialização, execução ou uso.
 | Campo | Valor |
 | --- | --- |
 | Decisor | `BrunoMNoronha` |
-| Função / autoridade | Responsável técnico e mantenedor do projeto FaithRO - Laos Deos |
+| Função / autoridade | Responsável técnico e mantenedor do projeto FaithRO - Laus Deo |
 | Canal | ChatGPT — conversa do projeto FaithRO |
 | Data | 2026-07-31 |
 | Opção selecionada | **`PREBUILT_PATH`** (registrada em `decision.option`) |

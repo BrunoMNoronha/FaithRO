@@ -8,7 +8,7 @@
 ## Objetivo
 
 Preparar a VPS base Ubuntu 22.04 para, no futuro, receber as dependências, o
-banco de dados, o emulador e os serviços do FaithRO - Laos Deos.
+banco de dados, o emulador e os serviços do FaithRO - Laus Deo.
 
 Nesta etapa **não** se instala o rAthena e **não** se instala o MariaDB. O foco
 é deixar o sistema operacional atualizado, com um usuário operacional não-root,

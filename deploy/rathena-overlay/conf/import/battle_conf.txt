@@ -1,4 +1,4 @@
-// FaithRO - Laos Deos - override versionado (ETAPA 2N-C, issue #8).
+// FaithRO - Laus Deo - override versionado (ETAPA 2N-C, issue #8).
 //
 // Fonte versionada. Destino na VPS:
 //   /opt/faithro/rathena/conf/import/battle_conf.txt

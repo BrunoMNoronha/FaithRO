@@ -12,7 +12,7 @@
 
 ## 1. Objetivo
 
-Registrar a execução autorizada da instalação local e isolada da toolchain `1.85.0-x86_64-pc-windows-msvc` no ambiente de desenvolvimento do projeto **FaithRO - Laos Deos**, preservando integralmente a toolchain ativa `1.77.2-x86_64-pc-windows-msvc` como padrão global.
+Registrar a execução autorizada da instalação local e isolada da toolchain `1.85.0-x86_64-pc-windows-msvc` no ambiente de desenvolvimento do projeto **FaithRO - Laus Deo**, preservando integralmente a toolchain ativa `1.77.2-x86_64-pc-windows-msvc` como padrão global.
 
 A instalação foi efetuada **sem autorização de compilação**, **sem execução do Beam Patcher**, **sem alteração de dependências**, **sem acesso à VPS** e **sem deploy**.
 
