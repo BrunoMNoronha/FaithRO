@@ -55,3 +55,20 @@ Só execute de verdade após revisar a saída do modo simulação e confirmar qu
 ```
 
 Isso criará as 15 issues reais em `https://github.com/BrunoMNoronha/FaithRO/issues`.
+
+## Configuração do cliente no Windows sem VM
+
+`configurar-cliente-windows.ps1` (PowerShell 5.1+) valida assinatura/hash, faz
+backup dos arquivos envolvidos e adiciona/atualiza XML na instalação existente.
+Não copia o diretório inteiro nem altera executáveis/GRFs. `-BackupPath` exige
+uma pasta nova fora do cliente/repositório; `-WhatIf` valida sem escrita.
+XML opcional exige todos os valores explicitamente confirmados.
+
+Ver [guia e rollback](../docs/53-instalacao-cliente-windows-sem-vm.md#passo-4--backup-e-configuração-na-instalação-existente).
+Evidências ficam no backup. Em falha, confira o XML e restaure somente os arquivos
+alterados; não há limpeza automática. Nenhum patch ou login é executado.
+
+Teste: `powershell -NoProfile -File scripts/test-configurar-cliente-windows.ps1`.
+14 verificações com fixtures sintéticas e assinatura simulada somente nos testes.
+Execução na instalação real continua pendente. PowerShell usa StrictMode e
+ErrorActionPreference Stop; `set -euo pipefail` aplica-se a scripts shell.

@@ -323,3 +323,14 @@ O [documento 53](53-instalacao-cliente-windows-sem-vm.md) detalha a instalação
 oficial, verificação de integridade, cópia separada, configuração e checkpoints
 do primeiro acesso no Windows. A aplicação de patches continua pendente de
 homologação; o guia não registra execução.
+
+### Ajuste vigente — backup de arquivos, sem cópia integral
+
+Em 2026-10-01, o usuário substituiu a exigência de cópia separada do diretório:
+“não precisa copiar o diretorio. apenas crie backup dos arquivos e inclua os novos”.
+Para a configuração textual, o fluxo vigente trabalha na instalação existente,
+após backup verificado dos arquivos envolvidos, e acrescenta/atualiza o XML.
+O [guia 53](53-instalacao-cliente-windows-sem-vm.md) detalha o script e o rollback.
+Este ajuste substitui as orientações anteriores de copiar o diretório inteiro;
+não autoriza patch binário, distribuição ou alteração de servidor. A configuração
+real não foi executada nesta etapa; os testes do script usam fixtures sintéticas.

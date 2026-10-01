@@ -15,8 +15,8 @@ conforme os passos 2 e 3 antes de executar o instalador.
 
 ## Objetivo e contexto
 
-Instalar ou reaproveitar o cliente oficial, preservar o original e preparar uma
-cópia separada para testar login → personagem → mapa no FaithRO - Laus Deo.
+Instalar ou reaproveitar o cliente oficial, preservar os arquivos envolvidos em backup e configurar a
+instalação existente para testar login → personagem → mapa no FaithRO - Laus Deo.
 Todo o trabalho acontece no Windows do operador, sem VM, conforme a
 [decisão registrada no documento 52](52-gate5-validacao-pos-snapshot-baseline-preparacao-cliente.md#decisao-vigente-primeiro-acesso-no-windows-sem-vm).
 
@@ -28,9 +28,9 @@ não substitui automaticamente essa baseline. Ver [documento 29](29-compatibilid
 
 ## Pré-requisitos
 
-- Windows do operador, Defender ativo e espaço para o cliente completo e sua cópia.
+- Windows do operador, Defender ativo e espaço para o cliente completo e o backup dos arquivos envolvidos.
 - Cliente e assets obtidos legitimamente da fonte oficial; sem mirrors comunitários.
-- Pasta de teste escolhida pelo operador, fora do repositório e separada da original.
+- Pasta de backup escolhida pelo operador, fora do repositório e da instalação.
 - Pasta de evidências fora do Git; não registrar senha ou dados de jogadores.
 - Para o login: servidor disponível, IP autorizado no firewall e conta de teste.
 
@@ -98,22 +98,78 @@ Se houver divergência, classifique a instalação antes de prosseguir. Esses ha
 identificam os arquivos históricos; não garantem segurança nem compatibilidade
 de qualquer versão nova. Preserve o resultado na pasta de evidências.
 
-## Passo 4 — Criar a cópia de teste
+## Passo 4 — Backup e configuração na instalação existente
 
-1. Feche cliente, launcher e configurador.
-2. Escolha uma pasta nova, vazia, fora do repositório e da instalação original.
-   O destino é uma escolha do operador; registre seu caminho absoluto.
-3. Pelo Explorador, **copie** a pasta completa do cliente para esse destino.
-   Não mova a instalação original e não sobrescreva outro cliente.
-4. Confira se os GRFs, subpastas e executáveis estão presentes na cópia.
-5. Repita `Get-FileHash` para `Ragexe.exe` e `data.grf` no destino. Os hashes
-   devem ser iguais aos da origem antes da preparação.
-6. Faça toda alteração posterior somente nessa cópia. Não publique ou envie
-   a cópia ao GitHub, a jogadores ou a serviços de armazenamento.
+Por decisão do usuário em 2026-10-01, não é necessário copiar o diretório inteiro.
+O fluxo vigente cria backup dos arquivos envolvidos e adiciona/atualiza o XML
+na instalação existente. GRFs e executáveis não são modificados pelo script.
+
+Use [configurar-cliente-windows.ps1](../scripts/configurar-cliente-windows.ps1)
+no PowerShell 5.1+, a partir da raiz do repositório. Feche cliente e configurador.
+Escolha uma pasta de backup NOVA, fora do cliente e do repositório, cujo diretório
+pai já exista. Não sobrescreva nem reutilize backups.
+
+```powershell
+$clientBackup = Read-Host 'Caminho absoluto de uma NOVA pasta de backup'
+.\scripts\configurar-cliente-windows.ps1 -BackupPath $clientBackup -WhatIf
+.\scripts\configurar-cliente-windows.ps1 -BackupPath $clientBackup
+```
+
+A origem padrão é `C:\Gravity\Ragnarok`; ajuste `-ClientPath` se necessário.
+Sem parâmetros XML, o script faz somente backup. Ele exige assinatura válida da
+Gravity e o hash histórico do Ragexe. `-ExpectedExecutableSha256` só deve apontar
+para outra baseline já identificada; não é correção automática de divergência.
+`-WhatIf` valida as pré-condições sem escrita; não comprova espaço/permissões.
+
+São preservados, quando presentes: `Ragexe.exe`, `Setup.exe`, `data.ini`,
+`data/clientinfo.xml` e `data/sclientinfo.xml`. Todos os backups são conferidos
+por SHA-256 antes da configuração. `data.grf`, músicas e demais assets não são
+copiados. Links/junctions nos caminhos envolvidos são recusados.
+
+### Adicionar ou atualizar o XML
+
+Somente após confirmar os valores do passo 6, execute:
+
+```powershell
+$confirmedHost = Read-Host 'Host confirmado'
+$confirmedService = Read-Host 'ServiceType confirmado'
+$confirmedServer = Read-Host 'ServerType confirmado'
+$confirmedVersion = [int](Read-Host 'Valor XML version confirmado')
+$confirmedLang = [int](Read-Host 'LangType confirmado')
+$confirmedFile = Read-Host 'Arquivo confirmado: clientinfo.xml ou sclientinfo.xml'
+$clientBackup = Read-Host 'NOVA pasta de backup desta tentativa'
+.\scripts\configurar-cliente-windows.ps1 -BackupPath $clientBackup `
+  -ConnectionFile $confirmedFile -ServerHost $confirmedHost `
+  -ServiceType $confirmedService -ServerType $confirmedServer `
+  -ClientVersion $confirmedVersion -LangType $confirmedLang -WhatIf
+# Apos conferir, repita o comando retirando somente -WhatIf.
+```
+
+O XML é escrito em UTF-8 na pasta `data` da instalação. `-LoginPort` tem padrão
+6900; `-DisplayName`, FaithRO - Laus Deo. Outros valores exigem fornecimento
+explícito. Não inclua senhas. Codificação, localização e leitura pelo executável
+continuam pendentes de homologação. O script não aplica patches, não cria
+`data.ini`, não executa cliente/Setup e não altera firewall, servidor ou GRFs.
+
+`faithro-preparation.json` fica no backup, com hashes, arquivos novos e estado.
+Sucesso é `PREPARED_NOT_PATCHED_NOT_LOGIN_VALIDATED`; falha é
+`FAILED_CHECK_BACKUP_BEFORE_RETRY`. Em falha, preserve evidências e verifique o
+XML: pode haver configuração parcial, mas o backup anterior permanece disponível.
+
+**Rollback:** feche o cliente, restaure somente o XML anterior a partir do backup
+verificado. Se ele não existia, remova apenas o arquivo novo indicado em
+`new_files` da evidência. Remova `data` somente se criada nesta tentativa e vazia.
+Não restaure executáveis/GRFs que não foram alterados; não há exclusão automática.
+
+**Testes:** `powershell -NoProfile -File scripts/test-configurar-cliente-windows.ps1`
+— 14 verificações aprovadas com arquivos sintéticos e assinatura simulada somente
+na suíte. Nenhuma instalação real foi configurada. Teste manual pendente:
+`-WhatIf` na instalação real, backup e comparação dos hashes; depois conferir
+XML e rollback. Isso não comprova login.
 
 ## Passo 5 — Configurar vídeo e áudio
 
-1. Abra `Setup.exe` **da cópia de teste**.
+1. Abra `Setup.exe` **da instalação existente**.
 2. Escolha opções disponíveis e compatíveis com a estação; para o primeiro teste,
    prefira modo janela e uma resolução suportada pelo configurador.
 3. Salve e feche o configurador. Registre qualquer erro e os arquivos alterados.
@@ -127,7 +183,7 @@ de qualquer versão nova. Preserve o resultado na pasta de evidências.
 FaithRO apenas por receber um XML. O executável original ainda aponta para a
 infraestrutura oficial e sua leitura de configuração externa não foi homologada.
 
-Antes de aplicar qualquer alteração na cópia:
+Antes de aplicar qualquer alteração na instalação:
 
 1. Consulte o [repositório oficial do WARP](https://github.com/Neo-Mind/WARP)
    e a [revisão fixada pelo projeto](https://github.com/Neo-Mind/WARP/tree/9b1173e9e4e135c68e150704f01186ab5e763acd).
@@ -144,8 +200,8 @@ Antes de aplicar qualquer alteração na cópia:
    apenas como referência; todos os placeholders precisam de valores validados.
 5. O endpoint histórico foi `129.121.46.11:6900`; confirme o endpoint vigente
    com o operador do servidor antes de produzir a configuração real.
-6. Somente após essa validação, prepare a cópia, registre os patches e hashes
-   de saída e confira novamente que o original permaneceu intacto.
+6. Somente após essa validação, prepare a configuração após backup e registre as alterações e hashes.
+   Qualquer patch binário exige procedimento próprio; o script não o aplica.
 
 Não há comando ou sequência de cliques WARP homologados neste guia. Não faça
 hex edit manual, injeção de DLL, bypass de anticheat ou desativação de Defender.
@@ -176,7 +232,7 @@ em XML, scripts, capturas ou documentação.
 ## Passo 8 — Primeiro acesso e evidências
 
 Após concluir o passo 6, use o executável e o método de inicialização validados
-na cópia, mantendo o diretório de trabalho nela. Não use `Ragnarok.exe` como
+na instalação configurada, mantendo o diretório de trabalho nela. Não use `Ragnarok.exe` como
 launcher do FaithRO por suposição: esse é o launcher oficial.
 
 | Checkpoint | Evidência mínima |
@@ -207,25 +263,21 @@ esse teste não comprova progressão, balanceamento ou prontidão para alpha.
 
 ## Arquivos afetados, riscos e rollback
 
-A execução futura afeta somente a pasta de teste, sua configuração e evidências
-locais. Originais e arquivos do servidor devem permanecer preservados. Ferramenta
-executada diretamente no Windows pode afetar a estação; a cópia separada não é
-isolamento de segurança equivalente a uma VM.
-
-Para voltar ao início, feche cliente e ferramenta, preserve as evidências e
-recrie uma nova cópia a partir do original cujo hash foi conferido. Não faça
-reversão manual de bytes nem exclusão automática de diretórios. Não restaure
-snapshot ou altere a VPS/banco como parte desse rollback.
+A execução do script afeta somente o XML selecionado na instalação e o backup
+local. Executáveis, GRFs e servidor permanecem inalterados. Falhas de escrita
+podem deixar XML parcial; restaure a configuração conforme a evidência do backup.
+Ferramentas futuras executadas no host podem afetar a estação; backup de arquivos
+não oferece isolamento equivalente a VM. Não apague backups ou evidências.
 
 ## Checklist de conclusão
 
 - [ ] Cliente de origem legítima identificado e assinatura/hash registrados.
-- [ ] Original preservado; cópia separada com integridade conferida.
+- [ ] Backup dos arquivos envolvidos verificado antes da configuração.
 - [ ] Ferramenta e perfil de preparação validados no host.
 - [ ] Configuração de conexão efetivamente lida pelo cliente.
 - [ ] Rede e conta de teste confirmadas.
 - [ ] H2–H7 comprovados e logs sanitizados registrados.
-- [ ] Original continua intacto; nenhum proprietário ou segredo no Git.
+- [ ] Executáveis/GRFs intactos; nenhum proprietário ou segredo no Git.
 
 ## Referências
 
