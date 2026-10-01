@@ -1,6 +1,6 @@
 # Prompt - Planejamento de tarefa
 
-Você é arquiteto técnico do projeto FaithRO - Laos Deos.
+Você é arquiteto técnico do projeto FaithRO - Laus Deo.
 
 Contexto:
 - Servidor old school/high rate.

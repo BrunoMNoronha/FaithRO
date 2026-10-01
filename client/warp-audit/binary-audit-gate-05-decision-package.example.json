@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "project": "WARP",
+  "stage": "2P-E-C5-PREP",
+  "record_type": "gate-5-decision-preparation-package",
+  "purpose": "Pacote de PREPARACAO da futura decisao humana sobre o GATE 5 (verificacoes locais de seguranca) da auditoria binaria offline do WARP. NAO seleciona opcao, NAO preenche registro real e NAO concede autorizacao. O merge do PR NAO constitui decisao humana. Estado PENDING_HUMAN_DECISION.",
+  "classification": "D2",
+  "non_authorization_notice": "COMPLETED_PASS do GATE 4 e um resultado PROCEDURAL e NAO aprova o binario. Este pacote NAO autoriza, NAO inicia e NAO executa o GATE 5; NAO repete o GATE 4; NAO altera a saida nem a evidencia do GATE 4; NAO prepara o cliente; NAO acessa a VPS. gate_5_authorized permanece false.",
+  "reference_hash_method": "SHA-256 do conteudo do blob Git normalizado a LF, reproduzivel por: git show <rev>:<path> | sha256sum. Nao usar o working tree (pode ter CRLF no Windows).",
+  "gate_4_reference": {
+    "integrated_squash": "03348d7",
+    "pull_request": 57,
+    "outcome": "COMPLETED_PASS",
+    "output_path": "client/warp-audit/evidence/binary-audit-gate-04-static-inventory-output-2026-08-05.json",
+    "output_sha256": "84c3c49a770b475fdf25c43467498e014b2f8950ef172384bb8ea48bbe17f584",
+    "pass_evidence_path": "client/warp-audit/evidence/binary-audit-gate-04-pass-evidence-2026-08-05.json",
+    "decision_record_path": "client/warp-audit/decisions/binary-audit-gate-04-decision-record-2026-08-05.json",
+    "outcome_is_security_approval": false
+  },
+  "gate_5_definition": {
+    "gate_id": 5,
+    "gate_name": "Verificacoes locais de seguranca",
+    "nature": "Somente mecanismos locais (estatico/offline no contrato canonico).",
+    "source_plan_doc": "docs/33-plano-auditoria-binaria-offline-warp.md",
+    "source_plan_example": "client/warp-audit/binary-audit-plan.example.json",
+    "objective": "Planejar uso APENAS de mecanismos locais e autorizados (antivirus local, Defender ou equivalente disponivel, ferramentas estaticas locais, regras YARA locais aprovadas).",
+    "planned_actions": [
+      "executar apenas ferramentas de seguranca locais e autorizadas",
+      "avaliar analise de reputacao somente sob autorizacao humana separada",
+      "nao enviar o binario a nenhum servico externo automaticamente"
+    ],
+    "does_not_authorize": [
+      "enviar o binario a servico externo, sandbox publica, nuvem, LLM, repositorio, issue, chat ou storage externo"
+    ],
+    "must_remain_false": [
+      "external_reputation_upload_authorized"
+    ]
+  },
+  "gaps": [
+    { "element": "Entradas (materializacao)", "status": "ambiguo", "note": "O contrato do gate marca does_not_materialize_binary=true no nivel do PLANO; a execucao real precisaria do blob c853da42 materializado temporariamente (como no GATE 4). O modo/limites dessa materializacao para o GATE 5 NAO estao especificados na cadeia canonica atual." },
+    { "element": "Lista de ferramentas locais", "status": "ambiguo", "note": "O objetivo cita categorias (antivirus local, Defender, ferramentas estaticas, YARA local), mas a lista fechada de ferramentas, versoes e regras aprovadas NAO esta definida na cadeia canonica atual." },
+    { "element": "Ambiente exigido", "status": "ambiguo", "note": "A sandbox e o GATE 6 (posterior). O ambiente exato para verificacoes locais offline do GATE 5 (host do operador com rede bloqueada e sem upload externo) NAO esta detalhado por gate na cadeia canonica atual." },
+    { "element": "Criterio de aprovacao especifico", "status": "ambiguo", "note": "Exit options canonicas: GATE_PASSED/GATE_FAILED/STOP_PATH; criterios gerais em docs/33 secao 15. Criterios de sucesso especificos do GATE 5 (o que constitui PASS/FAIL de uma verificacao local) NAO estao definidos por gate na cadeia canonica atual." },
+    { "element": "Artefatos de preparacao (schemas/ferramenta/evidencia)", "status": "ausente", "note": "O GATE 4 teve uma etapa PREP dedicada (2P-E-C4-PREP: analisador versionado + testes + schemas fechados de decisao/evidencia/saida). O GATE 5 ainda NAO possui schemas de decisao/evidencia, ferramenta versionada nem testes. NAO DEFINIDO NA CADEIA CANONICA ATUAL." }
+  ],
+  "decision_options": [
+    { "id": "A", "label": "Nao avancar; manter o GATE 5 nao autorizado.", "selected": false, "authorizes_execution": false },
+    { "id": "B", "label": "Aprovar APENAS a definicao e o plano de controle do GATE 5 (sem materializacao nem execucao).", "selected": false, "authorizes_execution": false },
+    { "id": "C", "label": "Solicitar correcoes a este pacote.", "selected": false, "authorizes_execution": false },
+    { "id": "D", "label": "Autorizar uma FUTURA execucao limitada do GATE 5 em PR separado (permanece desmarcada; depende de decisao humana explicita posterior).", "selected": false, "authorizes_execution": true }
+  ],
+  "state": "PENDING_HUMAN_DECISION",
+  "decision_status": "PENDING_HUMAN_DECISION",
+  "human_decision_required": true,
+  "human_decision_received": false,
+  "decision_received": false,
+  "option_selected": false,
+  "gate_5_authorized": false,
+  "execution_authorized": false,
+  "client_preparation_authorized": false,
+  "materialization_authorized": false,
+  "gate_4_reexecution_authorized": false,
+  "local_security_scan_authorized": false,
+  "external_reputation_upload_authorized": false,
+  "vps_access_authorized": false,
+  "distribution_authorized": false
+}

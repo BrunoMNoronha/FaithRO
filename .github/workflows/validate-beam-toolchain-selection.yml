@@ -1,0 +1,32 @@
+name: Validate Beam toolchain selection
+
+on:
+  push:
+    branches:
+      - dev
+      - test/auditar-toolchain-rust-beam
+  pull_request:
+    branches:
+      - dev
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate toolchain selection evidence
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Validate evidence from external CWD
+        run: |
+          cd /tmp
+          python "$GITHUB_WORKSPACE/scripts/validate-beam-toolchain-selection.py"

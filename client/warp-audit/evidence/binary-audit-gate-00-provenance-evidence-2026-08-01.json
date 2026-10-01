@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "project": "WARP",
+  "stage": "2P-E-C0-B",
+  "record_type": "binary-audit-gate-00-provenance-evidence-real",
+  "status": "COMPLETED_PASS",
+  "gate": {
+    "id": 0,
+    "name": "PROVENANCE_RECONFIRMATION"
+  },
+  "authorization_ref": {
+    "path": "client/warp-audit/decisions/binary-audit-gate-00-decision-record-2026-07-31.json"
+  },
+  "plan_ref": {
+    "path": "client/warp-audit/binary-audit-plan.example.json"
+  },
+  "source_decision_ref": {
+    "path": "client/warp-audit/decisions/core-path-decision-record-2026-07-31.json"
+  },
+  "execution": {
+    "gate_0_started": true,
+    "gate_0_completed": true,
+    "execution_state": "COMPLETED",
+    "started_at": "2026-08-01T08:30:00Z",
+    "finished_at": "2026-08-01T08:35:00Z",
+    "operator": "agente FaithRO (Claude Code) sob autorizacao humana de BrunoMNoronha",
+    "method": "METADATA_ONLY",
+    "network_scope": "GITHUB_OFFICIAL_ONLY"
+  },
+  "authorization_snapshot": {
+    "decision": "APPROVE_GATE_0",
+    "provenance_reconfirmation_authorized": true,
+    "gate_1_authorized": false
+  },
+  "upstream_expected": {
+    "repository_full_name": "Neo-Mind/WARP",
+    "commit_oid": "9b1173e9e4e135c68e150704f01186ab5e763acd",
+    "artifact_path": "win32/WARP.exe",
+    "artifact_blob_oid": "c853da42d18dfe090b4e941b435d989311faf3dc",
+    "artifact_blob_size": 1137152,
+    "expected_branch": "rock_win32"
+  },
+  "upstream_observed": {
+    "repository_full_name": "Neo-Mind/WARP",
+    "owner": "Neo-Mind",
+    "visibility": "PUBLIC",
+    "is_fork": false,
+    "parent": null,
+    "is_archived": false,
+    "default_branch": "rock_win32",
+    "created_at": "2020-11-05T19:27:42Z",
+    "updated_at": "2026-07-26T14:50:34Z"
+  },
+  "commit_evidence": {
+    "expected_commit_oid": "9b1173e9e4e135c68e150704f01186ab5e763acd",
+    "observed_commit_oid": "9b1173e9e4e135c68e150704f01186ab5e763acd",
+    "object_type": "commit",
+    "tree_oid": "1aebae06d5c71a145afc35cc72fcf5c210a08758",
+    "parent_oids": [
+      "cf8d6bf924caf724c6d712c3e02f9148977dd7f6",
+      "511bf10d7cdda0770f187462ce9a2652a30925a7"
+    ],
+    "author_date": "2026-05-07T15:02:45Z",
+    "committer_date": "2026-05-07T15:02:45Z",
+    "commit_exists": true
+  },
+  "tree_evidence": {
+    "tree_oid": "1aebae06d5c71a145afc35cc72fcf5c210a08758",
+    "tree_truncated": false,
+    "artifact_path_expected": "win32/WARP.exe",
+    "artifact_path_found": "win32/WARP.exe",
+    "artifact_entry_type": "blob",
+    "artifact_blob_oid": "c853da42d18dfe090b4e941b435d989311faf3dc",
+    "artifact_blob_size": 1137152,
+    "matching_paths_count": 1
+  },
+  "artifact_evidence": {
+    "path": "win32/WARP.exe",
+    "object_type": "blob",
+    "git_blob_oid": "c853da42d18dfe090b4e941b435d989311faf3dc",
+    "git_blob_oid_algorithm": "GIT_OBJECT_ID",
+    "size_bytes_metadata": 1137152,
+    "binary_sha256": null,
+    "binary_sha256_computed": false,
+    "blob_content_accessed": false,
+    "binary_materialized": false
+  },
+  "refs_evidence": {
+    "head_refs_count": 10,
+    "tag_refs_count": 0,
+    "direct_refs_pointing_to_commit": 1,
+    "direct_head_refs": ["rock_win32"],
+    "ancestry": "not_established_by_gate_0"
+  },
+  "tags_evidence": {
+    "tags_observed": 0
+  },
+  "releases_evidence": {
+    "release_count": 0,
+    "releases": []
+  },
+  "license_evidence": {
+    "license_name": "GNU General Public License v3.0",
+    "license_spdx_id": "GPL-3.0",
+    "license_metadata_present": true
+  },
+  "consistency_matrix": [
+    { "field": "repository_full_name", "expected": "Neo-Mind/WARP", "observed": "Neo-Mind/WARP", "result": "MATCH", "internal_source": "client/warp-audit/README.md", "upstream_source": "REPOSITORY_METADATA", "note": "" },
+    { "field": "commit_oid", "expected": "9b1173e9e4e135c68e150704f01186ab5e763acd", "observed": "9b1173e9e4e135c68e150704f01186ab5e763acd", "result": "MATCH", "internal_source": "core-path-decision-package.example.json", "upstream_source": "GIT_COMMIT_METADATA", "note": "" },
+    { "field": "tree_oid", "expected": "1aebae06d5c71a145afc35cc72fcf5c210a08758", "observed": "1aebae06d5c71a145afc35cc72fcf5c210a08758", "result": "MATCH", "internal_source": "docs/30-auditoria-estatica-warp.md", "upstream_source": "GIT_COMMIT_METADATA", "note": "" },
+    { "field": "artifact_path", "expected": "win32/WARP.exe", "observed": "win32/WARP.exe", "result": "MATCH", "internal_source": "docs/30-auditoria-estatica-warp.md", "upstream_source": "GIT_TREE_METADATA", "note": "" },
+    { "field": "artifact_object_type", "expected": "blob", "observed": "blob", "result": "MATCH", "internal_source": "docs/30-auditoria-estatica-warp.md", "upstream_source": "GIT_TREE_METADATA", "note": "" },
+    { "field": "artifact_blob_oid", "expected": "c853da42d18dfe090b4e941b435d989311faf3dc", "observed": "c853da42d18dfe090b4e941b435d989311faf3dc", "result": "MATCH", "internal_source": "core-path-decision-package.example.json", "upstream_source": "GIT_TREE_METADATA", "note": "Git object ID (nao SHA-256 local)" },
+    { "field": "artifact_blob_size", "expected": "1137152", "observed": "1137152", "result": "MATCH", "internal_source": "core-path-decision-package.example.json", "upstream_source": "GIT_TREE_METADATA", "note": "" },
+    { "field": "license", "expected": "GPL-3.0", "observed": "GPL-3.0", "result": "MATCH", "internal_source": "client/warp-audit/README.md", "upstream_source": "LICENSE_METADATA", "note": "" },
+    { "field": "direct_refs", "expected": "rock_win32 (branch head)", "observed": "rock_win32 (1 head ref)", "result": "MATCH", "internal_source": "docs/30-auditoria-estatica-warp.md", "upstream_source": "REF_METADATA", "note": "" },
+    { "field": "tags", "expected": "0", "observed": "0", "result": "MATCH", "internal_source": "core-path-decision-package.example.json", "upstream_source": "REF_METADATA", "note": "" },
+    { "field": "releases", "expected": "0", "observed": "0", "result": "MATCH", "internal_source": "core-path-decision-package.example.json", "upstream_source": "RELEASE_METADATA", "note": "" }
+  ],
+  "query_log": [
+    { "sequence": 1, "timestamp": "2026-08-01T08:30:20Z", "method": "GITHUB_GRAPHQL", "source": "github.com", "endpoint_class": "REPOSITORY_METADATA", "selected_fields": ["nameWithOwner", "owner", "visibility", "isFork", "parent", "isArchived", "defaultBranchRef", "createdAt", "updatedAt", "licenseInfo"], "purpose": "identidade do repositorio e licenca", "result": "OK" },
+    { "sequence": 2, "timestamp": "2026-08-01T08:31:05Z", "method": "GITHUB_REST", "source": "github.com", "endpoint_class": "GIT_COMMIT_METADATA", "selected_fields": ["sha", "tree", "parents", "author.date", "committer.date"], "purpose": "existencia e metadados do commit fixado", "result": "OK" },
+    { "sequence": 3, "timestamp": "2026-08-01T08:32:10Z", "method": "GITHUB_REST", "source": "github.com", "endpoint_class": "GIT_TREE_METADATA", "selected_fields": ["truncated", "path", "type", "sha", "size"], "purpose": "localizar win32/WARP.exe na arvore (sem conteudo)", "result": "OK" },
+    { "sequence": 4, "timestamp": "2026-08-01T08:33:00Z", "method": "GITHUB_REST", "source": "github.com", "endpoint_class": "REF_METADATA", "selected_fields": ["ref", "object.sha"], "purpose": "heads apontando para o commit", "result": "OK" },
+    { "sequence": 5, "timestamp": "2026-08-01T08:33:30Z", "method": "GITHUB_REST", "source": "github.com", "endpoint_class": "REF_METADATA", "selected_fields": ["ref", "object.sha"], "purpose": "tags do repositorio", "result": "SEM_TAGS" },
+    { "sequence": 6, "timestamp": "2026-08-01T08:34:10Z", "method": "GITHUB_GRAPHQL", "source": "github.com", "endpoint_class": "RELEASE_METADATA", "selected_fields": ["tagName", "name", "isDraft", "isPrerelease", "publishedAt", "releaseAssets.totalCount", "refs.totalCount"], "purpose": "tags e releases (sem URLs de asset)", "result": "SEM_RELEASES" }
+  ],
+  "limitations": [
+    "A ancestralidade do commit (alcancabilidade por outras branches) NAO foi estabelecida pelo GATE 0; registrada como not_established_by_gate_0 para nao ampliar o escopo.",
+    "0 tags e 0 releases observadas: nao ha hash publicado nem assinatura em release; isso ja constava da cadeia documental e nao contradiz o esperado.",
+    "git_blob_oid e o identificador do objeto Git informado pelo upstream; NAO e um SHA-256 calculado localmente sobre o binario (conteudo nao acessado).",
+    "A reconfirmacao usa metadados oficiais em 2026-08-01; e um retrato pontual e NAO prova integridade nem seguranca do binario.",
+    "Os horarios (started_at, finished_at e query_log) sao REPRESENTATIVOS do intervalo real de execucao em 2026-08-01 (observado ~08:34Z); os horarios individuais por consulta nao foram capturados com precisao de relogio. A ordem causal e o fato historico da execucao sao preservados."
+  ],
+  "findings": [
+    "Repositorio, commit, arvore, caminho, tipo de objeto, blob OID e tamanho coincidem com os registros internos do FaithRO.",
+    "O commit fixado e a cabeca (head) da branch rock_win32.",
+    "Licenca declarada GPL-3.0 consistente com os registros internos."
+  ],
+  "outcome": "COMPLETED_PASS",
+  "authorizations": {
+    "gate_1_authorized": false,
+    "materialization_authorized": false,
+    "hashing_authorized": false,
+    "static_inspection_authorized": false,
+    "local_security_scan_authorized": false,
+    "external_reputation_upload_authorized": false,
+    "sandbox_creation_authorized": false,
+    "execution_without_client_authorized": false,
+    "client_copy_provision_authorized": false,
+    "execution_with_client_copy_authorized": false,
+    "patch_review_authorized": false,
+    "patch_application_authorized": false,
+    "client_preparation_authorized": false,
+    "vps_access_authorized": false,
+    "test_account_authorized": false,
+    "first_login_authorized": false,
+    "distribution_authorized": false
+  },
+  "security_assertions": {
+    "blob_content_accessed": false,
+    "binary_materialized": false,
+    "binary_sha256_computed": false,
+    "binary_sha256": null,
+    "no_download_performed": true,
+    "no_clone_or_fetch_upstream": true,
+    "no_archive_or_release_asset": true,
+    "no_direct_binary_url_followed": true,
+    "no_blob_endpoint_used": true,
+    "no_contents_endpoint_used": true,
+    "raw_responses_versioned": false,
+    "network_scope": "GITHUB_OFFICIAL_ONLY"
+  },
+  "rollback": "Registro documental de evidencia: reverter o commit desta branch (antes do merge) ou abrir PR de reversao (apos integracao). O revert nao apaga o fato de que consultas publicas de metadados ocorreram, nao autoriza o GATE 1 e nao substitui decisao humana. Nada foi materializado, baixado ou executado.",
+  "notes": "GATE 0 concluido por metadados oficiais com resultado COMPLETED_PASS: a proveniencia declarada e CONSISTENTE com os metadados oficiais observados. Isso NAO significa confianca, seguranca ou aprovacao do binario, nem autoriza download, materializacao ou execucao. O GATE 1 permanece proibido; qualquer avanco exige nova decisao humana."
+}

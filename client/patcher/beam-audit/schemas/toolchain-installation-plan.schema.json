@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "BeamPatcherToolchainInstallationPlan",
+  "description": "JSON Schema para validação estática do plano controlado de instalação isolada da toolchain Rust 1.85.0 (ETAPA 2O-D1-B4).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "stage",
+    "timestamp_utc",
+    "target_toolchain",
+    "existing_toolchain",
+    "coexistence_strategy",
+    "installation_command",
+    "verification_commands",
+    "rollback_command",
+    "security_flags"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "enum": [1]
+    },
+    "stage": {
+      "type": "string",
+      "enum": ["2O-D1-B4"]
+    },
+    "timestamp_utc": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "target_toolchain": {
+      "type": "object",
+      "required": ["version", "host_triple", "profile", "components", "targets"],
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "type": "string",
+          "enum": ["1.85.0"]
+        },
+        "host_triple": {
+          "type": "string",
+          "enum": ["x86_64-pc-windows-msvc"]
+        },
+        "profile": {
+          "type": "string",
+          "enum": ["minimal"]
+        },
+        "components": {
+          "type": "array",
+          "items": { "type": "string" },
+          "enum": [["rustc", "cargo", "rust-std"]]
+        },
+        "targets": {
+          "type": "array",
+          "items": { "type": "string" },
+          "enum": [["x86_64-pc-windows-msvc"]]
+        }
+      }
+    },
+    "existing_toolchain": {
+      "type": "object",
+      "required": ["version", "host_triple", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "type": "string",
+          "enum": ["1.77.2"]
+        },
+        "host_triple": {
+          "type": "string",
+          "enum": ["x86_64-pc-windows-msvc"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active-default-preserved"]
+        }
+      }
+    },
+    "coexistence_strategy": {
+      "type": "object",
+      "required": ["named_toolchain_only", "default_toolchain_modified", "persistent_override_created"],
+      "additionalProperties": false,
+      "properties": {
+        "named_toolchain_only": { "type": "boolean", "enum": [true] },
+        "default_toolchain_modified": { "type": "boolean", "enum": [false] },
+        "persistent_override_created": { "type": "boolean", "enum": [false] }
+      }
+    },
+    "installation_command": {
+      "type": "object",
+      "required": ["command", "permissible_in_future_stage"],
+      "additionalProperties": false,
+      "properties": {
+        "command": {
+          "type": "string",
+          "enum": ["rustup toolchain install 1.85.0-x86_64-pc-windows-msvc --profile minimal"]
+        },
+        "permissible_in_future_stage": { "type": "boolean", "enum": [true] }
+      }
+    },
+    "verification_commands": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "rollback_command": {
+      "type": "object",
+      "required": ["command", "preserves_existing_toolchain"],
+      "additionalProperties": false,
+      "properties": {
+        "command": {
+          "type": "string",
+          "enum": ["rustup toolchain uninstall 1.85.0-x86_64-pc-windows-msvc"]
+        },
+        "preserves_existing_toolchain": { "type": "boolean", "enum": [true] }
+      }
+    },
+    "security_flags": {
+      "type": "object",
+      "required": [
+        "installation_authorized",
+        "build_authorized",
+        "toolchain_changed",
+        "default_toolchain_change_allowed",
+        "persistent_override_allowed",
+        "permanent_path_change_allowed",
+        "elevated_shell_allowed",
+        "vps_access_allowed",
+        "deploy_allowed",
+        "next_authorization_required"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "installation_authorized": { "type": "boolean", "enum": [false] },
+        "build_authorized": { "type": "boolean", "enum": [false] },
+        "toolchain_changed": { "type": "boolean", "enum": [false] },
+        "default_toolchain_change_allowed": { "type": "boolean", "enum": [false] },
+        "persistent_override_allowed": { "type": "boolean", "enum": [false] },
+        "permanent_path_change_allowed": { "type": "boolean", "enum": [false] },
+        "elevated_shell_allowed": { "type": "boolean", "enum": [false] },
+        "vps_access_allowed": { "type": "boolean", "enum": [false] },
+        "deploy_allowed": { "type": "boolean", "enum": [false] },
+        "next_authorization_required": { "type": "boolean", "enum": [true] }
+      }
+    }
+  }
+}

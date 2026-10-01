@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:warp-audit/binary-audit-gate-04-fail-evidence",
+  "title": "WARP GATE 4 static PE inventory evidence — COMPLETED_FAIL (real, future)",
+  "description": "CONVENCAO (2P-E-C4-PREP) para a FUTURA evidencia do GATE 4 no caminho COMPLETED_FAIL. NAO exige identity_matches_gate_2 nem inventario completo. Os tres booleanos parser_execution (analyzer_invoked/analyzer_completed/analyzer_output_produced) modelam apenas os estados fechados PRE_ANALYZER_FAIL (false/false/false), ANALYZER_ERROR_WITHOUT_OUTPUT (true/false/false) e POST_OUTPUT_FAIL (true/true/true); a logica condicional e aplicada em Python (o mini-validador nao suporta if/then/else). Nenhum registro real nesta etapa. gate_5_authorized const:false.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "project", "stage", "record_type", "status", "outcome", "gate",
+    "gate_4_decision_ref", "reviewed_analyzer_ref", "reviewed_analyzer_commit",
+    "reviewed_analyzer_git_blob_oid", "reviewed_analyzer_test_ref",
+    "reviewed_analyzer_test_git_blob_oid", "parser_execution", "failure",
+    "security_assertions", "findings", "limitations", "rollback", "notes"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "project": { "type": "string", "const": "WARP" },
+    "stage": { "type": "string", "const": "2P-E-C4" },
+    "record_type": { "type": "string", "const": "binary-audit-gate-04-fail-evidence-real" },
+    "status": { "type": "string", "const": "COMPLETED_FAIL" },
+    "outcome": { "type": "string", "const": "COMPLETED_FAIL" },
+    "gate": {
+      "type": "object", "additionalProperties": false, "required": ["id", "name"],
+      "properties": { "id": { "type": "integer", "const": 4 }, "name": { "type": "string", "const": "STATIC_PE_INVENTORY" } }
+    },
+    "gate_4_decision_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "minLength": 1 } } },
+    "reviewed_analyzer_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "const": "scripts/inspect-warp-pe-static.py" } } },
+    "reviewed_analyzer_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "reviewed_analyzer_git_blob_oid": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "reviewed_analyzer_test_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "const": "scripts/test-warp-pe-static.py" } } },
+    "reviewed_analyzer_test_git_blob_oid": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "reviewed_analyzer_output_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "minLength": 1 } } },
+    "reviewed_analyzer_output_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "parser_execution": {
+      "type": "object", "additionalProperties": false,
+      "required": ["analyzer_invoked", "analyzer_completed", "analyzer_output_produced"],
+      "properties": {
+        "analyzer_invoked": { "type": "boolean" },
+        "analyzer_completed": { "type": "boolean" },
+        "analyzer_output_produced": { "type": "boolean" }
+      }
+    },
+    "failure": {
+      "type": "object", "additionalProperties": false,
+      "required": ["category", "reason", "cleanup_attempted"],
+      "properties": {
+        "category": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 },
+        "cleanup_attempted": { "type": "boolean", "const": true }
+      }
+    },
+    "security_assertions": {
+      "type": "object", "additionalProperties": false,
+      "required": ["no_execution_performed", "no_gate5_inspection_performed", "no_ragexe_access", "no_vps_access", "gate_5_authorized"],
+      "properties": {
+        "no_execution_performed": { "type": "boolean", "const": true },
+        "no_gate5_inspection_performed": { "type": "boolean", "const": true },
+        "no_ragexe_access": { "type": "boolean", "const": true },
+        "no_vps_access": { "type": "boolean", "const": true },
+        "gate_5_authorized": { "type": "boolean", "const": false }
+      }
+    },
+    "findings": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "limitations": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "rollback": { "type": "string", "minLength": 1 },
+    "notes": { "type": "string", "minLength": 1 }
+  }
+}

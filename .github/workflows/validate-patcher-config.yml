@@ -1,0 +1,35 @@
+name: Validate patcher config
+
+# Valida os templates e fixtures versionados em client/patcher/ (configuração do
+# patcher, patchlist e version de laboratório). Não acessa a VPS, não inicia
+# servidores, não usa secrets, não baixa nem executa o binário do patcher e não
+# redistribui nenhum asset proprietário.
+
+on:
+  pull_request:
+    paths:
+      - client/patcher/**
+      - scripts/validate-patcher-config.py
+      - .github/workflows/validate-patcher-config.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-patcher-config:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Show Python version
+        run: python --version
+
+      - name: Validate patcher config
+        run: python scripts/validate-patcher-config.py

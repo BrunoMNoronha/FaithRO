@@ -1,4 +1,4 @@
-# FaithRO - Laos Deos
+# FaithRO - Laus Deo
 
 Servidor sem fins lucrativos inspirado em Ragnarok Online, com proposta **old school**, **high rate**, sem 3ª classes e com progressão customizada até o nível base 255 (atributo/status natural máximo individual planejado: 185; ASPD máxima planejada: 197).
 
@@ -72,6 +72,11 @@ faithro/
 Ver [docs/06-plano-execucao-inicial.md](docs/06-plano-execucao-inicial.md) para o detalhamento e [docs/02-roadmap.md](docs/02-roadmap.md) para o roadmap por fases.
 
 ## Documentação
+
+Para instalar e preparar o cliente, consulte o
+[guia passo a passo no Windows, sem VM](docs/53-instalacao-cliente-windows-sem-vm.md).
+O guia inclui verificação de integridade, cópia separada e testes do primeiro
+acesso; a preparação com patches permanece pendente de homologação.
 
 O índice central da base de conhecimento está em
 [docs/README.md](docs/README.md). Para cliente e protocolo, ver

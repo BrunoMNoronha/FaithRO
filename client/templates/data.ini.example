@@ -1,0 +1,26 @@
+; =====================================================================
+; data.ini.example - EXEMPLO (placeholders). NAO e o arquivo real.
+;
+; Define a ORDEM em que o cliente le os pacotes de dados (GRF) e a pasta
+; "data". A ordem importa: entradas com indice menor tem PRIORIDADE sobre
+; as de indice maior. O GRF PROPRIO do FaithRO deve vir ANTES dos GRFs
+; oficiais para que os assets proprios/licenciados sobreponham os padroes.
+;
+; IMPORTANTE:
+;   - Este arquivo e apenas um MODELO. Copie para "data.ini" fora do
+;     controle de versao e ajuste conforme a instalacao homologada.
+;   - Os nomes e a obrigatoriedade de cada GRF ainda NAO estao homologados
+;     (ver docs/15-cliente-primeiro-acesso.md). Trate como PLANEJADO.
+;   - "faithro.grf" deve conter apenas conteudo PROPRIO/licenciado do
+;     FaithRO; NAO empacote assets da Gravity.
+;   - Confirme o formato real contra o cliente-alvo antes de distribuir
+;     (docs/09-cliente-baseline-protocolo.md, secao 8).
+; =====================================================================
+
+[Data]
+; 0 = maior prioridade (lido primeiro)
+0=faithro.grf
+; GRFs oficiais do cliente-base (nomes conforme a instalacao; PENDENTE de
+; homologacao quanto a obrigatoriedade e a ordem exata):
+1=rdata.grf
+2=data.grf

@@ -1,0 +1,266 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:warp-audit/binary-audit-gate-04-static-inventory-output",
+  "title": "WARP GATE 4 static PE inventory — reviewed-analyzer output (real, future)",
+  "description": "CONVENCAO (2P-E-C4-PREP) para a FUTURA saida textual EXATA e SANITIZADA do inventario PE estatico (scripts/inspect-warp-pe-static.py). Schema FECHADO (additionalProperties=false em todos os niveis), modelando exatamente os campos emitidos pelo analisador. Somente fatos estruturais, heuristicas e indicadores textuais LIMITADOS: SEM bytes brutos, SEM bCertificate, SEM base64, SEM dump integral de recursos/strings, SEM caminho pessoal, segredo ou endpoint de download. Separa fatos, heuristicas, limitacoes e truncamentos. Nenhum arquivo real do WARP nesta etapa.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "record_type", "analysis_metadata", "structural_facts", "heuristics",
+    "import_classification", "string_indicators", "limitations"
+  ],
+  "properties": {
+    "record_type": { "type": "string", "const": "warp-pe-static-inventory" },
+    "analysis_metadata": {
+      "type": "object", "additionalProperties": false,
+      "required": ["static_only", "file_read_for_static_inspection", "launched", "executed", "loaded_as_executable", "emulated", "unpacked_dynamically", "network_access", "pe_format"],
+      "properties": {
+        "static_only": { "type": "boolean", "const": true },
+        "file_read_for_static_inspection": { "type": "boolean", "const": true },
+        "launched": { "type": "boolean", "const": false },
+        "executed": { "type": "boolean", "const": false },
+        "loaded_as_executable": { "type": "boolean", "const": false },
+        "emulated": { "type": "boolean", "const": false },
+        "unpacked_dynamically": { "type": "boolean", "const": false },
+        "network_access": { "type": "boolean", "const": false },
+        "pe_format": { "type": "string", "enum": ["PE32", "PE32+"] }
+      }
+    },
+    "structural_facts": {
+      "type": "object", "additionalProperties": false,
+      "required": ["headers", "sections", "section_count", "overlay", "total_entropy", "imports", "exports", "resources", "tls_callbacks", "relocations", "debug_directory", "certificate_table", "declared_dependencies"],
+      "properties": {
+        "headers": {
+          "type": "object", "additionalProperties": false,
+          "required": ["file_size", "e_lfanew", "machine_value", "machine", "number_of_sections", "timedatestamp_raw", "timedatestamp_is_trusted", "size_of_optional_header", "characteristics", "optional_header_magic", "pe_format", "image_base", "subsystem_value", "subsystem", "section_alignment", "file_alignment", "size_of_headers", "size_of_image", "number_of_rva_and_sizes", "section_table_offset", "executable_image_flag_present"],
+          "properties": {
+            "file_size": { "type": "integer", "minimum": 0 },
+            "e_lfanew": { "type": "integer", "minimum": 0 },
+            "machine_value": { "type": "string", "pattern": "^0x[0-9a-f]{4}$" },
+            "machine": { "type": "string", "minLength": 1 },
+            "number_of_sections": { "type": "integer", "minimum": 1 },
+            "timedatestamp_raw": { "type": "integer", "minimum": 0 },
+            "timedatestamp_is_trusted": { "type": "boolean", "const": false },
+            "size_of_optional_header": { "type": "integer", "minimum": 0 },
+            "characteristics": { "type": "string", "pattern": "^0x[0-9a-f]{4}$" },
+            "optional_header_magic": { "type": "string", "pattern": "^0x[0-9a-f]{4}$" },
+            "pe_format": { "type": "string", "enum": ["PE32", "PE32+"] },
+            "image_base": { "type": "string", "pattern": "^0x[0-9a-f]{8,16}$" },
+            "subsystem_value": { "type": "integer", "minimum": 0 },
+            "subsystem": { "type": "string", "minLength": 1 },
+            "section_alignment": { "type": "integer", "minimum": 0 },
+            "file_alignment": { "type": "integer", "minimum": 0 },
+            "size_of_headers": { "type": "integer", "minimum": 0 },
+            "size_of_image": { "type": "integer", "minimum": 0 },
+            "number_of_rva_and_sizes": { "type": "integer", "minimum": 0 },
+            "section_table_offset": { "type": "integer", "minimum": 0 },
+            "executable_image_flag_present": { "type": "boolean", "const": true }
+          }
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["index", "name", "virtual_size", "virtual_address", "size_of_raw_data", "pointer_to_raw_data", "characteristics", "mem_read", "mem_write", "mem_execute", "cnt_code", "cnt_initialized_data", "cnt_uninitialized_data", "discardable", "writable_and_executable", "raw_data_present", "entropy"],
+            "properties": {
+              "index": { "type": "integer", "minimum": 0 },
+              "name": { "type": "string" },
+              "virtual_size": { "type": "integer", "minimum": 0 },
+              "virtual_address": { "type": "integer", "minimum": 0 },
+              "size_of_raw_data": { "type": "integer", "minimum": 0 },
+              "pointer_to_raw_data": { "type": "integer", "minimum": 0 },
+              "characteristics": { "type": "string", "pattern": "^0x[0-9a-f]{8}$" },
+              "mem_read": { "type": "boolean" },
+              "mem_write": { "type": "boolean" },
+              "mem_execute": { "type": "boolean" },
+              "cnt_code": { "type": "boolean" },
+              "cnt_initialized_data": { "type": "boolean" },
+              "cnt_uninitialized_data": { "type": "boolean" },
+              "discardable": { "type": "boolean" },
+              "writable_and_executable": { "type": "boolean" },
+              "raw_data_present": { "type": "boolean" },
+              "entropy": { "type": "number", "minimum": 0 }
+            }
+          }
+        },
+        "section_count": { "type": "integer", "minimum": 1 },
+        "overlay": {
+          "type": "object", "additionalProperties": false,
+          "required": ["present", "offset", "size", "content_emitted"],
+          "properties": {
+            "present": { "type": "boolean" },
+            "offset": { "type": "integer", "minimum": 0 },
+            "size": { "type": "integer", "minimum": 0 },
+            "content_emitted": { "type": "boolean", "const": false }
+          }
+        },
+        "total_entropy": { "type": "number", "minimum": 0 },
+        "imports": {
+          "type": "object", "additionalProperties": false,
+          "required": ["present", "dll_count", "dlls", "truncated", "note"],
+          "properties": {
+            "present": { "type": "boolean" },
+            "dll_count": { "type": "integer", "minimum": 0 },
+            "dlls": {
+              "type": "array",
+              "items": {
+                "type": "object", "additionalProperties": false,
+                "required": ["name", "api_count", "ordinal_count", "apis", "ordinals", "truncated"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "api_count": { "type": "integer", "minimum": 0 },
+                  "ordinal_count": { "type": "integer", "minimum": 0 },
+                  "apis": { "type": "array", "items": { "type": "string" } },
+                  "ordinals": { "type": "array", "items": { "type": "integer", "minimum": 0 } },
+                  "truncated": { "type": "boolean" }
+                }
+              }
+            },
+            "truncated": { "type": "boolean" },
+            "note": { "type": "string", "minLength": 1 }
+          }
+        },
+        "exports": {
+          "type": "object", "additionalProperties": false,
+          "required": ["present", "dll_name", "ordinal_base", "function_count", "name_count", "names", "truncated"],
+          "properties": {
+            "present": { "type": "boolean" },
+            "dll_name": { "type": "string" },
+            "ordinal_base": { "type": "integer", "minimum": 0 },
+            "function_count": { "type": "integer", "minimum": 0 },
+            "name_count": { "type": "integer", "minimum": 0 },
+            "names": { "type": "array", "items": { "type": "string" } },
+            "truncated": { "type": "boolean" }
+          }
+        },
+        "resources": {
+          "type": "object", "additionalProperties": false,
+          "required": ["present", "type_ids", "manifest_present", "requested_execution_level", "truncated"],
+          "properties": {
+            "present": { "type": "boolean" },
+            "type_ids": { "type": "array", "items": { "type": "integer", "minimum": 0 } },
+            "manifest_present": { "type": "boolean" },
+            "requested_execution_level": { "type": "string", "enum": ["asInvoker", "highestAvailable", "requireAdministrator", "NOT_PRESENT", "NOT_DETERMINED"] },
+            "truncated": { "type": "boolean" }
+          }
+        },
+        "tls_callbacks": {
+          "type": "object", "additionalProperties": false,
+          "required": ["present", "callback_count", "truncated"],
+          "properties": {
+            "present": { "type": "boolean" },
+            "callback_count": { "type": "integer", "minimum": 0 },
+            "truncated": { "type": "boolean" }
+          }
+        },
+        "relocations": {
+          "type": "object", "additionalProperties": false,
+          "required": ["present", "total_size", "block_count", "truncated"],
+          "properties": {
+            "present": { "type": "boolean" },
+            "total_size": { "type": "integer", "minimum": 0 },
+            "block_count": { "type": "integer", "minimum": 0 },
+            "truncated": { "type": "boolean" }
+          }
+        },
+        "debug_directory": {
+          "type": "object", "additionalProperties": false,
+          "required": ["present", "entry_count", "types", "has_codeview", "truncated"],
+          "properties": {
+            "present": { "type": "boolean" },
+            "entry_count": { "type": "integer", "minimum": 0 },
+            "types": { "type": "array", "items": { "type": "string" } },
+            "has_codeview": { "type": "boolean" },
+            "truncated": { "type": "boolean" }
+          }
+        },
+        "certificate_table": {
+          "type": "object", "additionalProperties": false,
+          "required": ["present", "structurally_parseable", "file_offset", "size", "entry_count", "entries", "truncated", "first_field_is_file_offset_not_rva", "note"],
+          "properties": {
+            "present": { "type": "boolean" },
+            "structurally_parseable": { "type": "boolean", "const": true },
+            "file_offset": { "type": "integer", "minimum": 0 },
+            "size": { "type": "integer", "minimum": 0 },
+            "entry_count": { "type": "integer", "minimum": 0 },
+            "entries": {
+              "type": "array",
+              "items": {
+                "type": "object", "additionalProperties": false,
+                "required": ["declared_dw_length", "revision", "certificate_type", "certificate_type_name"],
+                "properties": {
+                  "declared_dw_length": { "type": "integer", "minimum": 8 },
+                  "revision": { "type": "string", "pattern": "^0x[0-9a-f]{4}$" },
+                  "certificate_type": { "type": "string", "pattern": "^0x[0-9a-f]{4}$" },
+                  "certificate_type_name": { "type": "string", "minLength": 1 }
+                }
+              }
+            },
+            "truncated": { "type": "boolean" },
+            "first_field_is_file_offset_not_rva": { "type": "boolean", "const": true },
+            "note": { "type": "string", "minLength": 1 }
+          }
+        },
+        "declared_dependencies": {
+          "type": "object", "additionalProperties": false,
+          "required": ["dll_names", "count", "truncated"],
+          "properties": {
+            "dll_names": { "type": "array", "items": { "type": "string" } },
+            "count": { "type": "integer", "minimum": 0 },
+            "truncated": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "heuristics": {
+      "type": "object", "additionalProperties": false,
+      "required": ["note", "indicators", "indicator_count"],
+      "properties": {
+        "note": { "type": "string", "minLength": 1 },
+        "indicators": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["indicator", "section", "detail"],
+            "properties": {
+              "indicator": { "type": "string", "minLength": 1 },
+              "section": { "type": "string" },
+              "detail": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "indicator_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "import_classification": {
+      "type": "object", "additionalProperties": false,
+      "required": ["note", "network", "process", "service", "registry", "remote_memory", "injection", "library_loading", "crypto", "debug_anti_debug"],
+      "properties": {
+        "note": { "type": "string", "minLength": 1 },
+        "network": { "type": "object", "additionalProperties": false, "required": ["values", "count", "truncated"], "properties": { "values": { "type": "array", "items": { "type": "string" } }, "count": { "type": "integer", "minimum": 0 }, "truncated": { "type": "boolean" } } },
+        "process": { "type": "object", "additionalProperties": false, "required": ["values", "count", "truncated"], "properties": { "values": { "type": "array", "items": { "type": "string" } }, "count": { "type": "integer", "minimum": 0 }, "truncated": { "type": "boolean" } } },
+        "service": { "type": "object", "additionalProperties": false, "required": ["values", "count", "truncated"], "properties": { "values": { "type": "array", "items": { "type": "string" } }, "count": { "type": "integer", "minimum": 0 }, "truncated": { "type": "boolean" } } },
+        "registry": { "type": "object", "additionalProperties": false, "required": ["values", "count", "truncated"], "properties": { "values": { "type": "array", "items": { "type": "string" } }, "count": { "type": "integer", "minimum": 0 }, "truncated": { "type": "boolean" } } },
+        "remote_memory": { "type": "object", "additionalProperties": false, "required": ["values", "count", "truncated"], "properties": { "values": { "type": "array", "items": { "type": "string" } }, "count": { "type": "integer", "minimum": 0 }, "truncated": { "type": "boolean" } } },
+        "injection": { "type": "object", "additionalProperties": false, "required": ["values", "count", "truncated"], "properties": { "values": { "type": "array", "items": { "type": "string" } }, "count": { "type": "integer", "minimum": 0 }, "truncated": { "type": "boolean" } } },
+        "library_loading": { "type": "object", "additionalProperties": false, "required": ["values", "count", "truncated"], "properties": { "values": { "type": "array", "items": { "type": "string" } }, "count": { "type": "integer", "minimum": 0 }, "truncated": { "type": "boolean" } } },
+        "crypto": { "type": "object", "additionalProperties": false, "required": ["values", "count", "truncated"], "properties": { "values": { "type": "array", "items": { "type": "string" } }, "count": { "type": "integer", "minimum": 0 }, "truncated": { "type": "boolean" } } },
+        "debug_anti_debug": { "type": "object", "additionalProperties": false, "required": ["values", "count", "truncated"], "properties": { "values": { "type": "array", "items": { "type": "string" } }, "count": { "type": "integer", "minimum": 0 }, "truncated": { "type": "boolean" } } }
+      }
+    },
+    "string_indicators": {
+      "type": "object", "additionalProperties": false,
+      "required": ["note", "redacted_count", "urls", "domains", "embedded_paths", "mutex_service_registry", "debug_packing_indicators"],
+      "properties": {
+        "note": { "type": "string", "minLength": 1 },
+        "redacted_count": { "type": "integer", "minimum": 0 },
+        "urls": { "type": "object", "additionalProperties": false, "required": ["values", "count", "truncated"], "properties": { "values": { "type": "array", "items": { "type": "string" } }, "count": { "type": "integer", "minimum": 0 }, "truncated": { "type": "boolean" } } },
+        "domains": { "type": "object", "additionalProperties": false, "required": ["values", "count", "truncated"], "properties": { "values": { "type": "array", "items": { "type": "string" } }, "count": { "type": "integer", "minimum": 0 }, "truncated": { "type": "boolean" } } },
+        "embedded_paths": { "type": "object", "additionalProperties": false, "required": ["values", "count", "truncated"], "properties": { "values": { "type": "array", "items": { "type": "string" } }, "count": { "type": "integer", "minimum": 0 }, "truncated": { "type": "boolean" } } },
+        "mutex_service_registry": { "type": "object", "additionalProperties": false, "required": ["values", "count", "truncated"], "properties": { "values": { "type": "array", "items": { "type": "string" } }, "count": { "type": "integer", "minimum": 0 }, "truncated": { "type": "boolean" } } },
+        "debug_packing_indicators": { "type": "object", "additionalProperties": false, "required": ["values", "count", "truncated"], "properties": { "values": { "type": "array", "items": { "type": "string" } }, "count": { "type": "integer", "minimum": 0 }, "truncated": { "type": "boolean" } } }
+      }
+    },
+    "limitations": { "type": "array", "minItems": 8, "items": { "type": "string", "minLength": 1 } }
+  }
+}

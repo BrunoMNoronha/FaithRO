@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "project": "Beam Patcher",
+  "repository": "beamguides/beam-patcher",
+  "official_source": "https://github.com/beamguides/beam-patcher",
+  "version_reference": "v1.0.1",
+  "commit": "feed97887090d121f796bc1b941390e28b7a2da5",
+  "commit_short": "feed978870",
+  "commit_date_utc": "2026-06-06T18:52:58Z",
+  "commit_is_descendant_of_tag": "v1.0.1 (e09a0551b4d371d304e6da351e5f3e3b5fec2c69)",
+  "license_expression": "MIT OR Apache-2.0",
+  "source_acquired": true,
+  "source_executed": false,
+  "source_built": false,
+  "binary_created": false,
+  "audit_scope": "static-pre-build",
+  "cargo_lock_present_upstream": false,
+  "rust_toolchain_file_present": false,
+  "workspace_members": [
+    "beam-core",
+    "beam-formats",
+    "beam-patcher",
+    "beam-ui"
+  ],
+  "tree_digest_algorithm": "sha256",
+  "tree_digest": "4f405c9ecfb2f505d99b00bc77468961e3aa98c72f9ec30faa3939849465b9d5",
+  "file_count": 68,
+  "tracked_binary_count": 12,
+  "submodules": [],
+  "git_dependencies": [],
+  "shell_scripts": [],
+  "build_scripts": [
+    "beam-ui/build.rs"
+  ],
+  "licenses": [
+    "LICENSE",
+    "LICENSE-APACHE",
+    "LICENSE-MIT"
+  ],
+  "critical_files": [
+    {
+      "path": "Cargo.toml",
+      "sha256": "e94c57208430110dfb990bfb212fa5c955cf310bfb0712769d44cb756efad701",
+      "size": 661
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "744847fba85a4c01084c6b14a863e98aa754ecc47793967b9e866dee5465266a",
+      "size": 1088
+    },
+    {
+      "path": "LICENSE-APACHE",
+      "sha256": "1abf87feb0bbffd7041a7d851e41c05a27b805aa4ce825f93c94ffd0ab03ca30",
+      "size": 9824
+    },
+    {
+      "path": "LICENSE-MIT",
+      "sha256": "ae806cef2212529e4f78906911186367099a96d35f5db2ee856cce798406f86f",
+      "size": 1095
+    },
+    {
+      "path": "beam-core/Cargo.toml",
+      "sha256": "0eec8b7da17691a63ff8f879ed38b66fcd46260fc28f112662319e35e807fa2a",
+      "size": 750
+    },
+    {
+      "path": "beam-formats/Cargo.toml",
+      "sha256": "aa9c212944e0193a227a6583416569aa7cc8874494383c945c2bf2a6dff5c30a",
+      "size": 402
+    },
+    {
+      "path": "beam-patcher/Cargo.toml",
+      "sha256": "c359116d9285f5a83b8e08f4074f1d9c70984d7e339adfe298e0e16a3148ede9",
+      "size": 591
+    },
+    {
+      "path": "beam-ui/Cargo.toml",
+      "sha256": "868eb510461277addf39f9419e23eaba830708485fbd44503880aba3f8cbaa2b",
+      "size": 779
+    },
+    {
+      "path": "beam-ui/build.rs",
+      "sha256": "4ae2333b11623039cc115e29b696e7ff5cdfcd5b7d628280ddf48fa733e6418d",
+      "size": 42
+    },
+    {
+      "path": "beam-ui/tauri.conf.json",
+      "sha256": "8d9232982699c705d255660fbc9aa68274d19f85b9649c95a6ea18b55e7bf51f",
+      "size": 1984
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "binary-audit-gate-05-input.schema.json",
+  "title": "Contrato de entrada do GATE 5 (WARP) — preparacao",
+  "description": "CONVENCAO (2P-E-C5-TOOLING-PREP) para o input FUTURO do orquestrador estatico do GATE 5 (scripts/warp-audit-gate-05.py). Schema FECHADO. NAO autoriza execucao real: as flags gate_5_authorized/execution_authorized/local_security_scan_authorized/external_reputation_upload_authorized sao const:false; network_policy const:blocked; execution_policy const:artifact_never_executed. O exemplo aponta para fixture SINTETICA, nunca para o WARP real.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "gate_id",
+    "gate_name",
+    "mode",
+    "input_path",
+    "output_directory",
+    "timeout_seconds",
+    "enabled_adapters",
+    "network_policy",
+    "execution_policy",
+    "modification_policy",
+    "authorization_flags"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "gate_id": { "type": "integer", "const": 5 },
+    "gate_name": { "type": "string", "const": "Verificacoes locais de seguranca" },
+    "mode": { "type": "string", "enum": ["validate-only", "fixture"] },
+    "input_path": { "type": "string", "minLength": 1 },
+    "expected_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "output_directory": { "type": "string", "minLength": 1 },
+    "timeout_seconds": { "type": "integer", "minimum": 1 },
+    "enabled_adapters": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "enum": ["synthetic-local", "windows-defender-local", "yara-local"] }
+    },
+    "network_policy": { "type": "string", "const": "blocked" },
+    "execution_policy": { "type": "string", "const": "artifact_never_executed" },
+    "modification_policy": { "type": "string", "const": "input_never_modified" },
+    "decision_ref": { "type": "string", "minLength": 1 },
+    "authorization_flags": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gate_5_authorized",
+        "execution_authorized",
+        "local_security_scan_authorized",
+        "external_reputation_upload_authorized",
+        "client_preparation_authorized"
+      ],
+      "properties": {
+        "gate_5_authorized": { "type": "boolean", "const": false },
+        "execution_authorized": { "type": "boolean", "const": false },
+        "local_security_scan_authorized": { "type": "boolean", "const": false },
+        "external_reputation_upload_authorized": { "type": "boolean", "const": false },
+        "client_preparation_authorized": { "type": "boolean", "const": false }
+      }
+    }
+  }
+}

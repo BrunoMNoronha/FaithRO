@@ -1,0 +1,12 @@
+# patchlist.example.txt — SINTÉTICO (laboratório). NÃO é um patchlist real.
+# Formato do Beam: "<arquivo> <sha256>" por linha; linhas com # são comentários.
+# Patches são aplicados na ordem listada. Os hashes abaixo são EXEMPLOS
+# sintéticos (não correspondem a arquivos reais) e devem ser regenerados no
+# laboratório com sha256sum/Get-FileHash sobre os patches efetivamente criados.
+#
+# Nomes sem barra de diretório: nenhum patch deve conter ".." ou caminho
+# absoluto (ver teste G9 de path traversal em README.md).
+
+001_inicial.beam        1111111111111111111111111111111111111111111111111111111111111111
+002_data_sintetico.beam 2222222222222222222222222222222222222222222222222222222222222222
+003_hotfix.thor         3333333333333333333333333333333333333333333333333333333333333333

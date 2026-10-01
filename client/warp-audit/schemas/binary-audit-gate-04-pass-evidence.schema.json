@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:warp-audit/binary-audit-gate-04-pass-evidence",
+  "title": "WARP GATE 4 static PE inventory evidence — COMPLETED_PASS (real, future)",
+  "description": "CONVENCAO (2P-E-C4-PREP) para a FUTURA evidencia do GATE 4 no caminho COMPLETED_PASS. Exige identidade IGUAL ao GATE 2/3, execucao do analisador revisado (SOMENTE leitura estatica), saida do inventario amarrada por SHA-256, proveniencia do analisador/testes e limpeza confirmada. Nenhum registro real nesta etapa. gate_5_authorized const:false; executed/loaded const:false.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "project", "stage", "record_type", "status", "outcome", "gate",
+    "gate_4_decision_ref", "reviewed_analyzer_ref", "reviewed_analyzer_commit",
+    "reviewed_analyzer_git_blob_oid", "reviewed_analyzer_test_ref",
+    "reviewed_analyzer_test_git_blob_oid", "reviewed_analyzer_output_ref",
+    "reviewed_analyzer_output_sha256", "parser_execution", "execution",
+    "upstream_expected", "identity_reconfirmation", "static_inventory_summary",
+    "reviewed_analyzer", "security_assertions", "preserved_gate_3_facts",
+    "findings", "limitations", "rollback", "notes"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "project": { "type": "string", "const": "WARP" },
+    "stage": { "type": "string", "const": "2P-E-C4" },
+    "record_type": { "type": "string", "const": "binary-audit-gate-04-pass-evidence-real" },
+    "status": { "type": "string", "const": "COMPLETED_PASS" },
+    "outcome": { "type": "string", "const": "COMPLETED_PASS" },
+    "gate": {
+      "type": "object", "additionalProperties": false, "required": ["id", "name"],
+      "properties": { "id": { "type": "integer", "const": 4 }, "name": { "type": "string", "const": "STATIC_PE_INVENTORY" } }
+    },
+    "gate_4_decision_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "minLength": 1 } } },
+    "reviewed_analyzer_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "const": "scripts/inspect-warp-pe-static.py" } } },
+    "reviewed_analyzer_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "reviewed_analyzer_git_blob_oid": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "reviewed_analyzer_test_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "const": "scripts/test-warp-pe-static.py" } } },
+    "reviewed_analyzer_test_git_blob_oid": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "reviewed_analyzer_output_ref": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "minLength": 1 } } },
+    "reviewed_analyzer_output_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "parser_execution": {
+      "type": "object", "additionalProperties": false,
+      "required": ["analyzer_invoked", "analyzer_completed", "analyzer_output_produced"],
+      "properties": {
+        "analyzer_invoked": { "type": "boolean", "const": true },
+        "analyzer_completed": { "type": "boolean", "const": true },
+        "analyzer_output_produced": { "type": "boolean", "const": true }
+      }
+    },
+    "execution": {
+      "type": "object", "additionalProperties": false,
+      "required": ["gate_4_started", "gate_4_completed", "execution_state", "started_at", "finished_at", "cleanup_at", "operator", "method", "network_scope"],
+      "properties": {
+        "gate_4_started": { "type": "boolean", "const": true },
+        "gate_4_completed": { "type": "boolean", "const": true },
+        "execution_state": { "type": "string", "const": "COMPLETED" },
+        "started_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}" },
+        "finished_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}" },
+        "cleanup_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}" },
+        "operator": { "type": "string", "minLength": 2 },
+        "method": { "type": "string", "const": "GITHUB_OFFICIAL_GIT_DATA_API_BLOB_BY_OID" },
+        "network_scope": { "type": "string", "const": "GITHUB_OFFICIAL_ONLY" }
+      }
+    },
+    "upstream_expected": {
+      "type": "object", "additionalProperties": false,
+      "required": ["repository_full_name", "expected_branch", "commit_oid", "tree_oid", "artifact_path", "artifact_blob_oid", "artifact_blob_size"],
+      "properties": {
+        "repository_full_name": { "type": "string", "const": "Neo-Mind/WARP" },
+        "expected_branch": { "type": "string", "const": "rock_win32" },
+        "commit_oid": { "type": "string", "const": "9b1173e9e4e135c68e150704f01186ab5e763acd" },
+        "tree_oid": { "type": "string", "const": "1aebae06d5c71a145afc35cc72fcf5c210a08758" },
+        "artifact_path": { "type": "string", "const": "win32/WARP.exe" },
+        "artifact_blob_oid": { "type": "string", "const": "c853da42d18dfe090b4e941b435d989311faf3dc" },
+        "artifact_blob_size": { "type": "integer", "const": 1137152 }
+      }
+    },
+    "identity_reconfirmation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["materialized_file_count", "temporary_dir_outside_repo", "size_bytes_observed", "size_match", "git_blob_oid_computed", "git_blob_oid_match", "sha256_local", "sha256_match", "identity_matches_gate_2", "file_read_for_static_inspection", "launched", "executed", "loaded_as_executable"],
+      "properties": {
+        "materialized_file_count": { "type": "integer", "const": 1 },
+        "temporary_dir_outside_repo": { "type": "boolean", "const": true },
+        "size_bytes_observed": { "type": "integer", "const": 1137152 },
+        "size_match": { "type": "boolean", "const": true },
+        "git_blob_oid_computed": { "type": "string", "const": "c853da42d18dfe090b4e941b435d989311faf3dc" },
+        "git_blob_oid_match": { "type": "boolean", "const": true },
+        "sha256_local": { "type": "string", "const": "345f3464ee72a60afc97bde0773410f47348a00d8629182fe52741c5f1a42874" },
+        "sha256_match": { "type": "boolean", "const": true },
+        "identity_matches_gate_2": { "type": "boolean", "const": true },
+        "file_read_for_static_inspection": { "type": "boolean", "const": true },
+        "launched": { "type": "boolean", "const": false },
+        "executed": { "type": "boolean", "const": false },
+        "loaded_as_executable": { "type": "boolean", "const": false }
+      }
+    },
+    "static_inventory_summary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["produced_by", "pe_format", "section_count", "import_dll_count", "export_present", "manifest_present", "requested_execution_level", "signature_present", "overlay_present", "tls_callbacks_present", "relocations_present", "debug_directory_present"],
+      "properties": {
+        "produced_by": { "type": "string", "const": "REVIEWED_VERSIONED_ANALYZER" },
+        "pe_format": { "type": "string", "enum": ["PE32", "PE32+"] },
+        "section_count": { "type": "integer", "minimum": 1 },
+        "import_dll_count": { "type": "integer", "minimum": 0 },
+        "export_present": { "type": "boolean" },
+        "manifest_present": { "type": "boolean" },
+        "requested_execution_level": { "type": "string", "enum": ["asInvoker", "highestAvailable", "requireAdministrator", "NOT_PRESENT", "NOT_DETERMINED"] },
+        "signature_present": { "type": "boolean" },
+        "overlay_present": { "type": "boolean" },
+        "tls_callbacks_present": { "type": "boolean" },
+        "relocations_present": { "type": "boolean" },
+        "debug_directory_present": { "type": "boolean" }
+      }
+    },
+    "reviewed_analyzer": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "test_path", "git_blob_oid", "stdlib_only", "network_access", "executes_or_loads_pe", "emulates_pe", "unpacks_dynamically", "run_on_warp_exe"],
+      "properties": {
+        "path": { "type": "string", "const": "scripts/inspect-warp-pe-static.py" },
+        "test_path": { "type": "string", "const": "scripts/test-warp-pe-static.py" },
+        "git_blob_oid": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "stdlib_only": { "type": "boolean", "const": true },
+        "network_access": { "type": "boolean", "const": false },
+        "executes_or_loads_pe": { "type": "boolean", "const": false },
+        "emulates_pe": { "type": "boolean", "const": false },
+        "unpacks_dynamically": { "type": "boolean", "const": false },
+        "run_on_warp_exe": { "type": "boolean", "const": true }
+      }
+    },
+    "security_assertions": {
+      "type": "object", "additionalProperties": false,
+      "required": ["no_execution_performed", "no_dynamic_analysis_performed", "no_emulation_performed", "no_unpacking_performed", "no_sandbox_created", "no_wine_or_vm_load", "no_network_after_fetch", "no_external_service_upload", "no_gate5_inspection_performed", "no_ragexe_access", "no_client_access", "no_vps_access", "temporary_file_removed", "temporary_dir_removed", "binary_versioned", "raw_bytes_versioned", "gate_5_authorized"],
+      "properties": {
+        "no_execution_performed": { "type": "boolean", "const": true },
+        "no_dynamic_analysis_performed": { "type": "boolean", "const": true },
+        "no_emulation_performed": { "type": "boolean", "const": true },
+        "no_unpacking_performed": { "type": "boolean", "const": true },
+        "no_sandbox_created": { "type": "boolean", "const": true },
+        "no_wine_or_vm_load": { "type": "boolean", "const": true },
+        "no_network_after_fetch": { "type": "boolean", "const": true },
+        "no_external_service_upload": { "type": "boolean", "const": true },
+        "no_gate5_inspection_performed": { "type": "boolean", "const": true },
+        "no_ragexe_access": { "type": "boolean", "const": true },
+        "no_client_access": { "type": "boolean", "const": true },
+        "no_vps_access": { "type": "boolean", "const": true },
+        "temporary_file_removed": { "type": "boolean", "const": true },
+        "temporary_dir_removed": { "type": "boolean", "const": true },
+        "binary_versioned": { "type": "boolean", "const": false },
+        "raw_bytes_versioned": { "type": "boolean", "const": false },
+        "gate_5_authorized": { "type": "boolean", "const": false }
+      }
+    },
+    "preserved_gate_3_facts": {
+      "type": "object", "additionalProperties": false,
+      "required": ["artifact_blob_oid", "artifact_blob_size", "artifact_sha256"],
+      "properties": {
+        "artifact_blob_oid": { "type": "string", "const": "c853da42d18dfe090b4e941b435d989311faf3dc" },
+        "artifact_blob_size": { "type": "integer", "const": 1137152 },
+        "artifact_sha256": { "type": "string", "const": "345f3464ee72a60afc97bde0773410f47348a00d8629182fe52741c5f1a42874" }
+      }
+    },
+    "findings": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "limitations": { "type": "array", "minItems": 6, "items": { "type": "string", "minLength": 1 } },
+    "rollback": { "type": "string", "minLength": 1 },
+    "notes": { "type": "string", "minLength": 1 }
+  }
+}

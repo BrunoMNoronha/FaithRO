@@ -1,0 +1,50 @@
+name: Validate beam first build runbook
+
+on:
+  push:
+    branches: [ main, dev ]
+    paths:
+      - 'client/patcher/beam-audit/first-build-runbook.example.json'
+      - 'client/patcher/beam-audit/first-build-authorization.example.json'
+      - 'client/patcher/beam-audit/first-build-execution-evidence.example.json'
+      - 'client/patcher/beam-audit/schemas/first-build-runbook.schema.json'
+      - 'client/patcher/beam-audit/schemas/first-build-authorization.schema.json'
+      - 'client/patcher/beam-audit/schemas/first-build-execution-evidence.schema.json'
+      - 'client/patcher/beam-audit/first-build-plan.example.json'
+      - 'client/patcher/beam-audit/upstream-manifest.example.json'
+      - 'client/patcher/beam-audit/overlays/beam-lab-security.patch'
+      - 'scripts/validate-beam-first-build-runbook.py'
+      - '.github/workflows/validate-beam-first-build-runbook.yml'
+  pull_request:
+    branches: [ main, dev ]
+    paths:
+      - 'client/patcher/beam-audit/first-build-runbook.example.json'
+      - 'client/patcher/beam-audit/first-build-authorization.example.json'
+      - 'client/patcher/beam-audit/first-build-execution-evidence.example.json'
+      - 'client/patcher/beam-audit/schemas/first-build-runbook.schema.json'
+      - 'client/patcher/beam-audit/schemas/first-build-authorization.schema.json'
+      - 'client/patcher/beam-audit/schemas/first-build-execution-evidence.schema.json'
+      - 'client/patcher/beam-audit/first-build-plan.example.json'
+      - 'client/patcher/beam-audit/upstream-manifest.example.json'
+      - 'client/patcher/beam-audit/overlays/beam-lab-security.patch'
+      - 'scripts/validate-beam-first-build-runbook.py'
+      - '.github/workflows/validate-beam-first-build-runbook.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-first-build-runbook:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate runbook/authorization/evidence (offline; no Rust, no build, still unauthorized)
+        run: |
+          python scripts/validate-beam-first-build-runbook.py

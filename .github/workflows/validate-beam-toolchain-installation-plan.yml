@@ -1,0 +1,36 @@
+name: Validate beam toolchain installation plan
+
+on:
+  push:
+    branches: [ main, dev ]
+    paths:
+      - 'client/patcher/beam-audit/toolchain-installation-plan.example.json'
+      - 'client/patcher/beam-audit/schemas/toolchain-installation-plan.schema.json'
+      - 'scripts/validate-beam-toolchain-installation-plan.py'
+      - '.github/workflows/validate-beam-toolchain-installation-plan.yml'
+  pull_request:
+    branches: [ main, dev ]
+    paths:
+      - 'client/patcher/beam-audit/toolchain-installation-plan.example.json'
+      - 'client/patcher/beam-audit/schemas/toolchain-installation-plan.schema.json'
+      - 'scripts/validate-beam-toolchain-installation-plan.py'
+      - '.github/workflows/validate-beam-toolchain-installation-plan.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-installation-plan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate toolchain installation plan
+        run: |
+          python scripts/validate-beam-toolchain-installation-plan.py

@@ -2,7 +2,7 @@
 
 ## Visão
 
-FaithRO - Laos Deos será um servidor old school/high rate, sem fins lucrativos, com foco em nostalgia e comunidade.
+FaithRO - Laus Deo será um servidor old school/high rate, sem fins lucrativos, com foco em nostalgia e comunidade.
 
 ## Definição de old school no projeto
 
@@ -79,4 +79,14 @@ Recomendado:
 | [10-fontes-comunitarias-rathena.md](10-fontes-comunitarias-rathena.md) | Registrar e classificar fontes de pesquisa usadas no projeto. | Todos | validado | Nenhuma | 2026-07-10 |
 | [11-servicos-systemd-rathena.md](11-servicos-systemd-rathena.md) | Descrever os serviços systemd criados na implantação. | Infra/DevOps | pendente de validação | 08 | 2026-07-10 |
 | [12-configuracao-packetver.md](12-configuracao-packetver.md) | Procedimento técnico (planejado) para alteração de PACKETVER e obfuscação. | Técnicos | validado | 09 | 2026-07-10 |
+| [15-cliente-primeiro-acesso.md](15-cliente-primeiro-acesso.md) | Fluxo planejado de primeiro acesso do jogador ao cliente. | Todos | pendente de validação | 09, 12, 16 | 2026-07-24 |
+| [16-politica-distribuicao-cliente.md](16-politica-distribuicao-cliente.md) | Política de distribuição e auditoria dos downloads do cliente. | Todos | validado | 09, 10 | 2026-07-24 |
+| [17-decisao-patcher-launcher.md](17-decisao-patcher-launcher.md) | Seleção do patcher/launcher (Beam Patcher principal, RPatchur reserva); protótipo local, sem produção. | Técnicos | validado | 15, 16, 10 | 2026-07-24 |
+| [18-homologacao-patch-sintetico-beam.md](18-homologacao-patch-sintetico-beam.md) | Homologação sintética do fluxo do Beam (gerador determinístico, loopback, SHA-256, testes negativos); APROVADO COM RESTRIÇÕES. | Técnicos | validado | 17, 16 | 2026-07-25 |
+| [19-preparacao-build-auditavel-beam.md](19-preparacao-build-auditavel-beam.md) | Preparação de build auditável do Beam (auditoria estática do commit fixado, manifesto, overlay de segurança de laboratório, plano de installation/build, validadores/CI). | Técnicos | validado | 18, 17 | 2026-07-25 |
+| [20-primeiro-build-controlado-beam.md](20-primeiro-build-controlado-beam.md) | Reprodução, documentação do bloqueio da toolchain Rust 1.77.2 e seleção estática da candidata mínima Rust 1.85.0. | Técnicos | candidata selecionada | 19, 18, 17 | 2026-07-25 |
+| [21-plano-instalacao-toolchain-rust-beam.md](21-plano-instalacao-toolchain-rust-beam.md) | Plano técnico de coexistência e futura instalação isolada da Rust 1.85.0-x86_64-pc-windows-msvc sem alterar default. | Técnicos | plano documentado | 20, 19 | 2026-07-25 |
+| [22-instalacao-isolada-toolchain-rust-beam.md](22-instalacao-isolada-toolchain-rust-beam.md) | Registro e validação empírica da instalação isolada da Rust 1.85.0-x86_64-pc-windows-msvc sem build. | Técnicos | instalado e validado | 21, 20 | 2026-07-25 |
+| [49-prontidao-operacional-runtime-primeiro-acesso.md](49-prontidao-operacional-runtime-primeiro-acesso.md) | Homologação e validação da prontidão de runtime do servidor (login, char, map, MariaDB, systemd, firewall e perfil de conexão) para o primeiro acesso. | Infra/DevOps | validado | 04, 11, 13, 29, 38 | 2026-09-03 |
+| [50-primeiro-acesso-cliente.md](50-primeiro-acesso-cliente.md) | Reconciliação de drift (Base Level 185, Packet Obfuscation) e prontidão para o handshake de primeiro acesso do cliente. | Infra/DevOps | validado | 04, 11, 13, 29, 49 | 2026-09-03 |
 | [99-checklists.md](99-checklists.md) | Listas de verificação para deploy, rollback e manutenção. | Técnicos | pendente de validação | Nenhuma | 2026-07-10 |

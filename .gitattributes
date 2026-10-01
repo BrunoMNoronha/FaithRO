@@ -1,0 +1,83 @@
+# Os arquivos de override do rAthena são implantados em host Linux
+# (/opt/faithro/rathena) e DEVEM permanecer com final de linha LF,
+# independentemente do core.autocrlf de quem faz checkout.
+deploy/rathena-overlay/** text eol=lf
+scripts/validate-progression-overrides.py text eol=lf
+scripts/validate-client-assets.py text eol=lf
+scripts/validate-patcher-config.py text eol=lf
+scripts/generate-synthetic-patch-lab.py text eol=lf
+scripts/validate-synthetic-patch-lab.py text eol=lf
+scripts/audit-beam-upstream.py text eol=lf
+scripts/validate-beam-build-plan.py text eol=lf
+scripts/validate-beam-security-overlay.py text eol=lf
+
+# O overlay de segurança do Beam é gerado contra o upstream (CRLF) e DEVE ser
+# aplicado byte a byte com git apply. Atributos:
+#   -text       impede o Git de reescrever os finais de linha (CRLF preservado);
+#   diff        trata como TEXTO no diff (auditável no Git e no GitHub);
+#   -whitespace não classifica os CR preservados como "trailing whitespace"
+#               apenas neste arquivo (evita falso positivo em git diff --check).
+# Ver client/patcher/beam-audit/overlays/.
+client/patcher/beam-audit/overlays/beam-lab-security.patch -text diff -whitespace
+
+# Fixtures sintéticas do laboratório do patcher DEVEM permanecer com LF: o
+# validador anti-drift compara byte a byte com a saída determinística (LF) do
+# gerador. Ver docs/18-homologacao-patch-sintetico-beam.md.
+client/patcher/fixtures/synthetic/** text eol=lf
+
+# O SHA-256 do runbook e do modelo de autorização é FIXADO na solicitação de
+# autorização (D1-B12) e recomputado byte a byte pelo validador
+# scripts/validate-beam-first-build-authorization-request.py. Esses arquivos
+# DEVEM permanecer com LF em qualquer plataforma (incluindo checkout Windows com
+# core.autocrlf=true), para que o hash fixado seja reproduzível e verificável no
+# host de build. Ver docs/25-solicitacao-autorizacao-primeiro-build-beam.md.
+client/patcher/beam-audit/first-build-runbook.example.json text eol=lf
+client/patcher/beam-audit/first-build-authorization.example.json text eol=lf
+client/patcher/beam-audit/first-build-authorization-request.example.json text eol=lf
+
+# O pacote de decisão humana (D1-B14) persiste o SHA-256 da solicitação, do
+# runbook, do modelo de autorização e do plano de build, recomputados byte a
+# byte por scripts/validate-beam-first-build-human-decision.py. O plano e os
+# novos artefatos de decisão DEVEM permanecer com LF para que os hashes fixados
+# sejam reproduzíveis em qualquer plataforma. Ver
+# docs/26-pacote-decisao-humana-primeiro-build-beam.md.
+client/patcher/beam-audit/first-build-plan.example.json text eol=lf
+client/patcher/beam-audit/first-build-human-decision-package.example.json text eol=lf
+client/patcher/beam-audit/first-build-human-decision-record.example.json text eol=lf
+
+# Artefatos da auditoria WARP cuja proveniência ou integridade é validada
+# byte a byte. Devem permanecer em LF inclusive em checkouts Windows com
+# core.autocrlf=true.
+client/warp-audit/evidence/binary-audit-gate-03-corrective-repeat-parser-output-*.json text eol=lf
+scripts/inspect-warp-pe-identity.py text eol=lf
+scripts/test-warp-pe-identity.py text eol=lf
+
+# Ferramenta do GATE 4 (2P-E-C4-PREP): o analisador PE estatico e seus testes, alem da
+# FUTURA saida do inventario (cujo SHA-256 sera fixado na evidencia real), DEVEM
+# permanecer em LF inclusive em checkouts Windows com core.autocrlf=true, para que os
+# Git blob OIDs e hashes sejam reproduziveis. Ver docs/40.
+scripts/inspect-warp-pe-static.py text eol=lf
+scripts/test-warp-pe-static.py text eol=lf
+client/warp-audit/evidence/binary-audit-gate-04-static-inventory-output-*.json text eol=lf
+
+# Tooling do GATE 5 (2P-E-C5-TOOLING-PREP): o orquestrador estatico e seus testes
+# DEVEM permanecer em LF inclusive em checkouts Windows com core.autocrlf=true, para
+# que os Git blob OIDs sejam reproduziveis (a FUTURA decisao real do GATE 5 podera
+# prende-los). Ver docs/45. Sem fixar SHA-256 (nao ha saida real do GATE 5).
+scripts/warp-audit-gate-05.py text eol=lf
+scripts/test-warp-audit-gate-05.py text eol=lf
+
+# Automacao do laboratorio GATE 5 (2P-E-C5-LAB-AUTOPROVISION): os scripts de
+# provisionamento e seus testes DEVEM permanecer em LF inclusive em checkouts
+# Windows com core.autocrlf=true, para que o conteudo versionado seja
+# byte-identico em qualquer maquina que reexecute a automacao. Ver docs/48.
+scripts/lab/** text eol=lf
+
+# O manifesto de apresentacao (D1-B16) persiste o SHA-256 dos artefatos
+# apresentados e sera, ele proprio, referenciado por hash em etapa posterior
+# (D1-B17). O manifesto e o comprovante DEVEM permanecer com LF para que os
+# hashes fixados sejam reproduziveis em qualquer plataforma, conforme o
+# validador scripts/validate-beam-first-build-human-presentation.py. Ver
+# docs/27-apresentacao-controlada-pacote-decisao-beam.md.
+client/patcher/beam-audit/first-build-human-presentation-manifest.example.json text eol=lf
+client/patcher/beam-audit/first-build-human-presentation-receipt.example.json text eol=lf

@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:beam-audit/toolchain-installation",
+  "title": "Beam Toolchain Installation Evidence",
+  "description": "JSON Schema para validação da evidência empírica de instalação isolada da toolchain Rust 1.85.0 (ETAPA 2O-D1-B6).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "stage",
+    "timestamp_utc",
+    "faithro_commit",
+    "branch",
+    "installed_toolchain",
+    "preserved_toolchain",
+    "installation_execution",
+    "coexistence_status",
+    "security_flags",
+    "governance_exception"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "enum": [1]
+    },
+    "stage": {
+      "type": "string",
+      "enum": ["2O-D1-B6"]
+    },
+    "timestamp_utc": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "faithro_commit": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "branch": {
+      "type": "string",
+      "enum": ["build/install-rust-185-beam"]
+    },
+    "installed_toolchain": {
+      "type": "object",
+      "required": ["version", "cargo_version", "host_triple", "profile", "components", "targets"],
+      "additionalProperties": false,
+      "properties": {
+        "version": { "type": "string", "enum": ["1.85.0"] },
+        "cargo_version": { "type": "string", "enum": ["1.85.0"] },
+        "host_triple": { "type": "string", "enum": ["x86_64-pc-windows-msvc"] },
+        "profile": { "type": "string", "enum": ["minimal"] },
+        "components": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "targets": {
+          "type": "array",
+          "items": { "type": "string" },
+          "enum": [["x86_64-pc-windows-msvc"]]
+        }
+      }
+    },
+    "preserved_toolchain": {
+      "type": "object",
+      "required": ["version", "cargo_version", "host_triple", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "version": { "type": "string", "enum": ["1.77.2"] },
+        "cargo_version": { "type": "string", "enum": ["1.77.2"] },
+        "host_triple": { "type": "string", "enum": ["x86_64-pc-windows-msvc"] },
+        "status": { "type": "string", "enum": ["active-default-preserved"] }
+      }
+    },
+    "installation_execution": {
+      "type": "object",
+      "required": ["start_timestamp_utc", "end_timestamp_utc", "command", "exit_code", "disk_free_before_gb", "disk_free_after_gb"],
+      "additionalProperties": false,
+      "properties": {
+        "start_timestamp_utc": { "type": "string" },
+        "end_timestamp_utc": { "type": "string" },
+        "command": { "type": "string", "enum": ["rustup toolchain install 1.85.0-x86_64-pc-windows-msvc --profile minimal"] },
+        "exit_code": { "type": "integer", "enum": [0] },
+        "disk_free_before_gb": { "type": "number" },
+        "disk_free_after_gb": { "type": "number" }
+      }
+    },
+    "coexistence_status": {
+      "type": "object",
+      "required": ["default_toolchain_before", "default_toolchain_after", "active_toolchain_before", "active_toolchain_after", "overrides_before", "overrides_after"],
+      "additionalProperties": false,
+      "properties": {
+        "default_toolchain_before": { "type": "string", "enum": ["1.77.2-x86_64-pc-windows-msvc"] },
+        "default_toolchain_after": { "type": "string", "enum": ["1.77.2-x86_64-pc-windows-msvc"] },
+        "active_toolchain_before": { "type": "string", "enum": ["1.77.2-x86_64-pc-windows-msvc"] },
+        "active_toolchain_after": { "type": "string", "enum": ["1.77.2-x86_64-pc-windows-msvc"] },
+        "overrides_before": { "type": "integer", "enum": [0] },
+        "overrides_after": { "type": "integer", "enum": [0] }
+      }
+    },
+    "security_flags": {
+      "type": "object",
+      "required": [
+        "installation_authorized",
+        "installation_executed",
+        "installation_validated",
+        "toolchain_added",
+        "default_toolchain_changed",
+        "persistent_override_created",
+        "permanent_path_changed",
+        "build_authorized",
+        "build_started",
+        "binary_produced",
+        "binary_executed",
+        "dependencies_modified",
+        "cargo_lock_created",
+        "deploy_performed",
+        "vps_accessed",
+        "windows_defender_disabled",
+        "next_authorization_required"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "installation_authorized": { "type": "boolean", "enum": [true] },
+        "installation_executed": { "type": "boolean", "enum": [true] },
+        "installation_validated": { "type": "boolean", "enum": [true] },
+        "toolchain_added": { "type": "boolean", "enum": [true] },
+        "default_toolchain_changed": { "type": "boolean", "enum": [false] },
+        "persistent_override_created": { "type": "boolean", "enum": [false] },
+        "permanent_path_changed": { "type": "boolean", "enum": [false] },
+        "build_authorized": { "type": "boolean", "enum": [false] },
+        "build_started": { "type": "boolean", "enum": [false] },
+        "binary_produced": { "type": "boolean", "enum": [false] },
+        "binary_executed": { "type": "boolean", "enum": [false] },
+        "dependencies_modified": { "type": "boolean", "enum": [false] },
+        "cargo_lock_created": { "type": "boolean", "enum": [false] },
+        "deploy_performed": { "type": "boolean", "enum": [false] },
+        "vps_accessed": { "type": "boolean", "enum": [false] },
+        "windows_defender_disabled": { "type": "boolean", "enum": [false] },
+        "next_authorization_required": { "type": "boolean", "enum": [true] }
+      }
+    },
+    "governance_exception": {
+      "type": "object",
+      "required": ["direct_dev_commit", "reason"],
+      "additionalProperties": false,
+      "properties": {
+        "direct_dev_commit": { "type": "string", "enum": ["d1b8a1ea7c30205ef8603081bfe412bd40625236"] },
+        "reason": { "type": "string" }
+      }
+    }
+  }
+}

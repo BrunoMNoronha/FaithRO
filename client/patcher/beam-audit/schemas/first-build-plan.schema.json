@@ -1,0 +1,280 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:beam-audit/first-build-plan",
+  "title": "Beam Patcher first controlled build plan (execution authorization gate)",
+  "description": "Plano do primeiro build controlado do Beam Patcher (ETAPA 2O-D1-B8). Documenta e bloqueia a execucao; NAO autoriza e NAO executa o build.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "stage",
+    "title",
+    "project",
+    "source_branch",
+    "governance_commit",
+    "created_utc",
+    "authorization_owner",
+    "plan_state",
+    "executes_build",
+    "execution_state",
+    "source",
+    "toolchain",
+    "planned_commands",
+    "network_policy",
+    "security",
+    "success_criteria",
+    "failure_criteria",
+    "required_future_evidence",
+    "proprietary_assets_included",
+    "deploy",
+    "access_vps",
+    "human_authorization",
+    "rollback",
+    "cleanup"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "stage": { "type": "string", "const": "2O-D1-B8" },
+    "title": { "type": "string", "minLength": 1 },
+    "document_reference": { "type": "string", "minLength": 1 },
+    "project": { "type": "string", "minLength": 1 },
+    "source_branch": { "type": "string", "const": "dev" },
+    "governance_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "created_utc": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
+    "authorization_owner": { "type": "string", "minLength": 1 },
+    "plan_state": { "type": "string", "const": "planned-pending-human-authorization" },
+    "executes_build": { "type": "boolean", "const": false },
+    "execution_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "planning_completed",
+        "static_validation_completed",
+        "build_authorized",
+        "build_started",
+        "binary_produced",
+        "binary_executed",
+        "deploy_authorized",
+        "deploy_performed",
+        "vps_access_authorized",
+        "vps_accessed",
+        "next_human_authorization_required"
+      ],
+      "properties": {
+        "planning_completed": { "type": "boolean" },
+        "static_validation_completed": { "type": "boolean" },
+        "build_authorized": { "type": "boolean", "const": false },
+        "build_started": { "type": "boolean", "const": false },
+        "binary_produced": { "type": "boolean", "const": false },
+        "binary_executed": { "type": "boolean", "const": false },
+        "deploy_authorized": { "type": "boolean", "const": false },
+        "deploy_performed": { "type": "boolean", "const": false },
+        "vps_access_authorized": { "type": "boolean", "const": false },
+        "vps_accessed": { "type": "boolean", "const": false },
+        "next_human_authorization_required": { "type": "boolean", "const": true }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "official_source",
+        "commit",
+        "version_reference",
+        "license_expression",
+        "checkout_mode",
+        "floating_branch_forbidden",
+        "integrity",
+        "workspace"
+      ],
+      "properties": {
+        "repository": { "type": "string", "const": "beamguides/beam-patcher" },
+        "official_source": { "type": "string", "const": "https://github.com/beamguides/beam-patcher" },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "commit_short": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+        "version_reference": { "type": "string", "minLength": 1 },
+        "license_expression": { "type": "string", "minLength": 1 },
+        "checkout_mode": { "type": "string", "const": "detached" },
+        "floating_branch_forbidden": { "type": "boolean", "const": true },
+        "integrity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["manifest_reference", "tree_digest_algorithm", "tree_digest", "critical_files_recheck_required"],
+          "properties": {
+            "manifest_reference": { "type": "string", "const": "client/patcher/beam-audit/upstream-manifest.example.json" },
+            "tree_digest_algorithm": { "type": "string", "const": "sha256" },
+            "tree_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+            "critical_files_recheck_required": { "type": "boolean", "const": true }
+          }
+        },
+        "workspace": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["temp_dir_prefix", "location", "inside_faithro_repo_forbidden", "cleanup_method"],
+          "properties": {
+            "temp_dir_prefix": { "type": "string", "minLength": 1 },
+            "location": { "type": "string", "minLength": 1 },
+            "inside_faithro_repo_forbidden": { "type": "boolean", "const": true },
+            "cleanup_method": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    },
+    "toolchain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required_toolchain",
+        "rust_version",
+        "preserved_default_toolchain",
+        "named_invocation_required",
+        "override_forbidden",
+        "permanent_path_change_forbidden",
+        "host_triple",
+        "target",
+        "profile",
+        "components",
+        "targets",
+        "implicit_installation_forbidden"
+      ],
+      "properties": {
+        "required_toolchain": { "type": "string", "const": "1.85.0-x86_64-pc-windows-msvc" },
+        "rust_version": { "type": "string", "const": "1.85.0" },
+        "preserved_default_toolchain": { "type": "string", "const": "1.77.2-x86_64-pc-windows-msvc" },
+        "named_invocation_required": { "type": "boolean", "const": true },
+        "override_forbidden": { "type": "boolean", "const": true },
+        "permanent_path_change_forbidden": { "type": "boolean", "const": true },
+        "host_triple": { "type": "string", "const": "x86_64-pc-windows-msvc" },
+        "target": { "type": "string", "const": "x86_64-pc-windows-msvc" },
+        "profile": { "type": "string", "const": "minimal" },
+        "components": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 3
+        },
+        "targets": {
+          "type": "array",
+          "items": { "type": "string", "const": "x86_64-pc-windows-msvc" },
+          "minItems": 1
+        },
+        "implicit_installation_forbidden": { "type": "boolean", "const": true }
+      }
+    },
+    "planned_commands": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["note", "executable_now", "sequence", "primary_build_command", "cleanup_command"],
+      "properties": {
+        "note": { "type": "string", "minLength": 1 },
+        "executable_now": { "type": "boolean", "const": false },
+        "sequence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["phase", "purpose", "command", "network", "authorized_now"],
+            "properties": {
+              "phase": { "type": "string", "minLength": 1 },
+              "purpose": { "type": "string", "minLength": 1 },
+              "command": { "type": "string", "minLength": 1 },
+              "network": { "type": "boolean" },
+              "authorized_now": { "type": "boolean", "const": false }
+            }
+          }
+        },
+        "primary_build_command": { "type": "string", "minLength": 1 },
+        "cleanup_command": { "type": "string", "minLength": 1 }
+      }
+    },
+    "network_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "network_allowed_phases",
+        "expected_hosts",
+        "expected_hosts_source",
+        "unexpected_download_aborts",
+        "credentials_required",
+        "dependencies_pinned",
+        "lockfile_change_aborts",
+        "offline_build_after_fetch"
+      ],
+      "properties": {
+        "network_allowed_phases": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "expected_hosts": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "expected_hosts_source": { "type": "string", "minLength": 1 },
+        "unexpected_download_aborts": { "type": "boolean", "const": true },
+        "credentials_required": { "type": "boolean", "const": false },
+        "dependencies_pinned": { "type": "boolean", "const": true },
+        "lockfile_change_aborts": { "type": "boolean", "const": true },
+        "offline_build_after_fetch": { "type": "boolean", "const": true }
+      }
+    },
+    "security": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "overlay_required",
+        "overlay_path",
+        "overlay_applied_before_build",
+        "overlay_fully_applied_required",
+        "antivirus_disable_forbidden",
+        "automatic_binary_execution_forbidden",
+        "static_artifact_inspection_required",
+        "binary_sha256_required",
+        "produced_files_inventory_required",
+        "output_isolated_in_temp",
+        "files_outside_workspace_abort",
+        "real_certificate_signing_forbidden",
+        "proprietary_client_packaging_forbidden"
+      ],
+      "properties": {
+        "overlay_required": { "type": "boolean", "const": true },
+        "overlay_path": { "type": "string", "const": "client/patcher/beam-audit/overlays/beam-lab-security.patch" },
+        "overlay_applied_before_build": { "type": "boolean", "const": true },
+        "overlay_fully_applied_required": { "type": "boolean", "const": true },
+        "antivirus_disable_forbidden": { "type": "boolean", "const": true },
+        "automatic_binary_execution_forbidden": { "type": "boolean", "const": true },
+        "static_artifact_inspection_required": { "type": "boolean", "const": true },
+        "binary_sha256_required": { "type": "boolean", "const": true },
+        "produced_files_inventory_required": { "type": "boolean", "const": true },
+        "output_isolated_in_temp": { "type": "boolean", "const": true },
+        "files_outside_workspace_abort": { "type": "boolean", "const": true },
+        "real_certificate_signing_forbidden": { "type": "boolean", "const": true },
+        "proprietary_client_packaging_forbidden": { "type": "boolean", "const": true }
+      }
+    },
+    "success_criteria": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "failure_criteria": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "required_future_evidence": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "proprietary_assets_included": { "type": "boolean", "const": false },
+    "deploy": { "type": "boolean", "const": false },
+    "access_vps": { "type": "boolean", "const": false },
+    "human_authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required_before_execution", "granted", "authorizer", "note"],
+      "properties": {
+        "required_before_execution": { "type": "boolean", "const": true },
+        "granted": { "type": "boolean", "const": false },
+        "authorizer": { "type": "string", "minLength": 1 },
+        "note": { "type": "string", "minLength": 1 }
+      }
+    },
+    "rollback": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "cleanup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["temp_workspace_removed", "faithro_repo_untouched_by_build"],
+      "properties": {
+        "temp_workspace_removed": { "type": "boolean", "const": true },
+        "faithro_repo_untouched_by_build": { "type": "boolean", "const": true }
+      }
+    }
+  }
+}

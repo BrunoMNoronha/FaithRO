@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "stage": "2O-D1-B14",
+  "artifact_kind": "human-decision-record",
+  "title": "Registro de decisao humana do primeiro build controlado do Beam Patcher (formulario nao preenchido)",
+  "document_reference": "docs/26-pacote-decisao-humana-primeiro-build-beam.md",
+  "package_reference": "client/patcher/beam-audit/first-build-human-decision-package.example.json",
+  "request_reference": "client/patcher/beam-audit/first-build-authorization-request.example.json",
+  "authorization_reference": "client/patcher/beam-audit/first-build-authorization.example.json",
+  "record_id": "REC-2O-D1-B14-primeiro-build-beam",
+  "decision_status": "PENDING",
+  "decision": null,
+  "authorization_granted": false,
+  "execution_permitted": false,
+  "authorization_used": false,
+  "authorization_revoked": false,
+  "decision_recorded": false,
+  "build_started": false,
+  "beam_downloaded": false,
+  "binary_produced": false,
+  "single_use_required": true,
+  "note": "FORMULARIO NAO PREENCHIDO. Este exemplo versionado representa APENAS o estado pendente. Ele NAO e uma decisao, NAO concede autorizacao e NAO permite execucao. Uma decisao humana real sera registrada em etapa posterior (ETAPA 2O-D1-B15), como instancia separada submetida a revisao tecnica. Nunca se edita este exemplo para simular uma decisao. Campos nulos permanecem nulos ate a decisao humana verificavel.",
+  "authority": {
+    "identifier": null,
+    "role": null,
+    "authority_basis": null,
+    "verifiable_channel": null,
+    "auditable_reference": null,
+    "decision_timestamp_utc": null,
+    "identity_confirmed": false
+  },
+  "approval": {
+    "window_not_before_utc": null,
+    "window_not_after_utc": null,
+    "window_timezone": "UTC",
+    "max_duration_hours": 4,
+    "justification": null,
+    "confirmed_faithro_commit": null,
+    "confirmed_request_sha256": null,
+    "confirmed_runbook_sha256": null,
+    "single_use_confirmed": false
+  },
+  "refusal": {
+    "justification": null,
+    "unmet_conditions": null
+  },
+  "revocation": {
+    "revocable": true,
+    "revoked": false,
+    "revoked_reason": null,
+    "revoked_timestamp_utc": null
+  }
+}

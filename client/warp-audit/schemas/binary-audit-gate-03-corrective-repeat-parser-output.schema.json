@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:warp-audit/binary-audit-gate-03-corrective-repeat-parser-output",
+  "title": "WARP GATE 3 corrective-repeat reviewed-parser output (real, future)",
+  "description": "CONVENCAO (2P-E-C3-R4) para a saida textual EXATA e SANITIZADA do inspetor PE revisado (scripts/inspect-warp-pe-identity.py). Schema FECHADO (additionalProperties=false em todos os niveis), modelando exatamente os campos emitidos pelo parser. Somente metadados estruturais: SEM conteudo binario, SEM bCertificate, SEM caminho pessoal, segredo ou endpoint, SEM campos livres de notas. Nenhum arquivo real nesta etapa.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "file_size", "mz_present", "e_lfanew", "pe_signature_present", "machine",
+    "machine_value", "number_of_sections", "timedatestamp_raw", "timedatestamp_is_trusted",
+    "size_of_optional_header", "characteristics", "characteristics_value",
+    "executable_image_flag_present", "optional_header_offset", "optional_header_magic",
+    "pe_format", "size_of_optional_header_equals_magic_observation", "subsystem",
+    "subsystem_value", "checksum_declared", "number_of_rva_and_sizes", "section_alignment",
+    "file_alignment", "size_of_headers", "section_table", "certificate_table",
+    "version_info_status", "pe_headers_structurally_parseable", "full_pe_validation_performed",
+    "section_contents_validated", "security_evaluation_performed",
+    "file_read_for_static_inspection", "launched", "executed", "loaded_as_executable"
+  ],
+  "properties": {
+    "file_size": { "type": "integer", "minimum": 0 },
+    "mz_present": { "type": "boolean", "const": true },
+    "e_lfanew": { "type": "integer", "minimum": 0 },
+    "pe_signature_present": { "type": "boolean", "const": true },
+    "machine": { "type": "string", "minLength": 1 },
+    "machine_value": { "type": "string", "pattern": "^0x[0-9a-f]{4}$" },
+    "number_of_sections": { "type": "integer", "minimum": 1 },
+    "timedatestamp_raw": { "type": "integer", "minimum": 0 },
+    "timedatestamp_is_trusted": { "type": "boolean", "const": false },
+    "size_of_optional_header": { "type": "integer", "minimum": 0 },
+    "characteristics": { "type": "string", "pattern": "^0x[0-9a-f]{4}$" },
+    "characteristics_value": { "type": "integer", "minimum": 0 },
+    "executable_image_flag_present": { "type": "boolean", "const": true },
+    "optional_header_offset": { "type": "integer", "minimum": 0 },
+    "optional_header_magic": { "type": "string", "pattern": "^0x[0-9a-f]{4}$" },
+    "pe_format": { "type": "string", "enum": ["PE32", "PE32+"] },
+    "size_of_optional_header_equals_magic_observation": { "type": "boolean" },
+    "subsystem": { "type": "string", "minLength": 1 },
+    "subsystem_value": { "type": "integer", "minimum": 0 },
+    "checksum_declared": { "type": "string", "pattern": "^0x[0-9a-f]{8}$" },
+    "number_of_rva_and_sizes": { "type": "integer", "minimum": 0 },
+    "section_alignment": { "type": "integer", "minimum": 0 },
+    "file_alignment": { "type": "integer", "minimum": 0 },
+    "size_of_headers": { "type": "integer", "minimum": 0 },
+    "section_table": {
+      "type": "object", "additionalProperties": false,
+      "required": ["offset", "entry_size", "declared_entry_count", "total_size", "end_offset", "within_file", "contents_inspected"],
+      "properties": {
+        "offset": { "type": "integer", "minimum": 0 },
+        "entry_size": { "type": "integer", "const": 40 },
+        "declared_entry_count": { "type": "integer", "minimum": 1 },
+        "total_size": { "type": "integer", "minimum": 0 },
+        "end_offset": { "type": "integer", "minimum": 0 },
+        "within_file": { "type": "boolean", "const": true },
+        "contents_inspected": { "type": "boolean", "const": false }
+      }
+    },
+    "certificate_table": {
+      "type": "object", "additionalProperties": false,
+      "required": ["index", "first_field_is_file_offset_not_rva", "present", "structurally_parseable", "within_file", "security_directory_entry_present", "file_offset", "size", "entry_count", "entries", "note_padding"],
+      "properties": {
+        "index": { "type": "integer", "const": 4 },
+        "first_field_is_file_offset_not_rva": { "type": "boolean", "const": true },
+        "present": { "type": "boolean" },
+        "structurally_parseable": { "type": "boolean" },
+        "within_file": { "type": "boolean" },
+        "security_directory_entry_present": { "type": "boolean" },
+        "file_offset": { "type": "integer", "minimum": 0 },
+        "size": { "type": "integer", "minimum": 0 },
+        "entry_count": { "type": "integer", "minimum": 0 },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["declared_dw_length", "aligned_span", "padding_length", "padding_zero_filled", "revision", "certificate_type", "certificate_type_name"],
+            "properties": {
+              "declared_dw_length": { "type": "integer", "minimum": 8 },
+              "aligned_span": { "type": "integer", "minimum": 8 },
+              "padding_length": { "type": "integer", "minimum": 0 },
+              "padding_zero_filled": { "type": "boolean", "const": true },
+              "revision": { "type": "string", "pattern": "^0x[0-9a-f]{4}$" },
+              "certificate_type": { "type": "string", "pattern": "^0x[0-9a-f]{4}$" },
+              "certificate_type_name": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "note_padding": { "type": "string", "minLength": 1 }
+      }
+    },
+    "version_info_status": { "type": "string", "const": "NOT_DETERMINED_BY_REVIEWED_PARSER" },
+    "pe_headers_structurally_parseable": { "type": "boolean", "const": true },
+    "full_pe_validation_performed": { "type": "boolean", "const": false },
+    "section_contents_validated": { "type": "boolean", "const": false },
+    "security_evaluation_performed": { "type": "boolean", "const": false },
+    "file_read_for_static_inspection": { "type": "boolean", "const": true },
+    "launched": { "type": "boolean", "const": false },
+    "executed": { "type": "boolean", "const": false },
+    "loaded_as_executable": { "type": "boolean", "const": false }
+  }
+}

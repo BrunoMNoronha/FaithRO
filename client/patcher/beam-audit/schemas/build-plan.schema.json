@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:beam-audit/build-plan",
+  "title": "Beam Patcher controlled install/build plan",
+  "description": "Plano controlado de instalacao e build auditavel do Beam Patcher (ETAPA 2O-D1-B). Documenta, nao executa.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "upstream",
+    "toolchain",
+    "prerequisites",
+    "install_rules",
+    "lockfile_strategy",
+    "build",
+    "overlay",
+    "network_policy",
+    "deploy",
+    "access_vps",
+    "rollback"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "upstream": {
+      "type": "object",
+      "required": ["repository", "official_source", "commit", "checkout_mode"],
+      "properties": {
+        "repository": { "type": "string", "pattern": "^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$" },
+        "official_source": { "type": "string", "pattern": "^https://github\\.com/beamguides/beam-patcher$" },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "checkout_mode": { "type": "string", "const": "detached" }
+      }
+    },
+    "toolchain": {
+      "type": "object",
+      "required": ["rust_version", "host_triple", "target", "architecture", "components"],
+      "properties": {
+        "rust_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "host_triple": { "type": "string", "minLength": 1 },
+        "target": { "type": "string", "const": "x86_64-pc-windows-msvc" },
+        "architecture": { "type": "string", "minLength": 1 },
+        "components": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      }
+    },
+    "prerequisites": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "source", "version", "verification", "elevation_required", "rollback", "gate"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "source": { "type": "string", "pattern": "^https://" },
+          "elevation_required": { "type": "boolean" }
+        }
+      }
+    },
+    "install_rules": {
+      "type": "object",
+      "required": ["no_pipe_to_shell", "no_irm_iex", "no_latest_without_recording_effective_version", "run_as_administrator", "modify_global_path"],
+      "properties": {
+        "no_pipe_to_shell": { "type": "boolean", "const": true },
+        "no_irm_iex": { "type": "boolean", "const": true },
+        "no_latest_without_recording_effective_version": { "type": "boolean", "const": true },
+        "run_as_administrator": { "type": "boolean", "const": false },
+        "modify_global_path": { "type": "boolean", "const": false }
+      }
+    },
+    "lockfile_strategy": {
+      "type": "object",
+      "required": ["cargo_lock_present_upstream", "action", "steps"],
+      "properties": {
+        "cargo_lock_present_upstream": { "type": "boolean" },
+        "steps": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+      }
+    },
+    "build": {
+      "type": "object",
+      "required": ["workspace_is_temporary", "primary_build_command", "locked", "offline_second_build", "bundle", "installer", "sha256_required", "execute_binary"],
+      "properties": {
+        "workspace_is_temporary": { "type": "boolean", "const": true },
+        "primary_build_command": { "type": "string", "minLength": 1 },
+        "locked": { "type": "boolean", "const": true },
+        "offline_second_build": { "type": "boolean", "const": true },
+        "bundle": { "type": "boolean", "const": false },
+        "installer": { "type": "boolean", "const": false },
+        "sha256_required": { "type": "boolean", "const": true },
+        "execute_binary": { "type": "boolean", "const": false }
+      }
+    },
+    "overlay": {
+      "type": "object",
+      "required": ["required", "path", "applied_before_first_build"],
+      "properties": {
+        "required": { "type": "boolean", "const": true },
+        "path": { "type": "string", "const": "client/patcher/beam-audit/overlays/beam-lab-security.patch" },
+        "applied_before_first_build": { "type": "boolean", "const": true }
+      }
+    },
+    "network_policy": {
+      "type": "object",
+      "required": ["first_execution_allows_only", "external_dns_during_first_run", "broad_network_release"],
+      "properties": {
+        "first_execution_allows_only": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["127.0.0.1", "localhost"] },
+          "minItems": 1
+        },
+        "external_dns_during_first_run": { "type": "boolean", "const": false },
+        "broad_network_release": { "type": "boolean", "const": false }
+      }
+    },
+    "deploy": { "type": "boolean", "const": false },
+    "access_vps": { "type": "boolean", "const": false },
+    "rollback": {
+      "type": "object",
+      "minProperties": 1
+    }
+  }
+}

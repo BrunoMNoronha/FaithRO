@@ -4,6 +4,25 @@ Todas as mudanças relevantes do FaithRO devem ser registradas aqui.
 
 ## [Não lançado]
 
+- **Implementação versionada** dos limites de progressão da issue #8 (ETAPA
+  2N-C), **sem implantação na VPS**. Criado o overlay versionado
+  `deploy/rathena-overlay/` espelhando os caminhos do rAthena: Base Level
+  máximo 255 e Base EXP (Curva B, níveis 99–255, 157 entradas) em
+  `db/import/job_stats.yml`; pontos de status (Modelo B, níveis 201–255, 55
+  entradas, `Points(255)=7185`) em `db/import/statpoint.yml`; atributo natural
+  máximo 185 (normal e trans) e ASPD máxima 197 em `conf/import/battle_conf.txt`.
+  Job levels mantidos no modelo clássico (nenhum `MaxJobLevel` alterado);
+  nenhuma 3ª/4ª classe habilitada; core do rAthena inalterado. Registrada a
+  correção de que o override de Base EXP usa `db/import/job_stats.yml` (não
+  `db/import/job_exp.yml`, que não pertence à cadeia de importação do commit
+  auditado `7f080871c`). Adicionados o validador determinístico
+  `scripts/validate-progression-overrides.py` (biblioteca padrão, não inicia o
+  map-server), a documentação `docs/14-progressao-base-255-overrides.md` e um
+  `.gitattributes` que fixa LF nos arquivos do overlay. Estado: implementação
+  versionada, **pendente de implantação controlada** e de validação no cliente;
+  rates (issue #7) e ativação de classes (issue #9) permanecem pendentes.
+  Nenhuma alteração operacional foi realizada na VPS, nos serviços ou no banco.
+
 - Alinhamento do README, roadmap e plano de execução inicial ao estado auditado
   do projeto, distinguindo infraestrutura da VPS, ambiente local/dev, itens
   parciais e pendências. A infraestrutura base da VPS está implantada; o

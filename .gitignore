@@ -32,3 +32,35 @@ build/
 dist/
 tmp/
 cache/
+
+# Estado/logs/segredos locais da automacao do laboratorio GATE 5 (nunca versionar)
+.local/
+
+# Python (validadores/testes em scripts/)
+__pycache__/
+*.pyc
+
+# Cliente / binarios e assets proprietarios (NAO versionar)
+# Bloqueio amplo por extensao para evitar commit acidental de executaveis,
+# GRFs, pacotes de patch e arquivos compactados. Arquivos legitimos com
+# licenca comprovada podem exigir uma EXCECAO revisada em PR separado.
+# Ver docs/16-politica-distribuicao-cliente.md e client/README.md.
+*.exe
+*.dll
+*.grf
+*.gpf
+*.rgz
+*.thor
+*.7z
+*.rar
+*.zip
+# Nomes/prefixos especificos do cliente-base e do executavel-alvo
+RAG_SETUP_*
+Ragexe*
+data.grf
+rdata.grf
+# Patcher/launcher: binarios e pacotes de patch (NAO versionar)
+# Ver docs/17-decisao-patcher-launcher.md e client/patcher/README.md.
+# (*.grf ja bloqueia faithro.grf/faithro-lab.grf acima.)
+*.beam
+*.msi

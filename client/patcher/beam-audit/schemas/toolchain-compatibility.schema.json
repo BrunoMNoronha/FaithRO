@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "faithro:beam-audit/toolchain-compatibility",
+  "title": "BeamToolchainCompatibility",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "stage",
+    "classification",
+    "upstream",
+    "tested_toolchain",
+    "cargo_lock",
+    "metadata",
+    "primary_blocker",
+    "additional_confirmed_msrv",
+    "build_started",
+    "binary_produced",
+    "binary_executed",
+    "dependencies_modified",
+    "toolchain_elevated",
+    "deploy_performed",
+    "vps_accessed",
+    "next_authorization_required"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "stage": {
+      "type": "string",
+      "const": "2O-D1-B1"
+    },
+    "classification": {
+      "type": "string",
+      "const": "blocked"
+    },
+    "upstream": {
+      "type": "object",
+      "required": ["repository", "commit", "source_digest"],
+      "additionalProperties": false,
+      "properties": {
+        "repository": { "type": "string" },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "source_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "tested_toolchain": {
+      "type": "object",
+      "required": ["rust", "cargo", "host"],
+      "additionalProperties": false,
+      "properties": {
+        "rust": { "type": "string" },
+        "cargo": { "type": "string" },
+        "host": { "type": "string" }
+      }
+    },
+    "cargo_lock": {
+      "type": "object",
+      "required": [
+        "origin",
+        "official_lockfile_found",
+        "sha256",
+        "git_dependencies",
+        "registry_sources"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "origin": { "type": "string" },
+        "official_lockfile_found": { "type": "boolean" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-fA-F]{64}$" },
+        "git_dependencies": { "type": "integer", "const": 0 },
+        "registry_sources": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["exit_code", "succeeded"],
+      "additionalProperties": false,
+      "properties": {
+        "exit_code": { "type": "integer" },
+        "succeeded": { "type": "boolean", "const": false }
+      }
+    },
+    "primary_blocker": {
+      "type": "object",
+      "required": ["crate", "version", "edition", "required_rust", "reason"],
+      "additionalProperties": false,
+      "properties": {
+        "crate": { "type": "string" },
+        "version": { "type": "string" },
+        "edition": { "type": "string" },
+        "required_rust": { "type": "string" },
+        "reason": { "type": "string" }
+      }
+    },
+    "additional_confirmed_msrv": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["crate", "version", "required_rust"],
+        "additionalProperties": false,
+        "properties": {
+          "crate": { "type": "string" },
+          "version": { "type": "string" },
+          "required_rust": { "type": "string" }
+        }
+      }
+    },
+    "build_started": { "type": "boolean", "const": false },
+    "binary_produced": { "type": "boolean", "const": false },
+    "binary_executed": { "type": "boolean", "const": false },
+    "dependencies_modified": { "type": "boolean", "const": false },
+    "toolchain_elevated": { "type": "boolean", "const": false },
+    "deploy_performed": { "type": "boolean", "const": false },
+    "vps_accessed": { "type": "boolean", "const": false },
+    "next_authorization_required": { "type": "boolean", "const": true }
+  }
+}

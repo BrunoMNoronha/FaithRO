@@ -1,0 +1,32 @@
+name: Validate Beam toolchain compatibility
+
+on:
+  push:
+    branches:
+      - dev
+      - test/build-controlado-beam
+  pull_request:
+    branches:
+      - dev
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate toolchain compatibility evidence
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Validate evidence from external CWD
+        run: |
+          cd /tmp
+          python "$GITHUB_WORKSPACE/scripts/validate-beam-toolchain-compatibility.py"
