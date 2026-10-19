@@ -1,0 +1,9 @@
+{
+  "timezone": "America/Sao_Paulo",
+  "process_TZ": [],
+  "online": 1,
+  "installed_sha256": "4e1114ff73ca4add082087420ba7dbbba7dd9970b7adab9f30260c34d2eff819",
+  "mirror_sha256": "0efdd9a8c06869fc653711feebed5e27375ab95b33e6b5f1972e9634d046e1cf",
+  "mirror_equivalent": true,
+  "deployment_status": "deferred_online_characters"
+}

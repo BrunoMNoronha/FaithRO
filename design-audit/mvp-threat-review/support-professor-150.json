@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "status": "pending_build_card_not_observation",
+  "purpose": "controlled_MVP_duo_support_baseline",
+  "actor": {
+    "role": "tester",
+    "group_id": 0,
+    "is_bot": false
+  },
+  "build": {
+    "class": "Professor",
+    "base_level": 150,
+    "job_level": 70,
+    "stats_SAVIDL": [
+      67,
+      33,
+      127,
+      110,
+      93,
+      1
+    ],
+    "equipment": [
+      {
+        "slot": "head_top",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "head_mid",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "head_low",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "armor",
+        "item_id": 2304,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "garment",
+        "item_id": 2504,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "shoes",
+        "item_id": 2404,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "right_hand",
+        "item_id": 1550,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "left_hand",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "accessory1",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "accessory2",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      }
+    ],
+    "skills": {
+      "NV_BASIC": 9,
+      "MG_NAPALMBEAT": 7,
+      "MG_SOULSTRIKE": 5,
+      "MG_SAFETYWALL": 10,
+      "MG_FIREBOLT": 1,
+      "SA_ADVANCEDBOOK": 9,
+      "SA_FLAMELAUNCHER": 2,
+      "SA_VOLCANO": 3,
+      "MG_COLDBOLT": 1,
+      "SA_FROSTWEAPON": 2,
+      "SA_DELUGE": 3,
+      "MG_LIGHTNINGBOLT": 1,
+      "SA_LIGHTNINGLOADER": 2,
+      "SA_VIOLENTGALE": 3,
+      "SA_LANDPROTECTOR": 5,
+      "SA_MAGICROD": 3,
+      "SA_SPELLBREAKER": 3,
+      "SA_DISPELL": 5,
+      "PF_SOULCHANGE": 1,
+      "SA_DRAGONOLOGY": 4,
+      "PF_SPIDERWEB": 1,
+      "PF_FOGWALL": 1
+    }
+  },
+  "status_points_used": 2722,
+  "status_points_budget": 2722,
+  "skill_points": {
+    "novice": 9,
+    "first": 25,
+    "second": 47
+  },
+  "skill_points_budget": {
+    "novice": 9,
+    "first": 49,
+    "second": 69
+  },
+  "equipment_compatible": true,
+  "normal_shop_prices_before_discount": {
+    "2304": 10000,
+    "2504": 10000,
+    "2404": 10000,
+    "1550": 30000
+  },
+  "equipment_purchase_total_before_discount": 60000,
+  "observed_panel": {
+    "hp": null,
+    "sp": null,
+    "aspd": null,
+    "weight": null,
+    "max_weight": null
+  },
+  "actual_skills_cast_and_results": null,
+  "consumables_and_cash_record": null,
+  "support_source_sha256": "702721e602d30f91b71385a7d4fc1d59f2abc120722895d1701a33a389480eea",
+  "limitations": [
+    "Baseline equipment is obtainable, but survival and usefulness are untested.",
+    "Prerequisite skills are allocated; their use must be declared and reconciled.",
+    "Skill availability does not establish effectiveness against bosses.",
+    "Copy before use; complete separate cash/consumable records for each participant."
+  ]
+}

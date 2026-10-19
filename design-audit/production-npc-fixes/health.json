@@ -1,0 +1,16 @@
+{
+  "http": {
+    "public": 200,
+    "origin_health": 200
+  },
+  "services": {
+    "rathena-login": "active",
+    "rathena-char": "active",
+    "rathena-map": "active",
+    "rathena-web": "active",
+    "faithro-web": "active"
+  },
+  "checked_at_utc": "2026-10-19T06:20:11.776318+00:00",
+  "default_python_public_probe_status": 403,
+  "external_browser_probe_status": 200
+}

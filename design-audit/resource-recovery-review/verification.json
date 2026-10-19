@@ -1,0 +1,32 @@
+{
+  "checked_at_utc": "2026-10-19T07:29:53.987620+00:00",
+  "tests": {
+    "passed": 143,
+    "failed": 0
+  },
+  "ast_and_json_valid": true,
+  "example_cli_base_sp": 1200,
+  "example_cli_arrows": 100,
+  "windows_recovery_mode_refuses_without_action": true,
+  "native_backup_file_recovery": "passed_in_private_lab",
+  "production_restore_executed": false,
+  "production_mutations": false,
+  "combats_executed": 0,
+  "real_pvm_observations_supplied": 0,
+  "source_tool_sha256": {
+    "tools/collect_resource_costs.py": "d05a323c986a9fd1c5dc4ad336189cabc378948ca97f28dce29d17cf46ee232b",
+    "tools/analyze_resource_costs.py": "0555639cb0ebb08c143dd08bf33c305d71369f7b55d928fe9a14ef5ab0349ff6",
+    "tools/isolated_char_check.py": "128e5374602bc1d76798dc16a84a91c943fc2fa2fa52c8abf399aaa8c9196172",
+    "tools/isolated_onboarding_checks.py": "fcccc2a6f634e40ede7280148b0c1e432bd12ea7bcd4ee0d22eb2b5c8dd9373e",
+    "tools/tests/test_resource_costs.py": "260ec36b63019d8c7407970f5192565b0ac359bf707781796f039aaeef58a715",
+    ".github/workflows/validate-balance-review.yml": "1a506059994d45547f75ed2430c200ee033053ecb722bfbac7bdf6fbbb219797"
+  },
+  "catalog_sha256": "400e3c623f00fcc0ad7e040c5b58bf8410a6135f1959db0e3b0e13032f4500e9",
+  "limits": {
+    "exp_rate": 300,
+    "level": 255,
+    "stats": 185,
+    "aspd": 197
+  },
+  "automatic_balance_changes": false
+}

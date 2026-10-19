@@ -1,0 +1,377 @@
+{
+  "protocol_id": "faithro-mvp-party-v1",
+  "status": "prepared_not_executed",
+  "matrix_with_both_supports": [
+    {
+      "target": 1086,
+      "name": "gtb",
+      "start_level": 99,
+      "map": "prt_sewb4",
+      "condition": "solo",
+      "repetition": 1,
+      "status": "pending",
+      "suggested_file": "gtb-solo-1.json"
+    },
+    {
+      "target": 1086,
+      "name": "gtb",
+      "start_level": 99,
+      "map": "prt_sewb4",
+      "condition": "solo",
+      "repetition": 2,
+      "status": "pending",
+      "suggested_file": "gtb-solo-2.json"
+    },
+    {
+      "target": 1086,
+      "name": "gtb",
+      "start_level": 99,
+      "map": "prt_sewb4",
+      "condition": "solo",
+      "repetition": 3,
+      "status": "pending",
+      "suggested_file": "gtb-solo-3.json"
+    },
+    {
+      "target": 1086,
+      "name": "gtb",
+      "start_level": 99,
+      "map": "prt_sewb4",
+      "condition": "High_Priest",
+      "repetition": 1,
+      "status": "pending",
+      "suggested_file": "gtb-high_priest-1.json"
+    },
+    {
+      "target": 1086,
+      "name": "gtb",
+      "start_level": 99,
+      "map": "prt_sewb4",
+      "condition": "High_Priest",
+      "repetition": 2,
+      "status": "pending",
+      "suggested_file": "gtb-high_priest-2.json"
+    },
+    {
+      "target": 1086,
+      "name": "gtb",
+      "start_level": 99,
+      "map": "prt_sewb4",
+      "condition": "High_Priest",
+      "repetition": 3,
+      "status": "pending",
+      "suggested_file": "gtb-high_priest-3.json"
+    },
+    {
+      "target": 1086,
+      "name": "gtb",
+      "start_level": 99,
+      "map": "prt_sewb4",
+      "condition": "Professor",
+      "repetition": 1,
+      "status": "pending",
+      "suggested_file": "gtb-professor-1.json"
+    },
+    {
+      "target": 1086,
+      "name": "gtb",
+      "start_level": 99,
+      "map": "prt_sewb4",
+      "condition": "Professor",
+      "repetition": 2,
+      "status": "pending",
+      "suggested_file": "gtb-professor-2.json"
+    },
+    {
+      "target": 1086,
+      "name": "gtb",
+      "start_level": 99,
+      "map": "prt_sewb4",
+      "condition": "Professor",
+      "repetition": 3,
+      "status": "pending",
+      "suggested_file": "gtb-professor-3.json"
+    },
+    {
+      "target": 1039,
+      "name": "baphomet",
+      "start_level": 150,
+      "map": "prt_maze03",
+      "condition": "solo",
+      "repetition": 1,
+      "status": "pending",
+      "suggested_file": "baphomet-solo-1.json"
+    },
+    {
+      "target": 1039,
+      "name": "baphomet",
+      "start_level": 150,
+      "map": "prt_maze03",
+      "condition": "solo",
+      "repetition": 2,
+      "status": "pending",
+      "suggested_file": "baphomet-solo-2.json"
+    },
+    {
+      "target": 1039,
+      "name": "baphomet",
+      "start_level": 150,
+      "map": "prt_maze03",
+      "condition": "solo",
+      "repetition": 3,
+      "status": "pending",
+      "suggested_file": "baphomet-solo-3.json"
+    },
+    {
+      "target": 1039,
+      "name": "baphomet",
+      "start_level": 150,
+      "map": "prt_maze03",
+      "condition": "High_Priest",
+      "repetition": 1,
+      "status": "pending",
+      "suggested_file": "baphomet-high_priest-1.json"
+    },
+    {
+      "target": 1039,
+      "name": "baphomet",
+      "start_level": 150,
+      "map": "prt_maze03",
+      "condition": "High_Priest",
+      "repetition": 2,
+      "status": "pending",
+      "suggested_file": "baphomet-high_priest-2.json"
+    },
+    {
+      "target": 1039,
+      "name": "baphomet",
+      "start_level": 150,
+      "map": "prt_maze03",
+      "condition": "High_Priest",
+      "repetition": 3,
+      "status": "pending",
+      "suggested_file": "baphomet-high_priest-3.json"
+    },
+    {
+      "target": 1039,
+      "name": "baphomet",
+      "start_level": 150,
+      "map": "prt_maze03",
+      "condition": "Professor",
+      "repetition": 1,
+      "status": "pending",
+      "suggested_file": "baphomet-professor-1.json"
+    },
+    {
+      "target": 1039,
+      "name": "baphomet",
+      "start_level": 150,
+      "map": "prt_maze03",
+      "condition": "Professor",
+      "repetition": 2,
+      "status": "pending",
+      "suggested_file": "baphomet-professor-2.json"
+    },
+    {
+      "target": 1039,
+      "name": "baphomet",
+      "start_level": 150,
+      "map": "prt_maze03",
+      "condition": "Professor",
+      "repetition": 3,
+      "status": "pending",
+      "suggested_file": "baphomet-professor-3.json"
+    },
+    {
+      "target": 1751,
+      "name": "randgris",
+      "start_level": 255,
+      "map": "odin_tem03",
+      "condition": "solo",
+      "repetition": 1,
+      "status": "pending",
+      "suggested_file": "randgris-solo-1.json"
+    },
+    {
+      "target": 1751,
+      "name": "randgris",
+      "start_level": 255,
+      "map": "odin_tem03",
+      "condition": "solo",
+      "repetition": 2,
+      "status": "pending",
+      "suggested_file": "randgris-solo-2.json"
+    },
+    {
+      "target": 1751,
+      "name": "randgris",
+      "start_level": 255,
+      "map": "odin_tem03",
+      "condition": "solo",
+      "repetition": 3,
+      "status": "pending",
+      "suggested_file": "randgris-solo-3.json"
+    },
+    {
+      "target": 1751,
+      "name": "randgris",
+      "start_level": 255,
+      "map": "odin_tem03",
+      "condition": "High_Priest",
+      "repetition": 1,
+      "status": "pending",
+      "suggested_file": "randgris-high_priest-1.json"
+    },
+    {
+      "target": 1751,
+      "name": "randgris",
+      "start_level": 255,
+      "map": "odin_tem03",
+      "condition": "High_Priest",
+      "repetition": 2,
+      "status": "pending",
+      "suggested_file": "randgris-high_priest-2.json"
+    },
+    {
+      "target": 1751,
+      "name": "randgris",
+      "start_level": 255,
+      "map": "odin_tem03",
+      "condition": "High_Priest",
+      "repetition": 3,
+      "status": "pending",
+      "suggested_file": "randgris-high_priest-3.json"
+    },
+    {
+      "target": 1751,
+      "name": "randgris",
+      "start_level": 255,
+      "map": "odin_tem03",
+      "condition": "Professor",
+      "repetition": 1,
+      "status": "pending",
+      "suggested_file": "randgris-professor-1.json"
+    },
+    {
+      "target": 1751,
+      "name": "randgris",
+      "start_level": 255,
+      "map": "odin_tem03",
+      "condition": "Professor",
+      "repetition": 2,
+      "status": "pending",
+      "suggested_file": "randgris-professor-2.json"
+    },
+    {
+      "target": 1751,
+      "name": "randgris",
+      "start_level": 255,
+      "map": "odin_tem03",
+      "condition": "Professor",
+      "repetition": 3,
+      "status": "pending",
+      "suggested_file": "randgris-professor-3.json"
+    },
+    {
+      "target": 1832,
+      "name": "ifrit",
+      "start_level": 255,
+      "map": "thor_v03",
+      "condition": "solo",
+      "repetition": 1,
+      "status": "pending",
+      "suggested_file": "ifrit-solo-1.json"
+    },
+    {
+      "target": 1832,
+      "name": "ifrit",
+      "start_level": 255,
+      "map": "thor_v03",
+      "condition": "solo",
+      "repetition": 2,
+      "status": "pending",
+      "suggested_file": "ifrit-solo-2.json"
+    },
+    {
+      "target": 1832,
+      "name": "ifrit",
+      "start_level": 255,
+      "map": "thor_v03",
+      "condition": "solo",
+      "repetition": 3,
+      "status": "pending",
+      "suggested_file": "ifrit-solo-3.json"
+    },
+    {
+      "target": 1832,
+      "name": "ifrit",
+      "start_level": 255,
+      "map": "thor_v03",
+      "condition": "High_Priest",
+      "repetition": 1,
+      "status": "pending",
+      "suggested_file": "ifrit-high_priest-1.json"
+    },
+    {
+      "target": 1832,
+      "name": "ifrit",
+      "start_level": 255,
+      "map": "thor_v03",
+      "condition": "High_Priest",
+      "repetition": 2,
+      "status": "pending",
+      "suggested_file": "ifrit-high_priest-2.json"
+    },
+    {
+      "target": 1832,
+      "name": "ifrit",
+      "start_level": 255,
+      "map": "thor_v03",
+      "condition": "High_Priest",
+      "repetition": 3,
+      "status": "pending",
+      "suggested_file": "ifrit-high_priest-3.json"
+    },
+    {
+      "target": 1832,
+      "name": "ifrit",
+      "start_level": 255,
+      "map": "thor_v03",
+      "condition": "Professor",
+      "repetition": 1,
+      "status": "pending",
+      "suggested_file": "ifrit-professor-1.json"
+    },
+    {
+      "target": 1832,
+      "name": "ifrit",
+      "start_level": 255,
+      "map": "thor_v03",
+      "condition": "Professor",
+      "repetition": 2,
+      "status": "pending",
+      "suggested_file": "ifrit-professor-2.json"
+    },
+    {
+      "target": 1832,
+      "name": "ifrit",
+      "start_level": 255,
+      "map": "thor_v03",
+      "condition": "Professor",
+      "repetition": 3,
+      "status": "pending",
+      "suggested_file": "ifrit-professor-3.json"
+    }
+  ],
+  "attempts_with_both_supports": 36,
+  "attempts_with_one_selected_support": 24,
+  "max_combat_seconds_per_attempt": 600,
+  "operational_time_separate": true,
+  "reference": {
+    "exp_rate": 300,
+    "max_level": 255,
+    "stat_cap": 185,
+    "aspd_cap": 197
+  },
+  "real_combat_attempts": 0
+}

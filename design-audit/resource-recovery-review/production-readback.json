@@ -1,0 +1,44 @@
+{
+  "checked_at_utc": "2026-10-19T07:27:29.942617+00:00",
+  "services": {
+    "rathena-login": {
+      "MainPID": "140817",
+      "NRestarts": "0",
+      "ActiveState": "active"
+    },
+    "rathena-char": {
+      "MainPID": "160495",
+      "NRestarts": "0",
+      "ActiveState": "active"
+    },
+    "rathena-map": {
+      "MainPID": "171553",
+      "NRestarts": "0",
+      "ActiveState": "active"
+    },
+    "rathena-web": {
+      "MainPID": "140820",
+      "NRestarts": "0",
+      "ActiveState": "active"
+    },
+    "faithro-web": {
+      "MainPID": "141001",
+      "NRestarts": "0",
+      "ActiveState": "active"
+    }
+  },
+  "http": {
+    "site": 200,
+    "health": 200
+  },
+  "new_map_errors": 0,
+  "lottery_installed_sha256": "9dbbb64a8e449fb6765ff246312b5e9491c688e96d4bd1848ca00e9b887b4119",
+  "lottery_deploy_mirror_sha256": "89ee437f011af781f7e6e2fb71add9ac5e3f648fe3458cbe2287aac8e7689d97",
+  "reference_files_checked": 13,
+  "reference_hashes_match": true,
+  "qa_units_remaining": [],
+  "qa_directories_remaining": [],
+  "production_mutations": false,
+  "production_combats": 0,
+  "production_service_states_and_pids_unchanged": true
+}

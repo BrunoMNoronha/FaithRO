@@ -1,0 +1,7 @@
+{
+  "path": "server/npc/custom/faithro/ptbr/custom/etc/lottery.txt",
+  "before_sha256": "0efdd9a8c06869fc653711feebed5e27375ab95b33e6b5f1972e9634d046e1cf",
+  "after_sha256": "89ee437f011af781f7e6e2fb71add9ac5e3f648fe3458cbe2287aac8e7689d97",
+  "matches_vps_utf8_deploy_mirror": true,
+  "only_confirmation_text_changed": true
+}

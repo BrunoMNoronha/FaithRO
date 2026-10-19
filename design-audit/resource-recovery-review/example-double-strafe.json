@@ -1,0 +1,14 @@
+{
+  "catalog_sha256": "400e3c623f00fcc0ad7e040c5b58bf8410a6135f1959db0e3b0e13032f4500e9",
+  "basis": "hypothetical_charge_counts",
+  "basic_arrow_charge_events": 0,
+  "skills": [
+    {
+      "skill": "AC_DOUBLE",
+      "level": 10,
+      "sp_charge_events": 100,
+      "item_charge_events": 0,
+      "ammo_charge_events": 100
+    }
+  ]
+}

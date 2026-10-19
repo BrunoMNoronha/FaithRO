@@ -1,0 +1,415 @@
+{
+  "schema_version": 1,
+  "protocol_id": "faithro-mvp-party-v1",
+  "status": "pending",
+  "attempt_id": null,
+  "monster_id": 1086,
+  "support_class": "Professor",
+  "combat_timing": {
+    "started_at": null,
+    "ended_at": null,
+    "elapsed_seconds": null
+  },
+  "outcome": null,
+  "target_kills": null,
+  "summon_kills": null,
+  "participants": [
+    {
+      "member_id": "attacker",
+      "session": {
+        "schema_version": 1,
+        "status": "pending",
+        "kind": "mvp",
+        "environment": "isolated_test",
+        "map": "prt_sewb4",
+        "actor": {
+          "role": "tester",
+          "group_id": 0,
+          "is_bot": false
+        },
+        "administrative_operations_present": false,
+        "build": {
+          "class": "Sniper",
+          "base_level": 99,
+          "job_level": 70,
+          "stats_SAVIDL": [
+            17,
+            78,
+            61,
+            35,
+            86,
+            1
+          ],
+          "equipment": [
+            {
+              "slot": "head_top",
+              "item_id": 0,
+              "refine": 0,
+              "cards": []
+            },
+            {
+              "slot": "head_mid",
+              "item_id": 0,
+              "refine": 0,
+              "cards": []
+            },
+            {
+              "slot": "head_low",
+              "item_id": 0,
+              "refine": 0,
+              "cards": []
+            },
+            {
+              "slot": "armor",
+              "item_id": 2304,
+              "refine": 0,
+              "cards": []
+            },
+            {
+              "slot": "garment",
+              "item_id": 2504,
+              "refine": 0,
+              "cards": []
+            },
+            {
+              "slot": "shoes",
+              "item_id": 2404,
+              "refine": 0,
+              "cards": []
+            },
+            {
+              "slot": "right_hand",
+              "item_id": 1708,
+              "refine": 0,
+              "cards": []
+            },
+            {
+              "slot": "left_hand",
+              "item_id": 0,
+              "refine": 0,
+              "cards": []
+            },
+            {
+              "slot": "accessory1",
+              "item_id": 0,
+              "refine": 0,
+              "cards": []
+            },
+            {
+              "slot": "accessory2",
+              "item_id": 0,
+              "refine": 0,
+              "cards": []
+            }
+          ],
+          "skills": {
+            "NV_BASIC": 9,
+            "AC_DOUBLE": 10,
+            "AC_OWL": 10,
+            "AC_VULTURE": 10,
+            "AC_CONCENTRATION": 10,
+            "SN_SHARPSHOOTING": 5,
+            "HT_BEASTBANE": 1,
+            "HT_FALCON": 1,
+            "SN_SIGHT": 10,
+            "SN_WINDWALK": 10
+          }
+        },
+        "observed_panel": {
+          "hp": null,
+          "sp": null,
+          "aspd": null,
+          "weight": null,
+          "max_weight": null
+        },
+        "buff_rules": {
+          "outside_support": false,
+          "record_self_buffs": true
+        },
+        "timing": {
+          "source": "session_stopwatch",
+          "elapsed_seconds": null,
+          "started_at": null,
+          "ended_at": null,
+          "includes_travel_sales_recovery": true
+        },
+        "kills_counter": {
+          "method": "manual_tally",
+          "start": null,
+          "end": null,
+          "calibration": {
+            "known_kills": 10,
+            "counter_increase": null
+          },
+          "scope": "party_shared"
+        },
+        "deaths": null,
+        "exp_gained": null,
+        "exp_measurement": "cumulative_counter_or_level_curve",
+        "cash": {
+          "start": null,
+          "end": null,
+          "npc_sales": null,
+          "quest_rewards": null,
+          "npc_purchases": null,
+          "transport_fees": null,
+          "refine_fees": null,
+          "other_sinks": null,
+          "external_in": null,
+          "external_out": null
+        },
+        "consumables_complete": false,
+        "consumables": [],
+        "notes": [
+          "Copiar para arquivo de medição antes de preencher.",
+          "status observed somente após sessão real; synthetic somente para testes de software.",
+          "Preencher 0 nos movimentos ausentes; não estimar valores desconhecidos.",
+          "Registrar bônus reais da arma, passivas e buffs no painel.",
+          "Inventário: quantidades e preço efetivo por fornecedor; não usar Buy genérico para loja custom.",
+          "Uma ficha por tentativa: victory, death, timeout ou abandoned.",
+          "Não misturar mortes de invocações com vitória sobre o MVP.",
+          "Registrar subida de nível; o piloto compara progressão desde 99. No cap 255, EXP/h efetiva não se aplica."
+        ],
+        "mvp_attempt": {
+          "monster_id": 1086,
+          "outcome": null,
+          "target_kills": null,
+          "outcome_scope": "party"
+        },
+        "party": {
+          "size": 2,
+          "support_class": "Professor"
+        },
+        "protocol_id": "faithro-mvp-party-v1",
+        "session_id": null,
+        "attributes_changed_during_session": false,
+        "equipment_changed_during_session": false,
+        "level_observation": {
+          "mode": "progression",
+          "start": 99,
+          "end": null
+        },
+        "exp_progress": {
+          "start_level": 99,
+          "start_exp": null,
+          "end_level": null,
+          "end_exp": null,
+          "curve_sha256": "465f226a0c19c756776c9b9212f47c7967db46f974eb6826f7c378e12563d93d"
+        },
+        "self_buffs_used": null,
+        "skills_used": [],
+        "received_buffs": [],
+        "buff_observations_complete": false,
+        "ammunition_item_id": 1750
+      }
+    },
+    {
+      "member_id": "support",
+      "session": {
+        "schema_version": 1,
+        "status": "pending",
+        "kind": "mvp",
+        "environment": "isolated_test",
+        "map": "prt_sewb4",
+        "actor": {
+          "role": "tester",
+          "group_id": 0,
+          "is_bot": false
+        },
+        "administrative_operations_present": false,
+        "build": {
+          "class": "Professor",
+          "base_level": 99,
+          "job_level": 70,
+          "stats_SAVIDL": [
+            35,
+            17,
+            86,
+            78,
+            61,
+            1
+          ],
+          "equipment": [
+            {
+              "slot": "head_top",
+              "item_id": 0,
+              "refine": 0,
+              "cards": []
+            },
+            {
+              "slot": "head_mid",
+              "item_id": 0,
+              "refine": 0,
+              "cards": []
+            },
+            {
+              "slot": "head_low",
+              "item_id": 0,
+              "refine": 0,
+              "cards": []
+            },
+            {
+              "slot": "armor",
+              "item_id": 2304,
+              "refine": 0,
+              "cards": []
+            },
+            {
+              "slot": "garment",
+              "item_id": 2504,
+              "refine": 0,
+              "cards": []
+            },
+            {
+              "slot": "shoes",
+              "item_id": 2404,
+              "refine": 0,
+              "cards": []
+            },
+            {
+              "slot": "right_hand",
+              "item_id": 1550,
+              "refine": 0,
+              "cards": []
+            },
+            {
+              "slot": "left_hand",
+              "item_id": 0,
+              "refine": 0,
+              "cards": []
+            },
+            {
+              "slot": "accessory1",
+              "item_id": 0,
+              "refine": 0,
+              "cards": []
+            },
+            {
+              "slot": "accessory2",
+              "item_id": 0,
+              "refine": 0,
+              "cards": []
+            }
+          ],
+          "skills": {
+            "NV_BASIC": 9,
+            "MG_NAPALMBEAT": 7,
+            "MG_SOULSTRIKE": 5,
+            "MG_SAFETYWALL": 10,
+            "MG_FIREBOLT": 1,
+            "SA_ADVANCEDBOOK": 9,
+            "SA_FLAMELAUNCHER": 2,
+            "SA_VOLCANO": 3,
+            "MG_COLDBOLT": 1,
+            "SA_FROSTWEAPON": 2,
+            "SA_DELUGE": 3,
+            "MG_LIGHTNINGBOLT": 1,
+            "SA_LIGHTNINGLOADER": 2,
+            "SA_VIOLENTGALE": 3,
+            "SA_LANDPROTECTOR": 5,
+            "SA_MAGICROD": 3,
+            "SA_SPELLBREAKER": 3,
+            "SA_DISPELL": 5,
+            "PF_SOULCHANGE": 1,
+            "SA_DRAGONOLOGY": 4,
+            "PF_SPIDERWEB": 1,
+            "PF_FOGWALL": 1
+          }
+        },
+        "observed_panel": {
+          "hp": null,
+          "sp": null,
+          "aspd": null,
+          "weight": null,
+          "max_weight": null
+        },
+        "buff_rules": {
+          "outside_support": false,
+          "record_self_buffs": true
+        },
+        "timing": {
+          "source": "session_stopwatch",
+          "elapsed_seconds": null,
+          "started_at": null,
+          "ended_at": null,
+          "includes_travel_sales_recovery": true
+        },
+        "kills_counter": {
+          "method": "manual_tally",
+          "start": null,
+          "end": null,
+          "calibration": {
+            "known_kills": 10,
+            "counter_increase": null
+          },
+          "scope": "party_shared"
+        },
+        "deaths": null,
+        "exp_gained": null,
+        "exp_measurement": "cumulative_counter_or_level_curve",
+        "cash": {
+          "start": null,
+          "end": null,
+          "npc_sales": null,
+          "quest_rewards": null,
+          "npc_purchases": null,
+          "transport_fees": null,
+          "refine_fees": null,
+          "other_sinks": null,
+          "external_in": null,
+          "external_out": null
+        },
+        "consumables_complete": false,
+        "consumables": [],
+        "notes": [
+          "Copiar para arquivo de medição antes de preencher.",
+          "status observed somente após sessão real; synthetic somente para testes de software.",
+          "Preencher 0 nos movimentos ausentes; não estimar valores desconhecidos.",
+          "Registrar bônus reais da arma, passivas e buffs no painel.",
+          "Inventário: quantidades e preço efetivo por fornecedor; não usar Buy genérico para loja custom.",
+          "Uma ficha por tentativa: victory, death, timeout ou abandoned.",
+          "Não misturar mortes de invocações com vitória sobre o MVP.",
+          "Registrar subida de nível; o piloto compara progressão desde 99. No cap 255, EXP/h efetiva não se aplica."
+        ],
+        "mvp_attempt": {
+          "monster_id": 1086,
+          "outcome": null,
+          "target_kills": null,
+          "outcome_scope": "party"
+        },
+        "party": {
+          "size": 2,
+          "support_class": "Professor"
+        },
+        "protocol_id": "faithro-mvp-party-v1",
+        "session_id": null,
+        "attributes_changed_during_session": false,
+        "equipment_changed_during_session": false,
+        "level_observation": {
+          "mode": "progression",
+          "start": 99,
+          "end": null
+        },
+        "exp_progress": {
+          "start_level": 99,
+          "start_exp": null,
+          "end_level": null,
+          "end_exp": null,
+          "curve_sha256": "465f226a0c19c756776c9b9212f47c7967db46f974eb6826f7c378e12563d93d"
+        },
+        "self_buffs_used": null,
+        "skills_used": [],
+        "received_buffs": [],
+        "buff_observations_complete": false,
+        "ammunition_item_id": 0
+      }
+    }
+  ],
+  "transfers": [],
+  "notes": [
+    "Preencher somente após ensaio real isolado; não publicar identificadores de jogadores.",
+    "Mesmo contador observado de chefe+invocações nas duas fichas; não somar duas vezes.",
+    "Transferências internas precisam constar dos dois ledgers. Sem entrada/saída externa durante o ensaio.",
+    "Custos de compra e valor de estoque consumido são medidas separadas."
+  ]
+}

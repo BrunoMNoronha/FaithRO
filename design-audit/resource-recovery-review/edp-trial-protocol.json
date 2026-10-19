@@ -1,0 +1,140 @@
+{
+  "status": "planned_not_executed",
+  "protocol_id": "faithro-edp-fixed-255-v1-draft",
+  "environment": "isolated_test",
+  "map": "juperos_02",
+  "build": {
+    "class": "Assassin_Cross",
+    "base_level": 255,
+    "job_level": 70,
+    "stats_SAVIDL": [
+      185,
+      185,
+      160,
+      80,
+      140,
+      1
+    ],
+    "equipment": [
+      {
+        "slot": "head_top",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "head_mid",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "head_low",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "armor",
+        "item_id": 2304,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "garment",
+        "item_id": 2504,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "shoes",
+        "item_id": 2404,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "right_hand",
+        "item_id": 1253,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "left_hand",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "accessory1",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "accessory2",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      }
+    ],
+    "skills": {
+      "NV_BASIC": 9,
+      "TF_DOUBLE": 10,
+      "TF_MISS": 10,
+      "AS_KATAR": 10,
+      "AS_SONICBLOW": 10,
+      "TF_STEAL": 5,
+      "TF_HIDING": 2,
+      "AS_CLOAKING": 3,
+      "ASC_KATAR": 5,
+      "TF_POISON": 10,
+      "TF_DETOXIFY": 1,
+      "AS_ENCHANTPOISON": 5,
+      "ASC_CDP": 1,
+      "ASC_EDP": 5
+    }
+  },
+  "session_seconds": 1800,
+  "pairs": [
+    {
+      "order": [
+        "off",
+        "on"
+      ]
+    },
+    {
+      "order": [
+        "on",
+        "off"
+      ]
+    },
+    {
+      "order": [
+        "off",
+        "on"
+      ]
+    }
+  ],
+  "total_sessions": 6,
+  "total_minutes_excluding_setup": 180,
+  "conditions": {
+    "off": "No ASC_EDP cast or Poison Bottle consumed",
+    "on": "Record actual ASC_EDP use, buff uptime/losses and Poison Bottle consumption; do not assume uninterrupted uptime"
+  },
+  "controls": [
+    "Same starting build, gear, consumable suppliers and map definition",
+    "Level cap 255; EXP gain not applicable",
+    "No attribute/equipment changes or outside support",
+    "Account for cash, initial stock consumed, deaths, travel, sales and recovery separately",
+    "Calibrate kill counter with 10 known kills before each measurement batch"
+  ],
+  "metrics": [
+    "kills per operational hour",
+    "cash flows excluding external transfers",
+    "consumption replacement value reported separately",
+    "deaths and actual EDP uptime",
+    "net inventory liquidation value with valuation method declared"
+  ],
+  "acceptance": "Compare repeated on/off pairs only after ledgers/counters reconcile; quantify additional output and resource use. No automatic skill/price adjustment.",
+  "combats_executed": 0
+}

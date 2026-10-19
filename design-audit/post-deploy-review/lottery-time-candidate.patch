@@ -1,0 +1,11 @@
+--- a/server/npc/custom/faithro/ptbr/custom/etc/lottery.txt
++++ b/server/npc/custom/faithro/ptbr/custom/etc/lottery.txt
+@@ -228,7 +228,7 @@
+ 	set #LID,$LID;
+ L_Confirm2:
+ 	mes "[Loteria]";
+-	mes "O sorteio ao vivo acontece às 21h.";
++	mes "O sorteio ao vivo acontece às 20h45 (horário de São Paulo).";
+ 	mes "Você pode resgatar seu bilhete até o próximo sorteio.";
+ 	next;
+ 	mes "[Loteria]";

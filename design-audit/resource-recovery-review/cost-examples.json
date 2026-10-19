@@ -1,0 +1,277 @@
+{
+  "status": "independent_hypothetical_examples_not_a_character_build",
+  "examples": [
+    {
+      "skill": "AC_DOUBLE",
+      "level": 10,
+      "charge_events_assumed": 100,
+      "result": {
+        "status": "calculated_base_costs_not_gameplay",
+        "basis": "hypothetical_charge_counts",
+        "base_sp_charge_total": 1200,
+        "items": [
+          {
+            "item_id": 1750,
+            "quantity": 100,
+            "unit_price_before_discount": 1,
+            "replacement_value": 100
+          }
+        ],
+        "replacement_value_before_discount": 100,
+        "skills": [
+          {
+            "skill": "AC_DOUBLE",
+            "level": 10,
+            "base_sp": 1200,
+            "charge_events": {
+              "sp": 100,
+              "item": 0,
+              "ammo": 100
+            }
+          }
+        ],
+        "player_performance_metrics": false,
+        "automatic_balance_changes": false,
+        "limitations": [
+          "Charge counts are inputs, not inferred from casts/hits or authenticated by the server.",
+          "Base SP is not net SP lost: modifiers, regeneration, exchanges and failures are unmodeled.",
+          "Replacement value is separate from cash purchases; do not deduct both as the same expense."
+        ]
+      }
+    },
+    {
+      "skill": "SN_SHARPSHOOTING",
+      "level": 5,
+      "charge_events_assumed": 100,
+      "result": {
+        "status": "calculated_base_costs_not_gameplay",
+        "basis": "hypothetical_charge_counts",
+        "base_sp_charge_total": 3000,
+        "items": [
+          {
+            "item_id": 1750,
+            "quantity": 100,
+            "unit_price_before_discount": 1,
+            "replacement_value": 100
+          }
+        ],
+        "replacement_value_before_discount": 100,
+        "skills": [
+          {
+            "skill": "SN_SHARPSHOOTING",
+            "level": 5,
+            "base_sp": 3000,
+            "charge_events": {
+              "sp": 100,
+              "item": 0,
+              "ammo": 100
+            }
+          }
+        ],
+        "player_performance_metrics": false,
+        "automatic_balance_changes": false,
+        "limitations": [
+          "Charge counts are inputs, not inferred from casts/hits or authenticated by the server.",
+          "Base SP is not net SP lost: modifiers, regeneration, exchanges and failures are unmodeled.",
+          "Replacement value is separate from cash purchases; do not deduct both as the same expense."
+        ]
+      }
+    },
+    {
+      "skill": "MG_SAFETYWALL",
+      "level": 10,
+      "charge_events_assumed": 10,
+      "result": {
+        "status": "calculated_base_costs_not_gameplay",
+        "basis": "hypothetical_charge_counts",
+        "base_sp_charge_total": 400,
+        "items": [
+          {
+            "item_id": 717,
+            "quantity": 10,
+            "unit_price_before_discount": 600,
+            "replacement_value": 6000
+          }
+        ],
+        "replacement_value_before_discount": 6000,
+        "skills": [
+          {
+            "skill": "MG_SAFETYWALL",
+            "level": 10,
+            "base_sp": 400,
+            "charge_events": {
+              "sp": 10,
+              "item": 10,
+              "ammo": 0
+            }
+          }
+        ],
+        "player_performance_metrics": false,
+        "automatic_balance_changes": false,
+        "limitations": [
+          "Charge counts are inputs, not inferred from casts/hits or authenticated by the server.",
+          "Base SP is not net SP lost: modifiers, regeneration, exchanges and failures are unmodeled.",
+          "Replacement value is separate from cash purchases; do not deduct both as the same expense."
+        ]
+      }
+    },
+    {
+      "skill": "SA_LANDPROTECTOR",
+      "level": 5,
+      "charge_events_assumed": 10,
+      "result": {
+        "status": "calculated_base_costs_not_gameplay",
+        "basis": "hypothetical_charge_counts",
+        "base_sp_charge_total": 500,
+        "items": [
+          {
+            "item_id": 715,
+            "quantity": 10,
+            "unit_price_before_discount": 600,
+            "replacement_value": 6000
+          },
+          {
+            "item_id": 717,
+            "quantity": 10,
+            "unit_price_before_discount": 600,
+            "replacement_value": 6000
+          }
+        ],
+        "replacement_value_before_discount": 12000,
+        "skills": [
+          {
+            "skill": "SA_LANDPROTECTOR",
+            "level": 5,
+            "base_sp": 500,
+            "charge_events": {
+              "sp": 10,
+              "item": 10,
+              "ammo": 0
+            }
+          }
+        ],
+        "player_performance_metrics": false,
+        "automatic_balance_changes": false,
+        "limitations": [
+          "Charge counts are inputs, not inferred from casts/hits or authenticated by the server.",
+          "Base SP is not net SP lost: modifiers, regeneration, exchanges and failures are unmodeled.",
+          "Replacement value is separate from cash purchases; do not deduct both as the same expense."
+        ]
+      }
+    },
+    {
+      "skill": "ALL_RESURRECTION",
+      "level": 4,
+      "charge_events_assumed": 5,
+      "result": {
+        "status": "calculated_base_costs_not_gameplay",
+        "basis": "hypothetical_charge_counts",
+        "base_sp_charge_total": 300,
+        "items": [
+          {
+            "item_id": 717,
+            "quantity": 5,
+            "unit_price_before_discount": 600,
+            "replacement_value": 3000
+          }
+        ],
+        "replacement_value_before_discount": 3000,
+        "skills": [
+          {
+            "skill": "ALL_RESURRECTION",
+            "level": 4,
+            "base_sp": 300,
+            "charge_events": {
+              "sp": 5,
+              "item": 5,
+              "ammo": 0
+            }
+          }
+        ],
+        "player_performance_metrics": false,
+        "automatic_balance_changes": false,
+        "limitations": [
+          "Charge counts are inputs, not inferred from casts/hits or authenticated by the server.",
+          "Base SP is not net SP lost: modifiers, regeneration, exchanges and failures are unmodeled.",
+          "Replacement value is separate from cash purchases; do not deduct both as the same expense."
+        ]
+      }
+    },
+    {
+      "skill": "PF_SPIDERWEB",
+      "level": 1,
+      "charge_events_assumed": 10,
+      "result": {
+        "status": "calculated_base_costs_not_gameplay",
+        "basis": "hypothetical_charge_counts",
+        "base_sp_charge_total": 500,
+        "items": [
+          {
+            "item_id": 1025,
+            "quantity": 10,
+            "unit_price_before_discount": 200,
+            "replacement_value": 2000
+          }
+        ],
+        "replacement_value_before_discount": 2000,
+        "skills": [
+          {
+            "skill": "PF_SPIDERWEB",
+            "level": 1,
+            "base_sp": 500,
+            "charge_events": {
+              "sp": 10,
+              "item": 10,
+              "ammo": 0
+            }
+          }
+        ],
+        "player_performance_metrics": false,
+        "automatic_balance_changes": false,
+        "limitations": [
+          "Charge counts are inputs, not inferred from casts/hits or authenticated by the server.",
+          "Base SP is not net SP lost: modifiers, regeneration, exchanges and failures are unmodeled.",
+          "Replacement value is separate from cash purchases; do not deduct both as the same expense."
+        ]
+      }
+    },
+    {
+      "skill": "ASC_EDP",
+      "level": 5,
+      "charge_events_assumed": 10,
+      "result": {
+        "status": "calculated_base_costs_not_gameplay",
+        "basis": "hypothetical_charge_counts",
+        "base_sp_charge_total": 1000,
+        "items": [
+          {
+            "item_id": 678,
+            "quantity": 10,
+            "unit_price_before_discount": 50000,
+            "replacement_value": 500000
+          }
+        ],
+        "replacement_value_before_discount": 500000,
+        "skills": [
+          {
+            "skill": "ASC_EDP",
+            "level": 5,
+            "base_sp": 1000,
+            "charge_events": {
+              "sp": 10,
+              "item": 10,
+              "ammo": 0
+            }
+          }
+        ],
+        "player_performance_metrics": false,
+        "automatic_balance_changes": false,
+        "limitations": [
+          "Charge counts are inputs, not inferred from casts/hits or authenticated by the server.",
+          "Base SP is not net SP lost: modifiers, regeneration, exchanges and failures are unmodeled.",
+          "Replacement value is separate from cash purchases; do not deduct both as the same expense."
+        ]
+      }
+    }
+  ]
+}

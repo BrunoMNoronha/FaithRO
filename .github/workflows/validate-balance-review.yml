@@ -25,13 +25,16 @@ jobs:
           python-version: "3.12"
       - name: Install test dependency
         run: python -m pip install 'pytest>=8,<9'
-      - name: Validate session, pilot and protocol
-        run: python -m pytest tools/tests/test_balance_session.py tools/tests/test_balance_pilot.py tools/tests/test_bot_protocol.py -q
+      - name: Validate session, pilot, protocol and MVP declarations
+        run: python -m pytest tools/tests/test_balance_session.py tools/tests/test_balance_pilot.py tools/tests/test_bot_protocol.py tools/tests/test_mvp_threats.py tools/tests/test_lottery_deploy.py tools/tests/test_balance_mvp.py tools/tests/test_resource_costs.py -q
       - name: Parse manual lab scripts without executing them
         run: |
           python - <<'PY'
           import ast
           from pathlib import Path
           for path in Path('tools').glob('isolated_*.py'):
+              ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
+          for name in ['deploy_lottery_text.py', 'collect_mvp_threats.py', 'collect_support_panels.py', 'prepare_support_cards.py', 'analyze_balance_mvp.py', 'prepare_mvp_party.py', 'collect_resource_costs.py', 'analyze_resource_costs.py']:
+              path = Path('tools') / name
               ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
           PY

@@ -1,0 +1,40 @@
+{
+  "checked_at_utc": "2026-10-19T06:30:57.228693+00:00",
+  "status": "passed",
+  "special_item_ratio_examples": [
+    {
+      "mob_id": 1086,
+      "item_id": 969,
+      "expected_percent": "30.00",
+      "displayed_percent": "30.00",
+      "public_row": "Gold 10.00% 30.00%",
+      "url": "https://faithro.site/db/monstro/1086"
+    },
+    {
+      "mob_id": 1289,
+      "item_id": 969,
+      "expected_percent": "3.00",
+      "displayed_percent": "3.00",
+      "public_row": "Gold 1.00% 3.00%",
+      "url": "https://faithro.site/db/monstro/1289"
+    },
+    {
+      "mob_id": 1681,
+      "item_id": 12040,
+      "expected_percent": "30.00",
+      "displayed_percent": "30.00",
+      "public_row": "Stone of Sage 3.00% 30.00%",
+      "url": "https://faithro.site/db/monstro/1681"
+    },
+    {
+      "mob_id": 1708,
+      "item_id": 7444,
+      "expected_percent": "10.00",
+      "displayed_percent": "10.00",
+      "public_row": "Treasure Box 10.00% 10.00%",
+      "url": "https://faithro.site/db/monstro/1708"
+    }
+  ],
+  "all_drop_rows_match": true,
+  "all_spawn_rows_match": true
+}

@@ -1,0 +1,2152 @@
+{
+  "timestamp_utc": "2026-10-19T06:45:24.486308+00:00",
+  "status": "legal_support_panels_not_combat_results",
+  "panels": {
+    "High_Priest": {
+      "first": "Acolyte",
+      "second": "Priest",
+      "requested": {
+        "AL_HEAL": 10,
+        "AL_BLESSING": 10,
+        "AL_INCAGI": 10,
+        "AL_PNEUMA": 1,
+        "PR_MAGNIFICAT": 5,
+        "HP_ASSUMPTIO": 5,
+        "ALL_RESURRECTION": 4
+      },
+      "skills": {
+        "NV_BASIC": 9,
+        "AL_HEAL": 10,
+        "AL_DP": 5,
+        "AL_BLESSING": 10,
+        "AL_INCAGI": 10,
+        "AL_RUWACH": 1,
+        "AL_TELEPORT": 2,
+        "AL_WARP": 4,
+        "AL_PNEUMA": 1,
+        "PR_MAGNIFICAT": 5,
+        "AL_ANGELUS": 1,
+        "MG_SRECOVERY": 4,
+        "PR_IMPOSITIO": 3,
+        "HP_ASSUMPTIO": 5,
+        "PR_STRECOVERY": 1,
+        "ALL_RESURRECTION": 4
+      },
+      "points_spent": {
+        "novice": 9,
+        "first": 44,
+        "second": 22
+      },
+      "points_budget": {
+        "novice": 9,
+        "first": 49,
+        "second": 69
+      }
+    },
+    "Professor": {
+      "first": "Mage",
+      "second": "Sage",
+      "requested": {
+        "MG_SAFETYWALL": 10,
+        "SA_LANDPROTECTOR": 5,
+        "SA_DISPELL": 5,
+        "PF_SOULCHANGE": 1,
+        "PF_SPIDERWEB": 1,
+        "PF_FOGWALL": 1
+      },
+      "skills": {
+        "NV_BASIC": 9,
+        "MG_NAPALMBEAT": 7,
+        "MG_SOULSTRIKE": 5,
+        "MG_SAFETYWALL": 10,
+        "MG_FIREBOLT": 1,
+        "SA_ADVANCEDBOOK": 9,
+        "SA_FLAMELAUNCHER": 2,
+        "SA_VOLCANO": 3,
+        "MG_COLDBOLT": 1,
+        "SA_FROSTWEAPON": 2,
+        "SA_DELUGE": 3,
+        "MG_LIGHTNINGBOLT": 1,
+        "SA_LIGHTNINGLOADER": 2,
+        "SA_VIOLENTGALE": 3,
+        "SA_LANDPROTECTOR": 5,
+        "SA_MAGICROD": 3,
+        "SA_SPELLBREAKER": 3,
+        "SA_DISPELL": 5,
+        "PF_SOULCHANGE": 1,
+        "SA_DRAGONOLOGY": 4,
+        "PF_SPIDERWEB": 1,
+        "PF_FOGWALL": 1
+      },
+      "points_spent": {
+        "novice": 9,
+        "first": 25,
+        "second": 47
+      },
+      "points_budget": {
+        "novice": 9,
+        "first": 49,
+        "second": 69
+      }
+    }
+  },
+  "gear": {
+    "2304": {
+      "Id": 2304,
+      "AegisName": "Leather_Jacket_",
+      "Name": "Jacket",
+      "Type": "Armor",
+      "Buy": 200,
+      "Weight": 200,
+      "Defense": 2,
+      "Slots": 1,
+      "Locations": {
+        "Armor": true
+      },
+      "ArmorLevel": 1,
+      "Refineable": true
+    },
+    "2404": {
+      "Id": 2404,
+      "AegisName": "Shoes_",
+      "Name": "Shoes",
+      "Type": "Armor",
+      "Buy": 3500,
+      "Weight": 400,
+      "Defense": 2,
+      "Slots": 1,
+      "Jobs": {
+        "All": true,
+        "Novice": false,
+        "SuperNovice": false
+      },
+      "Locations": {
+        "Shoes": true
+      },
+      "ArmorLevel": 1,
+      "Refineable": true
+    },
+    "2504": {
+      "Id": 2504,
+      "AegisName": "Muffler_",
+      "Name": "Muffler",
+      "Type": "Armor",
+      "Buy": 5000,
+      "Weight": 400,
+      "Defense": 2,
+      "Slots": 1,
+      "Jobs": {
+        "All": true,
+        "Novice": false,
+        "SuperNovice": false
+      },
+      "Locations": {
+        "Garment": true
+      },
+      "ArmorLevel": 1,
+      "Refineable": true
+    },
+    "1608": {
+      "Id": 1608,
+      "AegisName": "Staff_",
+      "Name": "Staff",
+      "Type": "Weapon",
+      "SubType": "Staff",
+      "Buy": 9500,
+      "Weight": 400,
+      "Attack": 40,
+      "Range": 1,
+      "Slots": 3,
+      "Jobs": {
+        "Acolyte": true,
+        "Mage": true,
+        "Monk": true,
+        "Priest": true,
+        "Sage": true,
+        "SoulLinker": true,
+        "Wizard": true
+      },
+      "Locations": {
+        "Right_Hand": true
+      },
+      "WeaponLevel": 2,
+      "EquipLevelMin": 12,
+      "Refineable": true,
+      "Script": "bonus bInt,2;\nbonus bMatkRate,15;\n"
+    },
+    "1550": {
+      "Id": 1550,
+      "AegisName": "Book",
+      "Name": "Book",
+      "Type": "Weapon",
+      "SubType": "Book",
+      "Buy": 30000,
+      "Weight": 600,
+      "Attack": 85,
+      "Range": 1,
+      "Slots": 3,
+      "Jobs": {
+        "Priest": true,
+        "Sage": true,
+        "StarGladiator": true
+      },
+      "Locations": {
+        "Right_Hand": true
+      },
+      "WeaponLevel": 2,
+      "EquipLevelMin": 14,
+      "Refineable": true
+    }
+  },
+  "skill_details": {
+    "NV_BASIC": {
+      "Id": 1,
+      "Name": "NV_BASIC",
+      "MaxLevel": 9
+    },
+    "MG_SRECOVERY": {
+      "Id": 9,
+      "Name": "MG_SRECOVERY",
+      "MaxLevel": 10
+    },
+    "MG_NAPALMBEAT": {
+      "Id": 11,
+      "Name": "MG_NAPALMBEAT",
+      "MaxLevel": 10,
+      "Requires": {
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 9
+          },
+          {
+            "Level": 2,
+            "Amount": 9
+          },
+          {
+            "Level": 3,
+            "Amount": 9
+          },
+          {
+            "Level": 4,
+            "Amount": 12
+          },
+          {
+            "Level": 5,
+            "Amount": 12
+          },
+          {
+            "Level": 6,
+            "Amount": 12
+          },
+          {
+            "Level": 7,
+            "Amount": 15
+          },
+          {
+            "Level": 8,
+            "Amount": 15
+          },
+          {
+            "Level": 9,
+            "Amount": 15
+          },
+          {
+            "Level": 10,
+            "Amount": 18
+          }
+        ]
+      },
+      "CastTime": 1000,
+      "AfterCastActDelay": [
+        {
+          "Level": 1,
+          "Time": 1000
+        },
+        {
+          "Level": 2,
+          "Time": 1000
+        },
+        {
+          "Level": 3,
+          "Time": 1000
+        },
+        {
+          "Level": 4,
+          "Time": 900
+        },
+        {
+          "Level": 5,
+          "Time": 900
+        },
+        {
+          "Level": 6,
+          "Time": 800
+        },
+        {
+          "Level": 7,
+          "Time": 800
+        },
+        {
+          "Level": 8,
+          "Time": 700
+        },
+        {
+          "Level": 9,
+          "Time": 600
+        },
+        {
+          "Level": 10,
+          "Time": 500
+        }
+      ]
+    },
+    "MG_SAFETYWALL": {
+      "Id": 12,
+      "Name": "MG_SAFETYWALL",
+      "MaxLevel": 10,
+      "Requires": {
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 30
+          },
+          {
+            "Level": 2,
+            "Amount": 30
+          },
+          {
+            "Level": 3,
+            "Amount": 30
+          },
+          {
+            "Level": 4,
+            "Amount": 35
+          },
+          {
+            "Level": 5,
+            "Amount": 35
+          },
+          {
+            "Level": 6,
+            "Amount": 35
+          },
+          {
+            "Level": 7,
+            "Amount": 40
+          },
+          {
+            "Level": 8,
+            "Amount": 40
+          },
+          {
+            "Level": 9,
+            "Amount": 40
+          },
+          {
+            "Level": 10,
+            "Amount": 40
+          }
+        ],
+        "ItemCost": [
+          {
+            "Item": "Blue_Gemstone",
+            "Amount": 1
+          }
+        ]
+      },
+      "CastTime": [
+        {
+          "Level": 1,
+          "Time": 4000
+        },
+        {
+          "Level": 2,
+          "Time": 3500
+        },
+        {
+          "Level": 3,
+          "Time": 3500
+        },
+        {
+          "Level": 4,
+          "Time": 2500
+        },
+        {
+          "Level": 5,
+          "Time": 2000
+        },
+        {
+          "Level": 6,
+          "Time": 1500
+        },
+        {
+          "Level": 7,
+          "Time": 1000
+        },
+        {
+          "Level": 8,
+          "Time": 1000
+        },
+        {
+          "Level": 9,
+          "Time": 1000
+        },
+        {
+          "Level": 10,
+          "Time": 1000
+        }
+      ],
+      "Duration1": [
+        {
+          "Level": 1,
+          "Time": 5000
+        },
+        {
+          "Level": 2,
+          "Time": 10000
+        },
+        {
+          "Level": 3,
+          "Time": 15000
+        },
+        {
+          "Level": 4,
+          "Time": 20000
+        },
+        {
+          "Level": 5,
+          "Time": 25000
+        },
+        {
+          "Level": 6,
+          "Time": 30000
+        },
+        {
+          "Level": 7,
+          "Time": 35000
+        },
+        {
+          "Level": 8,
+          "Time": 40000
+        },
+        {
+          "Level": 9,
+          "Time": 45000
+        },
+        {
+          "Level": 10,
+          "Time": 50000
+        }
+      ]
+    },
+    "MG_SOULSTRIKE": {
+      "Id": 13,
+      "Name": "MG_SOULSTRIKE",
+      "MaxLevel": 10,
+      "Requires": {
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 18
+          },
+          {
+            "Level": 2,
+            "Amount": 14
+          },
+          {
+            "Level": 3,
+            "Amount": 24
+          },
+          {
+            "Level": 4,
+            "Amount": 20
+          },
+          {
+            "Level": 5,
+            "Amount": 30
+          },
+          {
+            "Level": 6,
+            "Amount": 26
+          },
+          {
+            "Level": 7,
+            "Amount": 36
+          },
+          {
+            "Level": 8,
+            "Amount": 32
+          },
+          {
+            "Level": 9,
+            "Amount": 42
+          },
+          {
+            "Level": 10,
+            "Amount": 38
+          }
+        ]
+      },
+      "CastTime": 500,
+      "AfterCastActDelay": [
+        {
+          "Level": 1,
+          "Time": 1200
+        },
+        {
+          "Level": 2,
+          "Time": 1000
+        },
+        {
+          "Level": 3,
+          "Time": 1400
+        },
+        {
+          "Level": 4,
+          "Time": 1200
+        },
+        {
+          "Level": 5,
+          "Time": 1600
+        },
+        {
+          "Level": 6,
+          "Time": 1400
+        },
+        {
+          "Level": 7,
+          "Time": 1800
+        },
+        {
+          "Level": 8,
+          "Time": 1600
+        },
+        {
+          "Level": 9,
+          "Time": 2000
+        },
+        {
+          "Level": 10,
+          "Time": 1800
+        }
+      ]
+    },
+    "MG_COLDBOLT": {
+      "Id": 14,
+      "Name": "MG_COLDBOLT",
+      "MaxLevel": 10,
+      "Requires": {
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 12
+          },
+          {
+            "Level": 2,
+            "Amount": 14
+          },
+          {
+            "Level": 3,
+            "Amount": 16
+          },
+          {
+            "Level": 4,
+            "Amount": 18
+          },
+          {
+            "Level": 5,
+            "Amount": 20
+          },
+          {
+            "Level": 6,
+            "Amount": 22
+          },
+          {
+            "Level": 7,
+            "Amount": 24
+          },
+          {
+            "Level": 8,
+            "Amount": 26
+          },
+          {
+            "Level": 9,
+            "Amount": 28
+          },
+          {
+            "Level": 10,
+            "Amount": 30
+          }
+        ]
+      },
+      "CastTime": [
+        {
+          "Level": 1,
+          "Time": 700
+        },
+        {
+          "Level": 2,
+          "Time": 1400
+        },
+        {
+          "Level": 3,
+          "Time": 2100
+        },
+        {
+          "Level": 4,
+          "Time": 2800
+        },
+        {
+          "Level": 5,
+          "Time": 3500
+        },
+        {
+          "Level": 6,
+          "Time": 4200
+        },
+        {
+          "Level": 7,
+          "Time": 4900
+        },
+        {
+          "Level": 8,
+          "Time": 5600
+        },
+        {
+          "Level": 9,
+          "Time": 6300
+        },
+        {
+          "Level": 10,
+          "Time": 7000
+        }
+      ],
+      "AfterCastActDelay": [
+        {
+          "Level": 1,
+          "Time": 1000
+        },
+        {
+          "Level": 2,
+          "Time": 1200
+        },
+        {
+          "Level": 3,
+          "Time": 1400
+        },
+        {
+          "Level": 4,
+          "Time": 1600
+        },
+        {
+          "Level": 5,
+          "Time": 1800
+        },
+        {
+          "Level": 6,
+          "Time": 2000
+        },
+        {
+          "Level": 7,
+          "Time": 2200
+        },
+        {
+          "Level": 8,
+          "Time": 2400
+        },
+        {
+          "Level": 9,
+          "Time": 2600
+        },
+        {
+          "Level": 10,
+          "Time": 2800
+        }
+      ]
+    },
+    "MG_FIREBOLT": {
+      "Id": 19,
+      "Name": "MG_FIREBOLT",
+      "MaxLevel": 10,
+      "Requires": {
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 12
+          },
+          {
+            "Level": 2,
+            "Amount": 14
+          },
+          {
+            "Level": 3,
+            "Amount": 16
+          },
+          {
+            "Level": 4,
+            "Amount": 18
+          },
+          {
+            "Level": 5,
+            "Amount": 20
+          },
+          {
+            "Level": 6,
+            "Amount": 22
+          },
+          {
+            "Level": 7,
+            "Amount": 24
+          },
+          {
+            "Level": 8,
+            "Amount": 26
+          },
+          {
+            "Level": 9,
+            "Amount": 28
+          },
+          {
+            "Level": 10,
+            "Amount": 30
+          }
+        ]
+      },
+      "CastTime": [
+        {
+          "Level": 1,
+          "Time": 700
+        },
+        {
+          "Level": 2,
+          "Time": 1400
+        },
+        {
+          "Level": 3,
+          "Time": 2100
+        },
+        {
+          "Level": 4,
+          "Time": 2800
+        },
+        {
+          "Level": 5,
+          "Time": 3500
+        },
+        {
+          "Level": 6,
+          "Time": 4200
+        },
+        {
+          "Level": 7,
+          "Time": 4900
+        },
+        {
+          "Level": 8,
+          "Time": 5600
+        },
+        {
+          "Level": 9,
+          "Time": 6300
+        },
+        {
+          "Level": 10,
+          "Time": 7000
+        }
+      ],
+      "AfterCastActDelay": [
+        {
+          "Level": 1,
+          "Time": 1000
+        },
+        {
+          "Level": 2,
+          "Time": 1200
+        },
+        {
+          "Level": 3,
+          "Time": 1400
+        },
+        {
+          "Level": 4,
+          "Time": 1600
+        },
+        {
+          "Level": 5,
+          "Time": 1800
+        },
+        {
+          "Level": 6,
+          "Time": 2000
+        },
+        {
+          "Level": 7,
+          "Time": 2200
+        },
+        {
+          "Level": 8,
+          "Time": 2400
+        },
+        {
+          "Level": 9,
+          "Time": 2600
+        },
+        {
+          "Level": 10,
+          "Time": 2800
+        }
+      ]
+    },
+    "MG_LIGHTNINGBOLT": {
+      "Id": 20,
+      "Name": "MG_LIGHTNINGBOLT",
+      "MaxLevel": 10,
+      "Requires": {
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 12
+          },
+          {
+            "Level": 2,
+            "Amount": 14
+          },
+          {
+            "Level": 3,
+            "Amount": 16
+          },
+          {
+            "Level": 4,
+            "Amount": 18
+          },
+          {
+            "Level": 5,
+            "Amount": 20
+          },
+          {
+            "Level": 6,
+            "Amount": 22
+          },
+          {
+            "Level": 7,
+            "Amount": 24
+          },
+          {
+            "Level": 8,
+            "Amount": 26
+          },
+          {
+            "Level": 9,
+            "Amount": 28
+          },
+          {
+            "Level": 10,
+            "Amount": 30
+          }
+        ]
+      },
+      "CastTime": [
+        {
+          "Level": 1,
+          "Time": 700
+        },
+        {
+          "Level": 2,
+          "Time": 1400
+        },
+        {
+          "Level": 3,
+          "Time": 2100
+        },
+        {
+          "Level": 4,
+          "Time": 2800
+        },
+        {
+          "Level": 5,
+          "Time": 3500
+        },
+        {
+          "Level": 6,
+          "Time": 4200
+        },
+        {
+          "Level": 7,
+          "Time": 4900
+        },
+        {
+          "Level": 8,
+          "Time": 5600
+        },
+        {
+          "Level": 9,
+          "Time": 6300
+        },
+        {
+          "Level": 10,
+          "Time": 7000
+        }
+      ],
+      "AfterCastActDelay": [
+        {
+          "Level": 1,
+          "Time": 1000
+        },
+        {
+          "Level": 2,
+          "Time": 1200
+        },
+        {
+          "Level": 3,
+          "Time": 1400
+        },
+        {
+          "Level": 4,
+          "Time": 1600
+        },
+        {
+          "Level": 5,
+          "Time": 1800
+        },
+        {
+          "Level": 6,
+          "Time": 2000
+        },
+        {
+          "Level": 7,
+          "Time": 2200
+        },
+        {
+          "Level": 8,
+          "Time": 2400
+        },
+        {
+          "Level": 9,
+          "Time": 2600
+        },
+        {
+          "Level": 10,
+          "Time": 2800
+        }
+      ]
+    },
+    "AL_DP": {
+      "Id": 22,
+      "Name": "AL_DP",
+      "MaxLevel": 10
+    },
+    "AL_RUWACH": {
+      "Id": 24,
+      "Name": "AL_RUWACH",
+      "MaxLevel": 1,
+      "Requires": {
+        "SpCost": 10
+      },
+      "Duration1": 10000
+    },
+    "AL_PNEUMA": {
+      "Id": 25,
+      "Name": "AL_PNEUMA",
+      "MaxLevel": 1,
+      "Requires": {
+        "SpCost": 10
+      },
+      "Duration1": 10000
+    },
+    "AL_TELEPORT": {
+      "Id": 26,
+      "Name": "AL_TELEPORT",
+      "MaxLevel": 2,
+      "Requires": {
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 10
+          },
+          {
+            "Level": 2,
+            "Amount": 9
+          }
+        ]
+      }
+    },
+    "AL_WARP": {
+      "Id": 27,
+      "Name": "AL_WARP",
+      "MaxLevel": 4,
+      "Requires": {
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 35
+          },
+          {
+            "Level": 2,
+            "Amount": 32
+          },
+          {
+            "Level": 3,
+            "Amount": 29
+          },
+          {
+            "Level": 4,
+            "Amount": 26
+          }
+        ],
+        "ItemCost": [
+          {
+            "Item": "Blue_Gemstone",
+            "Amount": 1
+          }
+        ]
+      },
+      "CastTime": 1000,
+      "Duration1": [
+        {
+          "Level": 1,
+          "Time": 5000
+        },
+        {
+          "Level": 2,
+          "Time": 10000
+        },
+        {
+          "Level": 3,
+          "Time": 15000
+        },
+        {
+          "Level": 4,
+          "Time": 20000
+        },
+        {
+          "Level": 5,
+          "Time": 25000
+        },
+        {
+          "Level": 6,
+          "Time": 30000
+        },
+        {
+          "Level": 7,
+          "Time": 35000
+        },
+        {
+          "Level": 8,
+          "Time": 40000
+        },
+        {
+          "Level": 9,
+          "Time": 45000
+        },
+        {
+          "Level": 10,
+          "Time": 50000
+        }
+      ]
+    },
+    "AL_HEAL": {
+      "Id": 28,
+      "Name": "AL_HEAL",
+      "MaxLevel": 10,
+      "Requires": {
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 13
+          },
+          {
+            "Level": 2,
+            "Amount": 16
+          },
+          {
+            "Level": 3,
+            "Amount": 19
+          },
+          {
+            "Level": 4,
+            "Amount": 22
+          },
+          {
+            "Level": 5,
+            "Amount": 25
+          },
+          {
+            "Level": 6,
+            "Amount": 28
+          },
+          {
+            "Level": 7,
+            "Amount": 31
+          },
+          {
+            "Level": 8,
+            "Amount": 34
+          },
+          {
+            "Level": 9,
+            "Amount": 37
+          },
+          {
+            "Level": 10,
+            "Amount": 40
+          }
+        ]
+      },
+      "AfterCastActDelay": 1000
+    },
+    "AL_INCAGI": {
+      "Id": 29,
+      "Name": "AL_INCAGI",
+      "MaxLevel": 10,
+      "Requires": {
+        "HpCost": 15,
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 18
+          },
+          {
+            "Level": 2,
+            "Amount": 21
+          },
+          {
+            "Level": 3,
+            "Amount": 24
+          },
+          {
+            "Level": 4,
+            "Amount": 27
+          },
+          {
+            "Level": 5,
+            "Amount": 30
+          },
+          {
+            "Level": 6,
+            "Amount": 33
+          },
+          {
+            "Level": 7,
+            "Amount": 36
+          },
+          {
+            "Level": 8,
+            "Amount": 39
+          },
+          {
+            "Level": 9,
+            "Amount": 42
+          },
+          {
+            "Level": 10,
+            "Amount": 45
+          }
+        ]
+      },
+      "CastTime": 1000,
+      "AfterCastActDelay": 1000,
+      "Duration1": [
+        {
+          "Level": 1,
+          "Time": 60000
+        },
+        {
+          "Level": 2,
+          "Time": 80000
+        },
+        {
+          "Level": 3,
+          "Time": 100000
+        },
+        {
+          "Level": 4,
+          "Time": 120000
+        },
+        {
+          "Level": 5,
+          "Time": 140000
+        },
+        {
+          "Level": 6,
+          "Time": 160000
+        },
+        {
+          "Level": 7,
+          "Time": 180000
+        },
+        {
+          "Level": 8,
+          "Time": 200000
+        },
+        {
+          "Level": 9,
+          "Time": 220000
+        },
+        {
+          "Level": 10,
+          "Time": 240000
+        }
+      ]
+    },
+    "AL_ANGELUS": {
+      "Id": 33,
+      "Name": "AL_ANGELUS",
+      "MaxLevel": 10,
+      "Requires": {
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 23
+          },
+          {
+            "Level": 2,
+            "Amount": 26
+          },
+          {
+            "Level": 3,
+            "Amount": 29
+          },
+          {
+            "Level": 4,
+            "Amount": 32
+          },
+          {
+            "Level": 5,
+            "Amount": 35
+          },
+          {
+            "Level": 6,
+            "Amount": 38
+          },
+          {
+            "Level": 7,
+            "Amount": 41
+          },
+          {
+            "Level": 8,
+            "Amount": 44
+          },
+          {
+            "Level": 9,
+            "Amount": 47
+          },
+          {
+            "Level": 10,
+            "Amount": 50
+          }
+        ]
+      },
+      "CastTime": 500,
+      "AfterCastActDelay": 3500,
+      "Duration1": [
+        {
+          "Level": 1,
+          "Time": 30000
+        },
+        {
+          "Level": 2,
+          "Time": 60000
+        },
+        {
+          "Level": 3,
+          "Time": 90000
+        },
+        {
+          "Level": 4,
+          "Time": 120000
+        },
+        {
+          "Level": 5,
+          "Time": 150000
+        },
+        {
+          "Level": 6,
+          "Time": 180000
+        },
+        {
+          "Level": 7,
+          "Time": 210000
+        },
+        {
+          "Level": 8,
+          "Time": 240000
+        },
+        {
+          "Level": 9,
+          "Time": 270000
+        },
+        {
+          "Level": 10,
+          "Time": 300000
+        }
+      ]
+    },
+    "AL_BLESSING": {
+      "Id": 34,
+      "Name": "AL_BLESSING",
+      "MaxLevel": 10,
+      "Requires": {
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 28
+          },
+          {
+            "Level": 2,
+            "Amount": 32
+          },
+          {
+            "Level": 3,
+            "Amount": 36
+          },
+          {
+            "Level": 4,
+            "Amount": 40
+          },
+          {
+            "Level": 5,
+            "Amount": 44
+          },
+          {
+            "Level": 6,
+            "Amount": 48
+          },
+          {
+            "Level": 7,
+            "Amount": 52
+          },
+          {
+            "Level": 8,
+            "Amount": 56
+          },
+          {
+            "Level": 9,
+            "Amount": 60
+          },
+          {
+            "Level": 10,
+            "Amount": 64
+          }
+        ]
+      },
+      "Duration1": [
+        {
+          "Level": 1,
+          "Time": 60000
+        },
+        {
+          "Level": 2,
+          "Time": 80000
+        },
+        {
+          "Level": 3,
+          "Time": 100000
+        },
+        {
+          "Level": 4,
+          "Time": 120000
+        },
+        {
+          "Level": 5,
+          "Time": 140000
+        },
+        {
+          "Level": 6,
+          "Time": 160000
+        },
+        {
+          "Level": 7,
+          "Time": 180000
+        },
+        {
+          "Level": 8,
+          "Time": 200000
+        },
+        {
+          "Level": 9,
+          "Time": 220000
+        },
+        {
+          "Level": 10,
+          "Time": 240000
+        }
+      ]
+    },
+    "ALL_RESURRECTION": {
+      "Id": 54,
+      "Name": "ALL_RESURRECTION",
+      "MaxLevel": 4,
+      "Requires": {
+        "SpCost": 60,
+        "ItemCost": [
+          {
+            "Item": "Blue_Gemstone",
+            "Amount": 1
+          }
+        ]
+      },
+      "CastTime": [
+        {
+          "Level": 1,
+          "Time": 6000
+        },
+        {
+          "Level": 2,
+          "Time": 4000
+        },
+        {
+          "Level": 3,
+          "Time": 2000
+        }
+      ],
+      "AfterCastActDelay": [
+        {
+          "Level": 2,
+          "Time": 1000
+        },
+        {
+          "Level": 3,
+          "Time": 2000
+        },
+        {
+          "Level": 4,
+          "Time": 3000
+        }
+      ]
+    },
+    "PR_IMPOSITIO": {
+      "Id": 66,
+      "Name": "PR_IMPOSITIO",
+      "MaxLevel": 5,
+      "Requires": {
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 13
+          },
+          {
+            "Level": 2,
+            "Amount": 16
+          },
+          {
+            "Level": 3,
+            "Amount": 19
+          },
+          {
+            "Level": 4,
+            "Amount": 22
+          },
+          {
+            "Level": 5,
+            "Amount": 25
+          }
+        ]
+      },
+      "AfterCastActDelay": 3000,
+      "Duration1": 60000
+    },
+    "PR_STRECOVERY": {
+      "Id": 72,
+      "Name": "PR_STRECOVERY",
+      "MaxLevel": 1,
+      "Requires": {
+        "SpCost": 5
+      },
+      "AfterCastActDelay": 2000
+    },
+    "PR_MAGNIFICAT": {
+      "Id": 74,
+      "Name": "PR_MAGNIFICAT",
+      "MaxLevel": 5,
+      "Requires": {
+        "SpCost": 40
+      },
+      "CastTime": 4000,
+      "AfterCastActDelay": 2000,
+      "Duration1": [
+        {
+          "Level": 1,
+          "Time": 30000
+        },
+        {
+          "Level": 2,
+          "Time": 45000
+        },
+        {
+          "Level": 3,
+          "Time": 60000
+        },
+        {
+          "Level": 4,
+          "Time": 75000
+        },
+        {
+          "Level": 5,
+          "Time": 90000
+        }
+      ]
+    },
+    "SA_ADVANCEDBOOK": {
+      "Id": 274,
+      "Name": "SA_ADVANCEDBOOK",
+      "MaxLevel": 10
+    },
+    "SA_MAGICROD": {
+      "Id": 276,
+      "Name": "SA_MAGICROD",
+      "MaxLevel": 5,
+      "Requires": {
+        "SpCost": 2
+      },
+      "Duration1": [
+        {
+          "Level": 1,
+          "Time": 400
+        },
+        {
+          "Level": 2,
+          "Time": 600
+        },
+        {
+          "Level": 3,
+          "Time": 800
+        },
+        {
+          "Level": 4,
+          "Time": 1000
+        },
+        {
+          "Level": 5,
+          "Time": 1200
+        }
+      ]
+    },
+    "SA_SPELLBREAKER": {
+      "Id": 277,
+      "Name": "SA_SPELLBREAKER",
+      "MaxLevel": 5,
+      "Requires": {
+        "SpCost": 10
+      },
+      "CastTime": 700
+    },
+    "SA_FLAMELAUNCHER": {
+      "Id": 280,
+      "Name": "SA_FLAMELAUNCHER",
+      "MaxLevel": 5,
+      "Requires": {
+        "SpCost": 40,
+        "ItemCost": [
+          {
+            "Item": "Boody_Red",
+            "Amount": 1
+          }
+        ]
+      },
+      "CastTime": 3000,
+      "Duration1": [
+        {
+          "Level": 1,
+          "Time": 1200000
+        },
+        {
+          "Level": 2,
+          "Time": 1200000
+        },
+        {
+          "Level": 3,
+          "Time": 1200000
+        },
+        {
+          "Level": 4,
+          "Time": 1200000
+        },
+        {
+          "Level": 5,
+          "Time": 1800000
+        }
+      ]
+    },
+    "SA_FROSTWEAPON": {
+      "Id": 281,
+      "Name": "SA_FROSTWEAPON",
+      "MaxLevel": 5,
+      "Requires": {
+        "SpCost": 40,
+        "ItemCost": [
+          {
+            "Item": "Crystal_Blue",
+            "Amount": 1
+          }
+        ]
+      },
+      "CastTime": 3000,
+      "Duration1": [
+        {
+          "Level": 1,
+          "Time": 1200000
+        },
+        {
+          "Level": 2,
+          "Time": 1200000
+        },
+        {
+          "Level": 3,
+          "Time": 1200000
+        },
+        {
+          "Level": 4,
+          "Time": 1200000
+        },
+        {
+          "Level": 5,
+          "Time": 1800000
+        }
+      ]
+    },
+    "SA_LIGHTNINGLOADER": {
+      "Id": 282,
+      "Name": "SA_LIGHTNINGLOADER",
+      "MaxLevel": 5,
+      "Requires": {
+        "SpCost": 40,
+        "ItemCost": [
+          {
+            "Item": "Wind_Of_Verdure",
+            "Amount": 1
+          }
+        ]
+      },
+      "CastTime": 3000,
+      "Duration1": [
+        {
+          "Level": 1,
+          "Time": 1200000
+        },
+        {
+          "Level": 2,
+          "Time": 1200000
+        },
+        {
+          "Level": 3,
+          "Time": 1200000
+        },
+        {
+          "Level": 4,
+          "Time": 1200000
+        },
+        {
+          "Level": 5,
+          "Time": 1800000
+        }
+      ]
+    },
+    "SA_DRAGONOLOGY": {
+      "Id": 284,
+      "Name": "SA_DRAGONOLOGY",
+      "MaxLevel": 5
+    },
+    "SA_VOLCANO": {
+      "Id": 285,
+      "Name": "SA_VOLCANO",
+      "MaxLevel": 5,
+      "Requires": {
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 48
+          },
+          {
+            "Level": 2,
+            "Amount": 46
+          },
+          {
+            "Level": 3,
+            "Amount": 44
+          },
+          {
+            "Level": 4,
+            "Amount": 42
+          },
+          {
+            "Level": 5,
+            "Amount": 40
+          }
+        ],
+        "ItemCost": [
+          {
+            "Item": "Yellow_Gemstone",
+            "Amount": 1
+          }
+        ]
+      },
+      "CastTime": 5000,
+      "Duration1": [
+        {
+          "Level": 1,
+          "Time": 60000
+        },
+        {
+          "Level": 2,
+          "Time": 120000
+        },
+        {
+          "Level": 3,
+          "Time": 180000
+        },
+        {
+          "Level": 4,
+          "Time": 240000
+        },
+        {
+          "Level": 5,
+          "Time": 300000
+        }
+      ]
+    },
+    "SA_DELUGE": {
+      "Id": 286,
+      "Name": "SA_DELUGE",
+      "MaxLevel": 5,
+      "Requires": {
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 48
+          },
+          {
+            "Level": 2,
+            "Amount": 46
+          },
+          {
+            "Level": 3,
+            "Amount": 44
+          },
+          {
+            "Level": 4,
+            "Amount": 42
+          },
+          {
+            "Level": 5,
+            "Amount": 40
+          }
+        ],
+        "ItemCost": [
+          {
+            "Item": "Yellow_Gemstone",
+            "Amount": 1
+          }
+        ]
+      },
+      "CastTime": 5000,
+      "Duration1": [
+        {
+          "Level": 1,
+          "Time": 60000
+        },
+        {
+          "Level": 2,
+          "Time": 120000
+        },
+        {
+          "Level": 3,
+          "Time": 180000
+        },
+        {
+          "Level": 4,
+          "Time": 240000
+        },
+        {
+          "Level": 5,
+          "Time": 300000
+        }
+      ]
+    },
+    "SA_VIOLENTGALE": {
+      "Id": 287,
+      "Name": "SA_VIOLENTGALE",
+      "MaxLevel": 5,
+      "Requires": {
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 48
+          },
+          {
+            "Level": 2,
+            "Amount": 46
+          },
+          {
+            "Level": 3,
+            "Amount": 44
+          },
+          {
+            "Level": 4,
+            "Amount": 42
+          },
+          {
+            "Level": 5,
+            "Amount": 40
+          }
+        ],
+        "ItemCost": [
+          {
+            "Item": "Yellow_Gemstone",
+            "Amount": 1
+          }
+        ]
+      },
+      "CastTime": 5000,
+      "Duration1": [
+        {
+          "Level": 1,
+          "Time": 60000
+        },
+        {
+          "Level": 2,
+          "Time": 120000
+        },
+        {
+          "Level": 3,
+          "Time": 180000
+        },
+        {
+          "Level": 4,
+          "Time": 240000
+        },
+        {
+          "Level": 5,
+          "Time": 300000
+        }
+      ]
+    },
+    "SA_LANDPROTECTOR": {
+      "Id": 288,
+      "Name": "SA_LANDPROTECTOR",
+      "MaxLevel": 5,
+      "Requires": {
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 66
+          },
+          {
+            "Level": 2,
+            "Amount": 62
+          },
+          {
+            "Level": 3,
+            "Amount": 58
+          },
+          {
+            "Level": 4,
+            "Amount": 54
+          },
+          {
+            "Level": 5,
+            "Amount": 50
+          }
+        ],
+        "ItemCost": [
+          {
+            "Item": "Blue_Gemstone",
+            "Amount": 1
+          },
+          {
+            "Item": "Yellow_Gemstone",
+            "Amount": 1
+          }
+        ]
+      },
+      "CastTime": 5000,
+      "Duration1": [
+        {
+          "Level": 1,
+          "Time": 165000
+        },
+        {
+          "Level": 2,
+          "Time": 210000
+        },
+        {
+          "Level": 3,
+          "Time": 255000
+        },
+        {
+          "Level": 4,
+          "Time": 300000
+        },
+        {
+          "Level": 5,
+          "Time": 345000
+        }
+      ]
+    },
+    "SA_DISPELL": {
+      "Id": 289,
+      "Name": "SA_DISPELL",
+      "MaxLevel": 5,
+      "Requires": {
+        "SpCost": 1,
+        "ItemCost": [
+          {
+            "Item": "Yellow_Gemstone",
+            "Amount": 1
+          }
+        ]
+      },
+      "CastTime": 2000
+    },
+    "HP_ASSUMPTIO": {
+      "Id": 361,
+      "Name": "HP_ASSUMPTIO",
+      "MaxLevel": 5,
+      "Requires": {
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 20
+          },
+          {
+            "Level": 2,
+            "Amount": 30
+          },
+          {
+            "Level": 3,
+            "Amount": 40
+          },
+          {
+            "Level": 4,
+            "Amount": 50
+          },
+          {
+            "Level": 5,
+            "Amount": 60
+          }
+        ]
+      },
+      "CastTime": [
+        {
+          "Level": 1,
+          "Time": 1000
+        },
+        {
+          "Level": 2,
+          "Time": 1500
+        },
+        {
+          "Level": 3,
+          "Time": 2000
+        },
+        {
+          "Level": 4,
+          "Time": 2500
+        },
+        {
+          "Level": 5,
+          "Time": 3000
+        }
+      ],
+      "AfterCastActDelay": [
+        {
+          "Level": 1,
+          "Time": 1100
+        },
+        {
+          "Level": 2,
+          "Time": 1200
+        },
+        {
+          "Level": 3,
+          "Time": 1300
+        },
+        {
+          "Level": 4,
+          "Time": 1400
+        },
+        {
+          "Level": 5,
+          "Time": 1500
+        }
+      ],
+      "Duration1": [
+        {
+          "Level": 1,
+          "Time": 20000
+        },
+        {
+          "Level": 2,
+          "Time": 40000
+        },
+        {
+          "Level": 3,
+          "Time": 60000
+        },
+        {
+          "Level": 4,
+          "Time": 80000
+        },
+        {
+          "Level": 5,
+          "Time": 100000
+        }
+      ]
+    },
+    "PF_SOULCHANGE": {
+      "Id": 374,
+      "Name": "PF_SOULCHANGE",
+      "MaxLevel": 1,
+      "Requires": {
+        "SpCost": 5
+      },
+      "CastTime": 3000,
+      "AfterCastActDelay": 5000
+    },
+    "PF_FOGWALL": {
+      "Id": 404,
+      "Name": "PF_FOGWALL",
+      "MaxLevel": 5,
+      "Requires": {
+        "SpCost": 25
+      },
+      "Duration1": 20000
+    },
+    "PF_SPIDERWEB": {
+      "Id": 405,
+      "Name": "PF_SPIDERWEB",
+      "MaxLevel": 1,
+      "Requires": {
+        "SpCost": 50,
+        "ItemCost": [
+          {
+            "Item": "Spiderweb",
+            "Amount": 1
+          }
+        ]
+      },
+      "Duration1": 16000
+    }
+  },
+  "reagents": {
+    "715": {
+      "name": "Yellow Gemstone",
+      "aegis": "Yellow_Gemstone"
+    },
+    "717": {
+      "name": "Blue Gemstone",
+      "aegis": "Blue_Gemstone"
+    },
+    "990": {
+      "name": "Red Blood",
+      "aegis": "Boody_Red"
+    },
+    "991": {
+      "name": "Crystal Blue",
+      "aegis": "Crystal_Blue"
+    },
+    "992": {
+      "name": "Wind of Verdure",
+      "aegis": "Wind_Of_Verdure"
+    },
+    "1025": {
+      "name": "Cobweb",
+      "aegis": "Spiderweb"
+    }
+  },
+  "literal_normal_shop_offers": [
+    {
+      "item_id": 717,
+      "price": 600,
+      "source": "npc/merchants/shops.txt",
+      "line": 116
+    },
+    {
+      "item_id": 717,
+      "price": 600,
+      "source": "npc/merchants/shops.txt",
+      "line": 132
+    },
+    {
+      "item_id": 717,
+      "price": 600,
+      "source": "npc/merchants/shops.txt",
+      "line": 154
+    },
+    {
+      "item_id": 717,
+      "price": 600,
+      "source": "npc/merchants/shops.txt",
+      "line": 289
+    },
+    {
+      "item_id": 2304,
+      "price": 10000,
+      "source": "npc/custom/faithro/ptbr/custom/itemmall.txt",
+      "line": 15
+    },
+    {
+      "item_id": 2404,
+      "price": 10000,
+      "source": "npc/custom/faithro/ptbr/custom/itemmall.txt",
+      "line": 17
+    },
+    {
+      "item_id": 1550,
+      "price": 30000,
+      "source": "npc/custom/faithro/ptbr/custom/itemmall.txt",
+      "line": 22
+    },
+    {
+      "item_id": 1608,
+      "price": 20000,
+      "source": "npc/custom/faithro/ptbr/custom/itemmall.txt",
+      "line": 32
+    },
+    {
+      "item_id": 2504,
+      "price": 10000,
+      "source": "npc/custom/faithro/ptbr/custom/itemmall.txt",
+      "line": 33
+    },
+    {
+      "item_id": 715,
+      "price": 600,
+      "source": "npc/custom/faithro/ptbr/custom/itemmall.txt",
+      "line": 44
+    },
+    {
+      "item_id": 717,
+      "price": 600,
+      "source": "npc/custom/faithro/ptbr/custom/itemmall.txt",
+      "line": 44
+    },
+    {
+      "item_id": 1025,
+      "price": 200,
+      "source": "npc/custom/faithro/ptbr/custom/itemmall.txt",
+      "line": 44
+    },
+    {
+      "item_id": 505,
+      "price": 5000,
+      "source": "npc/custom/faithro/ptbr/custom/itemmall.txt",
+      "line": 45
+    }
+  ],
+  "source_sha256": {
+    "db/pre-re/skill_tree.yml": "fafe80390ac7c4ad79b4fb258614684250ccc9b72155d9218ea4ee7c063c7f54",
+    "db/import/skill_tree.yml": "12815f58c2a806da0c18e3bca084b56cf75c1d67c1473a696dfce55ac218e283",
+    "db/pre-re/item_db.yml": "e60b7fd65308f367f10652f665d0df3fb163a8923354739262fcf68d46cca8ed",
+    "db/import/item_db.yml": "9f6731294db854d56ee30f7d74b324aa173ec99c00187bffd17457db686d4d5b",
+    "db/pre-re/skill_db.yml": "f9846f5fe3074451c87930a451df80390e8fbadf692b9e67e388b67c07340541",
+    "db/import/skill_db.yml": "c3715f7cd3831a7675537c1e199ac2a278ddc662b78b962551facad22b4e7e47"
+  },
+  "production_mutations": false,
+  "combats_executed": 0,
+  "limitations": [
+    "Job change assumes first job 50, second job 70.",
+    "Legal skill allocation does not prove a skill affects an MVP.",
+    "Literal shop declaration may have access restrictions; barters and cash shops excluded."
+  ]
+}

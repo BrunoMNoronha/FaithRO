@@ -208,20 +208,33 @@ def _analyze(s):
         raise InvalidSession('declarar todos os consumíveis, inclusive estoque inicial usado')
 
     attempts = None
+    counter_scope = counter.get('scope', 'individual')
+    outcome_scope = 'participant'
+    if counter_scope not in ('individual', 'party_shared'):
+        raise InvalidSession('escopo do contador desconhecido')
     if s['kind'] == 'mvp':
         attempts = s['mvp_attempt']
+        outcome_scope = attempts.get('outcome_scope', 'participant')
+        if outcome_scope not in ('participant', 'party'):
+            raise InvalidSession('escopo do resultado de MVP desconhecido')
+        if outcome_scope == 'party' and (type(s.get('party', {}).get('size')) is not int or s['party']['size'] != 2 or counter_scope != 'party_shared'):
+            raise InvalidSession('resultado da dupla exige party 2 e contador compartilhado')
+        if outcome_scope == 'participant' and counter_scope != 'individual':
+            raise InvalidSession('contador compartilhado exige resultado da dupla')
         integer(attempts['monster_id'], 'mvp.monster_id', 1)
         target_kills = integer(attempts['target_kills'], 'mvp.target_kills')
         if target_kills > 1:
             raise InvalidSession('uma ficha por tentativa de MVP')
         if attempts['outcome'] not in ('victory','death','timeout','abandoned'):
             raise InvalidSession('resultado de MVP inválido')
-        if attempts['outcome'] == 'death' and deaths == 0:
+        if attempts['outcome'] == 'death' and deaths == 0 and outcome_scope == 'participant':
             raise InvalidSession('derrota por morte exige registrar a morte')
         if attempts['outcome'] == 'victory' and (target_kills != 1 or kills < 1):
             raise InvalidSession('vitória exige abate do MVP alvo, não apenas invocações')
         if attempts['outcome'] != 'victory' and target_kills:
             raise InvalidSession('resultado de falha incompatível com abate do MVP alvo')
+    elif counter_scope != 'individual':
+        raise InvalidSession('contador compartilhado permitido somente no protocolo de MVP')
     hour_factor = 3600/seconds
     return {
         'schema_version':1, 'status':status, 'kind':s['kind'], 'map':s['map'],
@@ -230,7 +243,7 @@ def _analyze(s):
         'level_observation':observed_levels,
         'fixed_level_comparison_eligible':observed_levels is not None and observed_levels['start']==observed_levels['end'],
         'exp_basis':'net_progress_including_losses' if exp is not None else 'unknown_or_not_applicable',
-        'eligible_for_player_metrics':status == 'observed' and actor['role'] == 'player' and s['environment'] == 'production_observation',
+        'eligible_for_player_metrics':status == 'observed' and actor['role'] == 'player' and s['environment'] == 'production_observation' and counter_scope == 'individual',
         'elapsed_seconds':seconds, 'kills':kills, 'kills_per_hour':round(kills*hour_factor, 3),
         'exp_gained':exp, 'exp_per_hour':None if exp is None else round(exp*hour_factor, 3),
         'deaths':deaths, 'cash_delta':delta, 'external_net':c['external_in']-c['external_out'],
@@ -239,6 +252,7 @@ def _analyze(s):
         'cash_and_consumption_are_separate':True,
         'limitation':'Saldo de caixa não é lucro total. Não subtrair consumo novamente de compras já debitadas; inclui estoque inicial e loot usado na avaliação de recursos.',
         'mvp_attempt':attempts,
+        'kill_counter_scope':counter_scope, 'mvp_outcome_scope':outcome_scope,
     }
 
 

@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "status": "pending_build_card_not_observation",
+  "purpose": "controlled_MVP_duo_support_baseline",
+  "actor": {
+    "role": "tester",
+    "group_id": 0,
+    "is_bot": false
+  },
+  "build": {
+    "class": "High_Priest",
+    "base_level": 99,
+    "job_level": 70,
+    "stats_SAVIDL": [
+      35,
+      17,
+      86,
+      78,
+      61,
+      1
+    ],
+    "equipment": [
+      {
+        "slot": "head_top",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "head_mid",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "head_low",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "armor",
+        "item_id": 2304,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "garment",
+        "item_id": 2504,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "shoes",
+        "item_id": 2404,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "right_hand",
+        "item_id": 1608,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "left_hand",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "accessory1",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "accessory2",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      }
+    ],
+    "skills": {
+      "NV_BASIC": 9,
+      "AL_HEAL": 10,
+      "AL_DP": 5,
+      "AL_BLESSING": 10,
+      "AL_INCAGI": 10,
+      "AL_RUWACH": 1,
+      "AL_TELEPORT": 2,
+      "AL_WARP": 4,
+      "AL_PNEUMA": 1,
+      "PR_MAGNIFICAT": 5,
+      "AL_ANGELUS": 1,
+      "MG_SRECOVERY": 4,
+      "PR_IMPOSITIO": 3,
+      "HP_ASSUMPTIO": 5,
+      "PR_STRECOVERY": 1,
+      "ALL_RESURRECTION": 4
+    }
+  },
+  "status_points_used": 1321,
+  "status_points_budget": 1325,
+  "skill_points": {
+    "novice": 9,
+    "first": 44,
+    "second": 22
+  },
+  "skill_points_budget": {
+    "novice": 9,
+    "first": 49,
+    "second": 69
+  },
+  "equipment_compatible": true,
+  "normal_shop_prices_before_discount": {
+    "2304": 10000,
+    "2504": 10000,
+    "2404": 10000,
+    "1608": 20000
+  },
+  "equipment_purchase_total_before_discount": 50000,
+  "observed_panel": {
+    "hp": null,
+    "sp": null,
+    "aspd": null,
+    "weight": null,
+    "max_weight": null
+  },
+  "actual_skills_cast_and_results": null,
+  "consumables_and_cash_record": null,
+  "support_source_sha256": "702721e602d30f91b71385a7d4fc1d59f2abc120722895d1701a33a389480eea",
+  "limitations": [
+    "Baseline equipment is obtainable, but survival and usefulness are untested.",
+    "Prerequisite skills are allocated; their use must be declared and reconciled.",
+    "Skill availability does not establish effectiveness against bosses.",
+    "Copy before use; complete separate cash/consumable records for each participant."
+  ]
+}

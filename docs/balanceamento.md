@@ -685,6 +685,248 @@ já foi descartado e não existe migração ou alteração de produção para re
 O piloto real permanece em 0/3 e EXP 300x, nível 255, atributos 185 e ASPD 197 seguem
 como referência.
 
+## Aplicação na produção e na VPS (19/10/2026)
+
+As duas correções validadas após o PR #95 foram aplicadas em 19/10, às 03h18 de
+São Paulo, em uma janela iniciada com zero personagens online. O map-server foi
+parado, os dois arquivos foram substituídos e o serviço reiniciado. A janela até
+a confirmação de prontidão e estabilidade durou 4,38 s.
+
+- **Curandeira:** `percentheal` passou para depois dos buffs, preenchendo o máximo
+  final de HP/SP conforme os nove casos de laboratório.
+- **Warpra:** a prévia do andar inclui a função compartilhada de tarifa, conforme
+  os 40 casos de laboratório. A chave `$QW_DW_OFF=1` permanece na produção.
+- **Sincronização:** arquivos instalados em `/home/rathena/rathena`, espelho de
+  deploy em `/root/faithro/deploy/server` e overlay operacional local foram atualizados.
+  A Warpra instalada mantém CP1252; os espelhos UTF-8 têm o mesmo conteúdo lógico.
+
+Antes da mudança foram conferidos os hashes de origem, os hashes dos candidatos
+ensaiados e a igualdade lógica dos espelhos. O lock existente de deploy foi usado.
+Backup criado e relido para validação:
+`/var/backups/faithro/npc-healer-warpra-20261019T061852Z.tar.gz`, com os quatro arquivos
+anteriores e manifesto de hashes, donos e permissões. SHA-256 do arquivo:
+`0c26e1996fcf97b2f62fc17ef2f55961252875a9186b2a3b739cbb17c3a5bd6f`.
+O backup não integra esta publicação.
+
+Apenas `rathena-map` foi reiniciado. Login, char e os dois serviços web mantiveram
+seus PIDs. O novo trecho do log não teve erros de script ou SQL, e o autoteste
+confirmou EXP 300x/300x, atributos naturais/trans 185, ASPD 197 e aura no 255.
+Os hashes de configurações protegidas, incluindo as tabelas de nível/atributos,
+permaneceram iguais. O site público com User-Agent de navegador e o `/healthz` local
+responderam HTTP 200. A sonda pública com User-Agent padrão do Python recebeu 403;
+as sondas de navegador na VPS e fora dela responderam 200.
+
+O comportamento funcional foi ensaiado no laboratório. Na produção foram verificados
+arquivos, carga, autoteste, serviços e HTTP; não foram alterados personagens pelo
+executor nem iniciados combates. O executor não emitiu SQL de escrita. Os hashes
+instalados coincidem com os candidatos ensaiados.
+
+Evidências: `design-audit/production-npc-fixes/deployment.json`, `health.json` e
+`local-overlay.json`. O ensaio comparativo `--candidate-checks` da rodada anterior
+requer a versão anterior como referência; depois desta aplicação, uma repetição exige
+preparar essa referência no laboratório a partir do backup, sem restaurar a produção.
+Em falha de inicialização, o procedimento preparado restauraria
+automaticamente os quatro arquivos e iniciaria novamente o map-server; não foi
+necessário usá-lo. Para reversão posterior, abrir outra janela com zero personagens,
+parar apenas o map-server, conferir o SHA-256 acima, restaurar as entradas
+`installed/` e `deploy/` nos respectivos diretórios preservando dono/permissão e
+reiniciar com a mesma validação de log/autoteste. Restaurar também os dois arquivos
+do overlay local a partir da cópia anterior mantida no registro operacional.
+Reverter apenas esta documentação no Git não desfaz a aplicação na VPS.
+
+## Cinco verificações após a implantação (19/10/2026)
+
+1. **Estabilidade e recuperação.** Cinco serviços ativos, contadores de reinício
+   automático em zero, nenhum erro de mapa/SQL após a última prontidão e HTTP 200
+   no site e no healthcheck local. O backup dos dois NPCs foi aberto novamente:
+   cinco entradas, modo 600 e SHA-256 igual ao registrado na implantação. Esta leitura
+   não equivale a ensaio de restauração em produção.
+2. **Fontes e database pública.** Coleta somente de leitura voltou a encontrar 6.171
+   itens, 1.004 monstros, 5.019 drops e 1.912 pares de spawn. Nenhuma divergência
+   entre drops/spawns esperados e tabelas do site. Quatro páginas públicas também
+   foram conferidas: Gold do Golden Thief Bug 30%, Gold da Maya Purple 3%, Stone of
+   Sage do Gemini 30% e Treasure Box do Thanatos 10%, incluindo os multiplicadores
+   específicos. Rates, densidades, cenários e builds calculados não mudaram.
+   Escada, times, Tine, venda de pontos da Arena e regras anteriores continuaram
+   no estado esperado. Campos de métricas de jogadores foram retirados do snapshot
+   público; consultas operacionais continuaram filtrando equipe, bot e operações
+   administrativas. Logs não foram convertidos em abates ou horas jogadas.
+3. **Horário da Loteria.** O host usa `America/Sao_Paulo`, o processo do mapa não
+   tem override `TZ` e `npc_event_do_clock` usa `localtime()` no código instalado.
+   O evento é `OnClock2045`; a produção ainda anuncia 21h na confirmação.
+   O candidato `lottery-time-candidate.patch` altera apenas essa mensagem para
+   **20h45 (horário de São Paulo)**. Foi aplicado somente à cópia privada e a
+   confirmação correta apareceu pelo cliente nativo. A compra continuou em 4.750;
+   segunda compra foi bloqueada sem débito tanto no mesmo personagem como em outro
+   personagem da mesma conta. Não houve resgate de prêmio ou execução do sorteio
+   real em produção. Confiança alta; risco baixo, condicionado à manutenção do fuso
+   e do evento. Adotar apenas se mensagem, fuso e evento concordarem; descartar ou
+   reverter se horário pretendido for outro ou se preço/regra de bilhetes mudar.
+4. **Poções de início.** Dois personagens novos do banco privado receberam 100
+   Red Potions (501), faca/camisa equipadas e zero zeny inicial. O controle de QA
+   reduziu HP antes do ensaio; cada personagem usou uma poção pelo pacote real
+   `CZ_USE_ITEM2` (0x0439). O ACK confirmou sucesso, o inventário passou para 99 e
+   o HP de 1 para 40/40, sem cobrança. Equipamentos permaneceram e as quantidades
+   99/99 foram salvas no banco privado ao sair. Não foram criados personagens ou
+   alterados inventários na produção.
+5. **Regressões e prioridades.** Os 83 testes locais passaram. O laboratório foi
+   removido, sem unidades ou diretórios de QA restantes, e o hash da Loteria instalada
+   permaneceu igual. Não há nova evidência de combate que sustente ajuste de rates,
+   EXP, atributos, ASPD ou habilidades. Os orçamentos trans 99/150/200/255 continuam
+   1.325/2.722/4.597/7.237; os cenários de farm permanecem cálculos brutos condicionais.
+   O piloto real segue 0/3. Próximas prioridades: aplicação controlada do texto da
+   Loteria, piloto PvM já especificado para Sniper/SinX/HW e, depois, fichas de MVP
+   separando chefe, invocações, falhas e consumíveis. Preservar os valores atuais até
+   existir evidência suficiente; validar/descartar hipóteses pelos critérios anteriores.
+
+Evidências em `design-audit/post-deploy-review/`: `stability.json`, `snapshot.json`,
+`public-database.json`, `onboarding-verification.json`, `cleanup-verification.json`,
+`lottery-review.json` e `priorities.json`. Os horários UTC nos arquivos são metadados;
+o horário comunicado ao jogador usa São Paulo.
+O modo manual `tools/isolated_char_check.py --onboarding-checks` exige o helper
+`isolated_onboarding_checks.py`, o pacote `bot` e o patch de horário ao lado do executor
+no pacote temporário. Converte o patch para CP1252 antes de conferir/aplicar na cópia
+privada, usa CPU 25%/512 MiB/300 s e não executa combates. Reverter esta rodada remove
+ferramentas/documentação/candidato; não existe alteração de produção a restaurar.
+
+## Rodada seguinte: janela da Loteria e suporte contra MVPs (19/10/2026)
+
+Cinco frentes foram trabalhadas, com implantação da Loteria ainda pendente:
+
+1. **Janela da Loteria.** Fuso, ausência de override TZ, hash instalado e equivalência
+   do espelho foram conferidos. Havia um personagem conectado; nenhum serviço foi
+   parado. O executor manual específico está preparado com hashes fixos, backup das
+   duas cópias, escrita atômica e restauração em falha. Os testes locais cobrem recusas;
+   essa variante ainda não executou implantação nem restauração reais. A produção
+   permanece anunciando 21h, embora o evento seja 20h45. Detalhes e critério de aceite:
+   `design-audit/lottery-deployment/README.md`.
+2. **Saúde da VPS.** Os cinco serviços continuam ativos com os mesmos PIDs e zero
+   reinícios automáticos. Nenhum erro novo de mapa/SQL após a prontidão; HTTP 200 no
+   site e healthcheck. Battle/char, job_stats, statpoint e optional mantiveram seus
+   hashes. Nenhuma alteração de produção foi realizada nesta rodada.
+3. **Ameaças dos MVPs.** Nova coleta sem SQL conferiu quatro chefes e 89 declarações
+   de habilidades: GTB 16, Baphomet 22, Randgris 28 e Ifrit 23. Para 600 s sem cura,
+   HP/tempo resulta em 210/1.113,333/5.945,333/12.833,333 de dano entregue por segundo.
+   Esses mínimos não são DPS medido de classe. Randgris usa `attackpcge,2`, que o
+   código compara com o contador de unidades tendo o chefe como alvo; tamanho de
+   party sozinho não determina a condição. Pneuma de Ifrit depende de estado idle e
+   `longrangeattacked`. Gatilhos, fases, limites e mapas estão em
+   `design-audit/mvp-threat-review/README.md`.
+4. **Suporte verificável.** Oito cartões pendentes cobrem High Priest e Professor
+   nos quatro níveis, com atributos dentro do orçamento, dez slots e equipamentos
+   obtíveis a +0 sem cartas. High Priest usa 44/49 e 22/69 pontos de classe;
+   Professor, 25/49 e 47/69. A compra base custa respectivamente 50 mil e 60 mil,
+   antes de desconto. Gemas e Cobweb, custos de SP e pré-requisitos estão registrados.
+   A disponibilidade da habilidade não comprova efeito contra chefes ou sobrevivência.
+   O protocolo exige ledger separado de cada participante e revisão conjunta da dupla.
+   Testar uma alternativa de suporte mantém 24 tentativas; testar as duas cria
+   36, separadas por classe de suporte, até seis horas de combate mais preparação.
+5. **Validação e continuidade.** Passaram 95 testes locais, incluindo import/clear,
+   chance condicional, atraso, teto de skill e recusas do deploy antes de mudanças.
+   Python e JSON foram validados. O gerador recusa sobrescrever cartões existentes.
+   O piloto real continua 0/3; não há resultados novos de combate ou justificativa
+   para mudar EXP 300x, nível 255, atributos 185, ASPD 197 ou habilidades. Primeiro
+   concluir o piloto já definido; depois registrar tentativas de MVP com falhas,
+   invocações, fases, suporte e custos completos. As recomendações são condicionais
+   aos critérios documentados, sem adoção automática de balanceamento.
+
+As novas ferramentas, fontes, evidências e cartões são listados nos dois diretórios
+citados. Rollback desta rodada: remover a preparação local. A Loteria só recebe
+alteração quando houver janela sem personagens conectados e backup validado; em
+falha posterior à parada, o executor restaura os originais e confere a prontidão.
+
+## Loteria implantada e MVP em dupla validável (19/10/2026)
+
+Esta rodada concluiu cinco frentes:
+
+1. **Loteria aplicada.** A primeira consulta ainda tinha um personagem conectado.
+   Ao terminar o trabalho local, uma nova consulta encontrou zero; o executor também
+   conferiu zero em dois checkpoints. A implantação ocorreu às 04:11:44 de São Paulo,
+   janela de 3,75 s, reiniciando apenas rathena-map. A única mudança é o anúncio
+   **20h45 (horário de São Paulo)**. Evento `OnClock2045`, preço e premiação foram
+   preservados. Backup dos dois originais e manifesto:
+   `/var/backups/faithro/npc-lottery-time-20261019T071144Z.tar.gz`, SHA-256
+   `ce66f9809cd5ab7846b42de49f6db2566f502f6cbc854bb867515d0ecd0e4470`.
+   O arquivo foi conferido antes da parada e reaberto após o deploy, com três entradas
+   e modo 600. O overlay operacional local corresponde ao espelho UTF-8 da VPS.
+2. **Saúde e regressão nativa.** Cinco serviços ativos, zero reinícios automáticos,
+   quatro PIDs preservados, nenhum erro novo de mapa/SQL e HTTP 200 no site/healthcheck.
+   Quatorze arquivos de referência de MVP/suporte continuam com os hashes da coleta.
+   O laboratório privado executou o hash implantado, sem reaplicar patch: anúncio
+   correto, compra de 4.750 e duplicidade bloqueada sem débito em dois personagens
+   da mesma conta. Ambos receberam 100 poções e salvaram 99 após uso com cura 1→40/40.
+   Nenhuma conta foi copiada da produção; nenhum combate ou sorteio foi executado;
+   laboratório, bundle e unidades temporárias foram removidos.
+3. **Custos conjuntos de MVP.** O novo analisador `tools/analyze_balance_mvp.py`
+   confere os ledgers de atacante e suporte, cancela transferências internas de
+   zeny/itens e recusa entradas externas durante o ensaio. Contador compartilhado
+   inclui chefe e invocações uma vez só e não entra em métrica individual de jogador.
+   Derrota da dupla exige ao menos uma morte, permitindo zero no suporte sobrevivente.
+   Buff recebido exige origem, nível e aplicações compatíveis com os casts declarados.
+   Compras e valor do estoque consumido continuam separados, sem dupla cobrança.
+4. **Painel e fichas pendentes.** O protocolo aceita quatro alvos, solo e uma classe
+   de suporte em 24 tentativas, ou solo/High Priest/Professor separados em 36, com
+   três repetições por condição. Exige builds de controle, níveis inicial/final,
+   flechas reconciliadas, painel real, IDs únicos, sessões sequenciais e combate
+   de até 600 s dentro da janela operacional. Falhas e timeouts entram nos custos
+   por vitória; sem vitória, o quociente fica desconhecido. Três exemplos e matriz
+   permanecem `pending`; o gerador não sobrescreve arquivos e a CLI recusa pendências.
+5. **Validação e limites.** Passaram 128 testes locais; o ensaio nativo posterior
+   também passou. Os cenários fictícios de 24/36 tentativas existem somente nas
+   fixtures de software, sem serem apresentados como observações reais. O protocolo
+   confere coerência declarada, não autentica servidor, não infere reagentes por skill
+   nem mede DPS/uptime individual. O piloto PvM real continua 0/3. EXP 300x, nível 255,
+   atributos 185 e ASPD 197 permanecem; não há recomendação numérica nova de combate.
+
+Objetivo, arquivos, comandos, impacto, confiança, aceite e rollback estão em
+`design-audit/mvp-party-kit/README.md`, junto dos registros de implantação, saúde e
+laboratório. Para reverter ferramentas, retirar os novos arquivos e restaurar o
+analisador anterior; fichas individuais antigas mantêm o comportamento por padrão.
+Rollback do texto implantado usa as duas cópias do backup em nova janela sem jogadores.
+Nenhuma reversão foi necessária nesta aplicação.
+
+## Recursos de combate e recuperação ensaiada (19/10/2026)
+
+Cinco etapas desta rodada:
+
+1. **Fontes de custo.** Coletor somente de leitura conferiu requisitos de 15 skills,
+   preços de lojas literais e `arrow_decrement=1`. Double Strafe tem dois acertos,
+   mas requer uma flecha; Focused Arrow Strike também usa uma. O código separa fases
+   de cobrança e aplica modificadores/dispensas. O calculador usa eventos explícitos
+   de SP, item e munição, sem inferir consumo por hits, casts ou linhas de dano.
+2. **Cálculo econômico.** Exemplos independentes: 100 cobranças de Double Strafe 10
+   correspondem a 1.200 SP-base e 100 flechas; dez Safety Wall 10, a 400 SP-base e
+   dez gemas azuis. Dez EDP 5 correspondem a dez frascos, 500 mil de reposição.
+   Uma hipótese de cobertura nominal contínua por uma hora usa 60 frascos/3 milhões.
+   Na mistura média de Juperos 2, 300 abates supostos gerariam 901.863 de revenda bruta;
+   seriam 998 abates/h no valor esperado para cobrir só frascos, antes de outros custos
+   e sem Overcharge. Não é desempenho medido nem justificativa isolada para reduzir
+   preço ou habilidade. Estoque consumido e compras de caixa continuam separados.
+3. **Recuperação da Loteria.** O backup revisado de 07:11:44 UTC foi restaurado em duas
+   cópias privadas com conteúdo, UID/GID e modo conferidos. O mapa carregou o original
+   antigo e o cliente mostrou 21h, cobrou 4.750 e bloqueou duplicidade sem débito na
+   mesma conta. Os dois personagens também passaram em uso/persistência das poções.
+   A produção permaneceu no texto novo de 20h45 e seus PIDs não mudaram. Cobertura:
+   restauração/carregamento dos arquivos, sem restauração de banco ou disparo de
+   rollback automático por falha. Nenhum combate, prêmio ou sorteio foi executado.
+4. **Próximo ensaio definido.** Roteiro separado compara EDP desligado/ligado em
+   três pares de 30 min, SinX 255, equipamento fixo e Juperos 2. Exige contadores,
+   uptime real, mortes, inventário e caixa reconciliados. O piloto inicial segue
+   0/3 observações fornecidas: Sniper/SinX/HW 99, 30 min cada. O executor de QA dura
+   300 s e não comporta uma sessão de 1.800 s; faltam ambiente persistente isolado
+   com acesso do testador e sessões reais. Preparação não é evidência de combate.
+5. **Regressões e saúde.** Passaram 143 testes locais e o ensaio nativo de recuperação.
+   A leitura final encontrou cinco serviços ativos, nenhum erro novo, site/health
+   HTTP 200, 13 referências com hashes esperados e nenhuma unidade/pasta de QA
+   restante. Não houve alteração em produção nesta rodada. EXP 300x, nível 255,
+   atributos 185 e ASPD 197 permanecem.
+
+Objetivo, arquivos, hipóteses, confiança, critérios de adoção/descarte, comandos e
+rollback estão em `design-audit/resource-recovery-review/README.md`. Confiança alta
+nas declarações/cálculos e recuperação dos arquivos ensaiados; resultado real de
+classes/rentabilidade continua sem medição. Reverter esta rodada remove o coletor,
+calculador, extensão de QA e documentos; não existe mudança de produção a restaurar.
+
 ## Riscos deixados para depois
 
 - **Zeny vindo de drops.** Tratado em `docs/drops.md` (tetos por categoria, equipamento 30x,

@@ -1,0 +1,25 @@
+{
+  "status": "conditional_cost_calculation_not_measured_farm",
+  "assumptions": {
+    "route": "juperos_02",
+    "edp_level": 5,
+    "nominal_duration_ms": 60000,
+    "continuous_nominal_coverage_seconds": 3600,
+    "no_gaps_no_early_losses": true,
+    "poison_bottles_assumed": 60,
+    "price_per_bottle": 50000,
+    "gross_sale_per_kill_expected": 3006.21,
+    "other_costs_excluded": true,
+    "overcharge_excluded": true
+  },
+  "poison_replacement_value": 3000000,
+  "kills_per_hour_for_poison_cost_only_expected_value": 998,
+  "gross_npc_sales_at_300_assumed_kills": 901863.0,
+  "resource_value_minus_gross_at_300_assumed_kills": 2098137.0,
+  "limitations": [
+    "No DPS, survival or real farm measured.",
+    "Expected loot sale value is an average; actual finite samples vary.",
+    "Replacement value is separate from cash purchases; no double debit."
+  ],
+  "recommendation": "Measure paired EDP on/off trials before changing skill or bottle price; no automatic numeric adjustment."
+}

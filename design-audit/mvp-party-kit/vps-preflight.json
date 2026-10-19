@@ -1,0 +1,47 @@
+{
+  "checked_at_utc": "2026-10-19T07:11:32.621160+00:00",
+  "online_characters": 0,
+  "lottery_deployment_status": "ready_for_controlled_window",
+  "lottery_sha256": "4e1114ff73ca4add082087420ba7dbbba7dd9970b7adab9f30260c34d2eff819",
+  "services": {
+    "rathena-login": {
+      "MainPID": "140817",
+      "NRestarts": "0",
+      "ActiveState": "active"
+    },
+    "rathena-char": {
+      "MainPID": "160495",
+      "NRestarts": "0",
+      "ActiveState": "active"
+    },
+    "rathena-map": {
+      "MainPID": "168672",
+      "NRestarts": "0",
+      "ActiveState": "active"
+    },
+    "rathena-web": {
+      "MainPID": "140820",
+      "NRestarts": "0",
+      "ActiveState": "active"
+    },
+    "faithro-web": {
+      "MainPID": "141001",
+      "NRestarts": "0",
+      "ActiveState": "active"
+    }
+  },
+  "http": {
+    "public_site": 200,
+    "origin_health": 200
+  },
+  "new_map_errors_since_last_readiness": 0,
+  "protected_hashes": {
+    "conf/import/battle_conf.txt": "54e6d7eb141252d9f250ed234944720ba85b68b2150a864c476a59ecaab2f9f8",
+    "conf/import/char_conf.txt": "46242e6c2e14fc3d80b6bacd8ec231514beeed39a56f6c49fe96898227593056",
+    "db/import/job_stats.yml": "ea3aa6fe84864b6069a31d25a3dc71257467f81aa9eb1ad66a61c30ebfcb4d1b",
+    "db/import/statpoint.yml": "18f6657fb7eb207882f5348adf862a155a055ce6823843c9764f068612f8b257",
+    "npc/custom/faithro/optional.conf": "9dd0896d43218c07089e74385b0fa397e51b5fe233c1873f93e8bdf40f35bdf2"
+  },
+  "production_mutations": false,
+  "combats_executed": 0
+}
