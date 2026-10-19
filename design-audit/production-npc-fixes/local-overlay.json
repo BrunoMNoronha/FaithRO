@@ -1,0 +1,10 @@
+{
+  "npc/custom/faithro/ptbr/custom/healer.txt": {
+    "operational_utf8_sha256": "681e70010ea8c1cba20b9abf95fed2ef56ce7aa05d9c90fc283900117ac7f1d6",
+    "installed_expected_sha256": "681e70010ea8c1cba20b9abf95fed2ef56ce7aa05d9c90fc283900117ac7f1d6"
+  },
+  "npc/custom/faithro/ptbr/custom/etc/quest_warper.txt": {
+    "operational_utf8_sha256": "3fb63e051ab43fc296c273747fc0bf69f634ab42d7fd4ca2d7ee92e44b5fdcad",
+    "installed_expected_sha256": "0df63e8c734c0af67cc3f47868a993d6218d1660586d5b6b6a959b882c735839"
+  }
+}

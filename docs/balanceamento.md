@@ -685,6 +685,55 @@ já foi descartado e não existe migração ou alteração de produção para re
 O piloto real permanece em 0/3 e EXP 300x, nível 255, atributos 185 e ASPD 197 seguem
 como referência.
 
+## Aplicação na produção e na VPS (19/10/2026)
+
+As duas correções validadas após o PR #95 foram aplicadas em 19/10, às 03h18 de
+São Paulo, em uma janela iniciada com zero personagens online. O map-server foi
+parado, os dois arquivos foram substituídos e o serviço reiniciado. A janela até
+a confirmação de prontidão e estabilidade durou 4,38 s.
+
+- **Curandeira:** `percentheal` passou para depois dos buffs, preenchendo o máximo
+  final de HP/SP conforme os nove casos de laboratório.
+- **Warpra:** a prévia do andar inclui a função compartilhada de tarifa, conforme
+  os 40 casos de laboratório. A chave `$QW_DW_OFF=1` permanece na produção.
+- **Sincronização:** arquivos instalados em `/home/rathena/rathena`, espelho de
+  deploy em `/root/faithro/deploy/server` e overlay operacional local foram atualizados.
+  A Warpra instalada mantém CP1252; os espelhos UTF-8 têm o mesmo conteúdo lógico.
+
+Antes da mudança foram conferidos os hashes de origem, os hashes dos candidatos
+ensaiados e a igualdade lógica dos espelhos. O lock existente de deploy foi usado.
+Backup criado e relido para validação:
+`/var/backups/faithro/npc-healer-warpra-20261019T061852Z.tar.gz`, com os quatro arquivos
+anteriores e manifesto de hashes, donos e permissões. SHA-256 do arquivo:
+`0c26e1996fcf97b2f62fc17ef2f55961252875a9186b2a3b739cbb17c3a5bd6f`.
+O backup não integra esta publicação.
+
+Apenas `rathena-map` foi reiniciado. Login, char e os dois serviços web mantiveram
+seus PIDs. O novo trecho do log não teve erros de script ou SQL, e o autoteste
+confirmou EXP 300x/300x, atributos naturais/trans 185, ASPD 197 e aura no 255.
+Os hashes de configurações protegidas, incluindo as tabelas de nível/atributos,
+permaneceram iguais. O site público com User-Agent de navegador e o `/healthz` local
+responderam HTTP 200. A sonda pública com User-Agent padrão do Python recebeu 403;
+as sondas de navegador na VPS e fora dela responderam 200.
+
+O comportamento funcional foi ensaiado no laboratório. Na produção foram verificados
+arquivos, carga, autoteste, serviços e HTTP; não foram alterados personagens pelo
+executor nem iniciados combates. O executor não emitiu SQL de escrita. Os hashes
+instalados coincidem com os candidatos ensaiados.
+
+Evidências: `design-audit/production-npc-fixes/deployment.json`, `health.json` e
+`local-overlay.json`. O ensaio comparativo `--candidate-checks` da rodada anterior
+requer a versão anterior como referência; depois desta aplicação, uma repetição exige
+preparar essa referência no laboratório a partir do backup, sem restaurar a produção.
+Em falha de inicialização, o procedimento preparado restauraria
+automaticamente os quatro arquivos e iniciaria novamente o map-server; não foi
+necessário usá-lo. Para reversão posterior, abrir outra janela com zero personagens,
+parar apenas o map-server, conferir o SHA-256 acima, restaurar as entradas
+`installed/` e `deploy/` nos respectivos diretórios preservando dono/permissão e
+reiniciar com a mesma validação de log/autoteste. Restaurar também os dois arquivos
+do overlay local a partir da cópia anterior mantida no registro operacional.
+Reverter apenas esta documentação no Git não desfaz a aplicação na VPS.
+
 ## Riscos deixados para depois
 
 - **Zeny vindo de drops.** Tratado em `docs/drops.md` (tetos por categoria, equipamento 30x,

@@ -1,0 +1,41 @@
+{
+  "status": "deployed",
+  "backup": "/var/backups/faithro/npc-healer-warpra-20261019T061852Z.tar.gz",
+  "backup_sha256": "0c26e1996fcf97b2f62fc17ef2f55961252875a9186b2a3b739cbb17c3a5bd6f",
+  "window_started_utc": "2026-10-19T06:18:52.535609+00:00",
+  "window_seconds": 4.38,
+  "restarted_services": [
+    "rathena-map"
+  ],
+  "other_service_pids_unchanged": true,
+  "runtime_selftest": [
+    "[Debug]: script debug : 0 110013172 : [FaithRO] modo=pre-renewal exp=300x/300x drop_comum=100x carta=10x",
+    "[Debug]: script debug : 0 110013172 : [FaithRO] max_parameter=185 max_trans_parameter=185 max_baby_parameter=150 max_aspd=197 aura_lv=255 multi_level_up_base=99"
+  ],
+  "new_map_errors": 0,
+  "protected_configuration_unchanged": true,
+  "warpra_dungeons_disabled": true,
+  "files": {
+    "/home/rathena/rathena/npc/custom/faithro/ptbr/custom/healer.txt": {
+      "before_sha256": "6848c0f815d0a76a550f4b6915e834b8245a96b41bd59813b5ce52d16b0995d1",
+      "after_sha256": "681e70010ea8c1cba20b9abf95fed2ef56ce7aa05d9c90fc283900117ac7f1d6"
+    },
+    "/root/faithro/deploy/server/npc/custom/faithro/ptbr/custom/healer.txt": {
+      "before_sha256": "6848c0f815d0a76a550f4b6915e834b8245a96b41bd59813b5ce52d16b0995d1",
+      "after_sha256": "681e70010ea8c1cba20b9abf95fed2ef56ce7aa05d9c90fc283900117ac7f1d6"
+    },
+    "/home/rathena/rathena/npc/custom/faithro/ptbr/custom/etc/quest_warper.txt": {
+      "before_sha256": "5279ae4ddc80426297f3bfdef55f8b456eaaa5c307f3f0b08d5896eca8047bb9",
+      "after_sha256": "0df63e8c734c0af67cc3f47868a993d6218d1660586d5b6b6a959b882c735839"
+    },
+    "/root/faithro/deploy/server/npc/custom/faithro/ptbr/custom/etc/quest_warper.txt": {
+      "before_sha256": "062d3a65a45fbfac5c50c756cfd4e65bea4655ec75bbdd6d915eba333d9fad5e",
+      "after_sha256": "3fb63e051ab43fc296c273747fc0bf69f634ab42d7fd4ca2d7ee92e44b5fdcad"
+    }
+  },
+  "database_writes_by_deployer": false,
+  "combats_executed": 0,
+  "rollback_used": false,
+  "checked_at_utc": "2026-10-19T06:18:57.201503+00:00",
+  "local_operational_overlay_updated": true
+}

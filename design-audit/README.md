@@ -22,6 +22,9 @@ substitui `deploy/rathena-overlay/`, não publica a aplicação web e não execu
 - `candidate-runtime/`: comparação posterior dos NPCs instalados com os dois patches,
   nove builds de cura, 40 combinações de tarifa e cinco recusas por saldo insuficiente.
   Os patches foram aplicados somente a cópias privadas temporárias.
+- `production-npc-fixes/`: registro da aplicação manual posterior dos dois patches
+  na VPS, backup validado, reinício do map-server e conferência de saúde. Atualiza
+  o estado histórico dos registros de proposta/laboratório; o backup fica na VPS.
 
 A referência continua EXP 300x, nível 255, atributos 185 e ASPD 197. Cenários de
 150/300/600 abates por hora são cálculos condicionais. Linhas de drops não são
@@ -70,13 +73,14 @@ não executa combate e não escreve nos NPCs instalados.
 
 ## Riscos e rollback
 
-Os patches candidatos de Curandeira e Warpra são arquivos de referência validados no
-laboratório, sem aplicação no overlay operacional ou na produção. O registro original
-de propostas permanece em `service-runtime/recommendations.json`; os resultados e
-critérios atualizados estão em `candidate-runtime/recommendations.json`. Não habilitar
-calabouços da Warpra em produção a partir desta publicação.
+Os patches de Curandeira e Warpra foram validados no laboratório e aplicados manualmente
+na produção em 19/10, conforme `production-npc-fixes/`. Os registros originais de proposta
+e ensaio permanecem em `service-runtime/recommendations.json` e
+`candidate-runtime/recommendations.json`. A chave de calabouços da Warpra continua
+desligada. Este repositório não inicia deploy automaticamente.
 
 Risco deste PR: interpretar resultados funcionais sintéticos como farm real ou
 aplicar procedimentos específicos da instalação em outro layout. O relatório
-explicita essas limitações. Para desfazer a publicação, reverter seus commits por
-novo PR; não há migração ou mudança de produção para reverter.
+explicita essas limitações. Para desfazer a publicação documental, reverter seus commits
+por novo PR. Para desfazer a aplicação manual dos NPCs, usar o backup da VPS e o
+procedimento específico registrado no relatório; um revert no Git não restaura a VPS.
