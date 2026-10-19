@@ -1,0 +1,19 @@
+--- a/server/npc/custom/faithro/ptbr/custom/healer.txt
++++ b/server/npc/custom/faithro/ptbr/custom/healer.txt
+@@ -31,13 +31,15 @@
+ 		Zeny -= .@Price;
+ 	}
+ 	specialeffect2 EF_HEAL2;
+-	percentheal 100,100;
+ 	if (.@Buffs && BaseLevel <= .@BuffMaxLevel) {
+ 		specialeffect2 EF_INCAGILITY;
+ 		sc_start SC_INCREASEAGI,240000,10;
+ 		specialeffect2 EF_BLESSING;
+ 		sc_start SC_BLESSING,240000,10;
+ 	}
++	// Restore against the final HP/SP maximum after healer buffs.
++	percentheal 100,100;
++
+ 	if (.@Delay)
+ 		@HD = gettimetick(2) + .@Delay;
+ 	end;

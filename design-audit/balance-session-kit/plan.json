@@ -1,0 +1,3100 @@
+{
+  "schema_version": 1,
+  "status": "prepared_not_executed",
+  "reference": {
+    "exp_rate": 300,
+    "max_level": 255,
+    "stat_cap": 185,
+    "aspd_cap": 197
+  },
+  "source_snapshot": "2026-10-19T04:45:57.522795+00:00",
+  "gear_checks": [
+    {
+      "class": "Lord_Knight",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 1158,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 1158,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 1158,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 1158,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 1158,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 1158,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 1158,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 1158,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 1408,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 1408,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 1408,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 1408,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 1408,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 1408,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 1408,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Paladin",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 1408,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 1708,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 1708,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 1708,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 1708,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 1708,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 1708,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 1708,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Sniper",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 1708,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 1253,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 1253,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 1253,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 1253,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 1253,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 1253,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 1253,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 1253,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 1608,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 1608,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 1608,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 1608,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 1608,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 1608,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 1608,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "High_Wizard",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 1608,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 1608,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 1608,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 1608,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 1608,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 1608,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 1608,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 1608,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "High_Priest",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 1608,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 1804,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 1804,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 1804,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 1804,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 1804,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 1804,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 1804,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Champion",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 1804,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 1550,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 1550,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 1550,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 1550,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 1550,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 1550,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 1550,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Professor",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 1550,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 1306,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 1306,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 1306,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 1306,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 1306,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 1306,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 1306,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Creator",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 1306,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 1355,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 1355,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 1355,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 1355,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 1355,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 1355,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 1355,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Whitesmith",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 1355,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 1708,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 1708,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 1708,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 1708,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 1708,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 1708,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 1708,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Stalker",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 1708,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 1904,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 1904,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 1904,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 1904,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 1904,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 1904,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 1904,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Clown",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 1904,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 99,
+      "purpose": "PvM",
+      "item_id": 1953,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 99,
+      "purpose": "MVP",
+      "item_id": 1953,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 150,
+      "purpose": "PvM",
+      "item_id": 1953,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 150,
+      "purpose": "MVP",
+      "item_id": 1953,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 200,
+      "purpose": "PvM",
+      "item_id": 1953,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 200,
+      "purpose": "MVP",
+      "item_id": 1953,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 255,
+      "purpose": "PvM",
+      "item_id": 1953,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2304,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2404,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 2504,
+      "compatible": true
+    },
+    {
+      "class": "Gypsy",
+      "level": 255,
+      "purpose": "MVP",
+      "item_id": 1953,
+      "compatible": true
+    }
+  ],
+  "templates": [
+    {
+      "class": "Sniper",
+      "level": 99,
+      "file": "template-sniper-99.json",
+      "map": "juperos_02"
+    },
+    {
+      "class": "Sniper",
+      "level": 150,
+      "file": "template-sniper-150.json",
+      "map": "abbey03"
+    },
+    {
+      "class": "Sniper",
+      "level": 200,
+      "file": "template-sniper-200.json",
+      "map": "thor_v01"
+    },
+    {
+      "class": "Sniper",
+      "level": 255,
+      "file": "template-sniper-255.json",
+      "map": "lhz_dun03"
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 99,
+      "file": "template-assassin_cross-99.json",
+      "map": "juperos_02"
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 150,
+      "file": "template-assassin_cross-150.json",
+      "map": "abbey03"
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 200,
+      "file": "template-assassin_cross-200.json",
+      "map": "thor_v01"
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 255,
+      "file": "template-assassin_cross-255.json",
+      "map": "lhz_dun03"
+    },
+    {
+      "class": "High_Wizard",
+      "level": 99,
+      "file": "template-high_wizard-99.json",
+      "map": "juperos_02"
+    },
+    {
+      "class": "High_Wizard",
+      "level": 150,
+      "file": "template-high_wizard-150.json",
+      "map": "abbey03"
+    },
+    {
+      "class": "High_Wizard",
+      "level": 200,
+      "file": "template-high_wizard-200.json",
+      "map": "thor_v01"
+    },
+    {
+      "class": "High_Wizard",
+      "level": 255,
+      "file": "template-high_wizard-255.json",
+      "map": "lhz_dun03"
+    }
+  ],
+  "pilot": {
+    "sessions": 3,
+    "duration_minutes_each": 30,
+    "classes": [
+      "Sniper",
+      "Assassin_Cross",
+      "High_Wizard"
+    ],
+    "base_level": 99,
+    "map": "juperos_02",
+    "total_minutes": 90,
+    "gate": "Only proceed after timing, counters, cash and consumables reconcile.",
+    "protocol_id": "faithro-juperos2-progression-v2",
+    "comparison_basis": "progression_from_common_start_not_fixed_level_dps"
+  },
+  "farm_panel": {
+    "primary_routes": {
+      "99": "juperos_02",
+      "150": "abbey03",
+      "200": "thor_v01",
+      "255": "lhz_dun03"
+    },
+    "additional_routes": [
+      {
+        "level": 150,
+        "map": "man_fild02"
+      },
+      {
+        "level": 255,
+        "map": "tha_t09"
+      }
+    ],
+    "classes": [
+      "Sniper",
+      "Assassin_Cross",
+      "High_Wizard"
+    ],
+    "repetitions": 3,
+    "minutes_per_session": 30,
+    "cells": 18,
+    "sessions": 54,
+    "total_hours": 27,
+    "pilot_counts_toward_repetitions_if_valid": true
+  },
+  "mvp_panel": {
+    "targets": [
+      {
+        "id": 1086,
+        "name": "GOLDEN_BUG",
+        "level": 99,
+        "file": "template-mvp-gtb.json"
+      },
+      {
+        "id": 1039,
+        "name": "BAPHOMET",
+        "level": 150,
+        "file": "template-mvp-baphomet.json"
+      },
+      {
+        "id": 1751,
+        "name": "RANDGRIS",
+        "level": 255,
+        "file": "template-mvp-randgris.json"
+      },
+      {
+        "id": 1832,
+        "name": "IFRIT",
+        "level": 255,
+        "file": "template-mvp-ifrit.json"
+      }
+    ],
+    "modes": [
+      "solo",
+      "duo"
+    ],
+    "support_options": [
+      "High_Priest",
+      "Professor"
+    ],
+    "attempts_per_target_mode": 3,
+    "attempt_limit_minutes": 10,
+    "attempts": 24,
+    "combat_time_limit_hours": 4,
+    "notes": [
+      "Control targets at 99/150; final targets at 255. Record exact build per attempt.",
+      "Support options are alternatives; testing both separately expands the panel.",
+      "Preparation and reset time are additional; none executed by this package."
+    ]
+  },
+  "acceptance": [
+    "No production combat or gameplay changes by preparation scripts.",
+    "No performance results until real timed sessions are recorded.",
+    "No build/route comparison if equipment, buffs or buying rules differ without disclosure.",
+    "Account for every declared cash movement and consumable before publishing rates.",
+    "Treat failure, timeout and inability to survive as results, not missing successes."
+  ],
+  "limitations": [
+    "Tool checks declared-data consistency, not authenticity of observations.",
+    "Skill legality and equipment compatibility were checked for these prepared panels only.",
+    "The kit does not provision an isolated server, create characters or run battles."
+  ]
+}

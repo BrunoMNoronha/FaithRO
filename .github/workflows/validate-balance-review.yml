@@ -1,0 +1,37 @@
+name: Validate balance review
+
+on:
+  pull_request:
+    paths:
+      - tools/**
+      - design-audit/**
+      - docs/balanceamento.md
+      - docs/estudo-balanceamento.md
+      - docs/progressao.csv
+      - docs/.gitattributes
+      - .github/workflows/validate-balance-review.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-local-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test dependency
+        run: python -m pip install 'pytest>=8,<9'
+      - name: Validate session, pilot and protocol
+        run: python -m pytest tools/tests/test_balance_session.py tools/tests/test_balance_pilot.py tools/tests/test_bot_protocol.py -q
+      - name: Parse manual lab scripts without executing them
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+          for path in Path('tools').glob('isolated_*.py'):
+              ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
+          PY

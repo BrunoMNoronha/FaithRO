@@ -1,0 +1,11 @@
+--- a/server/npc/custom/faithro/ptbr/custom/etc/quest_warper.txt
++++ b/server/npc/custom/faithro/ptbr/custom/etc/quest_warper.txt
+@@ -1509,7 +1509,7 @@
+ 	cleararray @DWLmenulist$[0],"",20; // Clearing the array to get rid off ghost items in menu
+ 	do {
+ 		if ($QW_DL == 0)||($QW_DDL >= @DDepth[@DWref]) {
+-			set @warpprice, (@pDprice[@DwarpMenu]+ (getd(@pDfee$[@DwarpMenu])*@DDepth[@DWref]));
++			set @warpprice, (@pDprice[@DwarpMenu]+ (getd(@pDfee$[@DwarpMenu])*@DDepth[@DWref])) + callfunc("F_FaithRO_WarpFee", @DGat$[@DWref]);
+ 			if (@warpprice != 0)&&($QW_MapUserShow == 0) set @DWLmenulist$[@DWj], @DLevelName$[@DWref]+" -> "+@warpprice;
+ 			if (@warpprice == 0)&&($QW_MapUserShow == 0) set @DWLmenulist$[@DWj], @DLevelName$[@DWref];
+ 			if (@warpprice != 0)&&($QW_MapUserShow == 1) set @DWLmenulist$[@DWj], @DLevelName$[@DWref]+" ["+getmapusers(@DGat$[@DWref])+"] -> "+@warpprice;

@@ -1,0 +1,10 @@
+{
+  "status": "awaiting_real_sessions",
+  "protocol_id": "faithro-juperos2-progression-v2",
+  "sessions_completed": 0,
+  "sessions_required": 3,
+  "consistent_character_creation_qa_is_not_combat_evidence": true,
+  "pending_gate_exit_code": 2,
+  "metrics_generated": false,
+  "balance_changes_applied": false
+}

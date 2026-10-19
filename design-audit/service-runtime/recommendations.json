@@ -1,0 +1,28 @@
+{
+  "status": "proposals_only",
+  "applied_to_overlay": false,
+  "applied_to_production": false,
+  "candidate_runtime_tested": false,
+  "healer": {
+    "confidence": "high",
+    "evidence": "Native first heal at Sniper 99: SP 512, final maximum 563 after Blessing 10",
+    "current": "percentheal before buffs",
+    "candidate": "percentheal after buffs",
+    "expected_effect": "Fill final HP/SP maximum; no price, buff-cap, duration or cooldown changes",
+    "risk": "Low; verify status recalculation and existing-buff refresh",
+    "validation": "Compare clean and already-buffed characters at levels 1,99,100,255, low/high INT and SP equipment. Require final HP=MaxHP and SP=MaxSP; buffs only at <=99, duration 240s, cooldown 3s, no zeny debit.",
+    "discard_if": "Any SP shortfall remains, a buff appears above 99, or price/duration/cooldown changes",
+    "patch": "healer-sp-candidate.patch"
+  },
+  "warpra": {
+    "confidence": "high",
+    "evidence": "Native level menus omit 25000/50000; account loses exactly that shared tariff on warp",
+    "current": "Destination preview excludes F_FaithRO_WarpFee",
+    "candidate": "Add shared fee to QWS_DLarray preview only",
+    "expected_effect": "Show actual total before choice; preserve existing debit; keep production dungeon switch off",
+    "risk": "Low; preview must include GM base/depth fees exactly once",
+    "validation": "In isolated lab compare preview and net debit at levels 99,100,199,200,255, both map-user display settings, depth 0/1 and nonzero GM base/depth prices. Require preview=debit, unchanged funds on insufficient balance and production DW_OFF=1.",
+    "discard_if": "Preview differs from debit, shared tariff is charged twice or production dungeons become enabled",
+    "patch": "warpra-price-preview-candidate.patch"
+  }
+}
