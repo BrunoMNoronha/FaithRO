@@ -789,6 +789,52 @@ no pacote temporário. Converte o patch para CP1252 antes de conferir/aplicar na
 privada, usa CPU 25%/512 MiB/300 s e não executa combates. Reverter esta rodada remove
 ferramentas/documentação/candidato; não existe alteração de produção a restaurar.
 
+## Rodada seguinte: janela da Loteria e suporte contra MVPs (19/10/2026)
+
+Cinco frentes foram trabalhadas, com implantação da Loteria ainda pendente:
+
+1. **Janela da Loteria.** Fuso, ausência de override TZ, hash instalado e equivalência
+   do espelho foram conferidos. Havia um personagem conectado; nenhum serviço foi
+   parado. O executor manual específico está preparado com hashes fixos, backup das
+   duas cópias, escrita atômica e restauração em falha. Os testes locais cobrem recusas;
+   essa variante ainda não executou implantação nem restauração reais. A produção
+   permanece anunciando 21h, embora o evento seja 20h45. Detalhes e critério de aceite:
+   `design-audit/lottery-deployment/README.md`.
+2. **Saúde da VPS.** Os cinco serviços continuam ativos com os mesmos PIDs e zero
+   reinícios automáticos. Nenhum erro novo de mapa/SQL após a prontidão; HTTP 200 no
+   site e healthcheck. Battle/char, job_stats, statpoint e optional mantiveram seus
+   hashes. Nenhuma alteração de produção foi realizada nesta rodada.
+3. **Ameaças dos MVPs.** Nova coleta sem SQL conferiu quatro chefes e 89 declarações
+   de habilidades: GTB 16, Baphomet 22, Randgris 28 e Ifrit 23. Para 600 s sem cura,
+   HP/tempo resulta em 210/1.113,333/5.945,333/12.833,333 de dano entregue por segundo.
+   Esses mínimos não são DPS medido de classe. Randgris usa `attackpcge,2`, que o
+   código compara com o contador de unidades tendo o chefe como alvo; tamanho de
+   party sozinho não determina a condição. Pneuma de Ifrit depende de estado idle e
+   `longrangeattacked`. Gatilhos, fases, limites e mapas estão em
+   `design-audit/mvp-threat-review/README.md`.
+4. **Suporte verificável.** Oito cartões pendentes cobrem High Priest e Professor
+   nos quatro níveis, com atributos dentro do orçamento, dez slots e equipamentos
+   obtíveis a +0 sem cartas. High Priest usa 44/49 e 22/69 pontos de classe;
+   Professor, 25/49 e 47/69. A compra base custa respectivamente 50 mil e 60 mil,
+   antes de desconto. Gemas e Cobweb, custos de SP e pré-requisitos estão registrados.
+   A disponibilidade da habilidade não comprova efeito contra chefes ou sobrevivência.
+   O protocolo exige ledger separado de cada participante e revisão conjunta da dupla.
+   Testar uma alternativa de suporte mantém 24 tentativas; testar as duas cria
+   36, separadas por classe de suporte, até seis horas de combate mais preparação.
+5. **Validação e continuidade.** Passaram 95 testes locais, incluindo import/clear,
+   chance condicional, atraso, teto de skill e recusas do deploy antes de mudanças.
+   Python e JSON foram validados. O gerador recusa sobrescrever cartões existentes.
+   O piloto real continua 0/3; não há resultados novos de combate ou justificativa
+   para mudar EXP 300x, nível 255, atributos 185, ASPD 197 ou habilidades. Primeiro
+   concluir o piloto já definido; depois registrar tentativas de MVP com falhas,
+   invocações, fases, suporte e custos completos. As recomendações são condicionais
+   aos critérios documentados, sem adoção automática de balanceamento.
+
+As novas ferramentas, fontes, evidências e cartões são listados nos dois diretórios
+citados. Rollback desta rodada: remover a preparação local. A Loteria só recebe
+alteração quando houver janela sem personagens conectados e backup validado; em
+falha posterior à parada, o executor restaura os originais e confere a prontidão.
+
 ## Riscos deixados para depois
 
 - **Zeny vindo de drops.** Tratado em `docs/drops.md` (tetos por categoria, equipamento 30x,

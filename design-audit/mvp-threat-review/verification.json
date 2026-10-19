@@ -1,0 +1,30 @@
+{
+  "checked_at_utc": "2026-10-19T06:49:12.659778+00:00",
+  "local_test_results": {
+    "passed": 95,
+    "failed": 0
+  },
+  "python_ast_valid": true,
+  "json_valid": true,
+  "support_cards": 8,
+  "support_cards_pending": true,
+  "overwrite_refused_without_file_changes": true,
+  "production_service_states_and_pids_unchanged": true,
+  "protected_configuration_unchanged": true,
+  "lottery_deployment": "deferred_online_characters",
+  "real_pvm_pilot_sessions": 0,
+  "combats_executed": 0,
+  "production_mutations": false,
+  "local_tool_sha256": {
+    "tools/collect_mvp_threats.py": "dd690b41f9c41fba43242ee526158ecb0da0690cad540fafeed7ad63f36bd0e3",
+    "tools/collect_support_panels.py": "b4ffb9ecd805017835df4fe29fec723c279ed262593d963af4a423eede06b9e2",
+    "tools/prepare_support_cards.py": "e3361ade8cfd05d845285477504b49aef24acac51915c23b659b3a558ae41d44",
+    "tools/deploy_lottery_text.py": "1a70f3ee5ee0a3e7f5bd981e4bf7b654c0463cbc2499ede5d557382289f651e0",
+    "tools/tests/test_mvp_threats.py": "975206d730883b5326f7977a69e9afc9448612302bfb2474009384cdecb47d0d",
+    "tools/tests/test_lottery_deploy.py": "7cc9e1d7e32524658514774a2bbc17b2271138b6c8d0c25bffd271f573659575"
+  },
+  "limitations": [
+    "Tests use synthetic data and mocks; they are not combat outcomes or a production deployment test.",
+    "No success/rollback deployment run for this lottery-specific executor."
+  ]
+}
