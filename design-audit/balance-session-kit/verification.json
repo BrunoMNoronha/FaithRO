@@ -1,0 +1,62 @@
+{
+  "timestamp_utc": "2026-10-19T05:06:24.517728+00:00",
+  "unit_tests_passed": 64,
+  "farm_templates": 12,
+  "mvp_templates": 4,
+  "pending_templates_rejected": 16,
+  "synthetic_schema_checks_passed": 16,
+  "synthetic_records_saved_as_observations": 0,
+  "templates_unmodified_by_analysis": true,
+  "cli_pending_exit_code": 2,
+  "cli_pending_stdout_empty": true,
+  "equipment_compatibility_checks": 416,
+  "equipment_compatible": true,
+  "skill_points": {
+    "Sniper": {
+      "novice": 9,
+      "first": 40,
+      "second": 27
+    },
+    "Assassin_Cross": {
+      "novice": 9,
+      "first": 38,
+      "second": 39
+    },
+    "High_Wizard": {
+      "novice": 9,
+      "first": 33,
+      "second": 44
+    }
+  },
+  "normal_shop_entries": 1758,
+  "arbitrage_candidates": 0,
+  "production_combats_executed": 0,
+  "production_mutations": false,
+  "isolated_server_provisioned": false,
+  "tool_sha256": "c396eb69aabde4f8c8090240ee64463fca414511bb7dedbf08473aa13a0a05d1",
+  "template_sha256": {
+    "template-assassin_cross-150.json": "ec0489f37789a271ab5561717f02bcc0a4625be4ce0cc32a7e83b09090385e38",
+    "template-assassin_cross-200.json": "f3d1895c2bfa6d6839e21857c6d6ca0f90d2b37b8c0321d5758cea29fe0f3886",
+    "template-assassin_cross-255.json": "4a30877a820ad3800861f688e407d4a64fe403be984d0bf57b08d1f8b808d197",
+    "template-assassin_cross-99.json": "8d0d37f8918258852450b14e8e80f0d7fa40a5b035673453a889e0c0538ff9ed",
+    "template-high_wizard-150.json": "41310d5c0ab31eb911c16ef387b023b582fa3722ec1509c31a9800d19774715b",
+    "template-high_wizard-200.json": "6325c35972aecc03ce9a37ae7255bdcf1aadf5603c456e303c0b44648e62497a",
+    "template-high_wizard-255.json": "86626c9e385bfa60bd1ba57a8f7aa96ea73b992a96e55344efc939497f501be3",
+    "template-high_wizard-99.json": "7a597296ddb88fa50b80bd2b63109724cdbe538bf4a47106fe87596f29c018fd",
+    "template-mvp-baphomet.json": "6751a6189a793ccec466a4cf477771b1b05e7273c7e53e62d64ec9ddb1b87dca",
+    "template-mvp-gtb.json": "865f8076c05572fcbf98a9ade6735810d45476fbe4aa9e0a021adee04c5caa54",
+    "template-mvp-ifrit.json": "149cbbe6b0a67144d509449a6a01c1e72353edbafc28b5e28fcdd250fa68b792",
+    "template-mvp-randgris.json": "f36c0b5216ac7182119ba09cbbcf55d9ad4dc5e767b7ca1cba64ad67c21d6c73",
+    "template-sniper-150.json": "2ed89908d9f387dbed3aaf16accb1e5854a28379fe2ba359757e7ebdcf771762",
+    "template-sniper-200.json": "4df879e22e79c9921f20562caa3dba943895c5794b4eddfdaf723698058fc430",
+    "template-sniper-255.json": "8c67541d6dedcfc42f0b04e4147fcfc5bdede4d973febc7b1186dcd2d05f8444",
+    "template-sniper-99.json": "3c19430662bf84bdf4659a1efc6ceedaaa78ccdd6a590b12b9a01558d2e0dd59"
+  },
+  "protocol_id": "faithro-juperos2-progression-v2",
+  "pilot_tool_sha256": "ab37273e2c957c8dab8888c5dab39b7597c4646783a66b2cde176356fe17b412",
+  "pilot_pending_exit_code": 2,
+  "pilot_pending_stdout_empty": true,
+  "isolated_character_qa_passed": true,
+  "persistent_combat_server_provisioned": false,
+  "real_combat_pilot_sessions": 0
+}

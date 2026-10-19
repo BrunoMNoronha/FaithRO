@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "status": "pending",
+  "kind": "farm",
+  "environment": "isolated_test",
+  "map": "juperos_02",
+  "actor": {
+    "role": "tester",
+    "group_id": 0,
+    "is_bot": false
+  },
+  "administrative_operations_present": false,
+  "build": {
+    "class": "Sniper",
+    "base_level": 99,
+    "job_level": 70,
+    "stats_SAVIDL": [
+      17,
+      78,
+      61,
+      35,
+      86,
+      1
+    ],
+    "equipment": [
+      {
+        "slot": "head_top",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "head_mid",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "head_low",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "armor",
+        "item_id": 2304,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "garment",
+        "item_id": 2504,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "shoes",
+        "item_id": 2404,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "right_hand",
+        "item_id": 1708,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "left_hand",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "accessory1",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      },
+      {
+        "slot": "accessory2",
+        "item_id": 0,
+        "refine": 0,
+        "cards": []
+      }
+    ],
+    "skills": {
+      "NV_BASIC": 9,
+      "AC_DOUBLE": 10,
+      "AC_OWL": 10,
+      "AC_VULTURE": 10,
+      "AC_CONCENTRATION": 10,
+      "SN_SHARPSHOOTING": 5,
+      "HT_BEASTBANE": 1,
+      "HT_FALCON": 1,
+      "SN_SIGHT": 10,
+      "SN_WINDWALK": 10
+    }
+  },
+  "observed_panel": {
+    "hp": null,
+    "sp": null,
+    "aspd": null,
+    "weight": null,
+    "max_weight": null
+  },
+  "buff_rules": {
+    "outside_support": false,
+    "record_self_buffs": true
+  },
+  "timing": {
+    "source": "session_stopwatch",
+    "elapsed_seconds": null,
+    "started_at": null,
+    "ended_at": null,
+    "includes_travel_sales_recovery": true
+  },
+  "kills_counter": {
+    "method": "manual_tally",
+    "start": null,
+    "end": null,
+    "calibration": {
+      "known_kills": 10,
+      "counter_increase": null
+    }
+  },
+  "deaths": null,
+  "exp_gained": null,
+  "exp_measurement": "cumulative_counter_or_level_curve",
+  "cash": {
+    "start": null,
+    "end": null,
+    "npc_sales": null,
+    "quest_rewards": null,
+    "npc_purchases": null,
+    "transport_fees": null,
+    "refine_fees": null,
+    "other_sinks": null,
+    "external_in": null,
+    "external_out": null
+  },
+  "consumables_complete": false,
+  "consumables": [],
+  "notes": [
+    "Copiar para arquivo de medição antes de preencher.",
+    "status observed somente após sessão real; synthetic somente para testes de software.",
+    "Preencher 0 nos movimentos ausentes; não estimar valores desconhecidos.",
+    "Registrar bônus reais da arma, passivas e buffs no painel.",
+    "Inventário: quantidades e preço efetivo por fornecedor; não usar Buy genérico para loja custom.",
+    "Registrar subida de nível; o piloto compara progressão desde 99. No cap 255, EXP/h efetiva não se aplica."
+  ],
+  "protocol_id": "faithro-juperos2-progression-v2",
+  "session_id": null,
+  "attributes_changed_during_session": false,
+  "equipment_changed_during_session": false,
+  "level_observation": {
+    "mode": "progression",
+    "start": 99,
+    "end": null
+  },
+  "exp_progress": {
+    "start_level": 99,
+    "start_exp": null,
+    "end_level": null,
+    "end_exp": null,
+    "curve_sha256": "465f226a0c19c756776c9b9212f47c7967db46f974eb6826f7c378e12563d93d"
+  },
+  "self_buffs_used": null
+}

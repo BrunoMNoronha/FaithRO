@@ -1,0 +1,42 @@
+{
+  "checked_at_utc": "2026-10-19T05:52:51.688737+00:00",
+  "read_only": true,
+  "queried_keys": [
+    "$QW_DW_OFF",
+    "$QW_TW_OFF",
+    "$QW_BW_PRICE",
+    "$QW_AW_PRICE",
+    "$QW_OW_PRICE",
+    "$QW_BW_FEE",
+    "$QW_AW_FEE",
+    "$QW_OW_FEE",
+    "$QW_DL",
+    "$QW_DDL",
+    "$QW_HF",
+    "$QW_HP",
+    "$QW_Stor",
+    "$QW_GStor",
+    "$QW_KPoint",
+    "$QW_MapUserShow"
+  ],
+  "stored_values": {
+    "$QW_DW_OFF": "1",
+    "$QW_MapUserShow": "1"
+  },
+  "absent_keys_read_as_zero_by_script": [
+    "$QW_AW_FEE",
+    "$QW_AW_PRICE",
+    "$QW_BW_FEE",
+    "$QW_BW_PRICE",
+    "$QW_DDL",
+    "$QW_DL",
+    "$QW_GStor",
+    "$QW_HF",
+    "$QW_HP",
+    "$QW_KPoint",
+    "$QW_OW_FEE",
+    "$QW_OW_PRICE",
+    "$QW_Stor",
+    "$QW_TW_OFF"
+  ]
+}

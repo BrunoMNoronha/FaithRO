@@ -1,0 +1,485 @@
+{
+  "status": "passed",
+  "private_network": true,
+  "network_interfaces": [
+    "lo"
+  ],
+  "private_pid_namespace": true,
+  "production_sources_readonly": true,
+  "fresh_database": true,
+  "production_accounts_copied": false,
+  "qa_characters_created": 2,
+  "inventory": [
+    [
+      150000,
+      501,
+      100,
+      0,
+      1
+    ],
+    [
+      150000,
+      1201,
+      1,
+      2,
+      1
+    ],
+    [
+      150000,
+      2301,
+      1,
+      16,
+      1
+    ],
+    [
+      150001,
+      501,
+      100,
+      0,
+      1
+    ],
+    [
+      150001,
+      1201,
+      1,
+      2,
+      1
+    ],
+    [
+      150001,
+      2301,
+      1,
+      16,
+      1
+    ]
+  ],
+  "starting_red_potions_per_character": 100,
+  "knife_and_shirt_preserved": true,
+  "map_server_started": true,
+  "combats_executed": 0,
+  "npc_checks": null,
+  "service_checks": {
+    "status": "passed",
+    "loaded_maps": [
+      "abyss_02",
+      "alb2trea",
+      "alberta",
+      "aldebaran",
+      "ama_dun02",
+      "ama_fild01",
+      "amatsu",
+      "anthell02",
+      "ayo_dun02",
+      "ayothaya",
+      "brasilis",
+      "c_tower3",
+      "comodo",
+      "dewata",
+      "dicastes01",
+      "ecl_in01",
+      "eclage",
+      "ein_dun02",
+      "einbech",
+      "einbroch",
+      "gef_dun02",
+      "gef_fild10",
+      "gefenia03",
+      "geffen",
+      "glast_01",
+      "gon_dun01",
+      "gonryun",
+      "hugel",
+      "in_sphinx2",
+      "iz_dun03",
+      "izlu2dun",
+      "izlude",
+      "jawaii",
+      "jupe_cave",
+      "jupe_core",
+      "juperos_01",
+      "juperos_02",
+      "kh_dun01",
+      "lasagna",
+      "lhz_dun02",
+      "lighthalzen",
+      "lou_dun02",
+      "louyang",
+      "mag_dun02",
+      "malangdo",
+      "malaya",
+      "manuk",
+      "mid_camp",
+      "mjo_dun02",
+      "mjolnir_02",
+      "moc_fild04",
+      "moc_fild19",
+      "moc_pryd02",
+      "moc_ruins",
+      "mora",
+      "morocc",
+      "moscovia",
+      "nameless_n",
+      "nif_fild01",
+      "niflheim",
+      "odin_tem01",
+      "orcsdun01",
+      "pay_arche",
+      "pay_dun03",
+      "payon",
+      "prontera",
+      "prt_fild05",
+      "prt_maze02",
+      "prt_sewb2",
+      "rachel",
+      "splendide",
+      "tha_t07",
+      "thor_camp",
+      "treasure02",
+      "tur_dun01",
+      "tur_dun02",
+      "um_dun02",
+      "umbala",
+      "valkyrie",
+      "veins",
+      "xmas",
+      "xmas_dun02",
+      "yuno",
+      "yuno_fild03"
+    ],
+    "map_errors": 0,
+    "installed_npc_files_unmodified": {
+      "npc/other/Global_Functions.txt": "6d1ce65db0038de1867c9c0f7113fbbec813054d1d403a4903337d130f96d5fe",
+      "npc/mapflag/town.txt": "611e6fd3bc0feeffdd9b00f3b6728f7d5daa138b9704fdcbb49376cda6a54ce9",
+      "npc/custom/faithro/ptbr/custom/healer.txt": "6848c0f815d0a76a550f4b6915e834b8245a96b41bd59813b5ce52d16b0995d1",
+      "npc/custom/faithro/ptbr/custom/warper.txt": "ee139a34db9c88d4c51427ac84233b33cd9fb01e79efe367746b6ba9676d0a55",
+      "npc/custom/faithro/ptbr/custom/etc/quest_warper.txt": "5279ae4ddc80426297f3bfdef55f8b456eaaa5c307f3f0b08d5896eca8047bb9",
+      "npc/custom/faithro/ptbr/custom/itemmall.txt": "4d706b47ccf43cf27b23137ea9197935d7780f6e0853ec82d1661a479d8aec09"
+    },
+    "healer": [
+      {
+        "level": 99,
+        "free_full_hp": true,
+        "restored_sp": 512,
+        "pre_buff_maxsp": 512,
+        "post_buff_maxsp": 563,
+        "sp_shortfall_after_buff": 51,
+        "blessing_level": 10,
+        "agi_level": 10,
+        "blessing_ms_remaining": 239520,
+        "agi_ms_remaining": 239520
+      },
+      {
+        "level": 100,
+        "free_full_hp": true,
+        "restored_sp": 517,
+        "pre_buff_maxsp": 517,
+        "post_buff_maxsp": 517,
+        "sp_shortfall_after_buff": 0,
+        "blessing_level": 0,
+        "agi_level": 0,
+        "blessing_ms_remaining": 0,
+        "agi_ms_remaining": 0
+      }
+    ],
+    "warper_level_boundaries": [
+      {
+        "level": 99,
+        "city_fee": 0,
+        "dungeon_fee_received": 0
+      },
+      {
+        "level": 100,
+        "city_fee": 0,
+        "dungeon_fee_received": 25000
+      },
+      {
+        "level": 199,
+        "city_fee": 0,
+        "dungeon_fee_received": 25000
+      },
+      {
+        "level": 200,
+        "city_fee": 0,
+        "dungeon_fee_received": 50000
+      },
+      {
+        "level": 255,
+        "city_fee": 0,
+        "dungeon_fee_received": 50000
+      }
+    ],
+    "warper_routes": {
+      "last_destination_recharged": 50000,
+      "insufficient_funds_no_debit_or_warp": true,
+      "city_free_at_level_255_with_zero_funds": true
+    },
+    "warpra": {
+      "real_town_unlock": true,
+      "production_dungeon_off_reproduced": 1,
+      "disabled_menu": [
+        "Teleporte para cidades",
+        "Por que tão poucos teleportes?",
+        "Cancelar"
+      ],
+      "town_free": true,
+      "dungeon_unlock_seeded_only_in_lab": true,
+      "enabled_dungeon_costs": [
+        {
+          "level": 100,
+          "net_cost_no_refund": 25000,
+          "destination_menu": "[menu] 1. Nível 1 [0] | 2. Nível 2 [0] | 3. Sair",
+          "shared_tariff_displayed": false
+        },
+        {
+          "level": 200,
+          "net_cost_no_refund": 50000,
+          "destination_menu": "[menu] 1. Nível 1 [0] | 2. Nível 2 [0] | 3. Sair",
+          "shared_tariff_displayed": false
+        }
+      ]
+    },
+    "purchases": {
+      "poison": {
+        "result": 0,
+        "spent": 50000,
+        "received": {
+          "poison": 1
+        },
+        "displayed_prices": {
+          "678": 50000
+        }
+      },
+      "blue": {
+        "result": 0,
+        "spent": 5000,
+        "received": {
+          "blue": 1
+        },
+        "displayed_prices": {
+          "505": 5000
+        }
+      },
+      "arrow": {
+        "result": 0,
+        "spent": 100,
+        "received": {
+          "arrow": 10
+        },
+        "displayed_prices": {
+          "1750": 10
+        }
+      },
+      "gems_and_ad": {
+        "result": 0,
+        "spent": 2800,
+        "received": {
+          "redgem": 1,
+          "yellowgem": 1,
+          "bluegem": 1,
+          "acid": 1,
+          "fire": 1
+        },
+        "displayed_prices": {
+          "715": 600,
+          "716": 600,
+          "717": 600,
+          "7136": 500,
+          "7135": 500
+        }
+      }
+    },
+    "purchase_insufficient_funds_preserves_inventory_and_zeny": true,
+    "findings": [
+      {
+        "id": "healer-sp-before-blessing",
+        "confidence": "high",
+        "observed_shortfall": 51,
+        "candidate": "Heal after buffs; patch prepared only, not applied or runtime-tested"
+      },
+      {
+        "id": "warpra-shared-tariff-omitted-from-menu",
+        "confidence": "high",
+        "currently_exposed_in_production": false,
+        "observed": [
+          {
+            "level": 100,
+            "net_cost_no_refund": 25000,
+            "destination_menu": "[menu] 1. Nível 1 [0] | 2. Nível 2 [0] | 3. Sair",
+            "shared_tariff_displayed": false
+          },
+          {
+            "level": 200,
+            "net_cost_no_refund": 50000,
+            "destination_menu": "[menu] 1. Nível 1 [0] | 2. Nível 2 [0] | 3. Sair",
+            "shared_tariff_displayed": false
+          }
+        ],
+        "candidate": "Include shared tariff in level menu; production dungeons remain disabled"
+      }
+    ],
+    "transcripts": {
+      "warper_dungeon_99": [
+        "[menu] 1. Último Teleporte ^777777[]^000000 | 2.  ~ Cidades | 3.  ~ Campos | 4.  ~ Calabouços | 5.  ~ Castelos de Clã | 6.  ~ Calabouços de Clã | 7.  ~ Instâncias | 8.  ~ Áreas Especiais",
+        "[escolha 4:  ~ Calabouços]",
+        "[menu] 1. Laboratório Abandonado Amicitia | 2. Lagos do Abismo | 3. Calabouço de Amatsu | 4. Formigueiro | 5. Calabouço de Ayothaya | 6. Calabouço da Praia | 7. Torre Bifrost | 8. Laboratórios Biológicos | 9. Calabouço de Brasilis | 10. Calabouço de Byalan | 11. Torre do Relógio | 12. Minas de Carvão | 13. Esgotos | 14. Abadia Maldita | 15. Calabouço de Dewata | 16. Calabouço de Einbroch | 17. Bacia de Fogo | 18. Gefenia | 19. Calabouço de Geffen | 20. Glast Heim | 21. Calabouço Oculto | 22. Calabouço de Gelo | 23. Calabouço da Ilusão | 24. Calabouço de Issgard | 25. Juperos | 26. Calabouço de Kiel | 27. Calabouço de Kunlun | 28. Calabouço de Lasagna | 29. Calabouço de Luoyang | 30. Calabouço de Magma | 31. Calabouço de Malangdo | 32. Calabouço de Moscovia | 33. Calabouço de Nidhogg | 34. Calabouço de Niflheim | 35. Templo de Odin | 36. Calabouço dos Orcs | 37. Labirinto de Oz | 38. Calabouço de Payon | 39. Subterrâneo de Prontera | 40. Pirâmides | 41. Santuário de Rachel | 42. Calabouço de Rock Ridge | 43. Calabouço de Rudus | 44. Toca dos Scarabas | 45. Esfinge | 46. Navio Naufragado | 47. Torre de Thanatos | 48. Vulcão de Thor | 49. Fábrica de Brinquedos | 50. Ilha da Tartaruga | 51. Calabouço de Umbala | 52. Calabouço de Varmundt | 53. Área de Verus",
+        "[escolha 25: Juperos]",
+        "[menu] 1. Entrada | 2. Juperos 1 | 3. Juperos 2 | 4. Núcleo | 5. Ruínas Orientais de Juperos",
+        "[escolha 2: Juperos 1]",
+        "[close]"
+      ],
+      "warper_dungeon_100": [
+        "[menu] 1. Último Teleporte ^777777[]^000000 | 2.  ~ Cidades | 3.  ~ Campos | 4.  ~ Calabouços | 5.  ~ Castelos de Clã | 6.  ~ Calabouços de Clã | 7.  ~ Instâncias | 8.  ~ Áreas Especiais",
+        "[escolha 4:  ~ Calabouços]",
+        "[menu] 1. Laboratório Abandonado Amicitia | 2. Lagos do Abismo | 3. Calabouço de Amatsu | 4. Formigueiro | 5. Calabouço de Ayothaya | 6. Calabouço da Praia | 7. Torre Bifrost | 8. Laboratórios Biológicos | 9. Calabouço de Brasilis | 10. Calabouço de Byalan | 11. Torre do Relógio | 12. Minas de Carvão | 13. Esgotos | 14. Abadia Maldita | 15. Calabouço de Dewata | 16. Calabouço de Einbroch | 17. Bacia de Fogo | 18. Gefenia | 19. Calabouço de Geffen | 20. Glast Heim | 21. Calabouço Oculto | 22. Calabouço de Gelo | 23. Calabouço da Ilusão | 24. Calabouço de Issgard | 25. Juperos | 26. Calabouço de Kiel | 27. Calabouço de Kunlun | 28. Calabouço de Lasagna | 29. Calabouço de Luoyang | 30. Calabouço de Magma | 31. Calabouço de Malangdo | 32. Calabouço de Moscovia | 33. Calabouço de Nidhogg | 34. Calabouço de Niflheim | 35. Templo de Odin | 36. Calabouço dos Orcs | 37. Labirinto de Oz | 38. Calabouço de Payon | 39. Subterrâneo de Prontera | 40. Pirâmides | 41. Santuário de Rachel | 42. Calabouço de Rock Ridge | 43. Calabouço de Rudus | 44. Toca dos Scarabas | 45. Esfinge | 46. Navio Naufragado | 47. Torre de Thanatos | 48. Vulcão de Thor | 49. Fábrica de Brinquedos | 50. Ilha da Tartaruga | 51. Calabouço de Umbala | 52. Calabouço de Varmundt | 53. Área de Verus",
+        "[escolha 25: Juperos]",
+        "[menu] 1. Entrada | 2. Juperos 1 | 3. Juperos 2 | 4. Núcleo | 5. Ruínas Orientais de Juperos",
+        "[escolha 2: Juperos 1]",
+        "[close]"
+      ],
+      "warper_dungeon_199": [
+        "[menu] 1. Último Teleporte ^777777[]^000000 | 2.  ~ Cidades | 3.  ~ Campos | 4.  ~ Calabouços | 5.  ~ Castelos de Clã | 6.  ~ Calabouços de Clã | 7.  ~ Instâncias | 8.  ~ Áreas Especiais",
+        "[escolha 4:  ~ Calabouços]",
+        "[menu] 1. Laboratório Abandonado Amicitia | 2. Lagos do Abismo | 3. Calabouço de Amatsu | 4. Formigueiro | 5. Calabouço de Ayothaya | 6. Calabouço da Praia | 7. Torre Bifrost | 8. Laboratórios Biológicos | 9. Calabouço de Brasilis | 10. Calabouço de Byalan | 11. Torre do Relógio | 12. Minas de Carvão | 13. Esgotos | 14. Abadia Maldita | 15. Calabouço de Dewata | 16. Calabouço de Einbroch | 17. Bacia de Fogo | 18. Gefenia | 19. Calabouço de Geffen | 20. Glast Heim | 21. Calabouço Oculto | 22. Calabouço de Gelo | 23. Calabouço da Ilusão | 24. Calabouço de Issgard | 25. Juperos | 26. Calabouço de Kiel | 27. Calabouço de Kunlun | 28. Calabouço de Lasagna | 29. Calabouço de Luoyang | 30. Calabouço de Magma | 31. Calabouço de Malangdo | 32. Calabouço de Moscovia | 33. Calabouço de Nidhogg | 34. Calabouço de Niflheim | 35. Templo de Odin | 36. Calabouço dos Orcs | 37. Labirinto de Oz | 38. Calabouço de Payon | 39. Subterrâneo de Prontera | 40. Pirâmides | 41. Santuário de Rachel | 42. Calabouço de Rock Ridge | 43. Calabouço de Rudus | 44. Toca dos Scarabas | 45. Esfinge | 46. Navio Naufragado | 47. Torre de Thanatos | 48. Vulcão de Thor | 49. Fábrica de Brinquedos | 50. Ilha da Tartaruga | 51. Calabouço de Umbala | 52. Calabouço de Varmundt | 53. Área de Verus",
+        "[escolha 25: Juperos]",
+        "[menu] 1. Entrada | 2. Juperos 1 | 3. Juperos 2 | 4. Núcleo | 5. Ruínas Orientais de Juperos",
+        "[escolha 2: Juperos 1]",
+        "[close]"
+      ],
+      "warper_dungeon_200": [
+        "[menu] 1. Último Teleporte ^777777[]^000000 | 2.  ~ Cidades | 3.  ~ Campos | 4.  ~ Calabouços | 5.  ~ Castelos de Clã | 6.  ~ Calabouços de Clã | 7.  ~ Instâncias | 8.  ~ Áreas Especiais",
+        "[escolha 4:  ~ Calabouços]",
+        "[menu] 1. Laboratório Abandonado Amicitia | 2. Lagos do Abismo | 3. Calabouço de Amatsu | 4. Formigueiro | 5. Calabouço de Ayothaya | 6. Calabouço da Praia | 7. Torre Bifrost | 8. Laboratórios Biológicos | 9. Calabouço de Brasilis | 10. Calabouço de Byalan | 11. Torre do Relógio | 12. Minas de Carvão | 13. Esgotos | 14. Abadia Maldita | 15. Calabouço de Dewata | 16. Calabouço de Einbroch | 17. Bacia de Fogo | 18. Gefenia | 19. Calabouço de Geffen | 20. Glast Heim | 21. Calabouço Oculto | 22. Calabouço de Gelo | 23. Calabouço da Ilusão | 24. Calabouço de Issgard | 25. Juperos | 26. Calabouço de Kiel | 27. Calabouço de Kunlun | 28. Calabouço de Lasagna | 29. Calabouço de Luoyang | 30. Calabouço de Magma | 31. Calabouço de Malangdo | 32. Calabouço de Moscovia | 33. Calabouço de Nidhogg | 34. Calabouço de Niflheim | 35. Templo de Odin | 36. Calabouço dos Orcs | 37. Labirinto de Oz | 38. Calabouço de Payon | 39. Subterrâneo de Prontera | 40. Pirâmides | 41. Santuário de Rachel | 42. Calabouço de Rock Ridge | 43. Calabouço de Rudus | 44. Toca dos Scarabas | 45. Esfinge | 46. Navio Naufragado | 47. Torre de Thanatos | 48. Vulcão de Thor | 49. Fábrica de Brinquedos | 50. Ilha da Tartaruga | 51. Calabouço de Umbala | 52. Calabouço de Varmundt | 53. Área de Verus",
+        "[escolha 25: Juperos]",
+        "[menu] 1. Entrada | 2. Juperos 1 | 3. Juperos 2 | 4. Núcleo | 5. Ruínas Orientais de Juperos",
+        "[escolha 2: Juperos 1]",
+        "[close]"
+      ],
+      "warper_dungeon_255": [
+        "[menu] 1. Último Teleporte ^777777[]^000000 | 2.  ~ Cidades | 3.  ~ Campos | 4.  ~ Calabouços | 5.  ~ Castelos de Clã | 6.  ~ Calabouços de Clã | 7.  ~ Instâncias | 8.  ~ Áreas Especiais",
+        "[escolha 4:  ~ Calabouços]",
+        "[menu] 1. Laboratório Abandonado Amicitia | 2. Lagos do Abismo | 3. Calabouço de Amatsu | 4. Formigueiro | 5. Calabouço de Ayothaya | 6. Calabouço da Praia | 7. Torre Bifrost | 8. Laboratórios Biológicos | 9. Calabouço de Brasilis | 10. Calabouço de Byalan | 11. Torre do Relógio | 12. Minas de Carvão | 13. Esgotos | 14. Abadia Maldita | 15. Calabouço de Dewata | 16. Calabouço de Einbroch | 17. Bacia de Fogo | 18. Gefenia | 19. Calabouço de Geffen | 20. Glast Heim | 21. Calabouço Oculto | 22. Calabouço de Gelo | 23. Calabouço da Ilusão | 24. Calabouço de Issgard | 25. Juperos | 26. Calabouço de Kiel | 27. Calabouço de Kunlun | 28. Calabouço de Lasagna | 29. Calabouço de Luoyang | 30. Calabouço de Magma | 31. Calabouço de Malangdo | 32. Calabouço de Moscovia | 33. Calabouço de Nidhogg | 34. Calabouço de Niflheim | 35. Templo de Odin | 36. Calabouço dos Orcs | 37. Labirinto de Oz | 38. Calabouço de Payon | 39. Subterrâneo de Prontera | 40. Pirâmides | 41. Santuário de Rachel | 42. Calabouço de Rock Ridge | 43. Calabouço de Rudus | 44. Toca dos Scarabas | 45. Esfinge | 46. Navio Naufragado | 47. Torre de Thanatos | 48. Vulcão de Thor | 49. Fábrica de Brinquedos | 50. Ilha da Tartaruga | 51. Calabouço de Umbala | 52. Calabouço de Varmundt | 53. Área de Verus",
+        "[escolha 25: Juperos]",
+        "[menu] 1. Entrada | 2. Juperos 1 | 3. Juperos 2 | 4. Núcleo | 5. Ruínas Orientais de Juperos",
+        "[escolha 2: Juperos 1]",
+        "[close]"
+      ],
+      "warper_last": [
+        "[menu] 1. Último Teleporte ^777777[juperos_01]^000000 | 2.  ~ Cidades | 3.  ~ Campos | 4.  ~ Calabouços | 5.  ~ Castelos de Clã | 6.  ~ Calabouços de Clã | 7.  ~ Instâncias | 8.  ~ Áreas Especiais",
+        "[escolha 1: Último Teleporte ^777777[juperos_01]^000000]",
+        "[close]"
+      ],
+      "warper_insufficient": [
+        "[menu] 1. Último Teleporte ^777777[juperos_01]^000000 | 2.  ~ Cidades | 3.  ~ Campos | 4.  ~ Calabouços | 5.  ~ Castelos de Clã | 6.  ~ Calabouços de Clã | 7.  ~ Instâncias | 8.  ~ Áreas Especiais",
+        "[escolha 1: Último Teleporte ^777777[juperos_01]^000000]",
+        "[close]"
+      ],
+      "warper_city_zero_funds": [
+        "[menu] 1. Último Teleporte ^777777[juperos_01]^000000 | 2.  ~ Cidades | 3.  ~ Campos | 4.  ~ Calabouços | 5.  ~ Castelos de Clã | 6.  ~ Calabouços de Clã | 7.  ~ Instâncias | 8.  ~ Áreas Especiais",
+        "[escolha 2:  ~ Cidades]",
+        "[menu] 1. Prontera | 2. Alberta | 3. Aldebaran | 4. Amatsu | 5. Ayothaya | 6. Brasilis | 7. Comodo | 8. Dewata | 9. Eclage | 10. Einbech | 11. Einbroch | 12. El Dicastes | 13. Geffen | 14. Hugel | 15. Castelo de Gelo | 16. Izlude | 17. Jawaii | 18. Juno | 19. Kunlun | 20. Lasagna | 21. Lighthalzen | 22. Luoyang | 23. Lutie | 24. Malangdo | 25. Malaya | 26. Manuk | 27. Acampamento da Expedição | 28. Mora | 29. Morocc | 30. Moscovia | 31. Ilha Sem Nome (Dia) | 32. Ilha Sem Nome (Noite) | 33. Niflheim | 34. Payon | 35. Rachel | 36. Rockridge | 37. Área de Segurança Especial, Cor | 38. Splendide | 39. Acampamento de Thor | 40. Umbala | 41. Mansão de Varmundt | 42. Veins | 43. Sítio de Verus | 44. Vila dos Lobos",
+        "[escolha 2: Alberta]",
+        "[close]"
+      ],
+      "warpra_unlock": [
+        "[Warpra]",
+        "Prontera Town foi desbloqueado!",
+        "[close]"
+      ],
+      "warpra_disabled_menu": [
+        "[Warpra]",
+        "Olá,",
+        "Posso teleportar você para qualquer cidade ou calabouço, mas primeiro precisa desbloqueá-los nos visitando.",
+        "O que você precisa?",
+        "[menu] 1. Teleporte para cidades | 2. Por que tão poucos teleportes? | 3. Cancelar",
+        "[menu cancelado: sem escolha pendente]"
+      ],
+      "warpra_free_town": [
+        "[Warpra]",
+        "Olá,",
+        "Posso teleportar você para qualquer cidade ou calabouço, mas primeiro precisa desbloqueá-los nos visitando.",
+        "O que você precisa?",
+        "[menu] 1. Teleporte para cidades | 2. Por que tão poucos teleportes? | 3. Cancelar",
+        "[escolha 1: Teleporte para cidades]",
+        "[menu] 1. Prontera [1] | 2. Cancelar",
+        "[escolha 1: Prontera [1]]",
+        "[close]"
+      ],
+      "warpra_dungeon_100": [
+        "[Warpra]",
+        "Olá,",
+        "Posso teleportar você para qualquer cidade ou calabouço, mas primeiro precisa desbloqueá-los nos visitando.",
+        "O que você precisa?",
+        "[menu] 1. Teleporte para cidades | 2. Teleporte para calabouços | 3. Por que tão poucos teleportes? | 4. Cancelar",
+        "[escolha 2: Teleporte para calabouços]",
+        "[menu] 1. Caverna de Juperos [0] | 2. Cancelar",
+        "[escolha 1: Caverna de Juperos [0]]",
+        "[Warpra]",
+        "Selecione para onde deseja ir:",
+        "[menu] 1. Nível 1 [0] | 2. Nível 2 [0] | 3. Sair",
+        "[escolha 1: Nível 1 [0]]",
+        "[close]"
+      ],
+      "warpra_dungeon_200": [
+        "[Warpra]",
+        "Olá,",
+        "Posso teleportar você para qualquer cidade ou calabouço, mas primeiro precisa desbloqueá-los nos visitando.",
+        "O que você precisa?",
+        "[menu] 1. Teleporte para cidades | 2. Teleporte para calabouços | 3. Por que tão poucos teleportes? | 4. Cancelar",
+        "[escolha 2: Teleporte para calabouços]",
+        "[menu] 1. Caverna de Juperos [0] | 2. Cancelar",
+        "[escolha 1: Caverna de Juperos [0]]",
+        "[Warpra]",
+        "Selecione para onde deseja ir:",
+        "[menu] 1. Nível 1 [0] | 2. Nível 2 [0] | 3. Sair",
+        "[escolha 1: Nível 1 [0]]",
+        "[close]"
+      ]
+    },
+    "combats_executed": 0,
+    "player_performance_metrics": false
+  },
+  "client_modules_from_temporary_bundle": true,
+  "player_performance_metrics": false,
+  "production_service_pids_unchanged": true,
+  "production_char_config_unchanged": true,
+  "resource_limits": {
+    "cpu_percent": 25,
+    "memory_MiB": 512,
+    "max_seconds": 420
+  },
+  "production_mutations": false,
+  "temporary_lab_removed_after_exit": true,
+  "checked_at_utc": "2026-10-19T05:57:41.076310+00:00",
+  "local_tool_sha256": {
+    "isolated_char_check.py": "96bd3189b1f3ca8ee61899f3a876624ef12a992775786bc5413f731f19456f30",
+    "isolated_service_checks.py": "97fcc82061dd0e58660bd11ee7a13ae945b5dfde09feae847810150a2a0cc850",
+    "bot/__init__.py": "7545614f16c898fb859fc4663e1fb9cbfec3485e650d20d0f01236a17335d25d",
+    "bot/client.py": "7720c1cbaf79d47ebd7743c2cbab34d2e73d4b978541d4ac3c8052e528c45d71",
+    "bot/actions.py": "a8fec52523f49c3445656bd601641a35c936eba46c624918b8842b637077109b",
+    "bot/protocol.py": "e7f87ed3bd16d00dba6a0726017005c33797829e9c8ffc4416f2ddf4639f6ffe",
+    "bot/packet_lengths.json": "ba411726f7352600b9314c5d3db619dc961598c92436b4c52d374a2c3e610f87"
+  },
+  "local_tests": {
+    "passed": 83,
+    "files": [
+      "tools/tests/test_balance_session.py",
+      "tools/tests/test_balance_pilot.py",
+      "tools/tests/test_bot_protocol.py"
+    ],
+    "result": "83 passed in 0.37s"
+  },
+  "candidate_patches": {
+    "applied_to_overlay": false,
+    "applied_to_production": false,
+    "runtime_tested": false,
+    "paths": [
+      "healer-sp-candidate.patch",
+      "warpra-price-preview-candidate.patch"
+    ],
+    "git_apply_check": "passed; read-only check against local overlay, no files changed",
+    "sha256": {
+      "healer-sp-candidate.patch": "5e73bb19882e245e3c7cbfdb9eeb3640f3499bfb9a84e16031f6b288732a4e12",
+      "warpra-price-preview-candidate.patch": "b953b21a6598060df69e4b034dfcff4801b2e39ef21d5ea0f6839553f0305609"
+    }
+  }
+}

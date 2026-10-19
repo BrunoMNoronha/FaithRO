@@ -1,0 +1,312 @@
+{
+  "status": "passed",
+  "private_network": true,
+  "network_interfaces": [
+    "lo"
+  ],
+  "private_pid_namespace": true,
+  "production_sources_readonly": true,
+  "fresh_database": true,
+  "production_accounts_copied": false,
+  "qa_characters_created": 2,
+  "inventory": [
+    [
+      150000,
+      501,
+      100,
+      0,
+      1
+    ],
+    [
+      150000,
+      1201,
+      1,
+      2,
+      1
+    ],
+    [
+      150000,
+      2301,
+      1,
+      16,
+      1
+    ],
+    [
+      150001,
+      501,
+      100,
+      0,
+      1
+    ],
+    [
+      150001,
+      1201,
+      1,
+      2,
+      1
+    ],
+    [
+      150001,
+      2301,
+      1,
+      16,
+      1
+    ]
+  ],
+  "starting_red_potions_per_character": 100,
+  "knife_and_shirt_preserved": true,
+  "map_server_started": true,
+  "combats_executed": 0,
+  "npc_checks": {
+    "map_loaded": true,
+    "loaded_maps": [
+      "alberta",
+      "einbroch",
+      "geffen",
+      "gon_test",
+      "lighthalzen",
+      "morocc",
+      "payon",
+      "prontera",
+      "prt_castle",
+      "rachel",
+      "veins",
+      "yuno"
+    ],
+    "map_errors": 0,
+    "effective_base_exp_rate": 30000,
+    "effective_job_exp_rate": 30000,
+    "effective_max_parameter": 185,
+    "installed_npc_files_unmodified": {
+      "npc/other/Global_Functions.txt": "6d1ce65db0038de1867c9c0f7113fbbec813054d1d403a4903337d130f96d5fe",
+      "npc/custom/faithro/ptbr/custom/etc/lottery.txt": "4e1114ff73ca4add082087420ba7dbbba7dd9970b7adab9f30260c34d2eff819",
+      "npc/custom/faithro/ptbr/custom/etc/monster_arena.txt": "9b2a4e371605ef8cf45d2a833cc950e11486093301278c3f419c738c2cf40457",
+      "npc/custom/faithro/ptbr/custom/quests/hunting_missions.txt": "3369dbcceede1e831baea05caa0cd8bd6b70fab61537f551e4acc0a41e0e75ac",
+      "npc/custom/faithro/ptbr/custom/events/holiday/valentinesdayexp.txt": "9abe16ac3d256b81eefe3f923412145d67d1441c2b6857eeb062f8317fb57431"
+    },
+    "removed_includes_absent": [
+      "npc/custom/faithro/ptbr/custom/events/mvp_ladder.txt",
+      "npc/custom/faithro/ptbr/custom/battleground/bg_emp.txt",
+      "npc/custom/faithro/ptbr/custom/battleground/bg_pvp.txt"
+    ],
+    "tine_runtime_id": 0,
+    "valentine_controller_present": true,
+    "removal_check_scope": "active include graph; runtime Tine check in loaded holiday file",
+    "lottery": {
+      "first_price": 4750,
+      "duplicate_blocked_without_charge": true,
+      "new_draw_renewal_price": 4750,
+      "numbers_preserved_on_renewal": true
+    },
+    "arena": {
+      "menu": [
+        "Evoluir Monstro",
+        "^FF0000Abandonar Monstro^000000",
+        "Cancelar"
+      ],
+      "sale_option_absent": true,
+      "points_preserved": 1234,
+      "zeny_preserved": 50000
+    },
+    "hunting": {
+      "new_assignment_distinct_targets": [
+        1189,
+        1255,
+        1504,
+        1715
+      ],
+      "new_assignment_count": 63,
+      "seeded_completion_without_combats": true,
+      "reward_zeny_expected": 8640,
+      "reward_zeny_received": 8640,
+      "reward_points": 3,
+      "reward_base_exp_displayed": 28800,
+      "reward_job_exp_displayed": 26400,
+      "progress_cleared": true,
+      "cooldown_seconds": 43193,
+      "early_retry_blocked": true
+    },
+    "transcripts": {
+      "lottery_first": [
+        "[Loteria]",
+        "Números sorteados (0):",
+        "^0000FF[0] [0] [0] [0] [0] [0]^000000",
+        "Seu bilhete (0):",
+        "^FF0000[0] [0] [0] [0] [0] [0]^000000",
+        "ID do próximo sorteio: ^FF0000664753^000000.",
+        "[menu] 1. Resgatar Prêmio | 2. Comprar Bilhete | 3. Cancelar",
+        "[escolha 2: Comprar Bilhete]",
+        "[Loteria]",
+        "Os bilhetes custam ^0000FF4750z^000000.",
+        "O prêmio acumulado é ^FF00005000000z^000000.",
+        "[menu] 1. Comprar Bilhete | 2. Cancelar",
+        "[escolha 1: Comprar Bilhete]",
+        "[Loteria]",
+        "Quer escolher seus números ou deixar o computador gerar?",
+        "[menu] 1. Gerados pelo Computador | 2. Escolher à Mão | 3. Renovar Bilhete",
+        "[escolha 1: Gerados pelo Computador]",
+        "[Loteria]",
+        "O computador escolheu os seguintes números:",
+        "^0000FF14 29 15 19 10 39^000000",
+        "[menu] 1. Confirmar | 2. Gerar Novamente",
+        "[escolha 1: Confirmar]",
+        "[Loteria]",
+        "O sorteio ao vivo acontece às 21h.",
+        "Você pode resgatar seu bilhete até o próximo sorteio.",
+        "[Loteria]",
+        "Boa sorte!",
+        "[close]"
+      ],
+      "lottery_blocked": [
+        "[Loteria]",
+        "Números sorteados (0):",
+        "^0000FF[0] [0] [0] [0] [0] [0]^000000",
+        "Seu bilhete (664753):",
+        "^FF0000[14] [29] [15] [19] [10] [39]^000000",
+        "ID do próximo sorteio: ^FF0000664753^000000.",
+        "[menu] 1. Resgatar Prêmio | 2. Comprar Bilhete | 3. Cancelar",
+        "[escolha 2: Comprar Bilhete]",
+        "[Loteria]",
+        "Parece que você já tem um bilhete para hoje.",
+        "Só é permitido um bilhete por sorteio.",
+        "[close]"
+      ],
+      "lottery_renew": [
+        "[Loteria]",
+        "Números sorteados (664753):",
+        "^0000FF[28] [36] [29] [18] [11] [8]^000000",
+        "Seu bilhete (664753):",
+        "^FF0000[14] [29] [15] [19] [10] [39]^000000",
+        "ID do próximo sorteio: ^FF0000765109^000000.",
+        "[menu] 1. Resgatar Prêmio | 2. Comprar Bilhete | 3. Cancelar",
+        "[escolha 2: Comprar Bilhete]",
+        "[Loteria]",
+        "Os bilhetes custam ^0000FF4750z^000000.",
+        "O prêmio acumulado é ^FF00005000000z^000000.",
+        "[menu] 1. Comprar Bilhete | 2. Cancelar",
+        "[escolha 1: Comprar Bilhete]",
+        "[Loteria]",
+        "Quer escolher seus números ou deixar o computador gerar?",
+        "[menu] 1. Gerados pelo Computador | 2. Escolher à Mão | 3. Renovar Bilhete",
+        "[escolha 3: Renovar Bilhete]",
+        "[Loteria]",
+        "O sorteio ao vivo acontece às 21h.",
+        "Você pode resgatar seu bilhete até o próximo sorteio.",
+        "[Loteria]",
+        "Boa sorte!",
+        "[close]"
+      ],
+      "arena": [
+        "[Treinador de Monstros]",
+        "Bem-vindo de volta, IsolatedQA0.",
+        "Seu monstro tem 1234 pontos de EXP.",
+        "A troca de experiência por zeny está suspensa.",
+        "[menu] 1. Evoluir Monstro | 2. ^FF0000Abandonar Monstro^000000 | 3. Cancelar",
+        "[menu cancelado: sem escolha pendente]"
+      ],
+      "hunt_new": [
+        "[Missões de Caça]",
+        "Olá, IsolatedQA0!",
+        "Trabalhando duro, como sempre...",
+        "Há algo em que eu possa",
+        "ajudar você?",
+        " ",
+        "^777777~ Você já completou ^0055FF0^777777 caçadas. ~^000000",
+        "[menu] 1.  ~ Nova Missão | 2.  ~ Informações | 3.  ~ Loja de Missões | 4.  ~ Ver Melhores Caçadores | 5.  ~ ^777777Cancelar^000000",
+        "[escolha 1:  ~ Nova Missão]",
+        "[Missões de Caça]",
+        "Você deve caçar:",
+        " > ^FF0000Orc Arqueiro (0/63)^000000",
+        " > ^FF0000Nereida (0/63)^000000",
+        " > ^FF0000Dullahan (0/63)^000000",
+        " > ^FF0000Novus (0/63)^000000",
+        "[Missões de Caça]",
+        "Recompensas da missão:",
+        " > Pontos de Missão: ^0055FF11^000000",
+        " > EXP de Base: ^0055FF32,855,760^000000",
+        " > EXP de Classe: ^0055FF24,328,080^000000",
+        " > Zeny: ^0055FF291,816^000000",
+        "[Missões de Caça]",
+        "Volte para me avisar",
+        "quando terminar.",
+        "Boa sorte!",
+        "[close]"
+      ],
+      "hunt_claim": [
+        "[Missões de Caça]",
+        "Olá, IsolatedQA0!",
+        "Trabalhando duro, como sempre...",
+        "Há algo em que eu possa",
+        "ajudar você?",
+        " ",
+        "^777777~ Você já completou ^0055FF0^777777 caçadas. ~^000000",
+        "[menu] 1.  ~ Status da Missão | 2.  ~ Abandonar Missão | 3.  ~ Informações | 4.  ~ Loja de Missões | 5.  ~ Ver Melhores Caçadores | 6.  ~ ^777777Cancelar^000000",
+        "[escolha 1:  ~ Status da Missão]",
+        "[Missões de Caça]",
+        "Status da missão:",
+        " > ^00FF00Poring (40/40)^000000",
+        " > ^00FF00Fabre (40/40)^000000",
+        " > ^00FF00Pupa (40/40)^000000",
+        " > ^00FF00Salgueiro (40/40)^000000",
+        "[Missões de Caça]",
+        "Recompensas da missão:",
+        " > Pontos de Missão: ^0055FF3^000000",
+        " > EXP de Base: ^0055FF28,800^000000",
+        " > EXP de Classe: ^0055FF26,400^000000",
+        " > Zeny: ^0055FF8,640^000000",
+        "[Missões de Caça]",
+        "Ah, você terminou!",
+        "Bom trabalho.",
+        "Aqui está sua recompensa.",
+        "[close]"
+      ],
+      "hunt_cooldown": [
+        "[Missões de Caça]",
+        "Olá, IsolatedQA0!",
+        "Trabalhando duro, como sempre...",
+        "Há algo em que eu possa",
+        "ajudar você?",
+        " ",
+        "^777777~ Você já completou ^0055FF1^777777 caçada. ~^000000",
+        "[menu] 1.  ~ Nova Missão | 2.  ~ Informações | 3.  ~ Loja de Missões | 4.  ~ Ver Melhores Caçadores | 5.  ~ ^777777Cancelar^000000",
+        "[escolha 1:  ~ Nova Missão]",
+        "[Missões de Caça]",
+        "Receio que você terá de esperar 11 hours, 59 minutes, 55 seconds antes de pegar outra missão.",
+        "[close]"
+      ]
+    },
+    "combats_executed": 0,
+    "player_performance_metrics": false
+  },
+  "client_modules_from_temporary_bundle": true,
+  "player_performance_metrics": false,
+  "production_service_pids_unchanged": true,
+  "production_char_config_unchanged": true,
+  "resource_limits": {
+    "cpu_percent": 25,
+    "memory_MiB": 512,
+    "max_seconds": 300
+  },
+  "production_mutations": false,
+  "temporary_lab_removed_after_exit": true,
+  "tool_hashes": {
+    "isolated_char_check.py": "cd3b6cc4fbcc6de631f382689f0b6a46554fd60ec871c967e5eaa8722859370b",
+    "isolated_npc_checks.py": "a524c2b7fb2748353b452373ab2c8c086968d69c53125679049b2cfc928ea9dc",
+    "bot/__init__.py": "7545614f16c898fb859fc4663e1fb9cbfec3485e650d20d0f01236a17335d25d",
+    "bot/client.py": "7720c1cbaf79d47ebd7743c2cbab34d2e73d4b978541d4ac3c8052e528c45d71",
+    "bot/actions.py": "a8fec52523f49c3445656bd601641a35c936eba46c624918b8842b637077109b",
+    "bot/protocol.py": "e7f87ed3bd16d00dba6a0726017005c33797829e9c8ffc4416f2ddf4639f6ffe",
+    "bot/packet_lengths.json": "ba411726f7352600b9314c5d3db619dc961598c92436b4c52d374a2c3e610f87"
+  },
+  "timestamp_utc": "2026-10-19T05:43:42.405647+00:00",
+  "protocol_unit_tests_passed": 19,
+  "production_bot_redeployed": false,
+  "minor_findings": [
+    {
+      "npc": "Loteria",
+      "displayed_time": "21h",
+      "event": "OnClock2045",
+      "changed": false
+    }
+  ]
+}

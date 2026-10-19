@@ -1,5 +1,8 @@
 # FaithRO - Laus Deo
 
+Revisão de 19/10/2026: [economia, combate e QA isolado](design-audit/README.md),
+com resultados sintéticos separados das medições reais e sem deploy neste PR.
+
 Servidor sem fins lucrativos inspirado em Ragnarok Online, com proposta **old school**, **high rate**, sem 3ª classes e com progressão customizada até o nível base 255 (atributo/status natural máximo individual planejado: 185; ASPD máxima planejada: 197).
 
 > Status: infraestrutura base **implantada e auditada na VPS** (usuário

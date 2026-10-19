@@ -1,0 +1,71 @@
+{
+  "status": "passed",
+  "private_network": true,
+  "network_interfaces": [
+    "lo"
+  ],
+  "private_pid_namespace": true,
+  "production_sources_readonly": true,
+  "fresh_database": true,
+  "production_accounts_copied": false,
+  "qa_characters_created": 2,
+  "inventory": [
+    [
+      150000,
+      501,
+      100,
+      0,
+      1
+    ],
+    [
+      150000,
+      1201,
+      1,
+      2,
+      1
+    ],
+    [
+      150000,
+      2301,
+      1,
+      16,
+      1
+    ],
+    [
+      150001,
+      501,
+      100,
+      0,
+      1
+    ],
+    [
+      150001,
+      1201,
+      1,
+      2,
+      1
+    ],
+    [
+      150001,
+      2301,
+      1,
+      16,
+      1
+    ]
+  ],
+  "starting_red_potions_per_character": 100,
+  "knife_and_shirt_preserved": true,
+  "map_server_started": false,
+  "combats_executed": 0,
+  "player_performance_metrics": false,
+  "production_service_pids_unchanged": true,
+  "production_char_config_unchanged": true,
+  "resource_limits": {
+    "cpu_percent": 25,
+    "memory_MiB": 384,
+    "max_seconds": 180
+  },
+  "production_mutations": false,
+  "temporary_lab_removed_after_exit": true,
+  "tested_tool_sha256": "71a607f25b5c8e39f8b71cfb0a4b15a74f04f1f466be6c9cc133c21370ff3686"
+}

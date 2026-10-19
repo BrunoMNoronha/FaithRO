@@ -1,0 +1,1533 @@
+{
+  "timestamp_utc": "2026-10-19T04:45:57.522795+00:00",
+  "skills": {
+    "Sniper": {
+      "first": "Archer",
+      "second": "Hunter",
+      "requested": {
+        "AC_DOUBLE": 10,
+        "AC_CONCENTRATION": 10,
+        "SN_SHARPSHOOTING": 5,
+        "SN_SIGHT": 10,
+        "SN_WINDWALK": 10
+      },
+      "skills": {
+        "NV_BASIC": 9,
+        "AC_DOUBLE": 10,
+        "AC_OWL": 10,
+        "AC_VULTURE": 10,
+        "AC_CONCENTRATION": 10,
+        "SN_SHARPSHOOTING": 5,
+        "HT_BEASTBANE": 1,
+        "HT_FALCON": 1,
+        "SN_SIGHT": 10,
+        "SN_WINDWALK": 10
+      },
+      "points_spent": {
+        "novice": 9,
+        "first": 40,
+        "second": 27
+      },
+      "points_budget": {
+        "novice": 9,
+        "first": 49,
+        "second": 69
+      },
+      "assumptions": {
+        "first_job_level_before_change": 50,
+        "second_job_level": 70
+      }
+    },
+    "Assassin_Cross": {
+      "first": "Thief",
+      "second": "Assassin",
+      "requested": {
+        "TF_DOUBLE": 10,
+        "TF_MISS": 10,
+        "AS_KATAR": 10,
+        "AS_SONICBLOW": 10,
+        "AS_CLOAKING": 3,
+        "ASC_KATAR": 5,
+        "ASC_EDP": 5
+      },
+      "skills": {
+        "NV_BASIC": 9,
+        "TF_DOUBLE": 10,
+        "TF_MISS": 10,
+        "AS_KATAR": 10,
+        "AS_SONICBLOW": 10,
+        "TF_STEAL": 5,
+        "TF_HIDING": 2,
+        "AS_CLOAKING": 3,
+        "ASC_KATAR": 5,
+        "TF_POISON": 10,
+        "TF_DETOXIFY": 1,
+        "AS_ENCHANTPOISON": 5,
+        "ASC_CDP": 1,
+        "ASC_EDP": 5
+      },
+      "points_spent": {
+        "novice": 9,
+        "first": 38,
+        "second": 39
+      },
+      "points_budget": {
+        "novice": 9,
+        "first": 49,
+        "second": 69
+      },
+      "assumptions": {
+        "first_job_level_before_change": 50,
+        "second_job_level": 70
+      }
+    },
+    "High_Wizard": {
+      "first": "Mage",
+      "second": "Wizard",
+      "requested": {
+        "MG_SRECOVERY": 10,
+        "MG_SIGHT": 1,
+        "MG_COLDBOLT": 5,
+        "MG_FROSTDIVER": 1,
+        "MG_LIGHTNINGBOLT": 4,
+        "WZ_JUPITEL": 5,
+        "WZ_STORMGUST": 10,
+        "WZ_QUAGMIRE": 5,
+        "HW_MAGICPOWER": 10,
+        "HW_SOULDRAIN": 10
+      },
+      "skills": {
+        "NV_BASIC": 9,
+        "MG_SRECOVERY": 10,
+        "MG_SIGHT": 1,
+        "MG_COLDBOLT": 5,
+        "MG_FROSTDIVER": 1,
+        "MG_LIGHTNINGBOLT": 4,
+        "MG_NAPALMBEAT": 4,
+        "WZ_JUPITEL": 5,
+        "WZ_STORMGUST": 10,
+        "MG_STONECURSE": 1,
+        "WZ_EARTHSPIKE": 3,
+        "WZ_HEAVENDRIVE": 1,
+        "WZ_QUAGMIRE": 5,
+        "HW_MAGICPOWER": 10,
+        "MG_SOULSTRIKE": 7,
+        "HW_SOULDRAIN": 10
+      },
+      "points_spent": {
+        "novice": 9,
+        "first": 33,
+        "second": 44
+      },
+      "points_budget": {
+        "novice": 9,
+        "first": 49,
+        "second": 69
+      },
+      "assumptions": {
+        "first_job_level_before_change": 50,
+        "second_job_level": 70
+      }
+    }
+  },
+  "gear": {
+    "2304": {
+      "Id": 2304,
+      "AegisName": "Leather_Jacket_",
+      "Name": "Jacket",
+      "Type": "Armor",
+      "SubType": null,
+      "Jobs": null,
+      "Classes": null,
+      "Gender": null,
+      "EquipLevelMin": null,
+      "EquipLevelMax": null,
+      "Locations": {
+        "Armor": true
+      },
+      "Script": null
+    },
+    "2404": {
+      "Id": 2404,
+      "AegisName": "Shoes_",
+      "Name": "Shoes",
+      "Type": "Armor",
+      "SubType": null,
+      "Jobs": {
+        "All": true,
+        "Novice": false,
+        "SuperNovice": false
+      },
+      "Classes": null,
+      "Gender": null,
+      "EquipLevelMin": null,
+      "EquipLevelMax": null,
+      "Locations": {
+        "Shoes": true
+      },
+      "Script": null
+    },
+    "2504": {
+      "Id": 2504,
+      "AegisName": "Muffler_",
+      "Name": "Muffler",
+      "Type": "Armor",
+      "SubType": null,
+      "Jobs": {
+        "All": true,
+        "Novice": false,
+        "SuperNovice": false
+      },
+      "Classes": null,
+      "Gender": null,
+      "EquipLevelMin": null,
+      "EquipLevelMax": null,
+      "Locations": {
+        "Garment": true
+      },
+      "Script": null
+    },
+    "1158": {
+      "Id": 1158,
+      "AegisName": "Two_Hand_Sword_",
+      "Name": "Two-Handed Sword",
+      "Type": "Weapon",
+      "SubType": "2hSword",
+      "Jobs": {
+        "Crusader": true,
+        "Knight": true,
+        "Swordman": true
+      },
+      "Classes": null,
+      "Gender": null,
+      "EquipLevelMin": 33,
+      "EquipLevelMax": null,
+      "Locations": {
+        "Both_Hand": true
+      },
+      "Script": null
+    },
+    "1408": {
+      "Id": 1408,
+      "AegisName": "Pike_",
+      "Name": "Pike",
+      "Type": "Weapon",
+      "SubType": "1hSpear",
+      "Jobs": {
+        "Crusader": true,
+        "Knight": true,
+        "Swordman": true
+      },
+      "Classes": null,
+      "Gender": null,
+      "EquipLevelMin": 4,
+      "EquipLevelMax": null,
+      "Locations": {
+        "Right_Hand": true
+      },
+      "Script": null
+    },
+    "1708": {
+      "Id": 1708,
+      "AegisName": "Great_Bow_",
+      "Name": "Great Bow",
+      "Type": "Weapon",
+      "SubType": "Bow",
+      "Jobs": {
+        "Archer": true,
+        "BardDancer": true,
+        "Hunter": true,
+        "Rogue": true,
+        "Thief": true
+      },
+      "Classes": null,
+      "Gender": null,
+      "EquipLevelMin": 18,
+      "EquipLevelMax": null,
+      "Locations": {
+        "Both_Hand": true
+      },
+      "Script": null
+    },
+    "1253": {
+      "Id": 1253,
+      "AegisName": "Katar_",
+      "Name": "Katar",
+      "Type": "Weapon",
+      "SubType": "Katar",
+      "Jobs": {
+        "Assassin": true
+      },
+      "Classes": null,
+      "Gender": null,
+      "EquipLevelMin": 33,
+      "EquipLevelMax": null,
+      "Locations": {
+        "Both_Hand": true
+      },
+      "Script": "bonus bDex,1;\n"
+    },
+    "1608": {
+      "Id": 1608,
+      "AegisName": "Staff_",
+      "Name": "Staff",
+      "Type": "Weapon",
+      "SubType": "Staff",
+      "Jobs": {
+        "Acolyte": true,
+        "Mage": true,
+        "Monk": true,
+        "Priest": true,
+        "Sage": true,
+        "SoulLinker": true,
+        "Wizard": true
+      },
+      "Classes": null,
+      "Gender": null,
+      "EquipLevelMin": 12,
+      "EquipLevelMax": null,
+      "Locations": {
+        "Right_Hand": true
+      },
+      "Script": "bonus bInt,2;\nbonus bMatkRate,15;\n"
+    },
+    "1804": {
+      "Id": 1804,
+      "AegisName": "Knuckle_Duster_",
+      "Name": "Knuckle Dusters",
+      "Type": "Weapon",
+      "SubType": "Knuckle",
+      "Jobs": {
+        "Monk": true,
+        "Priest": true
+      },
+      "Classes": null,
+      "Gender": null,
+      "EquipLevelMin": 12,
+      "EquipLevelMax": null,
+      "Locations": {
+        "Right_Hand": true
+      },
+      "Script": null
+    },
+    "1550": {
+      "Id": 1550,
+      "AegisName": "Book",
+      "Name": "Book",
+      "Type": "Weapon",
+      "SubType": "Book",
+      "Jobs": {
+        "Priest": true,
+        "Sage": true,
+        "StarGladiator": true
+      },
+      "Classes": null,
+      "Gender": null,
+      "EquipLevelMin": 14,
+      "EquipLevelMax": null,
+      "Locations": {
+        "Right_Hand": true
+      },
+      "Script": null
+    },
+    "1306": {
+      "Id": 1306,
+      "AegisName": "War_Axe",
+      "Name": "War Axe",
+      "Type": "Weapon",
+      "SubType": "1hAxe",
+      "Jobs": {
+        "Alchemist": true,
+        "Blacksmith": true
+      },
+      "Classes": null,
+      "Gender": null,
+      "EquipLevelMin": 76,
+      "EquipLevelMax": null,
+      "Locations": {
+        "Right_Hand": true
+      },
+      "Script": "bonus bDex,2;\nbonus bLuk,2;\n"
+    },
+    "1355": {
+      "Id": 1355,
+      "AegisName": "Hammer_",
+      "Name": "Hammer",
+      "Type": "Weapon",
+      "SubType": "2hAxe",
+      "Jobs": {
+        "Alchemist": true,
+        "Blacksmith": true,
+        "Crusader": true,
+        "Knight": true,
+        "Merchant": true,
+        "Swordman": true
+      },
+      "Classes": null,
+      "Gender": null,
+      "EquipLevelMin": 16,
+      "EquipLevelMax": null,
+      "Locations": {
+        "Both_Hand": true
+      },
+      "Script": null
+    },
+    "1904": {
+      "Id": 1904,
+      "AegisName": "Mandolin_",
+      "Name": "Mandolin",
+      "Type": "Weapon",
+      "SubType": "Musical",
+      "Jobs": {
+        "BardDancer": true
+      },
+      "Classes": null,
+      "Gender": "Male",
+      "EquipLevelMin": 14,
+      "EquipLevelMax": null,
+      "Locations": {
+        "Right_Hand": true
+      },
+      "Script": null
+    },
+    "1953": {
+      "Id": 1953,
+      "AegisName": "Line_",
+      "Name": "Whip",
+      "Type": "Weapon",
+      "SubType": "Whip",
+      "Jobs": {
+        "BardDancer": true
+      },
+      "Classes": null,
+      "Gender": "Female",
+      "EquipLevelMin": 16,
+      "EquipLevelMax": null,
+      "Locations": {
+        "Right_Hand": true
+      },
+      "Script": null
+    }
+  },
+  "prices": [
+    {
+      "item_id": 501,
+      "name": "Red Potion",
+      "offers": [
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#alb",
+          "source": "npc/merchants/shops.txt",
+          "line": 49
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#alb2",
+          "source": "npc/merchants/shops.txt",
+          "line": 51
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#alde",
+          "source": "npc/merchants/shops.txt",
+          "line": 62
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#ama",
+          "source": "npc/merchants/shops.txt",
+          "line": 69
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#ayo",
+          "source": "npc/merchants/shops.txt",
+          "line": 74
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#cmd",
+          "source": "npc/merchants/shops.txt",
+          "line": 90
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#cmd2",
+          "source": "npc/merchants/shops.txt",
+          "line": 92
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#ein",
+          "source": "npc/merchants/shops.txt",
+          "line": 102
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Paddler#ein",
+          "source": "npc/merchants/shops.txt",
+          "line": 104
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#gef",
+          "source": "npc/merchants/shops.txt",
+          "line": 115
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#gon",
+          "source": "npc/merchants/shops.txt",
+          "line": 122
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#hu",
+          "source": "npc/merchants/shops.txt",
+          "line": 131
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#yuno",
+          "source": "npc/merchants/shops.txt",
+          "line": 151
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#yuno2",
+          "source": "npc/merchants/shops.txt",
+          "line": 155
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#lhz2",
+          "source": "npc/merchants/shops.txt",
+          "line": 179
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#lou",
+          "source": "npc/merchants/shops.txt",
+          "line": 188
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#xmas",
+          "source": "npc/merchants/shops.txt",
+          "line": 193
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#mosk",
+          "source": "npc/merchants/shops.txt",
+          "line": 217
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#pay",
+          "source": "npc/merchants/shops.txt",
+          "line": 236
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#pay2",
+          "source": "npc/merchants/shops.txt",
+          "line": 237
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#pay3",
+          "source": "npc/merchants/shops.txt",
+          "line": 238
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#prt",
+          "source": "npc/merchants/shops.txt",
+          "line": 252
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#prt1",
+          "source": "npc/merchants/shops.txt",
+          "line": 254
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#ra",
+          "source": "npc/merchants/shops.txt",
+          "line": 265
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#tu",
+          "source": "npc/merchants/shops.txt",
+          "line": 273
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#ve",
+          "source": "npc/merchants/shops.txt",
+          "line": 287
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Turbo Track Merchant",
+          "source": "npc/other/turbo_track.txt",
+          "line": 3662
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#iz",
+          "source": "npc/pre-re/merchants/shops.txt",
+          "line": 40
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#moc1",
+          "source": "npc/pre-re/merchants/shops.txt",
+          "line": 51
+        },
+        {
+          "item_id": 501,
+          "price": 50,
+          "npc_sell": 25,
+          "npc": "Tool Dealer#moc2",
+          "source": "npc/pre-re/merchants/shops.txt",
+          "line": 52
+        }
+      ],
+      "min_price": 50,
+      "max_price": 50
+    },
+    {
+      "item_id": 504,
+      "name": "White Potion",
+      "offers": [
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#alb",
+          "source": "npc/merchants/shops.txt",
+          "line": 49
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#alb2",
+          "source": "npc/merchants/shops.txt",
+          "line": 51
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#alde",
+          "source": "npc/merchants/shops.txt",
+          "line": 62
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#ama",
+          "source": "npc/merchants/shops.txt",
+          "line": 69
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#ayo",
+          "source": "npc/merchants/shops.txt",
+          "line": 74
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#cmd",
+          "source": "npc/merchants/shops.txt",
+          "line": 90
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#cmd2",
+          "source": "npc/merchants/shops.txt",
+          "line": 92
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#ein",
+          "source": "npc/merchants/shops.txt",
+          "line": 102
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#gef",
+          "source": "npc/merchants/shops.txt",
+          "line": 115
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#gon",
+          "source": "npc/merchants/shops.txt",
+          "line": 122
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#hu",
+          "source": "npc/merchants/shops.txt",
+          "line": 131
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#yuno",
+          "source": "npc/merchants/shops.txt",
+          "line": 151
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#yuno2",
+          "source": "npc/merchants/shops.txt",
+          "line": 155
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#lhz",
+          "source": "npc/merchants/shops.txt",
+          "line": 176
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#lou",
+          "source": "npc/merchants/shops.txt",
+          "line": 188
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#xmas",
+          "source": "npc/merchants/shops.txt",
+          "line": 193
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#mosk",
+          "source": "npc/merchants/shops.txt",
+          "line": 217
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#pay",
+          "source": "npc/merchants/shops.txt",
+          "line": 236
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#pay2",
+          "source": "npc/merchants/shops.txt",
+          "line": 237
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#prt1",
+          "source": "npc/merchants/shops.txt",
+          "line": 254
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#ra",
+          "source": "npc/merchants/shops.txt",
+          "line": 265
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#tu",
+          "source": "npc/merchants/shops.txt",
+          "line": 273
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#ve",
+          "source": "npc/merchants/shops.txt",
+          "line": 287
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Turbo Track Merchant",
+          "source": "npc/other/turbo_track.txt",
+          "line": 3662
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#iz",
+          "source": "npc/pre-re/merchants/shops.txt",
+          "line": 40
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#moc1",
+          "source": "npc/pre-re/merchants/shops.txt",
+          "line": 51
+        },
+        {
+          "item_id": 504,
+          "price": 1200,
+          "npc_sell": 600,
+          "npc": "Tool Dealer#moc2",
+          "source": "npc/pre-re/merchants/shops.txt",
+          "line": 52
+        }
+      ],
+      "min_price": 1200,
+      "max_price": 1200
+    },
+    {
+      "item_id": 505,
+      "name": "Blue Potion",
+      "offers": [
+        {
+          "item_id": 505,
+          "price": 5000,
+          "npc_sell": 2500,
+          "npc": "Street Dealer",
+          "source": "npc/custom/faithro/ptbr/custom/itemmall.txt",
+          "line": 45
+        }
+      ],
+      "min_price": 5000,
+      "max_price": 5000
+    },
+    {
+      "item_id": 601,
+      "name": "Fly Wing",
+      "offers": [
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#alb2",
+          "source": "npc/merchants/shops.txt",
+          "line": 51
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#alde",
+          "source": "npc/merchants/shops.txt",
+          "line": 62
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#ama",
+          "source": "npc/merchants/shops.txt",
+          "line": 69
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#ayo",
+          "source": "npc/merchants/shops.txt",
+          "line": 74
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#bra",
+          "source": "npc/merchants/shops.txt",
+          "line": 81
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#cmd",
+          "source": "npc/merchants/shops.txt",
+          "line": 90
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#cmd2",
+          "source": "npc/merchants/shops.txt",
+          "line": 92
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#ein",
+          "source": "npc/merchants/shops.txt",
+          "line": 102
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#gef",
+          "source": "npc/merchants/shops.txt",
+          "line": 115
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#gon",
+          "source": "npc/merchants/shops.txt",
+          "line": 122
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#hu",
+          "source": "npc/merchants/shops.txt",
+          "line": 131
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#yuno",
+          "source": "npc/merchants/shops.txt",
+          "line": 151
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#yuno2",
+          "source": "npc/merchants/shops.txt",
+          "line": 155
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#lhz",
+          "source": "npc/merchants/shops.txt",
+          "line": 176
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#lhz2",
+          "source": "npc/merchants/shops.txt",
+          "line": 179
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#lou",
+          "source": "npc/merchants/shops.txt",
+          "line": 188
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#xmas",
+          "source": "npc/merchants/shops.txt",
+          "line": 193
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#mosk",
+          "source": "npc/merchants/shops.txt",
+          "line": 217
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#pay",
+          "source": "npc/merchants/shops.txt",
+          "line": 236
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#pay2",
+          "source": "npc/merchants/shops.txt",
+          "line": 237
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#pay3",
+          "source": "npc/merchants/shops.txt",
+          "line": 238
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#prt",
+          "source": "npc/merchants/shops.txt",
+          "line": 252
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#prt1",
+          "source": "npc/merchants/shops.txt",
+          "line": 254
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#ra",
+          "source": "npc/merchants/shops.txt",
+          "line": 265
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#tu",
+          "source": "npc/merchants/shops.txt",
+          "line": 273
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#um",
+          "source": "npc/merchants/shops.txt",
+          "line": 278
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#ve",
+          "source": "npc/merchants/shops.txt",
+          "line": 287
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#iz",
+          "source": "npc/pre-re/merchants/shops.txt",
+          "line": 40
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#moc1",
+          "source": "npc/pre-re/merchants/shops.txt",
+          "line": 51
+        },
+        {
+          "item_id": 601,
+          "price": 60,
+          "npc_sell": 30,
+          "npc": "Tool Dealer#moc2",
+          "source": "npc/pre-re/merchants/shops.txt",
+          "line": 52
+        }
+      ],
+      "min_price": 60,
+      "max_price": 60
+    },
+    {
+      "item_id": 715,
+      "name": "Yellow Gemstone",
+      "offers": [
+        {
+          "item_id": 715,
+          "price": 600,
+          "npc_sell": 300,
+          "npc": "Vendedor Alquimista",
+          "source": "npc/custom/faithro/ptbr/custom/itemmall.txt",
+          "line": 44
+        }
+      ],
+      "min_price": 600,
+      "max_price": 600
+    },
+    {
+      "item_id": 717,
+      "name": "Blue Gemstone",
+      "offers": [
+        {
+          "item_id": 717,
+          "price": 600,
+          "npc_sell": 300,
+          "npc": "Magical Item Seller#gef",
+          "source": "npc/merchants/shops.txt",
+          "line": 116
+        },
+        {
+          "item_id": 717,
+          "price": 600,
+          "npc_sell": 300,
+          "npc": "Tool Dealer#hu2",
+          "source": "npc/merchants/shops.txt",
+          "line": 132
+        },
+        {
+          "item_id": 717,
+          "price": 600,
+          "npc_sell": 300,
+          "npc": "Magical Item Seller#yuno",
+          "source": "npc/merchants/shops.txt",
+          "line": 154
+        },
+        {
+          "item_id": 717,
+          "price": 600,
+          "npc_sell": 300,
+          "npc": "Magical Item Seller#ve",
+          "source": "npc/merchants/shops.txt",
+          "line": 289
+        },
+        {
+          "item_id": 717,
+          "price": 600,
+          "npc_sell": 300,
+          "npc": "Vendedor Alquimista",
+          "source": "npc/custom/faithro/ptbr/custom/itemmall.txt",
+          "line": 44
+        }
+      ],
+      "min_price": 600,
+      "max_price": 600
+    },
+    {
+      "item_id": 678,
+      "name": "Poison Bottle",
+      "offers": [
+        {
+          "item_id": 678,
+          "price": 50000,
+          "npc_sell": 2500,
+          "npc": "Street Dealer",
+          "source": "npc/custom/faithro/ptbr/custom/itemmall.txt",
+          "line": 45
+        }
+      ],
+      "min_price": 50000,
+      "max_price": 50000
+    },
+    {
+      "item_id": 1750,
+      "name": "Arrow",
+      "offers": [
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Tool Dealer#alb",
+          "source": "npc/merchants/shops.txt",
+          "line": 49
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Tool Dealer#alb2",
+          "source": "npc/merchants/shops.txt",
+          "line": 51
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Weapon Dealer#alb",
+          "source": "npc/merchants/shops.txt",
+          "line": 53
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Tool Dealer#ama",
+          "source": "npc/merchants/shops.txt",
+          "line": 69
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Tool Dealer#ayo",
+          "source": "npc/merchants/shops.txt",
+          "line": 74
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Tool Dealer#ein",
+          "source": "npc/merchants/shops.txt",
+          "line": 102
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Paddler#ein",
+          "source": "npc/merchants/shops.txt",
+          "line": 104
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Weapon Dealer#gef2",
+          "source": "npc/merchants/shops.txt",
+          "line": 112
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Tool Dealer#gef",
+          "source": "npc/merchants/shops.txt",
+          "line": 115
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Tool Dealer#gon",
+          "source": "npc/merchants/shops.txt",
+          "line": 122
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Tool Dealer#hu",
+          "source": "npc/merchants/shops.txt",
+          "line": 131
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Weapon Dealer#iz",
+          "source": "npc/merchants/shops.txt",
+          "line": 140
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Tool Dealer#yuno",
+          "source": "npc/merchants/shops.txt",
+          "line": 151
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Tool Dealer#yuno2",
+          "source": "npc/merchants/shops.txt",
+          "line": 155
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Weapon Dealer#yuno",
+          "source": "npc/merchants/shops.txt",
+          "line": 156
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Arrow Merchant#lhz",
+          "source": "npc/merchants/shops.txt",
+          "line": 180
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Tool Dealer#lou",
+          "source": "npc/merchants/shops.txt",
+          "line": 188
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Weapon Dealer#moc1",
+          "source": "npc/merchants/shops.txt",
+          "line": 210
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Tool Dealer#mosk",
+          "source": "npc/merchants/shops.txt",
+          "line": 217
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Weapon Dealer#pay",
+          "source": "npc/merchants/shops.txt",
+          "line": 233
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Tool Dealer#pay",
+          "source": "npc/merchants/shops.txt",
+          "line": 236
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Tool Dealer#pay2",
+          "source": "npc/merchants/shops.txt",
+          "line": 237
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Tool Dealer#pay3",
+          "source": "npc/merchants/shops.txt",
+          "line": 238
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Tool Dealer#prt",
+          "source": "npc/merchants/shops.txt",
+          "line": 252
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Tool Dealer#prt1",
+          "source": "npc/merchants/shops.txt",
+          "line": 254
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Weapon Dealer#prt",
+          "source": "npc/merchants/shops.txt",
+          "line": 255
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Tool Dealer#tu",
+          "source": "npc/merchants/shops.txt",
+          "line": 273
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Turbo Track Merchant",
+          "source": "npc/other/turbo_track.txt",
+          "line": 3662
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Tool Dealer#iz",
+          "source": "npc/pre-re/merchants/shops.txt",
+          "line": 40
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Tool Dealer#moc1",
+          "source": "npc/pre-re/merchants/shops.txt",
+          "line": 51
+        },
+        {
+          "item_id": 1750,
+          "price": 1,
+          "npc_sell": 0,
+          "npc": "Tool Dealer#moc2",
+          "source": "npc/pre-re/merchants/shops.txt",
+          "line": 52
+        },
+        {
+          "item_id": 1750,
+          "price": 10,
+          "npc_sell": 0,
+          "npc": "Muni��es",
+          "source": "npc/custom/faithro/ptbr/custom/itemmall.txt",
+          "line": 43
+        }
+      ],
+      "min_price": 1,
+      "max_price": 10
+    },
+    {
+      "item_id": 7135,
+      "name": "Bottle Grenade",
+      "offers": [
+        {
+          "item_id": 7135,
+          "price": 500,
+          "npc_sell": 100,
+          "npc": "Vendedor Alquimista",
+          "source": "npc/custom/faithro/ptbr/custom/itemmall.txt",
+          "line": 44
+        }
+      ],
+      "min_price": 500,
+      "max_price": 500
+    },
+    {
+      "item_id": 7136,
+      "name": "Acid Bottle",
+      "offers": [
+        {
+          "item_id": 7136,
+          "price": 500,
+          "npc_sell": 100,
+          "npc": "Vendedor Alquimista",
+          "source": "npc/custom/faithro/ptbr/custom/itemmall.txt",
+          "line": 44
+        }
+      ],
+      "min_price": 500,
+      "max_price": 500
+    }
+  ],
+  "normal_shop_entries": 1758,
+  "arbitrage_candidates": [],
+  "missing_include_paths": [],
+  "limitations": [
+    "only literal active shop declarations; scripted traders/barters/cash shops excluded",
+    "Prices are before character discounts; source includes may contain runtime restrictions."
+  ]
+}
