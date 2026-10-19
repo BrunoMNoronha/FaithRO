@@ -885,6 +885,48 @@ analisador anterior; fichas individuais antigas mantêm o comportamento por padr
 Rollback do texto implantado usa as duas cópias do backup em nova janela sem jogadores.
 Nenhuma reversão foi necessária nesta aplicação.
 
+## Recursos de combate e recuperação ensaiada (19/10/2026)
+
+Cinco etapas desta rodada:
+
+1. **Fontes de custo.** Coletor somente de leitura conferiu requisitos de 15 skills,
+   preços de lojas literais e `arrow_decrement=1`. Double Strafe tem dois acertos,
+   mas requer uma flecha; Focused Arrow Strike também usa uma. O código separa fases
+   de cobrança e aplica modificadores/dispensas. O calculador usa eventos explícitos
+   de SP, item e munição, sem inferir consumo por hits, casts ou linhas de dano.
+2. **Cálculo econômico.** Exemplos independentes: 100 cobranças de Double Strafe 10
+   correspondem a 1.200 SP-base e 100 flechas; dez Safety Wall 10, a 400 SP-base e
+   dez gemas azuis. Dez EDP 5 correspondem a dez frascos, 500 mil de reposição.
+   Uma hipótese de cobertura nominal contínua por uma hora usa 60 frascos/3 milhões.
+   Na mistura média de Juperos 2, 300 abates supostos gerariam 901.863 de revenda bruta;
+   seriam 998 abates/h no valor esperado para cobrir só frascos, antes de outros custos
+   e sem Overcharge. Não é desempenho medido nem justificativa isolada para reduzir
+   preço ou habilidade. Estoque consumido e compras de caixa continuam separados.
+3. **Recuperação da Loteria.** O backup revisado de 07:11:44 UTC foi restaurado em duas
+   cópias privadas com conteúdo, UID/GID e modo conferidos. O mapa carregou o original
+   antigo e o cliente mostrou 21h, cobrou 4.750 e bloqueou duplicidade sem débito na
+   mesma conta. Os dois personagens também passaram em uso/persistência das poções.
+   A produção permaneceu no texto novo de 20h45 e seus PIDs não mudaram. Cobertura:
+   restauração/carregamento dos arquivos, sem restauração de banco ou disparo de
+   rollback automático por falha. Nenhum combate, prêmio ou sorteio foi executado.
+4. **Próximo ensaio definido.** Roteiro separado compara EDP desligado/ligado em
+   três pares de 30 min, SinX 255, equipamento fixo e Juperos 2. Exige contadores,
+   uptime real, mortes, inventário e caixa reconciliados. O piloto inicial segue
+   0/3 observações fornecidas: Sniper/SinX/HW 99, 30 min cada. O executor de QA dura
+   300 s e não comporta uma sessão de 1.800 s; faltam ambiente persistente isolado
+   com acesso do testador e sessões reais. Preparação não é evidência de combate.
+5. **Regressões e saúde.** Passaram 143 testes locais e o ensaio nativo de recuperação.
+   A leitura final encontrou cinco serviços ativos, nenhum erro novo, site/health
+   HTTP 200, 13 referências com hashes esperados e nenhuma unidade/pasta de QA
+   restante. Não houve alteração em produção nesta rodada. EXP 300x, nível 255,
+   atributos 185 e ASPD 197 permanecem.
+
+Objetivo, arquivos, hipóteses, confiança, critérios de adoção/descarte, comandos e
+rollback estão em `design-audit/resource-recovery-review/README.md`. Confiança alta
+nas declarações/cálculos e recuperação dos arquivos ensaiados; resultado real de
+classes/rentabilidade continua sem medição. Reverter esta rodada remove o coletor,
+calculador, extensão de QA e documentos; não existe mudança de produção a restaurar.
+
 ## Riscos deixados para depois
 
 - **Zeny vindo de drops.** Tratado em `docs/drops.md` (tetos por categoria, equipamento 30x,

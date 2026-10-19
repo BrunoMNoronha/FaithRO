@@ -1,0 +1,220 @@
+{
+  "status": "passed",
+  "private_network": true,
+  "network_interfaces": [
+    "lo"
+  ],
+  "private_pid_namespace": true,
+  "production_sources_readonly": true,
+  "fresh_database": true,
+  "production_accounts_copied": false,
+  "qa_characters_created": 2,
+  "inventory": [
+    [
+      150000,
+      501,
+      100,
+      0,
+      1
+    ],
+    [
+      150000,
+      1201,
+      1,
+      2,
+      1
+    ],
+    [
+      150000,
+      2301,
+      1,
+      16,
+      1
+    ],
+    [
+      150001,
+      501,
+      100,
+      0,
+      1
+    ],
+    [
+      150001,
+      1201,
+      1,
+      2,
+      1
+    ],
+    [
+      150001,
+      2301,
+      1,
+      16,
+      1
+    ]
+  ],
+  "starting_red_potions_per_character": 100,
+  "knife_and_shirt_preserved": true,
+  "map_server_started": true,
+  "combats_executed": 0,
+  "npc_checks": null,
+  "service_checks": null,
+  "candidate_checks": null,
+  "onboarding_checks": {
+    "status": "passed",
+    "onboarding": [
+      {
+        "slot": 0,
+        "initial_red_potions": 100,
+        "remaining_after_native_use": 99,
+        "hp_before": 1,
+        "hp_after": 40,
+        "maxhp": 40,
+        "knife_and_shirt_preserved": true,
+        "initial_zeny": 0,
+        "use_zeny_cost": 0,
+        "native_ack": {
+          "client_index": 4,
+          "item_id": 501,
+          "remaining": 99,
+          "success": true
+        }
+      },
+      {
+        "slot": 1,
+        "initial_red_potions": 100,
+        "remaining_after_native_use": 99,
+        "hp_before": 1,
+        "hp_after": 40,
+        "maxhp": 40,
+        "knife_and_shirt_preserved": true,
+        "initial_zeny": 0,
+        "use_zeny_cost": 0,
+        "native_ack": {
+          "client_index": 4,
+          "item_id": 501,
+          "remaining": 99,
+          "success": true
+        }
+      }
+    ],
+    "saved_red_potion_amounts": [
+      99,
+      99
+    ],
+    "lottery": {
+      "price": 4750,
+      "candidate_text_displayed": false,
+      "expected_text_displayed": true,
+      "displayed_draw_time": "21h.",
+      "duplicate_blocked_without_debit": true,
+      "draw_event_unchanged": "OnClock2045",
+      "local_timezone_offset": "-0300",
+      "same_account_second_character_blocked_without_debit": true
+    },
+    "transcripts": {
+      "purchase": [
+        "[Loteria]",
+        "Números sorteados (0):",
+        "^0000FF[0] [0] [0] [0] [0] [0]^000000",
+        "Seu bilhete (0):",
+        "^FF0000[0] [0] [0] [0] [0] [0]^000000",
+        "ID do próximo sorteio: ^FF0000901807^000000.",
+        "[menu] 1. Resgatar Prêmio | 2. Comprar Bilhete | 3. Cancelar",
+        "[escolha 2: Comprar Bilhete]",
+        "[Loteria]",
+        "Os bilhetes custam ^0000FF4750z^000000.",
+        "O prêmio acumulado é ^FF00005000000z^000000.",
+        "[menu] 1. Comprar Bilhete | 2. Cancelar",
+        "[escolha 1: Comprar Bilhete]",
+        "[Loteria]",
+        "Quer escolher seus números ou deixar o computador gerar?",
+        "[menu] 1. Gerados pelo Computador | 2. Escolher à Mão | 3. Renovar Bilhete",
+        "[escolha 1: Gerados pelo Computador]",
+        "[Loteria]",
+        "O computador escolheu os seguintes números:",
+        "^0000FF24 35 30 1 32 13^000000",
+        "[menu] 1. Confirmar | 2. Gerar Novamente",
+        "[escolha 1: Confirmar]",
+        "[Loteria]",
+        "O sorteio ao vivo acontece às 21h.",
+        "Você pode resgatar seu bilhete até o próximo sorteio.",
+        "[Loteria]",
+        "Boa sorte!",
+        "[close]"
+      ],
+      "duplicate": [
+        "[Loteria]",
+        "Números sorteados (0):",
+        "^0000FF[0] [0] [0] [0] [0] [0]^000000",
+        "Seu bilhete (901807):",
+        "^FF0000[24] [35] [30] [1] [32] [13]^000000",
+        "ID do próximo sorteio: ^FF0000901807^000000.",
+        "[menu] 1. Resgatar Prêmio | 2. Comprar Bilhete | 3. Cancelar",
+        "[escolha 2: Comprar Bilhete]",
+        "[Loteria]",
+        "Parece que você já tem um bilhete para hoje.",
+        "Só é permitido um bilhete por sorteio.",
+        "[close]"
+      ],
+      "second_character_duplicate": [
+        "[Loteria]",
+        "Números sorteados (0):",
+        "^0000FF[0] [0] [0] [0] [0] [0]^000000",
+        "Seu bilhete (901807):",
+        "^FF0000[24] [35] [30] [1] [32] [13]^000000",
+        "ID do próximo sorteio: ^FF0000901807^000000.",
+        "[menu] 1. Resgatar Prêmio | 2. Comprar Bilhete | 3. Cancelar",
+        "[escolha 2: Comprar Bilhete]",
+        "[Loteria]",
+        "Parece que você já tem um bilhete para hoje.",
+        "Só é permitido um bilhete por sorteio.",
+        "[close]"
+      ]
+    },
+    "patch_sha256": "2173300a3b2204c4d09ef78d0c7713f01fbee3a1ff77239814ed2c12ba047cf8",
+    "installed_lottery_sha256": "9dbbb64a8e449fb6765ff246312b5e9491c688e96d4bd1848ca00e9b887b4119",
+    "lottery_source_variant": "reviewed_backup_restored_in_private_lab",
+    "recovery_verification": {
+      "backup": "/var/backups/faithro/npc-lottery-time-20261019T071144Z.tar.gz",
+      "backup_sha256": "ce66f9809cd5ab7846b42de49f6db2566f502f6cbc854bb867515d0ecd0e4470",
+      "private_copies": {
+        "installed": {
+          "sha256": "4e1114ff73ca4add082087420ba7dbbba7dd9970b7adab9f30260c34d2eff819",
+          "owner_and_mode_restored": true
+        },
+        "deploy": {
+          "sha256": "0efdd9a8c06869fc653711feebed5e27375ab95b33e6b5f1972e9634d046e1cf",
+          "owner_and_mode_restored": true
+        }
+      },
+      "production_restore_executed": false
+    },
+    "patch_applied_in_private_lab": false,
+    "candidate_lottery_sha256": "4e1114ff73ca4add082087420ba7dbbba7dd9970b7adab9f30260c34d2eff819",
+    "production_lottery_changed": false,
+    "combats_executed": 0,
+    "player_performance_metrics": false
+  },
+  "client_modules_from_temporary_bundle": true,
+  "player_performance_metrics": false,
+  "production_service_pids_unchanged": true,
+  "production_char_config_unchanged": true,
+  "resource_limits": {
+    "cpu_percent": 25,
+    "memory_MiB": 512,
+    "max_seconds": 300
+  },
+  "production_mutations": false,
+  "temporary_lab_removed_after_exit": true,
+  "local_tool_sha256": {
+    "isolated_char_check.py": "128e5374602bc1d76798dc16a84a91c943fc2fa2fa52c8abf399aaa8c9196172",
+    "isolated_onboarding_checks.py": "fcccc2a6f634e40ede7280148b0c1e432bd12ea7bcd4ee0d22eb2b5c8dd9373e",
+    "lottery-time-candidate.patch": "2173300a3b2204c4d09ef78d0c7713f01fbee3a1ff77239814ed2c12ba047cf8",
+    "bot/__init__.py": "7545614f16c898fb859fc4663e1fb9cbfec3485e650d20d0f01236a17335d25d",
+    "bot/protocol.py": "e7f87ed3bd16d00dba6a0726017005c33797829e9c8ffc4416f2ddf4639f6ffe",
+    "bot/client.py": "7720c1cbaf79d47ebd7743c2cbab34d2e73d4b978541d4ac3c8052e528c45d71",
+    "bot/actions.py": "a8fec52523f49c3445656bd601641a35c936eba46c624918b8842b637077109b",
+    "bot/packet_lengths.json": "ba411726f7352600b9314c5d3db619dc961598c92436b4c52d374a2c3e610f87"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "status": "awaiting_real_observations_and_long_running_isolated_environment",
+  "profiles": [
+    {
+      "class": "Sniper",
+      "template": "design-audit/balance-session-kit/template-sniper-99.json",
+      "sha256": "3c19430662bf84bdf4659a1efc6ceedaaa78ccdd6a590b12b9a01558d2e0dd59",
+      "status": "pending",
+      "base_level": 99,
+      "map": "juperos_02",
+      "required_elapsed_seconds": 1800
+    },
+    {
+      "class": "Assassin_Cross",
+      "template": "design-audit/balance-session-kit/template-assassin_cross-99.json",
+      "sha256": "8d0d37f8918258852450b14e8e80f0d7fa40a5b035673453a889e0c0538ff9ed",
+      "status": "pending",
+      "base_level": 99,
+      "map": "juperos_02",
+      "required_elapsed_seconds": 1800
+    },
+    {
+      "class": "High_Wizard",
+      "template": "design-audit/balance-session-kit/template-high_wizard-99.json",
+      "sha256": "7a597296ddb88fa50b80bd2b63109724cdbe538bf4a47106fe87596f29c018fd",
+      "status": "pending",
+      "base_level": 99,
+      "map": "juperos_02",
+      "required_elapsed_seconds": 1800
+    }
+  ],
+  "observations_supplied_to_this_review": 0,
+  "required_pvm_sessions": 3,
+  "total_pvm_minutes_excluding_setup": 90,
+  "current_automated_qa_limit_seconds": 300,
+  "qa_duration_is_shorter_than_one_pilot_session": true,
+  "missing": [
+    "Long-running isolated environment with normal gameplay access for the tester",
+    "Three real timed sessions with calibration, full ledger, inventory and observed panel"
+  ],
+  "production_combats_authorized_by_this_package": false,
+  "balance_changes_supported": false
+}

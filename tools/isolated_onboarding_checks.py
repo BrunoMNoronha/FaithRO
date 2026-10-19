@@ -5,11 +5,14 @@ candidate hash is tested unchanged. New synthetic characters
 use one real inventory potion through the item-use packet; no battles or production SQL.
 """
 import hashlib
+import json
+import os
 from pathlib import Path
 import re
 import shutil
 import struct
 import subprocess
+import tarfile
 import time
 
 LOTTERY='npc/custom/faithro/ptbr/custom/etc/lottery.txt'
@@ -43,7 +46,37 @@ OnObserve:
 '''
 
 
-def run(folder, source, sql, spawn, wait_for, log, player_password):
+def restore_reviewed_backup(folder, source):
+    """Restore both archived NPC copies inside the private lab, never their real paths."""
+    assert os.getpid()==1 and Path('/proc/1/comm').read_text().strip().startswith('python')
+    assert folder.resolve().parent==Path('/tmp') and folder.name.startswith('faithro-char-qa-')
+    backup=Path('/var/backups/faithro/npc-lottery-time-20261019T071144Z.tar.gz')
+    digest=hashlib.sha256(backup.read_bytes()).hexdigest()
+    assert digest=='ce66f9809cd5ab7846b42de49f6db2566f502f6cbc854bb867515d0ecd0e4470'
+    expected={'installed':('4e1114ff73ca4add082087420ba7dbbba7dd9970b7adab9f30260c34d2eff819',source),
+              'deploy':('0efdd9a8c06869fc653711feebed5e27375ab95b33e6b5f1972e9634d046e1cf',Path('/root/faithro/deploy/server'))}
+    restored={}
+    with tarfile.open(backup,'r:gz') as archive:
+        assert {m.name for m in archive.getmembers()}=={'manifest.json','installed/'+LOTTERY,'deploy/'+LOTTERY}
+        manifest=json.loads(archive.extractfile('manifest.json').read())
+        for label,(expected_hash,origin) in expected.items():
+            member=archive.getmember(label+'/'+LOTTERY);assert member.isfile()
+            raw=archive.extractfile(member).read();assert hashlib.sha256(raw).hexdigest()==expected_hash
+            spec=manifest['files'][str(origin/LOTTERY)]
+            assert spec['sha256']==expected_hash and member.uid==spec['uid'] and member.gid==spec['gid']
+            assert member.mode==int(spec['mode'],8)
+            target=folder/LOTTERY if label=='installed' else folder/'recovery-mirror'/LOTTERY
+            assert target.resolve().is_relative_to(folder.resolve())
+            target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(raw)
+            os.chmod(target,member.mode);os.chown(target,member.uid,member.gid)
+            st=target.stat()
+            assert (st.st_mode & 0o777)==member.mode and st.st_uid==member.uid and st.st_gid==member.gid
+            restored[label]={'sha256':expected_hash,'owner_and_mode_restored':True}
+    assert (folder/LOTTERY).read_bytes().decode('cp1252')==(folder/'recovery-mirror'/LOTTERY).read_text(encoding='utf-8')
+    return {'backup':str(backup),'backup_sha256':digest,'private_copies':restored,'production_restore_executed':False}
+
+
+def run(folder, source, sql, spawn, wait_for, log, player_password, recovery=False):
     assert Path('/proc/1/comm').read_text().strip().startswith('python')
     assert folder.resolve().parent==Path('/tmp') and folder.name.startswith('faithro-char-qa-')
     originals={}
@@ -63,15 +96,19 @@ def run(folder, source, sql, spawn, wait_for, log, player_password):
     old_hash='4e1114ff73ca4add082087420ba7dbbba7dd9970b7adab9f30260c34d2eff819'
     deployed_hash='9dbbb64a8e449fb6765ff246312b5e9491c688e96d4bd1848ca00e9b887b4119'
     assert originals[LOTTERY] in (old_hash,deployed_hash),'Unreviewed lottery source drift'
-    patch_applied=originals[LOTTERY]==old_hash
+    restoration=None
+    if recovery:
+        assert originals[LOTTERY]==deployed_hash,'Recovery check expects the deployed source'
+        restoration=restore_reviewed_backup(folder,source)
+    patch_applied=not recovery and originals[LOTTERY]==old_hash
     if patch_applied:
         for args in [['git','apply','--check',str(native)],['git','apply',str(native)]]:
             p=subprocess.run(args,cwd=folder,text=True,capture_output=True)
             assert p.returncode==0,p.stderr[:400]
-    assert hashlib.sha256((folder/LOTTERY).read_bytes()).hexdigest()==deployed_hash
+    assert hashlib.sha256((folder/LOTTERY).read_bytes()).hexdigest()==(old_hash if recovery else deployed_hash)
     candidate=(folder/LOTTERY).read_text(encoding='cp1252')
-    assert candidate.count('OnClock2045:')==1 and 'às 20h45 (horário de São Paulo).' in candidate
-    assert 'às 21h.' not in candidate
+    expected_time='21h.' if recovery else '20h45 (horário de São Paulo).'
+    assert candidate.count('OnClock2045:')==1 and 'às '+expected_time in candidate
     for path in (source/'npc').rglob('*.yml'):
         target=folder/path.relative_to(source);target.parent.mkdir(parents=True,exist_ok=True)
         if not target.exists():target.symlink_to(path)
@@ -134,12 +171,13 @@ def run(folder, source, sql, spawn, wait_for, log, player_password):
                 actions=Actions(s);cash=after['zeny']
                 transcripts['purchase']=actions.talk('Loteria',choices=[2,1,1,1])
                 bought=state()
-                assert '20h45 (horário de São Paulo)' in ' '.join(transcripts['purchase'])
-                assert '21h.' not in ' '.join(transcripts['purchase']) and cash-bought['zeny']==4750
+                assert expected_time in ' '.join(transcripts['purchase'])
+                assert cash-bought['zeny']==4750
                 transcripts['duplicate']=actions.talk('Loteria',choices=[2])
                 blocked=state()
                 assert blocked['zeny']==bought['zeny'] and 'um bilhete por sorteio' in ' '.join(transcripts['duplicate'])
-                lottery={'price':4750,'candidate_text_displayed':True,'duplicate_blocked_without_debit':True,
+                lottery={'price':4750,'candidate_text_displayed':not recovery,'expected_text_displayed':True,
+                         'displayed_draw_time':expected_time,'duplicate_blocked_without_debit':True,
                          'draw_event_unchanged':'OnClock2045','local_timezone_offset':time.strftime('%z')}
             else:
                 transcripts['second_character_duplicate']=Actions(s).talk('Loteria',choices=[2])
@@ -158,7 +196,8 @@ def run(folder, source, sql, spawn, wait_for, log, player_password):
     return {'status':'passed','onboarding':cases,'saved_red_potion_amounts':[row[1] for row in saved],
             'lottery':lottery,'transcripts':transcripts,'patch_sha256':hashlib.sha256(patch.read_bytes()).hexdigest(),
             'installed_lottery_sha256':originals[LOTTERY],
-            'lottery_source_variant':'old_source_patched_in_private_lab' if patch_applied else 'deployed_candidate_unchanged',
+            'lottery_source_variant':'reviewed_backup_restored_in_private_lab' if recovery else 'old_source_patched_in_private_lab' if patch_applied else 'deployed_candidate_unchanged',
+            'recovery_verification':restoration,
             'patch_applied_in_private_lab':patch_applied,
             'candidate_lottery_sha256':hashlib.sha256((folder/LOTTERY).read_bytes()).hexdigest(),
             'production_lottery_changed':False,'combats_executed':0,'player_performance_metrics':False}

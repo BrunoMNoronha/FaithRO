@@ -38,6 +38,9 @@ substitui `deploy/rathena-overlay/`, não publica a aplicação web e não execu
 - `mvp-party-kit/`: implantação da Loteria e ensaio nativo posterior, protocolo de
   fichas conjuntas, três exemplos e matriz de 36 posições pendentes. O novo analisador
   confere custos/transferências da dupla e separa condições de suporte em 24/36 tentativas.
+- `resource-recovery-review/`: 15 requisitos de habilidades, cálculo de SP/itens/munição,
+  hipótese econômica de EDP, roteiro pareado e restauração nativa do backup em cópia
+  privada. Produção preservada; o piloto real continua pendente.
 
 A referência continua EXP 300x, nível 255, atributos 185 e ASPD 197. Cenários de
 150/300/600 abates por hora são cálculos condicionais. Linhas de drops não são
@@ -49,7 +52,7 @@ abates, intervalos de logs não são horas jogadas e o piloto real está em 0/3 
 `tools/analyze_balance_mvp.py` validam arquivos
 locais, sem rede ou banco. Os executores `tools/isolated_*` e o mini-cliente Python
 `tools/bot/` são ferramentas de QA manual. Não são iniciados por CI, serviço ou
-deploy deste PR. O workflow executa somente os 128 testes locais e análise de
+deploy deste PR. O workflow executa somente os 143 testes locais e análise de
 sintaxe. Nenhum executável ou asset proprietário é publicado.
 Os coletores `collect_mvp_threats.py` e `collect_support_panels.py` leem fontes da
 VPS sem SQL. `prepare_support_cards.py` e `prepare_mvp_party.py` geram cartões/fichas
@@ -67,7 +70,7 @@ os bytes de ferramentas, curva e evidências para evitar conversão CRLF/LF.
 Na raiz do repositório, com Python 3.12 e pytest:
 
 ```sh
-python -m pytest tools/tests/test_balance_session.py tools/tests/test_balance_pilot.py tools/tests/test_bot_protocol.py tools/tests/test_mvp_threats.py tools/tests/test_lottery_deploy.py tools/tests/test_balance_mvp.py -q
+python -m pytest tools/tests/test_balance_session.py tools/tests/test_balance_pilot.py tools/tests/test_bot_protocol.py tools/tests/test_mvp_threats.py tools/tests/test_lottery_deploy.py tools/tests/test_balance_mvp.py tools/tests/test_resource_costs.py -q
 ```
 
 As fichas `pending` devem ser recusadas, sem produzir métricas. Copiar uma ficha
