@@ -1,0 +1,24 @@
+{
+  "status": "candidate_validated_not_deployed",
+  "scope": "lottery confirmation text only",
+  "current": "21h",
+  "candidate": "20h45 (horário de São Paulo)",
+  "runtime_event": "OnClock2045",
+  "server_timezone": "America/Sao_Paulo",
+  "process_TZ_overrides": [],
+  "source_scheduler": "src/map/npc.cpp:npc_event_do_clock uses localtime()",
+  "confidence": "high",
+  "expected_effect": "Align the displayed draw time with installed event; no price, prizes or schedule changes",
+  "risk": "Low; changes to host timezone/event later require keeping message aligned",
+  "validation_passed": [
+    "candidate confirmation text through native client",
+    "purchase debits 4750",
+    "duplicate same character no debit",
+    "duplicate second character same account no debit",
+    "source event and production source hash unchanged"
+  ],
+  "adopt_if": "Deployment uses the tested patch hash and confirms server timezone, OnClock2045 and message still agree",
+  "discard_or_rollback_if": "A different timezone/schedule is intended or any ticket/price/prize behavior changes",
+  "patch_sha256": "2173300a3b2204c4d09ef78d0c7713f01fbee3a1ff77239814ed2c12ba047cf8",
+  "applied_to_production": false
+}

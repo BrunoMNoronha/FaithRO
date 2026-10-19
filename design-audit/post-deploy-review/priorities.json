@@ -1,0 +1,30 @@
+{
+  "status": "no_new_numeric_balance_change_supported",
+  "rates_unchanged": true,
+  "maps_and_scenarios_unchanged": true,
+  "builds_and_attribute_budgets_unchanged": true,
+  "budgets": {
+    "99": 1325,
+    "150": 2722,
+    "200": 4597,
+    "255": 7237
+  },
+  "reference": {
+    "exp_rate": 300,
+    "max_level": 255,
+    "stat_cap": 185,
+    "aspd_cap": 197
+  },
+  "priority_1": "Apply the tested lottery text candidate only with backup and a controlled maintenance window",
+  "priority_2": "Complete the existing isolated PvM pilot: Sniper, Assassin Cross and High Wizard, 99+, 30 min each with calibrated kill counter",
+  "priority_3": "Use the existing MVP attempt sheets and separate boss kills, summons, failed attempts and consumables",
+  "evidence_limits": [
+    "no real combat pilot sessions recorded",
+    "pickup log rows are not kills",
+    "log intervals are not played time",
+    "gross-sale scenarios are not measured net farm income"
+  ],
+  "real_pilot_sessions_completed": 0,
+  "real_pilot_sessions_required": 3,
+  "automatic_balance_changes": false
+}

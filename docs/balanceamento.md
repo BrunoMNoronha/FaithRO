@@ -734,6 +734,61 @@ reiniciar com a mesma validação de log/autoteste. Restaurar também os dois ar
 do overlay local a partir da cópia anterior mantida no registro operacional.
 Reverter apenas esta documentação no Git não desfaz a aplicação na VPS.
 
+## Cinco verificações após a implantação (19/10/2026)
+
+1. **Estabilidade e recuperação.** Cinco serviços ativos, contadores de reinício
+   automático em zero, nenhum erro de mapa/SQL após a última prontidão e HTTP 200
+   no site e no healthcheck local. O backup dos dois NPCs foi aberto novamente:
+   cinco entradas, modo 600 e SHA-256 igual ao registrado na implantação. Esta leitura
+   não equivale a ensaio de restauração em produção.
+2. **Fontes e database pública.** Coleta somente de leitura voltou a encontrar 6.171
+   itens, 1.004 monstros, 5.019 drops e 1.912 pares de spawn. Nenhuma divergência
+   entre drops/spawns esperados e tabelas do site. Quatro páginas públicas também
+   foram conferidas: Gold do Golden Thief Bug 30%, Gold da Maya Purple 3%, Stone of
+   Sage do Gemini 30% e Treasure Box do Thanatos 10%, incluindo os multiplicadores
+   específicos. Rates, densidades, cenários e builds calculados não mudaram.
+   Escada, times, Tine, venda de pontos da Arena e regras anteriores continuaram
+   no estado esperado. Campos de métricas de jogadores foram retirados do snapshot
+   público; consultas operacionais continuaram filtrando equipe, bot e operações
+   administrativas. Logs não foram convertidos em abates ou horas jogadas.
+3. **Horário da Loteria.** O host usa `America/Sao_Paulo`, o processo do mapa não
+   tem override `TZ` e `npc_event_do_clock` usa `localtime()` no código instalado.
+   O evento é `OnClock2045`; a produção ainda anuncia 21h na confirmação.
+   O candidato `lottery-time-candidate.patch` altera apenas essa mensagem para
+   **20h45 (horário de São Paulo)**. Foi aplicado somente à cópia privada e a
+   confirmação correta apareceu pelo cliente nativo. A compra continuou em 4.750;
+   segunda compra foi bloqueada sem débito tanto no mesmo personagem como em outro
+   personagem da mesma conta. Não houve resgate de prêmio ou execução do sorteio
+   real em produção. Confiança alta; risco baixo, condicionado à manutenção do fuso
+   e do evento. Adotar apenas se mensagem, fuso e evento concordarem; descartar ou
+   reverter se horário pretendido for outro ou se preço/regra de bilhetes mudar.
+4. **Poções de início.** Dois personagens novos do banco privado receberam 100
+   Red Potions (501), faca/camisa equipadas e zero zeny inicial. O controle de QA
+   reduziu HP antes do ensaio; cada personagem usou uma poção pelo pacote real
+   `CZ_USE_ITEM2` (0x0439). O ACK confirmou sucesso, o inventário passou para 99 e
+   o HP de 1 para 40/40, sem cobrança. Equipamentos permaneceram e as quantidades
+   99/99 foram salvas no banco privado ao sair. Não foram criados personagens ou
+   alterados inventários na produção.
+5. **Regressões e prioridades.** Os 83 testes locais passaram. O laboratório foi
+   removido, sem unidades ou diretórios de QA restantes, e o hash da Loteria instalada
+   permaneceu igual. Não há nova evidência de combate que sustente ajuste de rates,
+   EXP, atributos, ASPD ou habilidades. Os orçamentos trans 99/150/200/255 continuam
+   1.325/2.722/4.597/7.237; os cenários de farm permanecem cálculos brutos condicionais.
+   O piloto real segue 0/3. Próximas prioridades: aplicação controlada do texto da
+   Loteria, piloto PvM já especificado para Sniper/SinX/HW e, depois, fichas de MVP
+   separando chefe, invocações, falhas e consumíveis. Preservar os valores atuais até
+   existir evidência suficiente; validar/descartar hipóteses pelos critérios anteriores.
+
+Evidências em `design-audit/post-deploy-review/`: `stability.json`, `snapshot.json`,
+`public-database.json`, `onboarding-verification.json`, `cleanup-verification.json`,
+`lottery-review.json` e `priorities.json`. Os horários UTC nos arquivos são metadados;
+o horário comunicado ao jogador usa São Paulo.
+O modo manual `tools/isolated_char_check.py --onboarding-checks` exige o helper
+`isolated_onboarding_checks.py`, o pacote `bot` e o patch de horário ao lado do executor
+no pacote temporário. Converte o patch para CP1252 antes de conferir/aplicar na cópia
+privada, usa CPU 25%/512 MiB/300 s e não executa combates. Reverter esta rodada remove
+ferramentas/documentação/candidato; não existe alteração de produção a restaurar.
+
 ## Riscos deixados para depois
 
 - **Zeny vindo de drops.** Tratado em `docs/drops.md` (tetos por categoria, equipamento 30x,

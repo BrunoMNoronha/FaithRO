@@ -1,0 +1,7630 @@
+{
+  "timestamp_utc": "2026-10-19T06:26:50.417246+00:00",
+  "git_commit": "d4b8e7b8f16061cc2496d377ac8f777ce72a4f39",
+  "checks": {
+    "ladder_not_loaded": true,
+    "teams_not_loaded": true,
+    "tine_invisible_controller": true,
+    "arena_no_zeny_sale": true,
+    "lottery_guard": true,
+    "hunting_modifier6": true,
+    "starting_potions": true
+  },
+  "hashes": {
+    "conf/import/char_conf.txt": "46242e6c2e14fc3d80b6bacd8ec231514beeed39a56f6c49fe96898227593056",
+    "conf/import/battle_conf.txt": "54e6d7eb141252d9f250ed234944720ba85b68b2150a864c476a59ecaab2f9f8",
+    "conf/import/log_conf.txt": "a275f9ac1f2f3799ad12ef0090a5ab93f9478693b3a76c92db42578014c2e9e0",
+    "db/import/statpoint.yml": "18f6657fb7eb207882f5348adf862a155a055ce6823843c9764f068612f8b257",
+    "db/import/job_stats.yml": "ea3aa6fe84864b6069a31d25a3dc71257467f81aa9eb1ad66a61c30ebfcb4d1b",
+    "db/import/mob_item_ratio.yml": "5e4543b7e7325470f16388905c1c21f7749bc73f36bd10f55c7bf2325b244f89",
+    "npc/custom/faithro/optional.conf": "9dd0896d43218c07089e74385b0fa397e51b5fe233c1873f93e8bdf40f35bdf2",
+    "npc/custom/faithro/ptbr/custom/quests/hunting_missions.txt": "3369dbcceede1e831baea05caa0cd8bd6b70fab61537f551e4acc0a41e0e75ac",
+    "npc/custom/faithro/ptbr/custom/etc/monster_arena.txt": "9b2a4e371605ef8cf45d2a833cc950e11486093301278c3f419c738c2cf40457",
+    "npc/custom/faithro/ptbr/custom/etc/lottery.txt": "4e1114ff73ca4add082087420ba7dbbba7dd9970b7adab9f30260c34d2eff819",
+    "npc/custom/faithro/ptbr/custom/events/holiday/valentinesdayexp.txt": "9abe16ac3d256b81eefe3f923412145d67d1441c2b6857eeb062f8317fb57431",
+    "npc/custom/faithro/ptbr/custom/warper.txt": "ee139a34db9c88d4c51427ac84233b33cd9fb01e79efe367746b6ba9676d0a55",
+    "npc/custom/faithro/ptbr/custom/itemmall.txt": "4d706b47ccf43cf27b23137ea9197935d7780f6e0853ec82d1661a479d8aec09"
+  },
+  "normalized_hashes": {
+    "conf/import/char_conf.txt": "46242e6c2e14fc3d80b6bacd8ec231514beeed39a56f6c49fe96898227593056",
+    "conf/import/battle_conf.txt": "54e6d7eb141252d9f250ed234944720ba85b68b2150a864c476a59ecaab2f9f8",
+    "conf/import/log_conf.txt": "a275f9ac1f2f3799ad12ef0090a5ab93f9478693b3a76c92db42578014c2e9e0",
+    "db/import/statpoint.yml": "8254e89650c3a46d9df79d9d5d2b496ae381cc787b8e559efc96081c3e7ec959",
+    "db/import/job_stats.yml": "4b6a683153dbd2056e94c5670fe5cabac4095128236b959d91be8f6f49c934cf",
+    "db/import/mob_item_ratio.yml": "5e4543b7e7325470f16388905c1c21f7749bc73f36bd10f55c7bf2325b244f89",
+    "npc/custom/faithro/optional.conf": "9dd0896d43218c07089e74385b0fa397e51b5fe233c1873f93e8bdf40f35bdf2",
+    "npc/custom/faithro/ptbr/custom/quests/hunting_missions.txt": "0cfb475ed63b9b8b41bc7c57b8ba39687d15d1c983dfafb3fb144b1dd240e450",
+    "npc/custom/faithro/ptbr/custom/etc/monster_arena.txt": "de746511799096753eae15bee053623924efc417d3d741230141c3eb8b2355f9",
+    "npc/custom/faithro/ptbr/custom/etc/lottery.txt": "0efdd9a8c06869fc653711feebed5e27375ab95b33e6b5f1972e9634d046e1cf",
+    "npc/custom/faithro/ptbr/custom/events/holiday/valentinesdayexp.txt": "8d70452a649a208b3ec7a1b4ab229862a519f3cb22027b97c2b3d9257b2ddfac",
+    "npc/custom/faithro/ptbr/custom/warper.txt": "63c940e53ec16ace4eb36c56ffdd7e170b6e878463105dd64e41f355549b0407",
+    "npc/custom/faithro/ptbr/custom/itemmall.txt": "8c96caaee26b454b6680a7acbaee70a1978eb4ed67261c9db7c60c6cfea459b3"
+  },
+  "source_hashes": {
+    "src/map/mob.cpp": "4a5691708b1774c129089237d8380c2bf5c689d68a78a03483bd751fdcf63aa7",
+    "src/map/pc.cpp": "d12704c1ef7f8321c255175b6f61aa396209b931e2b1687fbbd16963d1def652",
+    "src/map/status.cpp": "4f940555e088eeed58933cd8bcb9b62822a5affa99465d1d48a496fdee600be1",
+    "src/map/battle.cpp": "26b32fe653933cede710edf9e48d3fa8a85dc88f0936b93632d00a03ad572578",
+    "src/config/core.hpp": "ba04ee9f32d9d334f59b345326105864ddc5fed296ebbaf9d599c26e48aea7ae"
+  },
+  "counts": {
+    "items": 6171,
+    "mobs": 1004,
+    "drops": 5019,
+    "spawn_pairs": 1912
+  },
+  "website": {
+    "drop_rows_different": 0,
+    "spawn_rows_different": 0
+  },
+  "rates": {
+    "flooritem_lifetime": 60000,
+    "first_attack_loot_bonus": 30,
+    "item_first_get_time": 3000,
+    "item_second_get_time": 2000,
+    "item_third_get_time": 2000,
+    "mvp_item_first_get_time": 10000,
+    "mvp_item_second_get_time": 10000,
+    "mvp_item_third_get_time": 2000,
+    "item_rate_common": 10000,
+    "item_rate_common_boss": 10000,
+    "item_rate_common_mvp": 10000,
+    "item_drop_common_min": 1,
+    "item_drop_common_max": 5000,
+    "item_rate_heal": 10000,
+    "item_rate_heal_boss": 10000,
+    "item_rate_heal_mvp": 10000,
+    "item_drop_heal_min": 1,
+    "item_drop_heal_max": 7000,
+    "item_rate_use": 10000,
+    "item_rate_use_boss": 10000,
+    "item_rate_use_mvp": 10000,
+    "item_drop_use_min": 1,
+    "item_drop_use_max": 7000,
+    "item_rate_equip": 3000,
+    "item_rate_equip_boss": 3000,
+    "item_rate_equip_mvp": 3000,
+    "item_drop_equip_min": 1,
+    "item_drop_equip_max": 3000,
+    "item_rate_card": 1000,
+    "item_rate_card_boss": 1000,
+    "item_rate_card_mvp": 100,
+    "item_drop_card_min": 1,
+    "item_drop_card_max": 10000,
+    "item_rate_mvp": 300,
+    "item_drop_mvp_min": 1,
+    "item_drop_mvp_max": 5000,
+    "item_drop_mvp_mode": 0,
+    "item_rate_adddrop": 100,
+    "item_drop_add_min": 1,
+    "item_drop_add_max": 10000,
+    "item_group_rate": 100,
+    "item_group_drop_min": 1,
+    "item_group_drop_max": 10000,
+    "item_rate_treasure": 500,
+    "item_drop_treasure_min": 1,
+    "item_drop_treasure_max": 5000,
+    "drops_by_luk": 0,
+    "alchemist_summon_reward": 1,
+    "rare_drop_announce": 0,
+    "autoloot_adjust": 0,
+    "idletime_mer_option": 0,
+    "drop_rate_cap": 9000,
+    "drop_rate_cap_vip": 9000,
+    "base_exp_rate": 30000,
+    "job_exp_rate": 30000,
+    "mvp_exp_rate": 30000,
+    "multi_level_up_base": 99,
+    "multi_level_up_job": 0,
+    "max_parameter": 185,
+    "max_trans_parameter": 185,
+    "max_baby_parameter": 150,
+    "transcendent_status_points": 52,
+    "max_aspd": 197,
+    "max_third_aspd": 197,
+    "max_extended_aspd": 197,
+    "max_hp": 1100000,
+    "max_lv": 99,
+    "aura_lv": 255
+  },
+  "maps": [
+    {
+      "map": "juperos_01",
+      "official_static_non_mvp": 285,
+      "active_static_non_mvp": 2850,
+      "base_exp_per_kill": 1302632,
+      "npc_sale_per_kill": 3132.05,
+      "scenarios": [
+        {
+          "kills_per_hour_assumed": 150,
+          "exp_G": 0.195,
+          "gross_zeny_M": 0.47,
+          "gross_with_overcharge10_M": 0.583
+        },
+        {
+          "kills_per_hour_assumed": 300,
+          "exp_G": 0.391,
+          "gross_zeny_M": 0.94,
+          "gross_with_overcharge10_M": 1.165
+        },
+        {
+          "kills_per_hour_assumed": 600,
+          "exp_G": 0.782,
+          "gross_zeny_M": 1.879,
+          "gross_with_overcharge10_M": 2.33
+        }
+      ],
+      "composition": [
+        {
+          "id": 1670,
+          "name": "DIMIK_1",
+          "amount": 100,
+          "hp": 16000
+        },
+        {
+          "id": 1671,
+          "name": "DIMIK_2",
+          "amount": 50,
+          "hp": 29000
+        },
+        {
+          "id": 1672,
+          "name": "DIMIK_3",
+          "amount": 50,
+          "hp": 19000
+        },
+        {
+          "id": 1673,
+          "name": "DIMIK_4",
+          "amount": 50,
+          "hp": 13900
+        },
+        {
+          "id": 1676,
+          "name": "VENATU_1",
+          "amount": 700,
+          "hp": 8900
+        },
+        {
+          "id": 1677,
+          "name": "VENATU_2",
+          "amount": 700,
+          "hp": 9000
+        },
+        {
+          "id": 1678,
+          "name": "VENATU_3",
+          "amount": 700,
+          "hp": 9500
+        },
+        {
+          "id": 1679,
+          "name": "VENATU_4",
+          "amount": 500,
+          "hp": 12300
+        }
+      ]
+    },
+    {
+      "map": "juperos_02",
+      "official_static_non_mvp": 315,
+      "active_static_non_mvp": 3150,
+      "base_exp_per_kill": 1400286,
+      "npc_sale_per_kill": 3006.21,
+      "scenarios": [
+        {
+          "kills_per_hour_assumed": 150,
+          "exp_G": 0.21,
+          "gross_zeny_M": 0.451,
+          "gross_with_overcharge10_M": 0.559
+        },
+        {
+          "kills_per_hour_assumed": 300,
+          "exp_G": 0.42,
+          "gross_zeny_M": 0.902,
+          "gross_with_overcharge10_M": 1.118
+        },
+        {
+          "kills_per_hour_assumed": 600,
+          "exp_G": 0.84,
+          "gross_zeny_M": 1.804,
+          "gross_with_overcharge10_M": 2.237
+        }
+      ],
+      "composition": [
+        {
+          "id": 1365,
+          "name": "APOCALIPS",
+          "amount": 700,
+          "hp": 22880
+        },
+        {
+          "id": 1676,
+          "name": "VENATU_1",
+          "amount": 650,
+          "hp": 8900
+        },
+        {
+          "id": 1677,
+          "name": "VENATU_2",
+          "amount": 650,
+          "hp": 9000
+        },
+        {
+          "id": 1678,
+          "name": "VENATU_3",
+          "amount": 650,
+          "hp": 9500
+        },
+        {
+          "id": 1679,
+          "name": "VENATU_4",
+          "amount": 500,
+          "hp": 12300
+        }
+      ]
+    },
+    {
+      "map": "abbey01",
+      "official_static_non_mvp": 258,
+      "active_static_non_mvp": 2580,
+      "base_exp_per_kill": 2843521,
+      "npc_sale_per_kill": 752.85,
+      "scenarios": [
+        {
+          "kills_per_hour_assumed": 150,
+          "exp_G": 0.427,
+          "gross_zeny_M": 0.113,
+          "gross_with_overcharge10_M": 0.14
+        },
+        {
+          "kills_per_hour_assumed": 300,
+          "exp_G": 0.853,
+          "gross_zeny_M": 0.226,
+          "gross_with_overcharge10_M": 0.28
+        },
+        {
+          "kills_per_hour_assumed": 600,
+          "exp_G": 1.706,
+          "gross_zeny_M": 0.452,
+          "gross_with_overcharge10_M": 0.56
+        }
+      ],
+      "composition": [
+        {
+          "id": 1036,
+          "name": "GHOUL",
+          "amount": 560,
+          "hp": 5418
+        },
+        {
+          "id": 1864,
+          "name": "ZOMBIE_SLAUGHTER",
+          "amount": 300,
+          "hp": 43000
+        },
+        {
+          "id": 1865,
+          "name": "RAGGED_ZOMBIE",
+          "amount": 330,
+          "hp": 25000
+        },
+        {
+          "id": 1866,
+          "name": "HELL_POODLE",
+          "amount": 250,
+          "hp": 9000
+        },
+        {
+          "id": 1867,
+          "name": "BANSHEE",
+          "amount": 930,
+          "hp": 35111
+        },
+        {
+          "id": 1869,
+          "name": "FLAME_SKULL",
+          "amount": 210,
+          "hp": 10080
+        }
+      ]
+    },
+    {
+      "map": "abbey03",
+      "official_static_non_mvp": 116,
+      "active_static_non_mvp": 116,
+      "base_exp_per_kill": 8495690,
+      "npc_sale_per_kill": 582.8,
+      "scenarios": [
+        {
+          "kills_per_hour_assumed": 150,
+          "exp_G": 1.274,
+          "gross_zeny_M": 0.087,
+          "gross_with_overcharge10_M": 0.108
+        },
+        {
+          "kills_per_hour_assumed": 300,
+          "exp_G": 2.549,
+          "gross_zeny_M": 0.175,
+          "gross_with_overcharge10_M": 0.217
+        },
+        {
+          "kills_per_hour_assumed": 600,
+          "exp_G": 5.097,
+          "gross_zeny_M": 0.35,
+          "gross_with_overcharge10_M": 0.434
+        }
+      ],
+      "composition": [
+        {
+          "id": 1867,
+          "name": "BANSHEE",
+          "amount": 30,
+          "hp": 35111
+        },
+        {
+          "id": 1869,
+          "name": "FLAME_SKULL",
+          "amount": 25,
+          "hp": 10080
+        },
+        {
+          "id": 1870,
+          "name": "NECROMANCER",
+          "amount": 60,
+          "hp": 98000
+        },
+        {
+          "id": 1873,
+          "name": "BEELZEBUB",
+          "amount": 1,
+          "hp": 6666666
+        }
+      ]
+    },
+    {
+      "map": "lhz_dun03",
+      "official_static_non_mvp": 312,
+      "active_static_non_mvp": 312,
+      "base_exp_per_kill": 29526923,
+      "npc_sale_per_kill": 6287.0,
+      "scenarios": [
+        {
+          "kills_per_hour_assumed": 150,
+          "exp_G": 4.429,
+          "gross_zeny_M": 0.943,
+          "gross_with_overcharge10_M": 1.169
+        },
+        {
+          "kills_per_hour_assumed": 300,
+          "exp_G": 8.858,
+          "gross_zeny_M": 1.886,
+          "gross_with_overcharge10_M": 2.339
+        },
+        {
+          "kills_per_hour_assumed": 600,
+          "exp_G": 17.716,
+          "gross_zeny_M": 3.772,
+          "gross_with_overcharge10_M": 4.678
+        }
+      ],
+      "composition": [
+        {
+          "id": 1634,
+          "name": "SEYREN",
+          "amount": 42,
+          "hp": 88402
+        },
+        {
+          "id": 1635,
+          "name": "EREMES",
+          "amount": 42,
+          "hp": 60199
+        },
+        {
+          "id": 1636,
+          "name": "HARWORD",
+          "amount": 42,
+          "hp": 78690
+        },
+        {
+          "id": 1637,
+          "name": "MAGALETA",
+          "amount": 42,
+          "hp": 61282
+        },
+        {
+          "id": 1638,
+          "name": "SHECIL",
+          "amount": 81,
+          "hp": 58900
+        },
+        {
+          "id": 1639,
+          "name": "KATRINN",
+          "amount": 57,
+          "hp": 47280
+        },
+        {
+          "id": 1640,
+          "name": "G_SEYREN",
+          "amount": 1,
+          "hp": 347590
+        },
+        {
+          "id": 1641,
+          "name": "G_EREMES",
+          "amount": 1,
+          "hp": 211230
+        },
+        {
+          "id": 1642,
+          "name": "G_HARWORD",
+          "amount": 1,
+          "hp": 310000
+        },
+        {
+          "id": 1643,
+          "name": "G_MAGALETA",
+          "amount": 1,
+          "hp": 182910
+        },
+        {
+          "id": 1644,
+          "name": "G_SHECIL",
+          "amount": 1,
+          "hp": 209000
+        },
+        {
+          "id": 1645,
+          "name": "G_KATRINN",
+          "amount": 1,
+          "hp": 189920
+        }
+      ]
+    },
+    {
+      "map": "thor_v01",
+      "official_static_non_mvp": 96,
+      "active_static_non_mvp": 96,
+      "base_exp_per_kill": 13315344,
+      "npc_sale_per_kill": 2156.95,
+      "scenarios": [
+        {
+          "kills_per_hour_assumed": 150,
+          "exp_G": 1.997,
+          "gross_zeny_M": 0.324,
+          "gross_with_overcharge10_M": 0.401
+        },
+        {
+          "kills_per_hour_assumed": 300,
+          "exp_G": 3.995,
+          "gross_zeny_M": 0.647,
+          "gross_with_overcharge10_M": 0.802
+        },
+        {
+          "kills_per_hour_assumed": 600,
+          "exp_G": 7.989,
+          "gross_zeny_M": 1.294,
+          "gross_with_overcharge10_M": 1.605
+        }
+      ],
+      "composition": [
+        {
+          "id": 1829,
+          "name": "SWORD_GUARDIAN",
+          "amount": 5,
+          "hp": 152533
+        },
+        {
+          "id": 1830,
+          "name": "BOW_GUARDIAN",
+          "amount": 5,
+          "hp": 80404
+        },
+        {
+          "id": 1831,
+          "name": "SALAMANDER",
+          "amount": 5,
+          "hp": 97934
+        },
+        {
+          "id": 1833,
+          "name": "KASA",
+          "amount": 45,
+          "hp": 80375
+        },
+        {
+          "id": 1836,
+          "name": "MAGMARING",
+          "amount": 10,
+          "hp": 5300
+        },
+        {
+          "id": 1837,
+          "name": "IMP",
+          "amount": 25,
+          "hp": 46430
+        },
+        {
+          "id": 1839,
+          "name": "BYORGUE",
+          "amount": 1,
+          "hp": 38133
+        }
+      ]
+    },
+    {
+      "map": "thor_v03",
+      "official_static_non_mvp": 125,
+      "active_static_non_mvp": 125,
+      "base_exp_per_kill": 20223888,
+      "npc_sale_per_kill": 2508.45,
+      "scenarios": [
+        {
+          "kills_per_hour_assumed": 150,
+          "exp_G": 3.034,
+          "gross_zeny_M": 0.376,
+          "gross_with_overcharge10_M": 0.467
+        },
+        {
+          "kills_per_hour_assumed": 300,
+          "exp_G": 6.067,
+          "gross_zeny_M": 0.753,
+          "gross_with_overcharge10_M": 0.933
+        },
+        {
+          "kills_per_hour_assumed": 600,
+          "exp_G": 12.134,
+          "gross_zeny_M": 1.505,
+          "gross_with_overcharge10_M": 1.866
+        }
+      ],
+      "composition": [
+        {
+          "id": 1829,
+          "name": "SWORD_GUARDIAN",
+          "amount": 10,
+          "hp": 152533
+        },
+        {
+          "id": 1830,
+          "name": "BOW_GUARDIAN",
+          "amount": 10,
+          "hp": 80404
+        },
+        {
+          "id": 1831,
+          "name": "SALAMANDER",
+          "amount": 60,
+          "hp": 97934
+        },
+        {
+          "id": 1833,
+          "name": "KASA",
+          "amount": 40,
+          "hp": 80375
+        },
+        {
+          "id": 1839,
+          "name": "BYORGUE",
+          "amount": 5,
+          "hp": 38133
+        }
+      ]
+    },
+    {
+      "map": "tha_t09",
+      "official_static_non_mvp": 44,
+      "active_static_non_mvp": 44,
+      "base_exp_per_kill": 6745023,
+      "npc_sale_per_kill": 12631.73,
+      "scenarios": [
+        {
+          "kills_per_hour_assumed": 150,
+          "exp_G": 1.012,
+          "gross_zeny_M": 1.895,
+          "gross_with_overcharge10_M": 2.35
+        },
+        {
+          "kills_per_hour_assumed": 300,
+          "exp_G": 2.024,
+          "gross_zeny_M": 3.79,
+          "gross_with_overcharge10_M": 4.699
+        },
+        {
+          "kills_per_hour_assumed": 600,
+          "exp_G": 4.047,
+          "gross_zeny_M": 7.579,
+          "gross_with_overcharge10_M": 9.398
+        }
+      ],
+      "composition": [
+        {
+          "id": 1694,
+          "name": "PLASMA_R",
+          "amount": 5,
+          "hp": 5700
+        },
+        {
+          "id": 1700,
+          "name": "OBSERVATION",
+          "amount": 5,
+          "hp": 65111
+        },
+        {
+          "id": 1701,
+          "name": "SHELTER",
+          "amount": 5,
+          "hp": 38000
+        },
+        {
+          "id": 1702,
+          "name": "RETRIBUTION",
+          "amount": 5,
+          "hp": 46666
+        },
+        {
+          "id": 1703,
+          "name": "SOLACE",
+          "amount": 20,
+          "hp": 25252
+        },
+        {
+          "id": 1707,
+          "name": "THA_DOLOR",
+          "amount": 1,
+          "hp": 59922
+        },
+        {
+          "id": 1712,
+          "name": "G_THA_DOLOR",
+          "amount": 3,
+          "hp": 59922
+        }
+      ]
+    },
+    {
+      "map": "man_fild02",
+      "official_static_non_mvp": 110,
+      "active_static_non_mvp": 550,
+      "base_exp_per_kill": 6140168,
+      "npc_sale_per_kill": 416.82,
+      "scenarios": [
+        {
+          "kills_per_hour_assumed": 150,
+          "exp_G": 0.921,
+          "gross_zeny_M": 0.063,
+          "gross_with_overcharge10_M": 0.078
+        },
+        {
+          "kills_per_hour_assumed": 300,
+          "exp_G": 1.842,
+          "gross_zeny_M": 0.125,
+          "gross_with_overcharge10_M": 0.155
+        },
+        {
+          "kills_per_hour_assumed": 600,
+          "exp_G": 3.684,
+          "gross_zeny_M": 0.25,
+          "gross_with_overcharge10_M": 0.31
+        }
+      ],
+      "composition": [
+        {
+          "id": 1986,
+          "name": "TATACHO",
+          "amount": 125,
+          "hp": 39500
+        },
+        {
+          "id": 1987,
+          "name": "CENTIPEDE",
+          "amount": 175,
+          "hp": 45662
+        },
+        {
+          "id": 2024,
+          "name": "BRADIUM_GOLEM",
+          "amount": 250,
+          "hp": 45200
+        }
+      ]
+    }
+  ],
+  "budgets": {
+    "99": 1325,
+    "150": 2722,
+    "200": 4597,
+    "255": 7237
+  },
+  "cost_1_to_185": 1970,
+  "builds": [
+    {
+      "class": "Lord_Knight",
+      "level": 99,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        86,
+        78,
+        61,
+        17,
+        35,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 16853,
+      "sp_without_equipment_or_skills": 456,
+      "aspd_without_buffs_passives_or_shield": 166.3,
+      "weapon_id": 1158,
+      "weapon": "Two-Handed Sword"
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 99,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        86,
+        35,
+        78,
+        17,
+        61,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 18548,
+      "sp_without_equipment_or_skills": 456,
+      "aspd_without_buffs_passives_or_shield": 158.3,
+      "weapon_id": 1158,
+      "weapon": "Two-Handed Sword"
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 150,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        127,
+        110,
+        93,
+        33,
+        67,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 44742,
+      "sp_without_equipment_or_skills": 776,
+      "aspd_without_buffs_passives_or_shield": 175.1,
+      "weapon_id": 1158,
+      "weapon": "Two-Handed Sword"
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 150,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        127,
+        67,
+        110,
+        33,
+        93,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 48526,
+      "sp_without_equipment_or_skills": 776,
+      "aspd_without_buffs_passives_or_shield": 167.1,
+      "weapon_id": 1158,
+      "weapon": "Two-Handed Sword"
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 200,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        162,
+        149,
+        123,
+        52,
+        96,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 90185,
+      "sp_without_equipment_or_skills": 1174,
+      "aspd_without_buffs_passives_or_shield": 185.3,
+      "weapon_id": 1158,
+      "weapon": "Two-Handed Sword"
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 200,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        162,
+        96,
+        149,
+        52,
+        123,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 100336,
+      "sp_without_equipment_or_skills": 1174,
+      "aspd_without_buffs_passives_or_shield": 175.1,
+      "weapon_id": 1158,
+      "weapon": "Two-Handed Sword"
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 255,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        185,
+        185,
+        160,
+        80,
+        140,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 168612,
+      "sp_without_equipment_or_skills": 1763,
+      "aspd_without_buffs_passives_or_shield": 195.6,
+      "weapon_id": 1158,
+      "weapon": "Two-Handed Sword"
+    },
+    {
+      "class": "Lord_Knight",
+      "level": 255,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        185,
+        140,
+        185,
+        80,
+        160,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 184340,
+      "sp_without_equipment_or_skills": 1763,
+      "aspd_without_buffs_passives_or_shield": 186.8,
+      "weapon_id": 1158,
+      "weapon": "Two-Handed Sword"
+    },
+    {
+      "class": "Paladin",
+      "level": 99,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        78,
+        35,
+        86,
+        17,
+        61,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 15133,
+      "sp_without_equipment_or_skills": 736,
+      "aspd_without_buffs_passives_or_shield": 154.4,
+      "weapon_id": 1408,
+      "weapon": "Pike"
+    },
+    {
+      "class": "Paladin",
+      "level": 99,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        78,
+        17,
+        86,
+        61,
+        35,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 15133,
+      "sp_without_equipment_or_skills": 997,
+      "aspd_without_buffs_passives_or_shield": 148.5,
+      "weapon_id": 1408,
+      "weapon": "Pike"
+    },
+    {
+      "class": "Paladin",
+      "level": 150,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        110,
+        67,
+        127,
+        33,
+        93,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 40138,
+      "sp_without_equipment_or_skills": 1251,
+      "aspd_without_buffs_passives_or_shield": 164.0,
+      "weapon_id": 1408,
+      "weapon": "Pike"
+    },
+    {
+      "class": "Paladin",
+      "level": 150,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        110,
+        33,
+        127,
+        93,
+        67,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 40138,
+      "sp_without_equipment_or_skills": 1787,
+      "aspd_without_buffs_passives_or_shield": 154.3,
+      "weapon_id": 1408,
+      "weapon": "Pike"
+    },
+    {
+      "class": "Paladin",
+      "level": 200,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        149,
+        96,
+        162,
+        52,
+        123,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 80083,
+      "sp_without_equipment_or_skills": 1888,
+      "aspd_without_buffs_passives_or_shield": 172.8,
+      "weapon_id": 1408,
+      "weapon": "Pike"
+    },
+    {
+      "class": "Paladin",
+      "level": 200,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        149,
+        52,
+        162,
+        123,
+        96,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 80083,
+      "sp_without_equipment_or_skills": 2731,
+      "aspd_without_buffs_passives_or_shield": 160.6,
+      "weapon_id": 1408,
+      "weapon": "Pike"
+    },
+    {
+      "class": "Paladin",
+      "level": 255,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        185,
+        140,
+        185,
+        80,
+        160,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 139147,
+      "sp_without_equipment_or_skills": 2823,
+      "aspd_without_buffs_passives_or_shield": 185.6,
+      "weapon_id": 1408,
+      "weapon": "Pike"
+    },
+    {
+      "class": "Paladin",
+      "level": 255,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        185,
+        80,
+        185,
+        160,
+        140,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 139147,
+      "sp_without_equipment_or_skills": 4031,
+      "aspd_without_buffs_passives_or_shield": 170.0,
+      "weapon_id": 1408,
+      "weapon": "Pike"
+    },
+    {
+      "class": "Sniper",
+      "level": 99,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        17,
+        78,
+        61,
+        35,
+        86,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 9714,
+      "sp_without_equipment_or_skills": 710,
+      "aspd_without_buffs_passives_or_shield": 167.3,
+      "weapon_id": 1708,
+      "weapon": "Great Bow"
+    },
+    {
+      "class": "Sniper",
+      "level": 99,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        17,
+        78,
+        61,
+        1,
+        86,
+        35
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 9714,
+      "sp_without_equipment_or_skills": 537,
+      "aspd_without_buffs_passives_or_shield": 167.3,
+      "weapon_id": 1708,
+      "weapon": "Great Bow"
+    },
+    {
+      "class": "Sniper",
+      "level": 150,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        33,
+        110,
+        93,
+        67,
+        127,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 25516,
+      "sp_without_equipment_or_skills": 1311,
+      "aspd_without_buffs_passives_or_shield": 177.5,
+      "weapon_id": 1708,
+      "weapon": "Great Bow"
+    },
+    {
+      "class": "Sniper",
+      "level": 150,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        33,
+        110,
+        93,
+        1,
+        127,
+        67
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 25516,
+      "sp_without_equipment_or_skills": 808,
+      "aspd_without_buffs_passives_or_shield": 177.5,
+      "weapon_id": 1708,
+      "weapon": "Great Bow"
+    },
+    {
+      "class": "Sniper",
+      "level": 200,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        52,
+        149,
+        123,
+        96,
+        162,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 51200,
+      "sp_without_equipment_or_skills": 2035,
+      "aspd_without_buffs_passives_or_shield": 188.9,
+      "weapon_id": 1708,
+      "weapon": "Great Bow"
+    },
+    {
+      "class": "Sniper",
+      "level": 200,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        52,
+        149,
+        123,
+        1,
+        162,
+        96
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 51200,
+      "sp_without_equipment_or_skills": 1073,
+      "aspd_without_buffs_passives_or_shield": 188.9,
+      "weapon_id": 1708,
+      "weapon": "Great Bow"
+    },
+    {
+      "class": "Sniper",
+      "level": 255,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        80,
+        185,
+        160,
+        140,
+        185,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 95534,
+      "sp_without_equipment_or_skills": 3154,
+      "aspd_without_buffs_passives_or_shield": 197.0,
+      "weapon_id": 1708,
+      "weapon": "Great Bow"
+    },
+    {
+      "class": "Sniper",
+      "level": 255,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        80,
+        185,
+        160,
+        1,
+        185,
+        140
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 95534,
+      "sp_without_equipment_or_skills": 1364,
+      "aspd_without_buffs_passives_or_shield": 197.0,
+      "weapon_id": 1708,
+      "weapon": "Great Bow"
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 99,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        86,
+        78,
+        61,
+        17,
+        35,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 12256,
+      "sp_without_equipment_or_skills": 593,
+      "aspd_without_buffs_passives_or_shield": 170.8,
+      "weapon_id": 1253,
+      "weapon": "Katar"
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 99,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        86,
+        17,
+        78,
+        35,
+        61,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 13527,
+      "sp_without_equipment_or_skills": 685,
+      "aspd_without_buffs_passives_or_shield": 159.9,
+      "weapon_id": 1253,
+      "weapon": "Katar"
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 150,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        127,
+        110,
+        93,
+        33,
+        67,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 32460,
+      "sp_without_equipment_or_skills": 1014,
+      "aspd_without_buffs_passives_or_shield": 178.8,
+      "weapon_id": 1253,
+      "weapon": "Katar"
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 150,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        127,
+        33,
+        110,
+        67,
+        93,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 35275,
+      "sp_without_equipment_or_skills": 1273,
+      "aspd_without_buffs_passives_or_shield": 164.7,
+      "weapon_id": 1253,
+      "weapon": "Katar"
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 200,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        162,
+        149,
+        123,
+        52,
+        96,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 65410,
+      "sp_without_equipment_or_skills": 1539,
+      "aspd_without_buffs_passives_or_shield": 188.1,
+      "weapon_id": 1253,
+      "weapon": "Katar"
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 200,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        162,
+        52,
+        149,
+        96,
+        123,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 72935,
+      "sp_without_equipment_or_skills": 1984,
+      "aspd_without_buffs_passives_or_shield": 170.0,
+      "weapon_id": 1253,
+      "weapon": "Katar"
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 255,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        185,
+        185,
+        160,
+        80,
+        140,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 122377,
+      "sp_without_equipment_or_skills": 2317,
+      "aspd_without_buffs_passives_or_shield": 197.0,
+      "weapon_id": 1253,
+      "weapon": "Katar"
+    },
+    {
+      "class": "Assassin_Cross",
+      "level": 255,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        185,
+        80,
+        185,
+        140,
+        160,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 134010,
+      "sp_without_equipment_or_skills": 3090,
+      "aspd_without_buffs_passives_or_shield": 177.5,
+      "weapon_id": 1253,
+      "weapon": "Katar"
+    },
+    {
+      "class": "High_Wizard",
+      "level": 99,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        35,
+        17,
+        61,
+        86,
+        78,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 6752,
+      "sp_without_equipment_or_skills": 2286,
+      "aspd_without_buffs_passives_or_shield": 149.1,
+      "weapon_id": 1608,
+      "weapon": "Staff"
+    },
+    {
+      "class": "High_Wizard",
+      "level": 99,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        35,
+        17,
+        78,
+        86,
+        61,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 7443,
+      "sp_without_equipment_or_skills": 2286,
+      "aspd_without_buffs_passives_or_shield": 148.1,
+      "weapon_id": 1608,
+      "weapon": "Staff"
+    },
+    {
+      "class": "High_Wizard",
+      "level": 150,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        67,
+        33,
+        93,
+        127,
+        110,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 17367,
+      "sp_without_equipment_or_skills": 4148,
+      "aspd_without_buffs_passives_or_shield": 155.1,
+      "weapon_id": 1608,
+      "weapon": "Staff"
+    },
+    {
+      "class": "High_Wizard",
+      "level": 150,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        67,
+        33,
+        110,
+        127,
+        93,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 18858,
+      "sp_without_equipment_or_skills": 4148,
+      "aspd_without_buffs_passives_or_shield": 154.1,
+      "weapon_id": 1608,
+      "weapon": "Staff"
+    },
+    {
+      "class": "High_Wizard",
+      "level": 200,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        96,
+        52,
+        123,
+        162,
+        149,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 34467,
+      "sp_without_equipment_or_skills": 6312,
+      "aspd_without_buffs_passives_or_shield": 162.3,
+      "weapon_id": 1608,
+      "weapon": "Staff"
+    },
+    {
+      "class": "High_Wizard",
+      "level": 200,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        96,
+        52,
+        149,
+        162,
+        123,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 38398,
+      "sp_without_equipment_or_skills": 6312,
+      "aspd_without_buffs_passives_or_shield": 160.7,
+      "weapon_id": 1608,
+      "weapon": "Staff"
+    },
+    {
+      "class": "High_Wizard",
+      "level": 255,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        140,
+        80,
+        160,
+        185,
+        185,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 63825,
+      "sp_without_equipment_or_skills": 8701,
+      "aspd_without_buffs_passives_or_shield": 171.6,
+      "weapon_id": 1608,
+      "weapon": "Staff"
+    },
+    {
+      "class": "High_Wizard",
+      "level": 255,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        140,
+        80,
+        185,
+        185,
+        160,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 69846,
+      "sp_without_equipment_or_skills": 8701,
+      "aspd_without_buffs_passives_or_shield": 170.0,
+      "weapon_id": 1608,
+      "weapon": "Staff"
+    },
+    {
+      "class": "High_Priest",
+      "level": 99,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        35,
+        17,
+        78,
+        86,
+        61,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 9837,
+      "sp_without_equipment_or_skills": 1984,
+      "aspd_without_buffs_passives_or_shield": 150.2,
+      "weapon_id": 1608,
+      "weapon": "Staff"
+    },
+    {
+      "class": "High_Priest",
+      "level": 99,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        35,
+        17,
+        86,
+        78,
+        61,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 10262,
+      "sp_without_equipment_or_skills": 1904,
+      "aspd_without_buffs_passives_or_shield": 150.2,
+      "weapon_id": 1608,
+      "weapon": "Staff"
+    },
+    {
+      "class": "High_Priest",
+      "level": 150,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        67,
+        33,
+        110,
+        127,
+        93,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 25218,
+      "sp_without_equipment_or_skills": 3614,
+      "aspd_without_buffs_passives_or_shield": 155.9,
+      "weapon_id": 1608,
+      "weapon": "Staff"
+    },
+    {
+      "class": "High_Priest",
+      "level": 150,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        67,
+        33,
+        127,
+        110,
+        93,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 27193,
+      "sp_without_equipment_or_skills": 3357,
+      "aspd_without_buffs_passives_or_shield": 155.9,
+      "weapon_id": 1608,
+      "weapon": "Staff"
+    },
+    {
+      "class": "High_Priest",
+      "level": 200,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        96,
+        52,
+        149,
+        162,
+        123,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 51628,
+      "sp_without_equipment_or_skills": 5514,
+      "aspd_without_buffs_passives_or_shield": 162.3,
+      "weapon_id": 1608,
+      "weapon": "Staff"
+    },
+    {
+      "class": "High_Priest",
+      "level": 200,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        96,
+        52,
+        162,
+        149,
+        123,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 54250,
+      "sp_without_equipment_or_skills": 5252,
+      "aspd_without_buffs_passives_or_shield": 162.3,
+      "weapon_id": 1608,
+      "weapon": "Staff"
+    },
+    {
+      "class": "High_Priest",
+      "level": 255,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        140,
+        80,
+        185,
+        185,
+        160,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 94246,
+      "sp_without_equipment_or_skills": 7610,
+      "aspd_without_buffs_passives_or_shield": 171.2,
+      "weapon_id": 1608,
+      "weapon": "Staff"
+    },
+    {
+      "class": "High_Priest",
+      "level": 255,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        140,
+        80,
+        185,
+        185,
+        160,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 94246,
+      "sp_without_equipment_or_skills": 7610,
+      "aspd_without_buffs_passives_or_shield": 171.2,
+      "weapon_id": 1608,
+      "weapon": "Staff"
+    },
+    {
+      "class": "Champion",
+      "level": 99,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        86,
+        17,
+        35,
+        78,
+        61,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 9118,
+      "sp_without_equipment_or_skills": 1098,
+      "aspd_without_buffs_passives_or_shield": 160.8,
+      "weapon_id": 1804,
+      "weapon": "Knuckle Dusters"
+    },
+    {
+      "class": "Champion",
+      "level": 99,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        86,
+        17,
+        35,
+        78,
+        61,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 9118,
+      "sp_without_equipment_or_skills": 1098,
+      "aspd_without_buffs_passives_or_shield": 160.8,
+      "weapon_id": 1804,
+      "weapon": "Knuckle Dusters"
+    },
+    {
+      "class": "Champion",
+      "level": 150,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        127,
+        33,
+        67,
+        110,
+        93,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 24379,
+      "sp_without_equipment_or_skills": 1939,
+      "aspd_without_buffs_passives_or_shield": 165.3,
+      "weapon_id": 1804,
+      "weapon": "Knuckle Dusters"
+    },
+    {
+      "class": "Champion",
+      "level": 150,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        127,
+        33,
+        67,
+        110,
+        93,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 24379,
+      "sp_without_equipment_or_skills": 1939,
+      "aspd_without_buffs_passives_or_shield": 165.3,
+      "weapon_id": 1804,
+      "weapon": "Knuckle Dusters"
+    },
+    {
+      "class": "Champion",
+      "level": 200,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        162,
+        52,
+        96,
+        149,
+        123,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 49313,
+      "sp_without_equipment_or_skills": 3040,
+      "aspd_without_buffs_passives_or_shield": 170.4,
+      "weapon_id": 1804,
+      "weapon": "Knuckle Dusters"
+    },
+    {
+      "class": "Champion",
+      "level": 200,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        162,
+        52,
+        96,
+        149,
+        123,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 49313,
+      "sp_without_equipment_or_skills": 3040,
+      "aspd_without_buffs_passives_or_shield": 170.4,
+      "weapon_id": 1804,
+      "weapon": "Knuckle Dusters"
+    },
+    {
+      "class": "Champion",
+      "level": 255,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        185,
+        80,
+        140,
+        185,
+        160,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 95962,
+      "sp_without_equipment_or_skills": 4409,
+      "aspd_without_buffs_passives_or_shield": 177.4,
+      "weapon_id": 1804,
+      "weapon": "Knuckle Dusters"
+    },
+    {
+      "class": "Champion",
+      "level": 255,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        185,
+        80,
+        140,
+        185,
+        160,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 95962,
+      "sp_without_equipment_or_skills": 4409,
+      "aspd_without_buffs_passives_or_shield": 177.4,
+      "weapon_id": 1804,
+      "weapon": "Knuckle Dusters"
+    },
+    {
+      "class": "Professor",
+      "level": 99,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        35,
+        17,
+        61,
+        86,
+        78,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 8773,
+      "sp_without_equipment_or_skills": 1748,
+      "aspd_without_buffs_passives_or_shield": 155.6,
+      "weapon_id": 1550,
+      "weapon": "Book"
+    },
+    {
+      "class": "Professor",
+      "level": 99,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        35,
+        17,
+        86,
+        78,
+        61,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 10103,
+      "sp_without_equipment_or_skills": 1678,
+      "aspd_without_buffs_passives_or_shield": 154.6,
+      "weapon_id": 1550,
+      "weapon": "Book"
+    },
+    {
+      "class": "Professor",
+      "level": 150,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        67,
+        33,
+        93,
+        127,
+        110,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 22893,
+      "sp_without_equipment_or_skills": 3180,
+      "aspd_without_buffs_passives_or_shield": 160.8,
+      "weapon_id": 1550,
+      "weapon": "Book"
+    },
+    {
+      "class": "Professor",
+      "level": 150,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        67,
+        33,
+        127,
+        110,
+        93,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 26845,
+      "sp_without_equipment_or_skills": 2954,
+      "aspd_without_buffs_passives_or_shield": 159.9,
+      "weapon_id": 1550,
+      "weapon": "Book"
+    },
+    {
+      "class": "Professor",
+      "level": 200,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        96,
+        52,
+        123,
+        162,
+        149,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 45780,
+      "sp_without_equipment_or_skills": 4846,
+      "aspd_without_buffs_passives_or_shield": 167.2,
+      "weapon_id": 1550,
+      "weapon": "Book"
+    },
+    {
+      "class": "Professor",
+      "level": 200,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        96,
+        52,
+        162,
+        149,
+        123,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 53645,
+      "sp_without_equipment_or_skills": 4617,
+      "aspd_without_buffs_passives_or_shield": 165.7,
+      "weapon_id": 1550,
+      "weapon": "Book"
+    },
+    {
+      "class": "Professor",
+      "level": 255,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        140,
+        80,
+        160,
+        185,
+        185,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 85209,
+      "sp_without_equipment_or_skills": 6686,
+      "aspd_without_buffs_passives_or_shield": 175.3,
+      "weapon_id": 1550,
+      "weapon": "Book"
+    },
+    {
+      "class": "Professor",
+      "level": 255,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        140,
+        80,
+        185,
+        185,
+        160,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 93278,
+      "sp_without_equipment_or_skills": 6686,
+      "aspd_without_buffs_passives_or_shield": 173.9,
+      "weapon_id": 1550,
+      "weapon": "Book"
+    },
+    {
+      "class": "Creator",
+      "level": 99,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        35,
+        17,
+        78,
+        86,
+        61,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 11287,
+      "sp_without_equipment_or_skills": 979,
+      "aspd_without_buffs_passives_or_shield": 143.7,
+      "weapon_id": 1306,
+      "weapon": "War Axe"
+    },
+    {
+      "class": "Creator",
+      "level": 99,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        35,
+        17,
+        78,
+        86,
+        61,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 11287,
+      "sp_without_equipment_or_skills": 979,
+      "aspd_without_buffs_passives_or_shield": 143.7,
+      "weapon_id": 1306,
+      "weapon": "War Axe"
+    },
+    {
+      "class": "Creator",
+      "level": 150,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        67,
+        33,
+        110,
+        127,
+        93,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 29244,
+      "sp_without_equipment_or_skills": 1784,
+      "aspd_without_buffs_passives_or_shield": 150.2,
+      "weapon_id": 1306,
+      "weapon": "War Axe"
+    },
+    {
+      "class": "Creator",
+      "level": 150,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        67,
+        33,
+        110,
+        127,
+        93,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 29244,
+      "sp_without_equipment_or_skills": 1784,
+      "aspd_without_buffs_passives_or_shield": 150.2,
+      "weapon_id": 1306,
+      "weapon": "War Axe"
+    },
+    {
+      "class": "Creator",
+      "level": 200,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        96,
+        52,
+        149,
+        162,
+        123,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 60272,
+      "sp_without_equipment_or_skills": 2723,
+      "aspd_without_buffs_passives_or_shield": 157.4,
+      "weapon_id": 1306,
+      "weapon": "War Axe"
+    },
+    {
+      "class": "Creator",
+      "level": 200,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        96,
+        52,
+        149,
+        162,
+        123,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 60272,
+      "sp_without_equipment_or_skills": 2723,
+      "aspd_without_buffs_passives_or_shield": 157.4,
+      "weapon_id": 1306,
+      "weapon": "War Axe"
+    },
+    {
+      "class": "Creator",
+      "level": 255,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        140,
+        80,
+        185,
+        185,
+        160,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 110516,
+      "sp_without_equipment_or_skills": 3759,
+      "aspd_without_buffs_passives_or_shield": 167.4,
+      "weapon_id": 1306,
+      "weapon": "War Axe"
+    },
+    {
+      "class": "Creator",
+      "level": 255,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        140,
+        80,
+        185,
+        185,
+        160,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 110516,
+      "sp_without_equipment_or_skills": 3759,
+      "aspd_without_buffs_passives_or_shield": 167.4,
+      "weapon_id": 1306,
+      "weapon": "War Axe"
+    },
+    {
+      "class": "Whitesmith",
+      "level": 99,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        86,
+        78,
+        61,
+        17,
+        35,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 10414,
+      "sp_without_equipment_or_skills": 624,
+      "aspd_without_buffs_passives_or_shield": 160.1,
+      "weapon_id": 1355,
+      "weapon": "Hammer"
+    },
+    {
+      "class": "Whitesmith",
+      "level": 99,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        86,
+        35,
+        78,
+        17,
+        61,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 11474,
+      "sp_without_equipment_or_skills": 624,
+      "aspd_without_buffs_passives_or_shield": 150.6,
+      "weapon_id": 1355,
+      "weapon": "Hammer"
+    },
+    {
+      "class": "Whitesmith",
+      "level": 150,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        127,
+        110,
+        93,
+        33,
+        67,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 27322,
+      "sp_without_equipment_or_skills": 1059,
+      "aspd_without_buffs_passives_or_shield": 170.5,
+      "weapon_id": 1355,
+      "weapon": "Hammer"
+    },
+    {
+      "class": "Whitesmith",
+      "level": 150,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        127,
+        67,
+        110,
+        33,
+        93,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 29656,
+      "sp_without_equipment_or_skills": 1059,
+      "aspd_without_buffs_passives_or_shield": 161.0,
+      "weapon_id": 1355,
+      "weapon": "Hammer"
+    },
+    {
+      "class": "Whitesmith",
+      "level": 200,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        162,
+        149,
+        123,
+        52,
+        96,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 54771,
+      "sp_without_equipment_or_skills": 1599,
+      "aspd_without_buffs_passives_or_shield": 182.5,
+      "weapon_id": 1355,
+      "weapon": "Hammer"
+    },
+    {
+      "class": "Whitesmith",
+      "level": 200,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        162,
+        96,
+        149,
+        52,
+        123,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 60989,
+      "sp_without_equipment_or_skills": 1599,
+      "aspd_without_buffs_passives_or_shield": 170.5,
+      "weapon_id": 1355,
+      "weapon": "Hammer"
+    },
+    {
+      "class": "Whitesmith",
+      "level": 255,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        185,
+        185,
+        160,
+        80,
+        140,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 102074,
+      "sp_without_equipment_or_skills": 2394,
+      "aspd_without_buffs_passives_or_shield": 194.8,
+      "weapon_id": 1355,
+      "weapon": "Hammer"
+    },
+    {
+      "class": "Whitesmith",
+      "level": 255,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        185,
+        140,
+        185,
+        80,
+        160,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 111667,
+      "sp_without_equipment_or_skills": 2394,
+      "aspd_without_buffs_passives_or_shield": 184.4,
+      "weapon_id": 1355,
+      "weapon": "Hammer"
+    },
+    {
+      "class": "Stalker",
+      "level": 99,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        17,
+        78,
+        61,
+        35,
+        86,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 9774,
+      "sp_without_equipment_or_skills": 871,
+      "aspd_without_buffs_passives_or_shield": 164.5,
+      "weapon_id": 1708,
+      "weapon": "Great Bow"
+    },
+    {
+      "class": "Stalker",
+      "level": 99,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        86,
+        78,
+        61,
+        17,
+        35,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 9774,
+      "sp_without_equipment_or_skills": 757,
+      "aspd_without_buffs_passives_or_shield": 161.1,
+      "weapon_id": 1708,
+      "weapon": "Great Bow"
+    },
+    {
+      "class": "Stalker",
+      "level": 150,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        33,
+        110,
+        93,
+        67,
+        127,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 25646,
+      "sp_without_equipment_or_skills": 1615,
+      "aspd_without_buffs_passives_or_shield": 175.4,
+      "weapon_id": 1708,
+      "weapon": "Great Bow"
+    },
+    {
+      "class": "Stalker",
+      "level": 150,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        127,
+        110,
+        93,
+        33,
+        67,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 25646,
+      "sp_without_equipment_or_skills": 1292,
+      "aspd_without_buffs_passives_or_shield": 171.5,
+      "weapon_id": 1708,
+      "weapon": "Great Bow"
+    },
+    {
+      "class": "Stalker",
+      "level": 200,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        52,
+        149,
+        123,
+        96,
+        162,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 51426,
+      "sp_without_equipment_or_skills": 2512,
+      "aspd_without_buffs_passives_or_shield": 187.9,
+      "weapon_id": 1708,
+      "weapon": "Great Bow"
+    },
+    {
+      "class": "Stalker",
+      "level": 200,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        162,
+        149,
+        123,
+        52,
+        96,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 51426,
+      "sp_without_equipment_or_skills": 1956,
+      "aspd_without_buffs_passives_or_shield": 183.6,
+      "weapon_id": 1708,
+      "weapon": "Great Bow"
+    },
+    {
+      "class": "Stalker",
+      "level": 255,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        80,
+        185,
+        160,
+        140,
+        185,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 95898,
+      "sp_without_equipment_or_skills": 3903,
+      "aspd_without_buffs_passives_or_shield": 197.0,
+      "weapon_id": 1708,
+      "weapon": "Great Bow"
+    },
+    {
+      "class": "Stalker",
+      "level": 255,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        185,
+        185,
+        160,
+        80,
+        140,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 95898,
+      "sp_without_equipment_or_skills": 2939,
+      "aspd_without_buffs_passives_or_shield": 195.8,
+      "weapon_id": 1708,
+      "weapon": "Great Bow"
+    },
+    {
+      "class": "Clown",
+      "level": 99,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        17,
+        35,
+        61,
+        78,
+        86,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 8264,
+      "sp_without_equipment_or_skills": 1381,
+      "aspd_without_buffs_passives_or_shield": 159.0,
+      "weapon_id": 1904,
+      "weapon": "Mandolin"
+    },
+    {
+      "class": "Clown",
+      "level": 99,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        17,
+        35,
+        86,
+        61,
+        78,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 9531,
+      "sp_without_equipment_or_skills": 1253,
+      "aspd_without_buffs_passives_or_shield": 158.6,
+      "weapon_id": 1904,
+      "weapon": "Mandolin"
+    },
+    {
+      "class": "Clown",
+      "level": 150,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        33,
+        67,
+        93,
+        110,
+        127,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 21930,
+      "sp_without_equipment_or_skills": 2445,
+      "aspd_without_buffs_passives_or_shield": 168.7,
+      "weapon_id": 1904,
+      "weapon": "Mandolin"
+    },
+    {
+      "class": "Clown",
+      "level": 150,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        33,
+        67,
+        127,
+        93,
+        110,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 25753,
+      "sp_without_equipment_or_skills": 2252,
+      "aspd_without_buffs_passives_or_shield": 167.8,
+      "weapon_id": 1904,
+      "weapon": "Mandolin"
+    },
+    {
+      "class": "Clown",
+      "level": 200,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        52,
+        96,
+        123,
+        149,
+        162,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 44251,
+      "sp_without_equipment_or_skills": 3841,
+      "aspd_without_buffs_passives_or_shield": 177.4,
+      "weapon_id": 1904,
+      "weapon": "Mandolin"
+    },
+    {
+      "class": "Clown",
+      "level": 200,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        52,
+        96,
+        162,
+        123,
+        149,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 51922,
+      "sp_without_equipment_or_skills": 3448,
+      "aspd_without_buffs_passives_or_shield": 176.7,
+      "weapon_id": 1904,
+      "weapon": "Mandolin"
+    },
+    {
+      "class": "Clown",
+      "level": 255,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        80,
+        140,
+        160,
+        185,
+        185,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 82893,
+      "sp_without_equipment_or_skills": 5582,
+      "aspd_without_buffs_passives_or_shield": 188.9,
+      "weapon_id": 1904,
+      "weapon": "Mandolin"
+    },
+    {
+      "class": "Clown",
+      "level": 255,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        80,
+        140,
+        185,
+        160,
+        185,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 90803,
+      "sp_without_equipment_or_skills": 5101,
+      "aspd_without_buffs_passives_or_shield": 188.9,
+      "weapon_id": 1904,
+      "weapon": "Mandolin"
+    },
+    {
+      "class": "Gypsy",
+      "level": 99,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        17,
+        35,
+        61,
+        78,
+        86,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 8264,
+      "sp_without_equipment_or_skills": 1381,
+      "aspd_without_buffs_passives_or_shield": 159.6,
+      "weapon_id": 1953,
+      "weapon": "Whip"
+    },
+    {
+      "class": "Gypsy",
+      "level": 99,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        17,
+        78,
+        86,
+        35,
+        61,
+        1
+      ],
+      "used": 1321,
+      "budget": 1325,
+      "hp_without_equipment_or_skills": 9531,
+      "sp_without_equipment_or_skills": 1057,
+      "aspd_without_buffs_passives_or_shield": 168.0,
+      "weapon_id": 1953,
+      "weapon": "Whip"
+    },
+    {
+      "class": "Gypsy",
+      "level": 150,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        33,
+        67,
+        93,
+        110,
+        127,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 21930,
+      "sp_without_equipment_or_skills": 2445,
+      "aspd_without_buffs_passives_or_shield": 169.3,
+      "weapon_id": 1953,
+      "weapon": "Whip"
+    },
+    {
+      "class": "Gypsy",
+      "level": 150,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        33,
+        110,
+        127,
+        67,
+        93,
+        1
+      ],
+      "used": 2722,
+      "budget": 2722,
+      "hp_without_equipment_or_skills": 25753,
+      "sp_without_equipment_or_skills": 1956,
+      "aspd_without_buffs_passives_or_shield": 177.2,
+      "weapon_id": 1953,
+      "weapon": "Whip"
+    },
+    {
+      "class": "Gypsy",
+      "level": 200,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        52,
+        96,
+        123,
+        149,
+        162,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 44251,
+      "sp_without_equipment_or_skills": 3841,
+      "aspd_without_buffs_passives_or_shield": 178.0,
+      "weapon_id": 1953,
+      "weapon": "Whip"
+    },
+    {
+      "class": "Gypsy",
+      "level": 200,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        52,
+        149,
+        162,
+        96,
+        123,
+        1
+      ],
+      "used": 4586,
+      "budget": 4597,
+      "hp_without_equipment_or_skills": 51922,
+      "sp_without_equipment_or_skills": 3040,
+      "aspd_without_buffs_passives_or_shield": 187.9,
+      "weapon_id": 1953,
+      "weapon": "Whip"
+    },
+    {
+      "class": "Gypsy",
+      "level": 255,
+      "purpose": "PvM",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        80,
+        140,
+        160,
+        185,
+        185,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 82893,
+      "sp_without_equipment_or_skills": 5582,
+      "aspd_without_buffs_passives_or_shield": 189.4,
+      "weapon_id": 1953,
+      "weapon": "Whip"
+    },
+    {
+      "class": "Gypsy",
+      "level": 255,
+      "purpose": "MVP",
+      "job_level_assumed": 70,
+      "stats_SAVIDL": [
+        80,
+        185,
+        185,
+        140,
+        160,
+        1
+      ],
+      "used": 7049,
+      "budget": 7237,
+      "hp_without_equipment_or_skills": 90803,
+      "sp_without_equipment_or_skills": 4716,
+      "aspd_without_buffs_passives_or_shield": 197.0,
+      "weapon_id": 1953,
+      "weapon": "Whip"
+    }
+  ],
+  "shop": [
+    {
+      "id": 2304,
+      "name": "Jacket",
+      "buy": 10000,
+      "sell": 100,
+      "discount24_buy": 7600,
+      "overcharge24_sell": 124
+    },
+    {
+      "id": 2306,
+      "name": "Adventurer's Suit",
+      "buy": 20000,
+      "sell": 500,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 620
+    },
+    {
+      "id": 2308,
+      "name": "Mantle",
+      "buy": 20000,
+      "sell": 5000,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 6200
+    },
+    {
+      "id": 2310,
+      "name": "Coat",
+      "buy": 50000,
+      "sell": 11000,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 13640
+    },
+    {
+      "id": 2311,
+      "name": "Mink Coat",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2313,
+      "name": "Padded Armor",
+      "buy": 50000,
+      "sell": 24000,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 29760
+    },
+    {
+      "id": 2315,
+      "name": "Chain Mail",
+      "buy": 75000,
+      "sell": 32500,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 40300
+    },
+    {
+      "id": 2317,
+      "name": "Full Plate",
+      "buy": 100000,
+      "sell": 40000,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 49600
+    },
+    {
+      "id": 2322,
+      "name": "Silk Robe",
+      "buy": 20000,
+      "sell": 4000,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 4960
+    },
+    {
+      "id": 2326,
+      "name": "Saint's Robe",
+      "buy": 60000,
+      "sell": 27000,
+      "discount24_buy": 45600,
+      "overcharge24_sell": 33480
+    },
+    {
+      "id": 2331,
+      "name": "Tights",
+      "buy": 75000,
+      "sell": 35500,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 44020
+    },
+    {
+      "id": 2342,
+      "name": "Legion Plate Armor",
+      "buy": 100000,
+      "sell": 51250,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 63550
+    },
+    {
+      "id": 2353,
+      "name": "Odin's Blessing",
+      "buy": 75000,
+      "sell": 15000,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 18600
+    },
+    {
+      "id": 2364,
+      "name": "Meteo Plate Armor",
+      "buy": 150000,
+      "sell": 10,
+      "discount24_buy": 114000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2367,
+      "name": "Sniping Suit",
+      "buy": 100000,
+      "sell": 10,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2399,
+      "name": "Dragon Vest",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2102,
+      "name": "Guard",
+      "buy": 10000,
+      "sell": 250,
+      "discount24_buy": 7600,
+      "overcharge24_sell": 310
+    },
+    {
+      "id": 2106,
+      "name": "Shield",
+      "buy": 60000,
+      "sell": 28000,
+      "discount24_buy": 45600,
+      "overcharge24_sell": 34720
+    },
+    {
+      "id": 2108,
+      "name": "Mirror Shield",
+      "buy": 60000,
+      "sell": 30000,
+      "discount24_buy": 45600,
+      "overcharge24_sell": 37200
+    },
+    {
+      "id": 2110,
+      "name": "Holy Guard",
+      "buy": 85000,
+      "sell": 42500,
+      "discount24_buy": 64600,
+      "overcharge24_sell": 52700
+    },
+    {
+      "id": 2114,
+      "name": "Stone Buckler",
+      "buy": 30000,
+      "sell": 15000,
+      "discount24_buy": 22800,
+      "overcharge24_sell": 18600
+    },
+    {
+      "id": 2116,
+      "name": "Angelic Guard",
+      "buy": 30000,
+      "sell": 5000,
+      "discount24_buy": 22800,
+      "overcharge24_sell": 6200
+    },
+    {
+      "id": 2123,
+      "name": "Orleans's Server",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2124,
+      "name": "Thorny Buckler",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2404,
+      "name": "Shoes",
+      "buy": 10000,
+      "sell": 1750,
+      "discount24_buy": 7600,
+      "overcharge24_sell": 2170
+    },
+    {
+      "id": 2406,
+      "name": "Boots",
+      "buy": 20000,
+      "sell": 9000,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 11160
+    },
+    {
+      "id": 2409,
+      "name": "High Heels",
+      "buy": 30000,
+      "sell": 4250,
+      "discount24_buy": 22800,
+      "overcharge24_sell": 5270
+    },
+    {
+      "id": 2412,
+      "name": "Greaves",
+      "buy": 50000,
+      "sell": 27000,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 33480
+    },
+    {
+      "id": 2417,
+      "name": "Fricco's Shoes",
+      "buy": 50000,
+      "sell": 15000,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 18600
+    },
+    {
+      "id": 2418,
+      "name": "Vidar's Boots",
+      "buy": 50000,
+      "sell": 15000,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 18600
+    },
+    {
+      "id": 2424,
+      "name": "Tidal Shoes",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2425,
+      "name": "Black Leather Boots",
+      "buy": 20000,
+      "sell": 10,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 1502,
+      "name": "Club",
+      "buy": 10000,
+      "sell": 60,
+      "discount24_buy": 7600,
+      "overcharge24_sell": 74
+    },
+    {
+      "id": 1505,
+      "name": "Mace",
+      "buy": 20000,
+      "sell": 800,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 992
+    },
+    {
+      "id": 1511,
+      "name": "Flail",
+      "buy": 20000,
+      "sell": 8000,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 9920
+    },
+    {
+      "id": 1514,
+      "name": "Morning Star",
+      "buy": 41000,
+      "sell": 20500,
+      "discount24_buy": 31160,
+      "overcharge24_sell": 25420
+    },
+    {
+      "id": 1517,
+      "name": "Sword Mace",
+      "buy": 50000,
+      "sell": 25000,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 31000
+    },
+    {
+      "id": 1520,
+      "name": "Chain",
+      "buy": 50000,
+      "sell": 11500,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 14260
+    },
+    {
+      "id": 1522,
+      "name": "Stunner",
+      "buy": 100000,
+      "sell": 30000,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 37200
+    },
+    {
+      "id": 1529,
+      "name": "Iron Driver",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 1531,
+      "name": "Wrench",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 1802,
+      "name": "Waghnak",
+      "buy": 20000,
+      "sell": 4000,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 4960
+    },
+    {
+      "id": 1804,
+      "name": "Knuckle Dusters",
+      "buy": 50000,
+      "sell": 12500,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 15500
+    },
+    {
+      "id": 1806,
+      "name": "Studded Knuckles",
+      "buy": 60000,
+      "sell": 16000,
+      "discount24_buy": 45600,
+      "overcharge24_sell": 19840
+    },
+    {
+      "id": 1808,
+      "name": "Fist",
+      "buy": 75000,
+      "sell": 26500,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 32860
+    },
+    {
+      "id": 1810,
+      "name": "Claw",
+      "buy": 70000,
+      "sell": 33500,
+      "discount24_buy": 53200,
+      "overcharge24_sell": 41540
+    },
+    {
+      "id": 1812,
+      "name": "Finger",
+      "buy": 60000,
+      "sell": 29000,
+      "discount24_buy": 45600,
+      "overcharge24_sell": 35960
+    },
+    {
+      "id": 1822,
+      "name": "Combo Battle Glove",
+      "buy": 150000,
+      "sell": 10,
+      "discount24_buy": 114000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 1951,
+      "name": "Rope",
+      "buy": 10000,
+      "sell": 1250,
+      "discount24_buy": 7600,
+      "overcharge24_sell": 1550
+    },
+    {
+      "id": 1953,
+      "name": "Whip",
+      "buy": 20000,
+      "sell": 6000,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 7440
+    },
+    {
+      "id": 1955,
+      "name": "Wire Whip",
+      "buy": 30000,
+      "sell": 8750,
+      "discount24_buy": 22800,
+      "overcharge24_sell": 10850
+    },
+    {
+      "id": 1902,
+      "name": "Violin",
+      "buy": 10000,
+      "sell": 2000,
+      "discount24_buy": 7600,
+      "overcharge24_sell": 2480
+    },
+    {
+      "id": 1904,
+      "name": "Mandolin",
+      "buy": 20000,
+      "sell": 9000,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 11160
+    },
+    {
+      "id": 1906,
+      "name": "Lute",
+      "buy": 24500,
+      "sell": 12250,
+      "discount24_buy": 18620,
+      "overcharge24_sell": 15190
+    },
+    {
+      "id": 1908,
+      "name": "Guitar",
+      "buy": 50000,
+      "sell": 23500,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 29140
+    },
+    {
+      "id": 1914,
+      "name": "Burning Passion Guitar",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 1915,
+      "name": "Loner's Guitar",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 1916,
+      "name": "Green Acre Guitar",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 1917,
+      "name": "Gentle Breeze Guitar",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 1550,
+      "name": "Book",
+      "buy": 30000,
+      "sell": 15000,
+      "discount24_buy": 22800,
+      "overcharge24_sell": 18600
+    },
+    {
+      "id": 1551,
+      "name": "Bible",
+      "buy": 60000,
+      "sell": 30000,
+      "discount24_buy": 45600,
+      "overcharge24_sell": 37200
+    },
+    {
+      "id": 1552,
+      "name": "Tablet",
+      "buy": 51000,
+      "sell": 25500,
+      "discount24_buy": 38760,
+      "overcharge24_sell": 31620
+    },
+    {
+      "id": 1564,
+      "name": "Encyclopedia",
+      "buy": 25000,
+      "sell": 10,
+      "discount24_buy": 19000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 1568,
+      "name": "Book of Billows",
+      "buy": 70000,
+      "sell": 17500,
+      "discount24_buy": 53200,
+      "overcharge24_sell": 21700
+    },
+    {
+      "id": 1569,
+      "name": "Book of Mother Earth",
+      "buy": 70000,
+      "sell": 17500,
+      "discount24_buy": 53200,
+      "overcharge24_sell": 21700
+    },
+    {
+      "id": 1570,
+      "name": "Book of Blazing Sun",
+      "buy": 70000,
+      "sell": 17500,
+      "discount24_buy": 53200,
+      "overcharge24_sell": 21700
+    },
+    {
+      "id": 1571,
+      "name": "Book of Gust of Wind",
+      "buy": 70000,
+      "sell": 17500,
+      "discount24_buy": 53200,
+      "overcharge24_sell": 21700
+    },
+    {
+      "id": 1572,
+      "name": "Principles of Magic",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 13103,
+      "name": "Crimson Bolt",
+      "buy": 60000,
+      "sell": 10000,
+      "discount24_buy": 45600,
+      "overcharge24_sell": 12400
+    },
+    {
+      "id": 13105,
+      "name": "Garrison",
+      "buy": 100000,
+      "sell": 24000,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 29760
+    },
+    {
+      "id": 13106,
+      "name": "Gold Lux",
+      "buy": 200000,
+      "sell": 50000,
+      "discount24_buy": 152000,
+      "overcharge24_sell": 62000
+    },
+    {
+      "id": 13101,
+      "name": "Six Shooter",
+      "buy": 10000,
+      "sell": 2250,
+      "discount24_buy": 7600,
+      "overcharge24_sell": 2790
+    },
+    {
+      "id": 13150,
+      "name": "Branch",
+      "buy": 6000,
+      "sell": 1500,
+      "discount24_buy": 4560,
+      "overcharge24_sell": 1860
+    },
+    {
+      "id": 13152,
+      "name": "Cyclone",
+      "buy": 30000,
+      "sell": 8750,
+      "discount24_buy": 22800,
+      "overcharge24_sell": 10850
+    },
+    {
+      "id": 13153,
+      "name": "Dusk",
+      "buy": 50000,
+      "sell": 11750,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 14570
+    },
+    {
+      "id": 13155,
+      "name": "Black Rose",
+      "buy": 60000,
+      "sell": 16000,
+      "discount24_buy": 45600,
+      "overcharge24_sell": 19840
+    },
+    {
+      "id": 13156,
+      "name": "Gate Keeper",
+      "buy": 100000,
+      "sell": 28000,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 34720
+    },
+    {
+      "id": 13154,
+      "name": "Rolling Stone",
+      "buy": 30000,
+      "sell": 6000,
+      "discount24_buy": 22800,
+      "overcharge24_sell": 7440
+    },
+    {
+      "id": 13159,
+      "name": "Butcher",
+      "buy": 250000,
+      "sell": 65000,
+      "discount24_buy": 190000,
+      "overcharge24_sell": 80600
+    },
+    {
+      "id": 13157,
+      "name": "Drifter",
+      "buy": 150000,
+      "sell": 40000,
+      "discount24_buy": 114000,
+      "overcharge24_sell": 49600
+    },
+    {
+      "id": 13161,
+      "name": "Destroyer",
+      "buy": 300000,
+      "sell": 55000,
+      "discount24_buy": 228000,
+      "overcharge24_sell": 68200
+    },
+    {
+      "id": 13162,
+      "name": "Inferno",
+      "buy": 500000,
+      "sell": 115000,
+      "discount24_buy": 380000,
+      "overcharge24_sell": 142600
+    },
+    {
+      "id": 7522,
+      "name": "Ice Stone",
+      "buy": 500,
+      "sell": 75,
+      "discount24_buy": 380,
+      "overcharge24_sell": 93
+    },
+    {
+      "id": 7521,
+      "name": "Flame Stone",
+      "buy": 500,
+      "sell": 75,
+      "discount24_buy": 380,
+      "overcharge24_sell": 93
+    },
+    {
+      "id": 7523,
+      "name": "Wind Stone",
+      "buy": 500,
+      "sell": 75,
+      "discount24_buy": 380,
+      "overcharge24_sell": 93
+    },
+    {
+      "id": 1108,
+      "name": "Blade",
+      "buy": 10000,
+      "sell": 1450,
+      "discount24_buy": 7600,
+      "overcharge24_sell": 1798
+    },
+    {
+      "id": 1117,
+      "name": "Katana",
+      "buy": 10000,
+      "sell": 1000,
+      "discount24_buy": 7600,
+      "overcharge24_sell": 1240
+    },
+    {
+      "id": 1120,
+      "name": "Tsurugi",
+      "buy": 100000,
+      "sell": 25500,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 31620
+    },
+    {
+      "id": 1124,
+      "name": "Orcish Sword",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 1145,
+      "name": "Holy Avenger",
+      "buy": 450000,
+      "sell": 225000,
+      "discount24_buy": 342000,
+      "overcharge24_sell": 279000
+    },
+    {
+      "id": 1149,
+      "name": "Flamberge",
+      "buy": 50000,
+      "sell": 30000,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 37200
+    },
+    {
+      "id": 1155,
+      "name": "Bastard Sword",
+      "buy": 50000,
+      "sell": 11250,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 13950
+    },
+    {
+      "id": 1158,
+      "name": "Two-Handed Sword",
+      "buy": 90000,
+      "sell": 30000,
+      "discount24_buy": 68400,
+      "overcharge24_sell": 37200
+    },
+    {
+      "id": 1163,
+      "name": "Claymore",
+      "buy": 120000,
+      "sell": 37000,
+      "discount24_buy": 91200,
+      "overcharge24_sell": 45880
+    },
+    {
+      "id": 1172,
+      "name": "Claymore",
+      "buy": 200000,
+      "sell": 37000,
+      "discount24_buy": 152000,
+      "overcharge24_sell": 45880
+    },
+    {
+      "id": 1405,
+      "name": "Spear",
+      "buy": 20000,
+      "sell": 850,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 1054
+    },
+    {
+      "id": 1408,
+      "name": "Pike",
+      "buy": 50000,
+      "sell": 1725,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 2139
+    },
+    {
+      "id": 1417,
+      "name": "Pole Axe",
+      "buy": 75000,
+      "sell": 10,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 1208,
+      "name": "Main Gauche",
+      "buy": 20000,
+      "sell": 1200,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 1488
+    },
+    {
+      "id": 1211,
+      "name": "Dirk",
+      "buy": 20000,
+      "sell": 4250,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 5270
+    },
+    {
+      "id": 1217,
+      "name": "Stiletto",
+      "buy": 20000,
+      "sell": 9750,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 12090
+    },
+    {
+      "id": 1302,
+      "name": "Axe",
+      "buy": 10000,
+      "sell": 250,
+      "discount24_buy": 7600,
+      "overcharge24_sell": 310
+    },
+    {
+      "id": 1306,
+      "name": "War Axe",
+      "buy": 20000,
+      "sell": 10,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 1307,
+      "name": "Windhawk",
+      "buy": 45000,
+      "sell": 9000,
+      "discount24_buy": 34200,
+      "overcharge24_sell": 11160
+    },
+    {
+      "id": 1309,
+      "name": "Orcish Axe",
+      "buy": 75000,
+      "sell": 10,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 1352,
+      "name": "Battle Axe",
+      "buy": 20000,
+      "sell": 2700,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 3348
+    },
+    {
+      "id": 1355,
+      "name": "Hammer",
+      "buy": 30000,
+      "sell": 7750,
+      "discount24_buy": 22800,
+      "overcharge24_sell": 9610
+    },
+    {
+      "id": 1358,
+      "name": "Buster",
+      "buy": 75000,
+      "sell": 17000,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 21080
+    },
+    {
+      "id": 2621,
+      "name": "Ring",
+      "buy": 30000,
+      "sell": 15000,
+      "discount24_buy": 22800,
+      "overcharge24_sell": 18600
+    },
+    {
+      "id": 2622,
+      "name": "Earring",
+      "buy": 30000,
+      "sell": 15000,
+      "discount24_buy": 22800,
+      "overcharge24_sell": 18600
+    },
+    {
+      "id": 2624,
+      "name": "Glove",
+      "buy": 30000,
+      "sell": 15000,
+      "discount24_buy": 22800,
+      "overcharge24_sell": 18600
+    },
+    {
+      "id": 2618,
+      "name": "Matyr's Leash",
+      "buy": 10000,
+      "sell": 1,
+      "discount24_buy": 7600,
+      "overcharge24_sell": 1
+    },
+    {
+      "id": 2625,
+      "name": "Brooch",
+      "buy": 30000,
+      "sell": 15000,
+      "discount24_buy": 22800,
+      "overcharge24_sell": 18600
+    },
+    {
+      "id": 2626,
+      "name": "Rosary",
+      "buy": 30000,
+      "sell": 7500,
+      "discount24_buy": 22800,
+      "overcharge24_sell": 9300
+    },
+    {
+      "id": 2674,
+      "name": "Ring of Honor",
+      "buy": 10000,
+      "sell": 10,
+      "discount24_buy": 7600,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2648,
+      "name": "Morpheus's Ring",
+      "buy": 50000,
+      "sell": 15000,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 18600
+    },
+    {
+      "id": 2649,
+      "name": "Morpheus's Bracelet",
+      "buy": 50000,
+      "sell": 15000,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 18600
+    },
+    {
+      "id": 2627,
+      "name": "Belt",
+      "buy": 20000,
+      "sell": 10000,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 12400
+    },
+    {
+      "id": 2701,
+      "name": "Orleans's Glove",
+      "buy": 75000,
+      "sell": 10,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 1702,
+      "name": "Bow",
+      "buy": 20000,
+      "sell": 500,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 620
+    },
+    {
+      "id": 1705,
+      "name": "Composite Bow",
+      "buy": 50000,
+      "sell": 1250,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 1550
+    },
+    {
+      "id": 1708,
+      "name": "Great Bow",
+      "buy": 20000,
+      "sell": 5000,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 6200
+    },
+    {
+      "id": 1723,
+      "name": "Luna Bow",
+      "buy": 75000,
+      "sell": 10,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 1602,
+      "name": "Rod",
+      "buy": 20000,
+      "sell": 25,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 31
+    },
+    {
+      "id": 1605,
+      "name": "Wand",
+      "buy": 20000,
+      "sell": 1250,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 1550
+    },
+    {
+      "id": 1608,
+      "name": "Staff",
+      "buy": 20000,
+      "sell": 4750,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 5890
+    },
+    {
+      "id": 1611,
+      "name": "Arc Wand",
+      "buy": 45000,
+      "sell": 22500,
+      "discount24_buy": 34200,
+      "overcharge24_sell": 27900
+    },
+    {
+      "id": 1618,
+      "name": "Survivor's Rod",
+      "buy": 85000,
+      "sell": 42500,
+      "discount24_buy": 64600,
+      "overcharge24_sell": 52700
+    },
+    {
+      "id": 1620,
+      "name": "Survivor's Rod",
+      "buy": 85000,
+      "sell": 42500,
+      "discount24_buy": 64600,
+      "overcharge24_sell": 52700
+    },
+    {
+      "id": 1622,
+      "name": "Hypnotist's Staff",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 1624,
+      "name": "Lich's Bone Wand",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 1625,
+      "name": "Healing Staff",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 1626,
+      "name": "Piercing Staff",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2504,
+      "name": "Muffler",
+      "buy": 10000,
+      "sell": 2500,
+      "discount24_buy": 7600,
+      "overcharge24_sell": 3100
+    },
+    {
+      "id": 2506,
+      "name": "Manteau",
+      "buy": 40000,
+      "sell": 16000,
+      "discount24_buy": 30400,
+      "overcharge24_sell": 19840
+    },
+    {
+      "id": 2507,
+      "name": "Ancient Cape",
+      "buy": 82000,
+      "sell": 41000,
+      "discount24_buy": 62320,
+      "overcharge24_sell": 50840
+    },
+    {
+      "id": 2508,
+      "name": "Ragamuffin Manteau",
+      "buy": 56000,
+      "sell": 28000,
+      "discount24_buy": 42560,
+      "overcharge24_sell": 34720
+    },
+    {
+      "id": 2514,
+      "name": "Pauldron",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2518,
+      "name": "Morpheus's Shawl",
+      "buy": 60000,
+      "sell": 15000,
+      "discount24_buy": 45600,
+      "overcharge24_sell": 18600
+    },
+    {
+      "id": 2519,
+      "name": "Morrigane's Manteau",
+      "buy": 60000,
+      "sell": 15000,
+      "discount24_buy": 45600,
+      "overcharge24_sell": 18600
+    },
+    {
+      "id": 2528,
+      "name": "Wool Scarf",
+      "buy": 85000,
+      "sell": 10,
+      "discount24_buy": 64600,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2531,
+      "name": "Ulfhedinn",
+      "buy": 10000,
+      "sell": 10,
+      "discount24_buy": 7600,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2553,
+      "name": "Dragon Manteau",
+      "buy": 10000,
+      "sell": 10,
+      "discount24_buy": 7600,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 1251,
+      "name": "Jur",
+      "buy": 50000,
+      "sell": 9750,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12090
+    },
+    {
+      "id": 1253,
+      "name": "Katar",
+      "buy": 100000,
+      "sell": 20500,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 25420
+    },
+    {
+      "id": 1255,
+      "name": "Jamadhar",
+      "buy": 75000,
+      "sell": 18600,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 23064
+    },
+    {
+      "id": 1262,
+      "name": "Loki's Nail",
+      "buy": 20000,
+      "sell": 10,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 1275,
+      "name": "Katar of Frozen Icicle",
+      "buy": 100000,
+      "sell": 22500,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 27900
+    },
+    {
+      "id": 1276,
+      "name": "Katar of Quaking",
+      "buy": 100000,
+      "sell": 22500,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 27900
+    },
+    {
+      "id": 1277,
+      "name": "Katar of Raging Blaze",
+      "buy": 100000,
+      "sell": 22500,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 27900
+    },
+    {
+      "id": 1278,
+      "name": "Katar of Piercing Wind",
+      "buy": 100000,
+      "sell": 22500,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 27900
+    },
+    {
+      "id": 2218,
+      "name": "Flu Mask",
+      "buy": 10000,
+      "sell": 150,
+      "discount24_buy": 7600,
+      "overcharge24_sell": 186
+    },
+    {
+      "id": 5054,
+      "name": "Assassin Mask",
+      "buy": 30000,
+      "sell": 10,
+      "discount24_buy": 22800,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2267,
+      "name": "Cigarette",
+      "buy": 5000,
+      "sell": 10,
+      "discount24_buy": 3800,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5107,
+      "name": "Crunch Toast",
+      "buy": 100000,
+      "sell": 10,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2265,
+      "name": "Gangster Mask",
+      "buy": 5000,
+      "sell": 10,
+      "discount24_buy": 3800,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2266,
+      "name": "Iron Cain",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2269,
+      "name": "Romantic Flower",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2270,
+      "name": "Romantic Leaf",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2201,
+      "name": "Sunglasses",
+      "buy": 5000,
+      "sell": 2500,
+      "discount24_buy": 3800,
+      "overcharge24_sell": 3100
+    },
+    {
+      "id": 2203,
+      "name": "Glasses",
+      "buy": 4000,
+      "sell": 2000,
+      "discount24_buy": 3040,
+      "overcharge24_sell": 2480
+    },
+    {
+      "id": 2205,
+      "name": "Diver Goggles",
+      "buy": 3500,
+      "sell": 1750,
+      "discount24_buy": 2660,
+      "overcharge24_sell": 2170
+    },
+    {
+      "id": 2212,
+      "name": "Eye Patch",
+      "buy": 5000,
+      "sell": 500,
+      "discount24_buy": 3800,
+      "overcharge24_sell": 620
+    },
+    {
+      "id": 2225,
+      "name": "Goggles",
+      "buy": 10000,
+      "sell": 10,
+      "discount24_buy": 7600,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2229,
+      "name": "Helm",
+      "buy": 50000,
+      "sell": 22000,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 27280
+    },
+    {
+      "id": 2281,
+      "name": "Opera Masque",
+      "buy": 25000,
+      "sell": 10,
+      "discount24_buy": 19000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2292,
+      "name": "Welding Mask",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2210,
+      "name": "Hair Band",
+      "buy": 1000,
+      "sell": 250,
+      "discount24_buy": 760,
+      "overcharge24_sell": 310
+    },
+    {
+      "id": 2211,
+      "name": "Bandana",
+      "buy": 1000,
+      "sell": 200,
+      "discount24_buy": 760,
+      "overcharge24_sell": 248
+    },
+    {
+      "id": 2213,
+      "name": "Kitty Band",
+      "buy": 10000,
+      "sell": 10,
+      "discount24_buy": 7600,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2214,
+      "name": "Bunny Band",
+      "buy": 20000,
+      "sell": 10,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2217,
+      "name": "Biretta",
+      "buy": 10000,
+      "sell": 4500,
+      "discount24_buy": 7600,
+      "overcharge24_sell": 5580
+    },
+    {
+      "id": 2221,
+      "name": "Hat",
+      "buy": 5000,
+      "sell": 500,
+      "discount24_buy": 3800,
+      "overcharge24_sell": 620
+    },
+    {
+      "id": 2223,
+      "name": "Turban",
+      "buy": 10000,
+      "sell": 2250,
+      "discount24_buy": 7600,
+      "overcharge24_sell": 2790
+    },
+    {
+      "id": 2264,
+      "name": "Munak Hat",
+      "buy": 100000,
+      "sell": 10,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2280,
+      "name": "Sakkat",
+      "buy": 20000,
+      "sell": 10,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2299,
+      "name": "Orc Helm",
+      "buy": 30000,
+      "sell": 10,
+      "discount24_buy": 22800,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5380,
+      "name": "Fish Head Hat",
+      "buy": 40000,
+      "sell": 10,
+      "discount24_buy": 30400,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5382,
+      "name": "Bell Ribbon",
+      "buy": 40000,
+      "sell": 10,
+      "discount24_buy": 30400,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2269,
+      "name": "Romantic Flower",
+      "buy": 5000,
+      "sell": 10,
+      "discount24_buy": 3800,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2270,
+      "name": "Romantic Leaf",
+      "buy": 5000,
+      "sell": 10,
+      "discount24_buy": 3800,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5107,
+      "name": "Crunch Toast",
+      "buy": 15000,
+      "sell": 10,
+      "discount24_buy": 11400,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5110,
+      "name": "Baby Pacifier",
+      "buy": 15000,
+      "sell": 10,
+      "discount24_buy": 11400,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2247,
+      "name": "Romantic Gent",
+      "buy": 30000,
+      "sell": 7500,
+      "discount24_buy": 22800,
+      "overcharge24_sell": 9300
+    },
+    {
+      "id": 5206,
+      "name": "Romantic White Flower",
+      "buy": 10000,
+      "sell": 10,
+      "discount24_buy": 7600,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2245,
+      "name": "Sweet Gent",
+      "buy": 30000,
+      "sell": 7500,
+      "discount24_buy": 22800,
+      "overcharge24_sell": 9300
+    },
+    {
+      "id": 2295,
+      "name": "Blinker",
+      "buy": 20000,
+      "sell": 750,
+      "discount24_buy": 15200,
+      "overcharge24_sell": 930
+    },
+    {
+      "id": 5026,
+      "name": "Chef Hat",
+      "buy": 30000,
+      "sell": 10,
+      "discount24_buy": 22800,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5032,
+      "name": "Sunday Hat",
+      "buy": 100000,
+      "sell": 10,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5038,
+      "name": "Deviruchi Hat",
+      "buy": 30000,
+      "sell": 10,
+      "discount24_buy": 22800,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5229,
+      "name": "Brown Deviruchi Hat",
+      "buy": 65000,
+      "sell": 10,
+      "discount24_buy": 49400,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5227,
+      "name": "Red Deviruchi Hat",
+      "buy": 65000,
+      "sell": 10,
+      "discount24_buy": 49400,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5228,
+      "name": "Gray Deviruchi Hat",
+      "buy": 65000,
+      "sell": 10,
+      "discount24_buy": 49400,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5198,
+      "name": "Drooping Bunny",
+      "buy": 50000,
+      "sell": 5,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 6
+    },
+    {
+      "id": 5058,
+      "name": "Drooping Cat",
+      "buy": 300000,
+      "sell": 125000,
+      "discount24_buy": 228000,
+      "overcharge24_sell": 155000
+    },
+    {
+      "id": 5253,
+      "name": "Lif Doll Hat",
+      "buy": 80000,
+      "sell": 10,
+      "discount24_buy": 60800,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5252,
+      "name": "Drooping Ninetail",
+      "buy": 60000,
+      "sell": 10,
+      "discount24_buy": 45600,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5296,
+      "name": "Drooping Nine Tail",
+      "buy": 100000,
+      "sell": 10,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5231,
+      "name": "Brown Drooping Cat",
+      "buy": 300000,
+      "sell": 125000,
+      "discount24_buy": 228000,
+      "overcharge24_sell": 155000
+    },
+    {
+      "id": 5232,
+      "name": "Pink Drooping Cat",
+      "buy": 300000,
+      "sell": 125000,
+      "discount24_buy": 228000,
+      "overcharge24_sell": 155000
+    },
+    {
+      "id": 5233,
+      "name": "Blue Drooping Cat",
+      "buy": 300000,
+      "sell": 125000,
+      "discount24_buy": 228000,
+      "overcharge24_sell": 155000
+    },
+    {
+      "id": 5230,
+      "name": "Gray Drooping Cat",
+      "buy": 300000,
+      "sell": 125000,
+      "discount24_buy": 228000,
+      "overcharge24_sell": 155000
+    },
+    {
+      "id": 5234,
+      "name": "Yellow Drooping Cat",
+      "buy": 300000,
+      "sell": 125000,
+      "discount24_buy": 228000,
+      "overcharge24_sell": 155000
+    },
+    {
+      "id": 5076,
+      "name": "Beanie",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5059,
+      "name": "Teddybear Hat",
+      "buy": 100000,
+      "sell": 10,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5235,
+      "name": "Brown Beanie",
+      "buy": 75000,
+      "sell": 10,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5236,
+      "name": "Blue Beanie",
+      "buy": 75000,
+      "sell": 10,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5237,
+      "name": "Pink Beanie",
+      "buy": 75000,
+      "sell": 10,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5293,
+      "name": "Ramen Hat",
+      "buy": 150000,
+      "sell": 10,
+      "discount24_buy": 114000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5303,
+      "name": "Flower Crown",
+      "buy": 35000,
+      "sell": 10,
+      "discount24_buy": 26600,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5304,
+      "name": "Cap Of Blindness",
+      "buy": 65000,
+      "sell": 10,
+      "discount24_buy": 49400,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5312,
+      "name": "Ayothaya King's Hat",
+      "buy": 65000,
+      "sell": 10,
+      "discount24_buy": 49400,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5315,
+      "name": "Observer",
+      "buy": 45000,
+      "sell": 10,
+      "discount24_buy": 34200,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5317,
+      "name": "Fisherman's Hat",
+      "buy": 45000,
+      "sell": 10,
+      "discount24_buy": 34200,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5319,
+      "name": "Hello Mother Hat",
+      "buy": 75000,
+      "sell": 10,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5336,
+      "name": "Guildsman Recruiter Hat",
+      "buy": 50000,
+      "sell": 0,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 0
+    },
+    {
+      "id": 5337,
+      "name": "Party Recruiter Hat",
+      "buy": 50000,
+      "sell": 0,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 0
+    },
+    {
+      "id": 5338,
+      "name": "Bf Recruiter Hat",
+      "buy": 50000,
+      "sell": 0,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 0
+    },
+    {
+      "id": 5339,
+      "name": "Friend Recruiter Hat",
+      "buy": 50000,
+      "sell": 0,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 0
+    },
+    {
+      "id": 5346,
+      "name": "Gf Recruiter Hat",
+      "buy": 50000,
+      "sell": 0,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 0
+    },
+    {
+      "id": 5102,
+      "name": "Blank Eyes",
+      "buy": 500000,
+      "sell": 10,
+      "discount24_buy": 380000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5016,
+      "name": "Boy's Cap",
+      "buy": 75000,
+      "sell": 10,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5349,
+      "name": "Boy's Cap",
+      "buy": 150000,
+      "sell": 10,
+      "discount24_buy": 114000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5135,
+      "name": "Cyclop's Eye",
+      "buy": 500000,
+      "sell": 0,
+      "discount24_buy": 380000,
+      "overcharge24_sell": 0
+    },
+    {
+      "id": 5029,
+      "name": "Spore Hat",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5033,
+      "name": "Raccoon Hat",
+      "buy": 65000,
+      "sell": 10,
+      "discount24_buy": 49400,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5040,
+      "name": "Blush",
+      "buy": 100000,
+      "sell": 10,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5047,
+      "name": "Fashionable Glasses",
+      "buy": 35000,
+      "sell": 10,
+      "discount24_buy": 26600,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5065,
+      "name": "Blue Fish",
+      "buy": 65000,
+      "sell": 10,
+      "discount24_buy": 49400,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5068,
+      "name": "Evil Wing Ears",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5074,
+      "name": "Angel Wing Ears",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5084,
+      "name": "Lazy Smokie",
+      "buy": 75000,
+      "sell": 10,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5086,
+      "name": "Alarm Mask",
+      "buy": 150000,
+      "sell": 10,
+      "discount24_buy": 114000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5108,
+      "name": "Renown Detective's Cap",
+      "buy": 350000,
+      "sell": 10,
+      "discount24_buy": 266000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5121,
+      "name": "Zealotus Mask",
+      "buy": 100000,
+      "sell": 10,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5133,
+      "name": "Sheep Hat",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5137,
+      "name": "Alice Doll",
+      "buy": 100000,
+      "sell": 10,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5138,
+      "name": "Magic Eyes",
+      "buy": 150000,
+      "sell": 10,
+      "discount24_buy": 114000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5140,
+      "name": "Charming Ribbon",
+      "buy": 55000,
+      "sell": 10,
+      "discount24_buy": 41800,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5146,
+      "name": "Elephant Hat",
+      "buy": 75000,
+      "sell": 0,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 0
+    },
+    {
+      "id": 5151,
+      "name": "Note Headphones",
+      "buy": 75000,
+      "sell": 10,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5152,
+      "name": "Chinese Crown",
+      "buy": 150000,
+      "sell": 10,
+      "discount24_buy": 114000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5170,
+      "name": "Feather Beret",
+      "buy": 150000,
+      "sell": 15000,
+      "discount24_buy": 114000,
+      "overcharge24_sell": 18600
+    },
+    {
+      "id": 5173,
+      "name": "Magistrate Hat",
+      "buy": 75000,
+      "sell": 15000,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 18600
+    },
+    {
+      "id": 5174,
+      "name": "Ayam",
+      "buy": 75000,
+      "sell": 15000,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 18600
+    },
+    {
+      "id": 5175,
+      "name": "Censor Bar",
+      "buy": 75000,
+      "sell": 15000,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 18600
+    },
+    {
+      "id": 5184,
+      "name": "Captain's Hat",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5185,
+      "name": "Laurel Wreath",
+      "buy": 45000,
+      "sell": 10,
+      "discount24_buy": 34200,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5187,
+      "name": "Twin Ribbon",
+      "buy": 75000,
+      "sell": 10,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5188,
+      "name": "Wandering Minstrel Hat",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5191,
+      "name": "Black Ribbon",
+      "buy": 25000,
+      "sell": 400,
+      "discount24_buy": 19000,
+      "overcharge24_sell": 496
+    },
+    {
+      "id": 5192,
+      "name": "Yellow Ribbon",
+      "buy": 25000,
+      "sell": 400,
+      "discount24_buy": 19000,
+      "overcharge24_sell": 496
+    },
+    {
+      "id": 5193,
+      "name": "Green Ribbon",
+      "buy": 25000,
+      "sell": 400,
+      "discount24_buy": 19000,
+      "overcharge24_sell": 496
+    },
+    {
+      "id": 5194,
+      "name": "Pink Ribbon",
+      "buy": 25000,
+      "sell": 400,
+      "discount24_buy": 19000,
+      "overcharge24_sell": 496
+    },
+    {
+      "id": 5195,
+      "name": "Red Ribbon",
+      "buy": 25000,
+      "sell": 400,
+      "discount24_buy": 19000,
+      "overcharge24_sell": 496
+    },
+    {
+      "id": 5196,
+      "name": "Orange Ribbon",
+      "buy": 25000,
+      "sell": 400,
+      "discount24_buy": 19000,
+      "overcharge24_sell": 496
+    },
+    {
+      "id": 5197,
+      "name": "White Ribbon",
+      "buy": 25000,
+      "sell": 400,
+      "discount24_buy": 19000,
+      "overcharge24_sell": 496
+    },
+    {
+      "id": 5200,
+      "name": "Coppola",
+      "buy": 75000,
+      "sell": 5,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 6
+    },
+    {
+      "id": 5211,
+      "name": "Dress Hat",
+      "buy": 75000,
+      "sell": 0,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 0
+    },
+    {
+      "id": 5226,
+      "name": "Mini Propeller",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5238,
+      "name": "Red Mage Hat",
+      "buy": 75000,
+      "sell": 10,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5239,
+      "name": "Gray Mage Hat",
+      "buy": 75000,
+      "sell": 10,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5240,
+      "name": "Brown Mage Hat",
+      "buy": 75000,
+      "sell": 10,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5241,
+      "name": "Blue Mage Hat",
+      "buy": 75000,
+      "sell": 10,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5242,
+      "name": "Yellow Mage Hat",
+      "buy": 75000,
+      "sell": 10,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5243,
+      "name": "Shafka",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5325,
+      "name": "Robo Eye",
+      "buy": 75000,
+      "sell": 10,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5254,
+      "name": "Deviling Hat",
+      "buy": 100000,
+      "sell": 10,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5255,
+      "name": "Triple Poring Hat",
+      "buy": 65000,
+      "sell": 10,
+      "discount24_buy": 49400,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5257,
+      "name": "Soul Ring",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 2202,
+      "name": "Sunglasses",
+      "buy": 45000,
+      "sell": 2500,
+      "discount24_buy": 34200,
+      "overcharge24_sell": 3100
+    },
+    {
+      "id": 5258,
+      "name": "Afro Wig",
+      "buy": 35000,
+      "sell": 10,
+      "discount24_buy": 26600,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5298,
+      "name": "Dokebi's Wig",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5276,
+      "name": "Fantastic Wig",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5273,
+      "name": "Happy Wig",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5275,
+      "name": "Marvelous Wig",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5274,
+      "name": "Shiny Wig",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5259,
+      "name": "Elephant Hat",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5271,
+      "name": "Phoenix Crown",
+      "buy": 250000,
+      "sell": 10,
+      "discount24_buy": 190000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5272,
+      "name": "Tongue Mask",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5284,
+      "name": "Water Lily Crown",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5286,
+      "name": "Pecopeco Hairband",
+      "buy": 75000,
+      "sell": 10,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5288,
+      "name": "Red Glasses",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5289,
+      "name": "Vanilmirth Hat",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5291,
+      "name": "Kettle Hat",
+      "buy": 55000,
+      "sell": 10,
+      "discount24_buy": 41800,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5292,
+      "name": "Dragon Skull",
+      "buy": 55000,
+      "sell": 10,
+      "discount24_buy": 41800,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5294,
+      "name": "Whisper Mask",
+      "buy": 55000,
+      "sell": 10,
+      "discount24_buy": 41800,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5352,
+      "name": "Poporing Cap",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5324,
+      "name": "Little Angel Doll",
+      "buy": 100000,
+      "sell": 10,
+      "discount24_buy": 76000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5359,
+      "name": "Ship Captain Hat",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5360,
+      "name": "Hyuke's Black Cat Ears",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5340,
+      "name": "Defolty Doll Hat",
+      "buy": 50000,
+      "sell": 0,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 0
+    },
+    {
+      "id": 5341,
+      "name": "Glaris Doll Hat",
+      "buy": 50000,
+      "sell": 0,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 0
+    },
+    {
+      "id": 5342,
+      "name": "Sorin Doll Hat",
+      "buy": 50000,
+      "sell": 0,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 0
+    },
+    {
+      "id": 5343,
+      "name": "Telling Doll Hat",
+      "buy": 50000,
+      "sell": 0,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 0
+    },
+    {
+      "id": 5344,
+      "name": "Bennit Doll Hat",
+      "buy": 50000,
+      "sell": 0,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 0
+    },
+    {
+      "id": 5345,
+      "name": "W Doll Hat",
+      "buy": 50000,
+      "sell": 0,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 0
+    },
+    {
+      "id": 5354,
+      "name": "Muslim Hat M",
+      "buy": 50000,
+      "sell": 0,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 0
+    },
+    {
+      "id": 5355,
+      "name": "Selendang",
+      "buy": 50000,
+      "sell": 0,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 0
+    },
+    {
+      "id": 5361,
+      "name": "Gangster Scarf",
+      "buy": 65000,
+      "sell": 10,
+      "discount24_buy": 49400,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5365,
+      "name": "Magnolia Hat",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5379,
+      "name": "Tam",
+      "buy": 50000,
+      "sell": 0,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 0
+    },
+    {
+      "id": 5383,
+      "name": "Hunter's Cap",
+      "buy": 60000,
+      "sell": 10,
+      "discount24_buy": 45600,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5384,
+      "name": "Twin Pompom By JB",
+      "buy": 88888,
+      "sell": 10,
+      "discount24_buy": 67554,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5390,
+      "name": "Frozen Twin Pompom",
+      "buy": 88888,
+      "sell": 10,
+      "discount24_buy": 67554,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5388,
+      "name": "Snake Head Hat",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5411,
+      "name": "White Snake Hat",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5393,
+      "name": "Love Valentine's Hat",
+      "buy": 75000,
+      "sell": 10,
+      "discount24_buy": 57000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5397,
+      "name": "Scuba Gear",
+      "buy": 35000,
+      "sell": 10,
+      "discount24_buy": 26600,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5399,
+      "name": "Mandragora Cap",
+      "buy": 50000,
+      "sell": 10,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5800,
+      "name": "Blush of Groom",
+      "buy": 175000,
+      "sell": 10,
+      "discount24_buy": 133000,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 5802,
+      "name": "Upgraded Elephant Hat",
+      "buy": 150000,
+      "sell": 0,
+      "discount24_buy": 114000,
+      "overcharge24_sell": 0
+    },
+    {
+      "id": 1766,
+      "name": "Arrow of Counter Evil",
+      "buy": 50,
+      "sell": 20,
+      "discount24_buy": 38,
+      "overcharge24_sell": 24
+    },
+    {
+      "id": 1755,
+      "name": "Arrow of Wind",
+      "buy": 20,
+      "sell": 1,
+      "discount24_buy": 15,
+      "overcharge24_sell": 1
+    },
+    {
+      "id": 1750,
+      "name": "Arrow",
+      "buy": 10,
+      "sell": 0,
+      "discount24_buy": 7,
+      "overcharge24_sell": 0
+    },
+    {
+      "id": 1754,
+      "name": "Crystal Arrow",
+      "buy": 20,
+      "sell": 1,
+      "discount24_buy": 15,
+      "overcharge24_sell": 1
+    },
+    {
+      "id": 1761,
+      "name": "Cursed Arrow",
+      "buy": 20,
+      "sell": 5,
+      "discount24_buy": 15,
+      "overcharge24_sell": 6
+    },
+    {
+      "id": 1752,
+      "name": "Fire Arrow",
+      "buy": 20,
+      "sell": 1,
+      "discount24_buy": 15,
+      "overcharge24_sell": 1
+    },
+    {
+      "id": 1760,
+      "name": "Flash Arrow",
+      "buy": 20,
+      "sell": 5,
+      "discount24_buy": 15,
+      "overcharge24_sell": 6
+    },
+    {
+      "id": 1759,
+      "name": "Frozen Arrow",
+      "buy": 20,
+      "sell": 5,
+      "discount24_buy": 15,
+      "overcharge24_sell": 6
+    },
+    {
+      "id": 1772,
+      "name": "Holy Arrow",
+      "buy": 100,
+      "sell": 1,
+      "discount24_buy": 76,
+      "overcharge24_sell": 1
+    },
+    {
+      "id": 1757,
+      "name": "Immaterial Arrow",
+      "buy": 30,
+      "sell": 1,
+      "discount24_buy": 22,
+      "overcharge24_sell": 1
+    },
+    {
+      "id": 1770,
+      "name": "Iron Arrow",
+      "buy": 20,
+      "sell": 1,
+      "discount24_buy": 15,
+      "overcharge24_sell": 1
+    },
+    {
+      "id": 1769,
+      "name": "Mute Arrow",
+      "buy": 30,
+      "sell": 5,
+      "discount24_buy": 22,
+      "overcharge24_sell": 6
+    },
+    {
+      "id": 1765,
+      "name": "Oridecon Arrow",
+      "buy": 40,
+      "sell": 15,
+      "discount24_buy": 30,
+      "overcharge24_sell": 18
+    },
+    {
+      "id": 1763,
+      "name": "Poison Arrow",
+      "buy": 30,
+      "sell": 5,
+      "discount24_buy": 22,
+      "overcharge24_sell": 6
+    },
+    {
+      "id": 1762,
+      "name": "Rusty Arrow",
+      "buy": 30,
+      "sell": 1,
+      "discount24_buy": 22,
+      "overcharge24_sell": 1
+    },
+    {
+      "id": 1767,
+      "name": "Arrow of Shadow",
+      "buy": 30,
+      "sell": 1,
+      "discount24_buy": 22,
+      "overcharge24_sell": 1
+    },
+    {
+      "id": 1764,
+      "name": "Sharp Arrow",
+      "buy": 30,
+      "sell": 10,
+      "discount24_buy": 22,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 1751,
+      "name": "Silver Arrow",
+      "buy": 20,
+      "sell": 1,
+      "discount24_buy": 15,
+      "overcharge24_sell": 1
+    },
+    {
+      "id": 1768,
+      "name": "Sleep Arrow",
+      "buy": 30,
+      "sell": 5,
+      "discount24_buy": 22,
+      "overcharge24_sell": 6
+    },
+    {
+      "id": 1753,
+      "name": "Steel Arrow",
+      "buy": 30,
+      "sell": 2,
+      "discount24_buy": 22,
+      "overcharge24_sell": 2
+    },
+    {
+      "id": 1756,
+      "name": "Stone Arrow",
+      "buy": 30,
+      "sell": 1,
+      "discount24_buy": 22,
+      "overcharge24_sell": 1
+    },
+    {
+      "id": 1758,
+      "name": "Stun Arrow",
+      "buy": 30,
+      "sell": 5,
+      "discount24_buy": 22,
+      "overcharge24_sell": 6
+    },
+    {
+      "id": 1771,
+      "name": "Venom Knife",
+      "buy": 1000,
+      "sell": 25,
+      "discount24_buy": 760,
+      "overcharge24_sell": 31
+    },
+    {
+      "id": 13200,
+      "name": "Bullet",
+      "buy": 50,
+      "sell": 0,
+      "discount24_buy": 38,
+      "overcharge24_sell": 0
+    },
+    {
+      "id": 13202,
+      "name": "Bloody Shell",
+      "buy": 100,
+      "sell": 15,
+      "discount24_buy": 76,
+      "overcharge24_sell": 18
+    },
+    {
+      "id": 13201,
+      "name": "Silver Bullet",
+      "buy": 300,
+      "sell": 7,
+      "discount24_buy": 228,
+      "overcharge24_sell": 8
+    },
+    {
+      "id": 13206,
+      "name": "Blind Sphere",
+      "buy": 500,
+      "sell": 40,
+      "discount24_buy": 380,
+      "overcharge24_sell": 49
+    },
+    {
+      "id": 13203,
+      "name": "Flare Sphere",
+      "buy": 500,
+      "sell": 40,
+      "discount24_buy": 380,
+      "overcharge24_sell": 49
+    },
+    {
+      "id": 13207,
+      "name": "Freezing Sphere",
+      "buy": 500,
+      "sell": 40,
+      "discount24_buy": 380,
+      "overcharge24_sell": 49
+    },
+    {
+      "id": 13204,
+      "name": "Lightning Sphere",
+      "buy": 500,
+      "sell": 40,
+      "discount24_buy": 380,
+      "overcharge24_sell": 49
+    },
+    {
+      "id": 13205,
+      "name": "Poison Sphere",
+      "buy": 500,
+      "sell": 40,
+      "discount24_buy": 380,
+      "overcharge24_sell": 49
+    },
+    {
+      "id": 13252,
+      "name": "Flash Shuriken",
+      "buy": 50,
+      "sell": 10,
+      "discount24_buy": 38,
+      "overcharge24_sell": 12
+    },
+    {
+      "id": 13254,
+      "name": "Thorn Needle Shuriken",
+      "buy": 500,
+      "sell": 50,
+      "discount24_buy": 380,
+      "overcharge24_sell": 62
+    },
+    {
+      "id": 13251,
+      "name": "Nimbus Shuriken",
+      "buy": 100,
+      "sell": 5,
+      "discount24_buy": 76,
+      "overcharge24_sell": 6
+    },
+    {
+      "id": 13253,
+      "name": "Sharp Leaf Shuriken",
+      "buy": 300,
+      "sell": 20,
+      "discount24_buy": 228,
+      "overcharge24_sell": 24
+    },
+    {
+      "id": 13250,
+      "name": "Shuriken",
+      "buy": 50,
+      "sell": 2,
+      "discount24_buy": 38,
+      "overcharge24_sell": 2
+    },
+    {
+      "id": 13256,
+      "name": "Black Earth Kunai",
+      "buy": 50,
+      "sell": 5,
+      "discount24_buy": 38,
+      "overcharge24_sell": 6
+    },
+    {
+      "id": 13259,
+      "name": "Fell Poison Kunai",
+      "buy": 50,
+      "sell": 5,
+      "discount24_buy": 38,
+      "overcharge24_sell": 6
+    },
+    {
+      "id": 13258,
+      "name": "Heat Wave Kunai",
+      "buy": 50,
+      "sell": 5,
+      "discount24_buy": 38,
+      "overcharge24_sell": 6
+    },
+    {
+      "id": 13255,
+      "name": "Icicle Kunai",
+      "buy": 50,
+      "sell": 5,
+      "discount24_buy": 38,
+      "overcharge24_sell": 6
+    },
+    {
+      "id": 13257,
+      "name": "High Wind Kunai",
+      "buy": 50,
+      "sell": 5,
+      "discount24_buy": 38,
+      "overcharge24_sell": 6
+    },
+    {
+      "id": 715,
+      "name": "Yellow Gemstone",
+      "buy": 600,
+      "sell": 300,
+      "discount24_buy": 456,
+      "overcharge24_sell": 372
+    },
+    {
+      "id": 716,
+      "name": "Red Gemstone",
+      "buy": 600,
+      "sell": 300,
+      "discount24_buy": 456,
+      "overcharge24_sell": 372
+    },
+    {
+      "id": 717,
+      "name": "Blue Gemstone",
+      "buy": 600,
+      "sell": 300,
+      "discount24_buy": 456,
+      "overcharge24_sell": 372
+    },
+    {
+      "id": 1025,
+      "name": "Cobweb",
+      "buy": 200,
+      "sell": 92,
+      "discount24_buy": 152,
+      "overcharge24_sell": 114
+    },
+    {
+      "id": 7136,
+      "name": "Acid Bottle",
+      "buy": 500,
+      "sell": 100,
+      "discount24_buy": 380,
+      "overcharge24_sell": 124
+    },
+    {
+      "id": 7135,
+      "name": "Bottle Grenade",
+      "buy": 500,
+      "sell": 100,
+      "discount24_buy": 380,
+      "overcharge24_sell": 124
+    },
+    {
+      "id": 7137,
+      "name": "Plant Bottle",
+      "buy": 500,
+      "sell": 100,
+      "discount24_buy": 380,
+      "overcharge24_sell": 124
+    },
+    {
+      "id": 7138,
+      "name": "Marine Sphere Bottle",
+      "buy": 500,
+      "sell": 100,
+      "discount24_buy": 380,
+      "overcharge24_sell": 124
+    },
+    {
+      "id": 7139,
+      "name": "Glistening Coat",
+      "buy": 500,
+      "sell": 100,
+      "discount24_buy": 380,
+      "overcharge24_sell": 124
+    },
+    {
+      "id": 678,
+      "name": "Poison Bottle",
+      "buy": 50000,
+      "sell": 2500,
+      "discount24_buy": 38000,
+      "overcharge24_sell": 3100
+    },
+    {
+      "id": 505,
+      "name": "Blue Potion",
+      "buy": 5000,
+      "sell": 2500,
+      "discount24_buy": 3800,
+      "overcharge24_sell": 3100
+    },
+    {
+      "id": 506,
+      "name": "Green Potion",
+      "buy": 40,
+      "sell": 20,
+      "discount24_buy": 30,
+      "overcharge24_sell": 24
+    },
+    {
+      "id": 610,
+      "name": "Yggdrasil Leaf",
+      "buy": 4000,
+      "sell": 2000,
+      "discount24_buy": 3040,
+      "overcharge24_sell": 2480
+    },
+    {
+      "id": 545,
+      "name": "Condensed Red Potion",
+      "buy": 150,
+      "sell": 75,
+      "discount24_buy": 114,
+      "overcharge24_sell": 93
+    },
+    {
+      "id": 546,
+      "name": "Condensed Yellow Potion",
+      "buy": 600,
+      "sell": 300,
+      "discount24_buy": 456,
+      "overcharge24_sell": 372
+    },
+    {
+      "id": 547,
+      "name": "Condensed White Potion",
+      "buy": 1650,
+      "sell": 825,
+      "discount24_buy": 1254,
+      "overcharge24_sell": 1023
+    },
+    {
+      "id": 12028,
+      "name": "Box of Thunder",
+      "buy": 1000,
+      "sell": 500,
+      "discount24_buy": 760,
+      "overcharge24_sell": 620
+    },
+    {
+      "id": 12262,
+      "name": "Authoritative Badge",
+      "buy": 500,
+      "sell": 0,
+      "discount24_buy": 380,
+      "overcharge24_sell": 0
+    },
+    {
+      "id": 12016,
+      "name": "Speed Potion",
+      "buy": 750,
+      "sell": 1,
+      "discount24_buy": 570,
+      "overcharge24_sell": 1
+    }
+  ],
+  "arbitrage_candidates": [],
+  "reference_items": {
+    "501": {
+      "id": 501,
+      "aegis": "Red_Potion",
+      "name": "Red Potion",
+      "type": "Healing",
+      "subtype": "",
+      "buy": 50,
+      "sell": 25,
+      "weight": 70,
+      "attack": 0,
+      "defense": 0,
+      "range": 0,
+      "slots": 0,
+      "jobs": "",
+      "locations": "",
+      "weapon_level": 0,
+      "equip_level_min": 0,
+      "equip_level_max": 0,
+      "refineable": 0,
+      "gender": "",
+      "script": "itemheal rand(45,65),0;",
+      "equip_script": null,
+      "unequip_script": null
+    },
+    "503": {
+      "id": 503,
+      "aegis": "Yellow_Potion",
+      "name": "Yellow Potion",
+      "type": "Healing",
+      "subtype": "",
+      "buy": 550,
+      "sell": 275,
+      "weight": 130,
+      "attack": 0,
+      "defense": 0,
+      "range": 0,
+      "slots": 0,
+      "jobs": "",
+      "locations": "",
+      "weapon_level": 0,
+      "equip_level_min": 0,
+      "equip_level_max": 0,
+      "refineable": 0,
+      "gender": "",
+      "script": "itemheal rand(175,235),0;",
+      "equip_script": null,
+      "unequip_script": null
+    },
+    "504": {
+      "id": 504,
+      "aegis": "White_Potion",
+      "name": "White Potion",
+      "type": "Healing",
+      "subtype": "",
+      "buy": 1200,
+      "sell": 600,
+      "weight": 150,
+      "attack": 0,
+      "defense": 0,
+      "range": 0,
+      "slots": 0,
+      "jobs": "",
+      "locations": "",
+      "weapon_level": 0,
+      "equip_level_min": 0,
+      "equip_level_max": 0,
+      "refineable": 0,
+      "gender": "",
+      "script": "itemheal rand(325,405),0;",
+      "equip_script": null,
+      "unequip_script": null
+    },
+    "505": {
+      "id": 505,
+      "aegis": "Blue_Potion",
+      "name": "Blue Potion",
+      "type": "Healing",
+      "subtype": "",
+      "buy": 5000,
+      "sell": 2500,
+      "weight": 150,
+      "attack": 0,
+      "defense": 0,
+      "range": 0,
+      "slots": 0,
+      "jobs": "",
+      "locations": "",
+      "weapon_level": 0,
+      "equip_level_min": 0,
+      "equip_level_max": 0,
+      "refineable": 0,
+      "gender": "",
+      "script": "itemheal 0,rand(40,60);",
+      "equip_script": null,
+      "unequip_script": null
+    },
+    "506": {
+      "id": 506,
+      "aegis": "Green_Potion",
+      "name": "Green Potion",
+      "type": "Healing",
+      "subtype": "",
+      "buy": 40,
+      "sell": 20,
+      "weight": 70,
+      "attack": 0,
+      "defense": 0,
+      "range": 0,
+      "slots": 0,
+      "jobs": "",
+      "locations": "",
+      "weapon_level": 0,
+      "equip_level_min": 0,
+      "equip_level_max": 0,
+      "refineable": 0,
+      "gender": "",
+      "script": "sc_end SC_Poison;\nsc_end SC_Silence;\nsc_end SC_Blind;",
+      "equip_script": null,
+      "unequip_script": null
+    },
+    "601": {
+      "id": 601,
+      "aegis": "Wing_Of_Fly",
+      "name": "Fly Wing",
+      "type": "Delayconsume",
+      "subtype": "",
+      "buy": 60,
+      "sell": 30,
+      "weight": 50,
+      "attack": 0,
+      "defense": 0,
+      "range": 0,
+      "slots": 0,
+      "jobs": "",
+      "locations": "",
+      "weapon_level": 0,
+      "equip_level_min": 0,
+      "equip_level_max": 0,
+      "refineable": 0,
+      "gender": "",
+      "script": "itemskill \"AL_TELEPORT\",1;",
+      "equip_script": null,
+      "unequip_script": null
+    },
+    "715": {
+      "id": 715,
+      "aegis": "Yellow_Gemstone",
+      "name": "Yellow Gemstone",
+      "type": "Etc",
+      "subtype": "",
+      "buy": 600,
+      "sell": 300,
+      "weight": 30,
+      "attack": 0,
+      "defense": 0,
+      "range": 0,
+      "slots": 0,
+      "jobs": "",
+      "locations": "",
+      "weapon_level": 0,
+      "equip_level_min": 0,
+      "equip_level_max": 0,
+      "refineable": 0,
+      "gender": "",
+      "script": null,
+      "equip_script": null,
+      "unequip_script": null
+    },
+    "717": {
+      "id": 717,
+      "aegis": "Blue_Gemstone",
+      "name": "Blue Gemstone",
+      "type": "Etc",
+      "subtype": "",
+      "buy": 600,
+      "sell": 300,
+      "weight": 30,
+      "attack": 0,
+      "defense": 0,
+      "range": 0,
+      "slots": 0,
+      "jobs": "",
+      "locations": "",
+      "weapon_level": 0,
+      "equip_level_min": 0,
+      "equip_level_max": 0,
+      "refineable": 0,
+      "gender": "",
+      "script": null,
+      "equip_script": null,
+      "unequip_script": null
+    },
+    "678": {
+      "id": 678,
+      "aegis": "Poison_Bottle",
+      "name": "Poison Bottle",
+      "type": "Usable",
+      "subtype": "",
+      "buy": 5000,
+      "sell": 2500,
+      "weight": 100,
+      "attack": 0,
+      "defense": 0,
+      "range": 0,
+      "slots": 0,
+      "jobs": "",
+      "locations": "",
+      "weapon_level": 0,
+      "equip_level_min": 0,
+      "equip_level_max": 0,
+      "refineable": 0,
+      "gender": "",
+      "script": "if (Class == Job_Assassin_Cross) {\n   sc_start SC_DPoison,60000,0;\n   sc_start SC_ASPDPOTION3,60000,0;\n}\nelse\n   percentheal -100,-100;",
+      "equip_script": null,
+      "unequip_script": null
+    },
+    "1750": {
+      "id": 1750,
+      "aegis": "Arrow",
+      "name": "Arrow",
+      "type": "Ammo",
+      "subtype": "Arrow",
+      "buy": 1,
+      "sell": 0,
+      "weight": 1,
+      "attack": 25,
+      "defense": 0,
+      "range": 0,
+      "slots": 0,
+      "jobs": "Arqueiro, Mercenário, Bardo/Odalisca, Caçador, Arruaceiro, Gatuno",
+      "locations": "Ammo",
+      "weapon_level": 0,
+      "equip_level_min": 1,
+      "equip_level_max": 0,
+      "refineable": 0,
+      "gender": "",
+      "script": null,
+      "equip_script": null,
+      "unequip_script": null
+    },
+    "2304": {
+      "id": 2304,
+      "aegis": "Leather_Jacket_",
+      "name": "Jacket",
+      "type": "Armor",
+      "subtype": "",
+      "buy": 200,
+      "sell": 100,
+      "weight": 200,
+      "attack": 0,
+      "defense": 2,
+      "range": 0,
+      "slots": 1,
+      "jobs": "",
+      "locations": "Armor",
+      "weapon_level": 0,
+      "equip_level_min": 0,
+      "equip_level_max": 0,
+      "refineable": 1,
+      "gender": "",
+      "script": null,
+      "equip_script": null,
+      "unequip_script": null
+    },
+    "2404": {
+      "id": 2404,
+      "aegis": "Shoes_",
+      "name": "Shoes",
+      "type": "Armor",
+      "subtype": "",
+      "buy": 3500,
+      "sell": 1750,
+      "weight": 400,
+      "attack": 0,
+      "defense": 2,
+      "range": 0,
+      "slots": 1,
+      "jobs": "Todas",
+      "locations": "Shoes",
+      "weapon_level": 0,
+      "equip_level_min": 0,
+      "equip_level_max": 0,
+      "refineable": 1,
+      "gender": "",
+      "script": null,
+      "equip_script": null,
+      "unequip_script": null
+    },
+    "2504": {
+      "id": 2504,
+      "aegis": "Muffler_",
+      "name": "Muffler",
+      "type": "Armor",
+      "subtype": "",
+      "buy": 5000,
+      "sell": 2500,
+      "weight": 400,
+      "attack": 0,
+      "defense": 2,
+      "range": 0,
+      "slots": 1,
+      "jobs": "Todas",
+      "locations": "Garment",
+      "weapon_level": 0,
+      "equip_level_min": 0,
+      "equip_level_max": 0,
+      "refineable": 1,
+      "gender": "",
+      "script": null,
+      "equip_script": null,
+      "unequip_script": null
+    }
+  },
+  "refine": [
+    {
+      "group": "Armor",
+      "weapon_level": 1,
+      "normal": [
+        {
+          "level": 1,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 2000,
+          "Material": "Elunium"
+        },
+        {
+          "level": 2,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 2000,
+          "Material": "Elunium"
+        },
+        {
+          "level": 3,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 2000,
+          "Material": "Elunium"
+        },
+        {
+          "level": 4,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 2000,
+          "Material": "Elunium"
+        },
+        {
+          "level": 5,
+          "Type": "Normal",
+          "Rate": 6000,
+          "Price": 2000,
+          "Material": "Elunium",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 6,
+          "Type": "Normal",
+          "Rate": 4000,
+          "Price": 2000,
+          "Material": "Elunium",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 7,
+          "Type": "Normal",
+          "Rate": 4000,
+          "Price": 2000,
+          "Material": "Elunium",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 8,
+          "Type": "Normal",
+          "Rate": 2000,
+          "Price": 2000,
+          "Material": "Elunium",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 9,
+          "Type": "Normal",
+          "Rate": 2000,
+          "Price": 2000,
+          "Material": "Elunium",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 10,
+          "Type": "Normal",
+          "Rate": 1000,
+          "Price": 2000,
+          "Material": "Elunium",
+          "BreakingRate": 10000
+        }
+      ]
+    },
+    {
+      "group": "Weapon",
+      "weapon_level": 1,
+      "normal": [
+        {
+          "level": 1,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 50,
+          "Material": "Phracon"
+        },
+        {
+          "level": 2,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 50,
+          "Material": "Phracon"
+        },
+        {
+          "level": 3,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 50,
+          "Material": "Phracon"
+        },
+        {
+          "level": 4,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 50,
+          "Material": "Phracon"
+        },
+        {
+          "level": 5,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 50,
+          "Material": "Phracon"
+        },
+        {
+          "level": 6,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 50,
+          "Material": "Phracon"
+        },
+        {
+          "level": 7,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 50,
+          "Material": "Phracon"
+        },
+        {
+          "level": 8,
+          "Type": "Normal",
+          "Rate": 6000,
+          "Price": 50,
+          "Material": "Phracon",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 9,
+          "Type": "Normal",
+          "Rate": 4000,
+          "Price": 50,
+          "Material": "Phracon",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 10,
+          "Type": "Normal",
+          "Rate": 2000,
+          "Price": 50,
+          "Material": "Phracon",
+          "BreakingRate": 10000
+        }
+      ]
+    },
+    {
+      "group": "Weapon",
+      "weapon_level": 2,
+      "normal": [
+        {
+          "level": 1,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 200,
+          "Material": "Emveretarcon"
+        },
+        {
+          "level": 2,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 200,
+          "Material": "Emveretarcon"
+        },
+        {
+          "level": 3,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 200,
+          "Material": "Emveretarcon"
+        },
+        {
+          "level": 4,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 200,
+          "Material": "Emveretarcon"
+        },
+        {
+          "level": 5,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 200,
+          "Material": "Emveretarcon"
+        },
+        {
+          "level": 6,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 200,
+          "Material": "Emveretarcon"
+        },
+        {
+          "level": 7,
+          "Type": "Normal",
+          "Rate": 6000,
+          "Price": 200,
+          "Material": "Emveretarcon",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 8,
+          "Type": "Normal",
+          "Rate": 4000,
+          "Price": 200,
+          "Material": "Emveretarcon",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 9,
+          "Type": "Normal",
+          "Rate": 2000,
+          "Price": 200,
+          "Material": "Emveretarcon",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 10,
+          "Type": "Normal",
+          "Rate": 2000,
+          "Price": 200,
+          "Material": "Emveretarcon",
+          "BreakingRate": 10000
+        }
+      ]
+    },
+    {
+      "group": "Weapon",
+      "weapon_level": 3,
+      "normal": [
+        {
+          "level": 1,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 5000,
+          "Material": "Oridecon"
+        },
+        {
+          "level": 2,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 5000,
+          "Material": "Oridecon"
+        },
+        {
+          "level": 3,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 5000,
+          "Material": "Oridecon"
+        },
+        {
+          "level": 4,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 5000,
+          "Material": "Oridecon"
+        },
+        {
+          "level": 5,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 5000,
+          "Material": "Oridecon"
+        },
+        {
+          "level": 6,
+          "Type": "Normal",
+          "Rate": 6000,
+          "Price": 5000,
+          "Material": "Oridecon",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 7,
+          "Type": "Normal",
+          "Rate": 5000,
+          "Price": 5000,
+          "Material": "Oridecon",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 8,
+          "Type": "Normal",
+          "Rate": 2000,
+          "Price": 5000,
+          "Material": "Oridecon",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 9,
+          "Type": "Normal",
+          "Rate": 2000,
+          "Price": 5000,
+          "Material": "Oridecon",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 10,
+          "Type": "Normal",
+          "Rate": 2000,
+          "Price": 5000,
+          "Material": "Oridecon",
+          "BreakingRate": 10000
+        }
+      ]
+    },
+    {
+      "group": "Weapon",
+      "weapon_level": 4,
+      "normal": [
+        {
+          "level": 1,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 20000,
+          "Material": "Oridecon"
+        },
+        {
+          "level": 2,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 20000,
+          "Material": "Oridecon"
+        },
+        {
+          "level": 3,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 20000,
+          "Material": "Oridecon"
+        },
+        {
+          "level": 4,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 20000,
+          "Material": "Oridecon"
+        },
+        {
+          "level": 5,
+          "Type": "Normal",
+          "Rate": 6000,
+          "Price": 20000,
+          "Material": "Oridecon",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 6,
+          "Type": "Normal",
+          "Rate": 4000,
+          "Price": 20000,
+          "Material": "Oridecon",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 7,
+          "Type": "Normal",
+          "Rate": 4000,
+          "Price": 20000,
+          "Material": "Oridecon",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 8,
+          "Type": "Normal",
+          "Rate": 2000,
+          "Price": 20000,
+          "Material": "Oridecon",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 9,
+          "Type": "Normal",
+          "Rate": 2000,
+          "Price": 20000,
+          "Material": "Oridecon",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 10,
+          "Type": "Normal",
+          "Rate": 1000,
+          "Price": 20000,
+          "Material": "Oridecon",
+          "BreakingRate": 10000
+        }
+      ]
+    },
+    {
+      "group": "Shadow_Armor",
+      "weapon_level": 1,
+      "normal": [
+        {
+          "level": 1,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 10000,
+          "Material": "Elunium"
+        },
+        {
+          "level": 2,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 10000,
+          "Material": "Elunium"
+        },
+        {
+          "level": 3,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 10000,
+          "Material": "Elunium"
+        },
+        {
+          "level": 4,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 10000,
+          "Material": "Elunium"
+        },
+        {
+          "level": 5,
+          "Type": "Normal",
+          "Rate": 6000,
+          "Price": 10000,
+          "Material": "Elunium",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 6,
+          "Type": "Normal",
+          "Rate": 4000,
+          "Price": 10000,
+          "Material": "Elunium",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 7,
+          "Type": "Normal",
+          "Rate": 4000,
+          "Price": 10000,
+          "Material": "Elunium",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 8,
+          "Type": "Normal",
+          "Rate": 2000,
+          "Price": 10000,
+          "Material": "Elunium",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 9,
+          "Type": "Normal",
+          "Rate": 2000,
+          "Price": 10000,
+          "Material": "Elunium",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 10,
+          "Type": "Normal",
+          "Rate": 900,
+          "Price": 10000,
+          "Material": "Elunium",
+          "BreakingRate": 10000
+        }
+      ]
+    },
+    {
+      "group": "Shadow_Weapon",
+      "weapon_level": 1,
+      "normal": [
+        {
+          "level": 1,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 10000,
+          "Material": "Oridecon"
+        },
+        {
+          "level": 2,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 10000,
+          "Material": "Oridecon"
+        },
+        {
+          "level": 3,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 10000,
+          "Material": "Oridecon"
+        },
+        {
+          "level": 4,
+          "Type": "Normal",
+          "Rate": 10000,
+          "Price": 10000,
+          "Material": "Oridecon"
+        },
+        {
+          "level": 5,
+          "Type": "Normal",
+          "Rate": 6000,
+          "Price": 10000,
+          "Material": "Oridecon",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 6,
+          "Type": "Normal",
+          "Rate": 4000,
+          "Price": 10000,
+          "Material": "Oridecon",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 7,
+          "Type": "Normal",
+          "Rate": 4000,
+          "Price": 10000,
+          "Material": "Oridecon",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 8,
+          "Type": "Normal",
+          "Rate": 2000,
+          "Price": 10000,
+          "Material": "Oridecon",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 9,
+          "Type": "Normal",
+          "Rate": 2000,
+          "Price": 10000,
+          "Material": "Oridecon",
+          "BreakingRate": 10000
+        },
+        {
+          "level": 10,
+          "Type": "Normal",
+          "Rate": 900,
+          "Price": 10000,
+          "Material": "Oridecon",
+          "BreakingRate": 10000
+        }
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "Id": 89,
+      "Name": "WZ_STORMGUST",
+      "MaxLevel": 10,
+      "CastTime": [
+        {
+          "Level": 1,
+          "Time": 6000
+        },
+        {
+          "Level": 2,
+          "Time": 7000
+        },
+        {
+          "Level": 3,
+          "Time": 8000
+        },
+        {
+          "Level": 4,
+          "Time": 9000
+        },
+        {
+          "Level": 5,
+          "Time": 10000
+        },
+        {
+          "Level": 6,
+          "Time": 11000
+        },
+        {
+          "Level": 7,
+          "Time": 12000
+        },
+        {
+          "Level": 8,
+          "Time": 13000
+        },
+        {
+          "Level": 9,
+          "Time": 14000
+        },
+        {
+          "Level": 10,
+          "Time": 15000
+        }
+      ],
+      "AfterCastActDelay": 5000,
+      "Requires": {
+        "SpCost": 78
+      }
+    },
+    {
+      "Id": 271,
+      "Name": "MO_EXTREMITYFIST",
+      "MaxLevel": 5,
+      "CastTime": [
+        {
+          "Level": 1,
+          "Time": 4000
+        },
+        {
+          "Level": 2,
+          "Time": 3500
+        },
+        {
+          "Level": 3,
+          "Time": 3000
+        },
+        {
+          "Level": 4,
+          "Time": 2500
+        },
+        {
+          "Level": 5,
+          "Time": 2000
+        }
+      ],
+      "AfterCastActDelay": [
+        {
+          "Level": 1,
+          "Time": 3000
+        },
+        {
+          "Level": 2,
+          "Time": 2500
+        },
+        {
+          "Level": 3,
+          "Time": 2000
+        },
+        {
+          "Level": 4,
+          "Time": 1500
+        },
+        {
+          "Level": 5,
+          "Time": 1000
+        }
+      ],
+      "Requires": {
+        "SpCost": 1,
+        "Weapon": {
+          "Fist": true,
+          "Dagger": true,
+          "1hSword": true,
+          "2hSword": true,
+          "1hSpear": true,
+          "2hSpear": true,
+          "1hAxe": true,
+          "2hAxe": true,
+          "Mace": true,
+          "2hMace": true,
+          "Staff": true,
+          "Knuckle": true,
+          "Musical": true,
+          "Whip": true,
+          "Book": true,
+          "Katar": true,
+          "Revolver": true,
+          "Rifle": true,
+          "Gatling": true,
+          "Shotgun": true,
+          "Grenade": true,
+          "Huuma": true
+        },
+        "Status": {
+          "Explosionspirits": true
+        },
+        "SpiritSphereCost": 5
+      }
+    },
+    {
+      "Id": 321,
+      "Name": "BA_POEMBRAGI",
+      "MaxLevel": 10,
+      "Requires": {
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 40
+          },
+          {
+            "Level": 2,
+            "Amount": 45
+          },
+          {
+            "Level": 3,
+            "Amount": 50
+          },
+          {
+            "Level": 4,
+            "Amount": 55
+          },
+          {
+            "Level": 5,
+            "Amount": 60
+          },
+          {
+            "Level": 6,
+            "Amount": 65
+          },
+          {
+            "Level": 7,
+            "Amount": 70
+          },
+          {
+            "Level": 8,
+            "Amount": 75
+          },
+          {
+            "Level": 9,
+            "Amount": 80
+          },
+          {
+            "Level": 10,
+            "Amount": 85
+          }
+        ],
+        "Weapon": {
+          "Musical": true,
+          "Whip": true
+        }
+      }
+    },
+    {
+      "Id": 361,
+      "Name": "HP_ASSUMPTIO",
+      "MaxLevel": 5,
+      "CastTime": [
+        {
+          "Level": 1,
+          "Time": 1000
+        },
+        {
+          "Level": 2,
+          "Time": 1500
+        },
+        {
+          "Level": 3,
+          "Time": 2000
+        },
+        {
+          "Level": 4,
+          "Time": 2500
+        },
+        {
+          "Level": 5,
+          "Time": 3000
+        }
+      ],
+      "AfterCastActDelay": [
+        {
+          "Level": 1,
+          "Time": 1100
+        },
+        {
+          "Level": 2,
+          "Time": 1200
+        },
+        {
+          "Level": 3,
+          "Time": 1300
+        },
+        {
+          "Level": 4,
+          "Time": 1400
+        },
+        {
+          "Level": 5,
+          "Time": 1500
+        }
+      ],
+      "Requires": {
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 20
+          },
+          {
+            "Level": 2,
+            "Amount": 30
+          },
+          {
+            "Level": 3,
+            "Amount": 40
+          },
+          {
+            "Level": 4,
+            "Amount": 50
+          },
+          {
+            "Level": 5,
+            "Amount": 60
+          }
+        ]
+      }
+    },
+    {
+      "Id": 368,
+      "Name": "PA_SACRIFICE",
+      "MaxLevel": 5,
+      "AfterCastActDelay": 2000,
+      "Requires": {
+        "SpCost": 100
+      }
+    },
+    {
+      "Id": 374,
+      "Name": "PF_SOULCHANGE",
+      "MaxLevel": 1,
+      "CastTime": 3000,
+      "AfterCastActDelay": 5000,
+      "Requires": {
+        "SpCost": 5
+      }
+    },
+    {
+      "Id": 378,
+      "Name": "ASC_EDP",
+      "MaxLevel": 5,
+      "AfterCastActDelay": 2000,
+      "Requires": {
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 60
+          },
+          {
+            "Level": 2,
+            "Amount": 70
+          },
+          {
+            "Level": 3,
+            "Amount": 80
+          },
+          {
+            "Level": 4,
+            "Amount": 90
+          },
+          {
+            "Level": 5,
+            "Amount": 100
+          }
+        ],
+        "ItemCost": [
+          {
+            "Item": "Poison_Bottle",
+            "Amount": 1
+          }
+        ]
+      }
+    },
+    {
+      "Id": 382,
+      "Name": "SN_SHARPSHOOTING",
+      "MaxLevel": 5,
+      "CastTime": 2000,
+      "AfterCastActDelay": 1500,
+      "Requires": {
+        "SpCost": [
+          {
+            "Level": 1,
+            "Amount": 18
+          },
+          {
+            "Level": 2,
+            "Amount": 21
+          },
+          {
+            "Level": 3,
+            "Amount": 24
+          },
+          {
+            "Level": 4,
+            "Amount": 27
+          },
+          {
+            "Level": 5,
+            "Amount": 30
+          }
+        ],
+        "Weapon": {
+          "Bow": true
+        },
+        "Ammo": {
+          "Arrow": true
+        },
+        "AmmoAmount": 1
+      }
+    },
+    {
+      "Id": 490,
+      "Name": "CR_ACIDDEMONSTRATION",
+      "MaxLevel": 10,
+      "CastTime": 1000,
+      "AfterCastActDelay": 1000,
+      "Requires": {
+        "SpCost": 30,
+        "ItemCost": [
+          {
+            "Item": "Fire_Bottle",
+            "Amount": 1
+          },
+          {
+            "Item": "Acid_Bottle",
+            "Amount": 1
+          }
+        ]
+      }
+    }
+  ],
+  "warp_database": [
+    [
+      "$QW_DW_OFF",
+      "1"
+    ]
+  ],
+  "drop_examples": [
+    {
+      "mob_id": 1086,
+      "idx": 0,
+      "item_id": 969,
+      "rate": 1000,
+      "rate_final": 3000,
+      "mvp": 0,
+      "steal_protected": 0,
+      "mob": "GOLDEN_BUG",
+      "item": "Gold"
+    },
+    {
+      "mob_id": 1289,
+      "idx": 3,
+      "item_id": 969,
+      "rate": 100,
+      "rate_final": 300,
+      "mvp": 0,
+      "steal_protected": 0,
+      "mob": "MAYA_PUPLE",
+      "item": "Gold"
+    },
+    {
+      "mob_id": 1681,
+      "idx": 6,
+      "item_id": 12040,
+      "rate": 300,
+      "rate_final": 3000,
+      "mvp": 0,
+      "steal_protected": 0,
+      "mob": "GEMINI",
+      "item": "Stone of Sage"
+    },
+    {
+      "mob_id": 1708,
+      "idx": 0,
+      "item_id": 7444,
+      "rate": 1000,
+      "rate_final": 1000,
+      "mvp": 0,
+      "steal_protected": 0,
+      "mob": "THANATOS",
+      "item": "Treasure Box"
+    }
+  ],
+  "mvp": [
+    {
+      "id": 1039,
+      "aegis": "BAPHOMET",
+      "name": "Baphomet",
+      "level": 81,
+      "hp": 668000,
+      "sp": 0,
+      "base_exp": 107250,
+      "job_exp": 37895,
+      "mvp_exp": 53625,
+      "attack": 3220,
+      "attack2": 4040,
+      "defense": 35,
+      "magic_defense": 45,
+      "str": 1,
+      "agi": 152,
+      "vit": 30,
+      "int": 85,
+      "dex": 120,
+      "luk": 95,
+      "attack_range": 2,
+      "size": "Large",
+      "race": "Demon",
+      "element": "Dark",
+      "element_level": 3,
+      "walk_speed": 100,
+      "attack_delay": 768,
+      "class": "Boss",
+      "modes": "Mvp",
+      "is_mvp": 1,
+      "npc_sale_expected": 558.3
+    },
+    {
+      "id": 1086,
+      "aegis": "GOLDEN_BUG",
+      "name": "Besouro-Ladrao Dourado",
+      "level": 64,
+      "hp": 126000,
+      "sp": 0,
+      "base_exp": 14300,
+      "job_exp": 7150,
+      "mvp_exp": 7150,
+      "attack": 870,
+      "attack2": 1145,
+      "defense": 60,
+      "magic_defense": 45,
+      "str": 65,
+      "agi": 75,
+      "vit": 35,
+      "int": 45,
+      "dex": 85,
+      "luk": 150,
+      "attack_range": 1,
+      "size": "Large",
+      "race": "Insect",
+      "element": "Fire",
+      "element_level": 2,
+      "walk_speed": 100,
+      "attack_delay": 768,
+      "class": "Boss",
+      "modes": "Mvp",
+      "is_mvp": 1,
+      "npc_sale_expected": 30561.5
+    },
+    {
+      "id": 1751,
+      "aegis": "RANDGRIS",
+      "name": "Valquiria Randgris",
+      "level": 99,
+      "hp": 3567200,
+      "sp": 0,
+      "base_exp": 2854900,
+      "job_exp": 3114520,
+      "mvp_exp": 1427450,
+      "attack": 5560,
+      "attack2": 9980,
+      "defense": 25,
+      "magic_defense": 42,
+      "str": 100,
+      "agi": 120,
+      "vit": 30,
+      "int": 120,
+      "dex": 220,
+      "luk": 210,
+      "attack_range": 3,
+      "size": "Large",
+      "race": "Angel",
+      "element": "Holy",
+      "element_level": 4,
+      "walk_speed": 100,
+      "attack_delay": 576,
+      "class": "Boss",
+      "modes": "Mvp",
+      "is_mvp": 1,
+      "npc_sale_expected": 59100.0
+    },
+    {
+      "id": 1832,
+      "aegis": "IFRIT",
+      "name": "Ifrit",
+      "level": 99,
+      "hp": 7700000,
+      "sp": 0,
+      "base_exp": 3154321,
+      "job_exp": 3114520,
+      "mvp_exp": 1577160,
+      "attack": 13530,
+      "attack2": 17000,
+      "defense": 40,
+      "magic_defense": 50,
+      "str": 120,
+      "agi": 180,
+      "vit": 25,
+      "int": 190,
+      "dex": 199,
+      "luk": 50,
+      "attack_range": 3,
+      "size": "Large",
+      "race": "Formless",
+      "element": "Fire",
+      "element_level": 4,
+      "walk_speed": 130,
+      "attack_delay": 212,
+      "class": "Boss",
+      "modes": "Mvp",
+      "is_mvp": 1,
+      "npc_sale_expected": 21165.0
+    }
+  ],
+  "normal_active_above100": [
+    {
+      "id": 1986,
+      "aegis": "TATACHO",
+      "name": "Tatacho",
+      "level": 106,
+      "hp": 39500,
+      "sp": 0,
+      "base_exp": 23700,
+      "job_exp": 13825,
+      "mvp_exp": 0,
+      "attack": 10000,
+      "attack2": 11000,
+      "defense": 20,
+      "magic_defense": 17,
+      "str": 106,
+      "agi": 40,
+      "vit": 30,
+      "int": 25,
+      "dex": 115,
+      "luk": 6,
+      "attack_range": 2,
+      "size": "Medium",
+      "race": "Brute",
+      "element": "Earth",
+      "element_level": 1,
+      "walk_speed": 150,
+      "attack_delay": 1000,
+      "class": "Normal",
+      "modes": "",
+      "is_mvp": 0
+    },
+    {
+      "id": 1987,
+      "aegis": "CENTIPEDE",
+      "name": "Centopeia",
+      "level": 110,
+      "hp": 45662,
+      "sp": 0,
+      "base_exp": 27397,
+      "job_exp": 15982,
+      "mvp_exp": 0,
+      "attack": 15000,
+      "attack2": 16000,
+      "defense": 40,
+      "magic_defense": 25,
+      "str": 112,
+      "agi": 43,
+      "vit": 30,
+      "int": 5,
+      "dex": 131,
+      "luk": 12,
+      "attack_range": 2,
+      "size": "Medium",
+      "race": "Insect",
+      "element": "Poison",
+      "element_level": 2,
+      "walk_speed": 150,
+      "attack_delay": 1000,
+      "class": "Normal",
+      "modes": "Detector",
+      "is_mvp": 0
+    },
+    {
+      "id": 1989,
+      "aegis": "HILLSRION",
+      "name": "Hillslion",
+      "level": 105,
+      "hp": 34600,
+      "sp": 0,
+      "base_exp": 20760,
+      "job_exp": 12110,
+      "mvp_exp": 0,
+      "attack": 5000,
+      "attack2": 5500,
+      "defense": 28,
+      "magic_defense": 15,
+      "str": 105,
+      "agi": 60,
+      "vit": 30,
+      "int": 15,
+      "dex": 115,
+      "luk": 5,
+      "attack_range": 1,
+      "size": "Small",
+      "race": "Brute",
+      "element": "Earth",
+      "element_level": 1,
+      "walk_speed": 100,
+      "attack_delay": 400,
+      "class": "Normal",
+      "modes": "",
+      "is_mvp": 0
+    },
+    {
+      "id": 1992,
+      "aegis": "CORNUS",
+      "name": "Cornus",
+      "level": 108,
+      "hp": 41220,
+      "sp": 0,
+      "base_exp": 30854,
+      "job_exp": 4427,
+      "mvp_exp": 0,
+      "attack": 12000,
+      "attack2": 13000,
+      "defense": 35,
+      "magic_defense": 80,
+      "str": 110,
+      "agi": 45,
+      "vit": 80,
+      "int": 200,
+      "dex": 105,
+      "luk": 10,
+      "attack_range": 2,
+      "size": "Medium",
+      "race": "Brute",
+      "element": "Holy",
+      "element_level": 3,
+      "walk_speed": 120,
+      "attack_delay": 1000,
+      "class": "Normal",
+      "modes": "",
+      "is_mvp": 0
+    },
+    {
+      "id": 1993,
+      "aegis": "NAGA",
+      "name": "Naga",
+      "level": 111,
+      "hp": 46708,
+      "sp": 0,
+      "base_exp": 30360,
+      "job_exp": 16348,
+      "mvp_exp": 0,
+      "attack": 8000,
+      "attack2": 8800,
+      "defense": 38,
+      "magic_defense": 15,
+      "str": 113,
+      "agi": 42,
+      "vit": 30,
+      "int": 108,
+      "dex": 122,
+      "luk": 13,
+      "attack_range": 3,
+      "size": "Large",
+      "race": "Brute",
+      "element": "Earth",
+      "element_level": 2,
+      "walk_speed": 150,
+      "attack_delay": 400,
+      "class": "Normal",
+      "modes": "",
+      "is_mvp": 0
+    },
+    {
+      "id": 1994,
+      "aegis": "LUCIOLA_VESPA",
+      "name": "Luciola Vespa",
+      "level": 104,
+      "hp": 32600,
+      "sp": 0,
+      "base_exp": 16300,
+      "job_exp": 11410,
+      "mvp_exp": 0,
+      "attack": 9000,
+      "attack2": 9900,
+      "defense": 29,
+      "magic_defense": 5,
+      "str": 104,
+      "agi": 56,
+      "vit": 30,
+      "int": 20,
+      "dex": 116,
+      "luk": 4,
+      "attack_range": 1,
+      "size": "Medium",
+      "race": "Insect",
+      "element": "Wind",
+      "element_level": 1,
+      "walk_speed": 110,
+      "attack_delay": 1000,
+      "class": "Normal",
+      "modes": "Detector",
+      "is_mvp": 0
+    },
+    {
+      "id": 2017,
+      "aegis": "RATA",
+      "name": "Rata",
+      "level": 107,
+      "hp": 216600,
+      "sp": 0,
+      "base_exp": 70012,
+      "job_exp": 34000,
+      "mvp_exp": 0,
+      "attack": 8000,
+      "attack2": 15000,
+      "defense": 32,
+      "magic_defense": 52,
+      "str": 1,
+      "agi": 51,
+      "vit": 22,
+      "int": 132,
+      "dex": 99,
+      "luk": 15,
+      "attack_range": 1,
+      "size": "Medium",
+      "race": "Demihuman",
+      "element": "Earth",
+      "element_level": 3,
+      "walk_speed": 150,
+      "attack_delay": 792,
+      "class": "Normal",
+      "modes": "",
+      "is_mvp": 0
+    },
+    {
+      "id": 2018,
+      "aegis": "DUNEYRR",
+      "name": "Duneyrr",
+      "level": 107,
+      "hp": 265100,
+      "sp": 0,
+      "base_exp": 83030,
+      "job_exp": 52000,
+      "mvp_exp": 0,
+      "attack": 16000,
+      "attack2": 19000,
+      "defense": 39,
+      "magic_defense": 35,
+      "str": 1,
+      "agi": 60,
+      "vit": 45,
+      "int": 89,
+      "dex": 105,
+      "luk": 15,
+      "attack_range": 1,
+      "size": "Medium",
+      "race": "Demihuman",
+      "element": "Earth",
+      "element_level": 3,
+      "walk_speed": 200,
+      "attack_delay": 672,
+      "class": "Normal",
+      "modes": "",
+      "is_mvp": 0
+    },
+    {
+      "id": 2024,
+      "aegis": "BRADIUM_GOLEM",
+      "name": "Golem de Bradio",
+      "level": 101,
+      "hp": 45200,
+      "sp": 0,
+      "base_exp": 14000,
+      "job_exp": 18920,
+      "mvp_exp": 0,
+      "attack": 12000,
+      "attack2": 13000,
+      "defense": 78,
+      "magic_defense": 22,
+      "str": 0,
+      "agi": 10,
+      "vit": 82,
+      "int": 25,
+      "dex": 60,
+      "luk": 12,
+      "attack_range": 1,
+      "size": "Large",
+      "race": "Formless",
+      "element": "Earth",
+      "element_level": 2,
+      "walk_speed": 300,
+      "attack_delay": 1008,
+      "class": "Normal",
+      "modes": "",
+      "is_mvp": 0
+    }
+  ],
+  "publication": {
+    "player_metrics_removed": true,
+    "read_only_collection": true
+  }
+}

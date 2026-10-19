@@ -25,6 +25,10 @@ substitui `deploy/rathena-overlay/`, não publica a aplicação web e não execu
 - `production-npc-fixes/`: registro da aplicação manual posterior dos dois patches
   na VPS, backup validado, reinício do map-server e conferência de saúde. Atualiza
   o estado histórico dos registros de proposta/laboratório; o backup fica na VPS.
+- `post-deploy-review/`: estabilidade, drops/spawns públicos, consumo real de poções
+  iniciais no laboratório e candidato textual de horário da Loteria. O candidato
+  foi ensaiado, sem aplicação na produção; as prioridades de combate continuam
+  condicionadas às sessões reais que ainda faltam.
 
 A referência continua EXP 300x, nível 255, atributos 185 e ASPD 197. Cenários de
 150/300/600 abates por hora são cálculos condicionais. Linhas de drops não são
@@ -70,6 +74,13 @@ ao lado do executor no pacote temporário enviado ao Linux. Compara duas instân
 sequenciais de map-server, encerrando a primeira antes de conferir/aplicar os patches
 nas cópias privadas. Limites: CPU 25%, 512 MiB e 600 s. Não instala ferramentas,
 não executa combate e não escreve nos NPCs instalados.
+
+O modo `--onboarding-checks` exige `isolated_onboarding_checks.py`, o pacote `bot`
+e `post-deploy-review/lottery-time-candidate.patch` ao lado do executor no pacote
+temporário. Usa o banco vazio do laboratório para criar dois personagens, consumir
+uma poção real por personagem e conferir o texto candidato e a regra de bilhete por
+conta. Limites: CPU 25%, 512 MiB e 300 s. Somente a cópia privada da Loteria recebe
+o patch, convertido para CP1252 para corresponder à codificação instalada.
 
 ## Riscos e rollback
 

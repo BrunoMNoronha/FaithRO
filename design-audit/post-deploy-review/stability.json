@@ -1,0 +1,40 @@
+{
+  "services": {
+    "rathena-login": {
+      "ActiveState": "active",
+      "MainPID": "140817",
+      "NRestarts": "0"
+    },
+    "rathena-char": {
+      "ActiveState": "active",
+      "MainPID": "160495",
+      "NRestarts": "0"
+    },
+    "rathena-map": {
+      "ActiveState": "active",
+      "MainPID": "168672",
+      "NRestarts": "0"
+    },
+    "rathena-web": {
+      "ActiveState": "active",
+      "MainPID": "140820",
+      "NRestarts": "0"
+    },
+    "faithro-web": {
+      "ActiveState": "active",
+      "MainPID": "141001",
+      "NRestarts": "0"
+    }
+  },
+  "map_errors_after_latest_readiness": 0,
+  "http": {
+    "site": 200,
+    "health": 200
+  },
+  "backup_sha256": "0c26e1996fcf97b2f62fc17ef2f55961252875a9186b2a3b739cbb17c3a5bd6f",
+  "backup_members": 5,
+  "backup_mode": "0o600",
+  "system_timezone": "America/Sao_Paulo",
+  "map_process_TZ": [],
+  "checked_at_utc": "2026-10-19T06:27:11.573572+00:00"
+}

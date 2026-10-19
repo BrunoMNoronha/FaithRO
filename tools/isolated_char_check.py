@@ -8,6 +8,8 @@ Default mode does not launch map-server. --npc-checks and --service-checks add
 unchanged NPC dialogs in a world without monster spawns. Never installs packages
 or copies player accounts. --candidate-checks compares the installed NPCs with
 two explicit patches applied only to private temporary copies.
+--onboarding-checks exercises real inventory potion use and a lottery text patch
+only on a private temporary copy.
 """
 from __future__ import annotations
 
@@ -40,7 +42,7 @@ def namespace():
     return os.readlink('/proc/self/ns/net')
 
 
-def inner(folder, parent_net, npc_checks=False, service_checks=False, candidate_checks=False):
+def inner(folder, parent_net, npc_checks=False, service_checks=False, candidate_checks=False, onboarding_checks=False):
     folder=Path(folder).resolve()
     assert folder.parent==Path('/tmp') and folder.name.startswith('faithro-char-qa-')
     assert parent_net and namespace()!=parent_net, 'Private network namespace required'
@@ -181,9 +183,10 @@ def inner(folder, parent_net, npc_checks=False, service_checks=False, candidate_
             assert actual==[[501,100,0,1],[1201,1,2,1],[2301,1,16,1]], actual
         assert len(ids)==2 and len(set(ids))==2
         npc_result=None
-        if npc_checks or service_checks or candidate_checks:
+        if npc_checks or service_checks or candidate_checks or onboarding_checks:
             import importlib.util
-            helper_name=('isolated_candidate_checks.py' if candidate_checks else
+            helper_name=('isolated_onboarding_checks.py' if onboarding_checks else
+                         'isolated_candidate_checks.py' if candidate_checks else
                          'isolated_service_checks.py' if service_checks else 'isolated_npc_checks.py')
             spec=importlib.util.spec_from_file_location('_npc_qa',Path(__file__).with_name(helper_name))
             helper=importlib.util.module_from_spec(spec);spec.loader.exec_module(helper)
@@ -193,10 +196,11 @@ def inner(folder, parent_net, npc_checks=False, service_checks=False, candidate_
                           'fresh_database':True,'production_accounts_copied':False,
                           'qa_characters_created':len(ids),'inventory':inventory,
                           'starting_red_potions_per_character':100,'knife_and_shirt_preserved':True,
-                          'map_server_started':npc_checks or service_checks or candidate_checks,'combats_executed':0,
+                          'map_server_started':npc_checks or service_checks or candidate_checks or onboarding_checks,'combats_executed':0,
                           'npc_checks':npc_result if npc_checks else None,
                           'service_checks':npc_result if service_checks else None,
                           'candidate_checks':npc_result if candidate_checks else None,
+                          'onboarding_checks':npc_result if onboarding_checks else None,
                           'client_modules_from_temporary_bundle':bundled.is_dir(),
                           'player_performance_metrics':False}))
     except Exception as error:
@@ -231,17 +235,18 @@ def main():
     modes.add_argument('--npc-checks',action='store_true')
     modes.add_argument('--service-checks',action='store_true')
     modes.add_argument('--candidate-checks',action='store_true')
+    modes.add_argument('--onboarding-checks',action='store_true')
     args=parser.parse_args()
     if args.inner:
-        inner(args.inner,args.parent_net,args.npc_checks,args.service_checks,args.candidate_checks);return
+        inner(args.inner,args.parent_net,args.npc_checks,args.service_checks,args.candidate_checks,args.onboarding_checks);return
     if sys.platform!='linux' or os.geteuid()!=0:
         raise SystemExit('Run on Linux as root; no action taken.')
     required=['systemd-run','unshare','ip','mount','findmnt','mariadb-install-db','mariadbd','mariadb']
-    if args.candidate_checks:required.append('git')
+    if args.candidate_checks or args.onboarding_checks:required.append('git')
     assert all(shutil.which(p) for p in required), 'Existing isolation/MariaDB tools required'
     available=int(next(l.split()[1] for l in Path('/proc/meminfo').read_text().splitlines() if l.startswith('MemAvailable:')))
-    memory=512 if args.npc_checks or args.service_checks or args.candidate_checks else 384
-    runtime=600 if args.candidate_checks else 420 if args.service_checks else 300 if args.npc_checks else 180
+    memory=512 if args.npc_checks or args.service_checks or args.candidate_checks or args.onboarding_checks else 384
+    runtime=600 if args.candidate_checks else 420 if args.service_checks else 300 if args.npc_checks or args.onboarding_checks else 180
     assert available>=(memory+384)*1024, 'Insufficient available RAM for isolated check plus reserve'
     before=pids();assert all(before.values())
     conf=SOURCE/'conf/import/char_conf.txt'
@@ -257,7 +262,8 @@ def main():
             sys.executable,'-B',str(Path(__file__).resolve()),'--inner',folder,'--parent-net',parent,
             *(['--npc-checks'] if args.npc_checks else []),
             *(['--service-checks'] if args.service_checks else []),
-            *(['--candidate-checks'] if args.candidate_checks else [])],
+            *(['--candidate-checks'] if args.candidate_checks else []),
+            *(['--onboarding-checks'] if args.onboarding_checks else [])],
             text=True,capture_output=True,timeout=runtime+20)
         lines=[line for line in result.stdout.splitlines() if line.startswith('{')]
         data=json.loads(lines[-1]) if lines else {'status':'failed','error':'No structured result from isolated process'}
