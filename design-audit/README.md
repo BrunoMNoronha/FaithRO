@@ -18,7 +18,10 @@ substitui `deploy/rathena-overlay/`, não publica a aplicação web e não execu
 - `balance-session-kit/`: equipamentos, habilidades, plano e 16 fichas pendentes.
   Nenhuma ficha representa combate executado. `prepare.py` nunca sobrescreve dados.
 - `game-lab/`, `npc-runtime/`, `service-runtime/`: resultados sintéticos dos
-  laboratórios descartáveis e propostas de correção ainda não aplicadas.
+  laboratórios descartáveis e propostas de correção.
+- `candidate-runtime/`: comparação posterior dos NPCs instalados com os dois patches,
+  nove builds de cura, 40 combinações de tarifa e cinco recusas por saldo insuficiente.
+  Os patches foram aplicados somente a cópias privadas temporárias.
 
 A referência continua EXP 300x, nível 255, atributos 185 e ASPD 197. Cenários de
 150/300/600 abates por hora são cálculos condicionais. Linhas de drops não são
@@ -58,12 +61,20 @@ Uma repetição manual cria banco novo e servidores próprios em namespaces priv
 com limites de recursos, fontes somente de leitura e remoção do ambiente ao sair.
 O mini-cliente usa `PACKETVER 20260219`, conforme a instalação analisada.
 
+O modo manual `--candidate-checks` exige `git` já instalado, o helper
+`isolated_candidate_checks.py`, o pacote `bot` e os dois patches de `service-runtime/`
+ao lado do executor no pacote temporário enviado ao Linux. Compara duas instâncias
+sequenciais de map-server, encerrando a primeira antes de conferir/aplicar os patches
+nas cópias privadas. Limites: CPU 25%, 512 MiB e 600 s. Não instala ferramentas,
+não executa combate e não escreve nos NPCs instalados.
+
 ## Riscos e rollback
 
-Os patches candidatos de Curandeira e Warpra são arquivos de referência. Não foram
-aplicados ou ensaiados; os critérios de adoção/descarte estão em
-`service-runtime/recommendations.json`. Não habilitar calabouços da Warpra em
-produção a partir desta publicação.
+Os patches candidatos de Curandeira e Warpra são arquivos de referência validados no
+laboratório, sem aplicação no overlay operacional ou na produção. O registro original
+de propostas permanece em `service-runtime/recommendations.json`; os resultados e
+critérios atualizados estão em `candidate-runtime/recommendations.json`. Não habilitar
+calabouços da Warpra em produção a partir desta publicação.
 
 Risco deste PR: interpretar resultados funcionais sintéticos como farm real ou
 aplicar procedimentos específicos da instalação em outro layout. O relatório

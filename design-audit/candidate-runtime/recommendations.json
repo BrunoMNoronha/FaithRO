@@ -1,0 +1,46 @@
+{
+  "status": "validated_in_isolated_lab_not_deployed",
+  "supersedes_untested_status_in": "../service-runtime/recommendations.json",
+  "applied_to_production": false,
+  "applied_to_operational_overlay": false,
+  "confidence": "high for tested functional behavior",
+  "healer": {
+    "candidate_cases": 9,
+    "baseline_sp": [
+      [
+        512,
+        563
+      ],
+      [
+        1018,
+        1072
+      ]
+    ],
+    "candidate_sp_deficits": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "cooldown_and_buff_renewal_cases": 9,
+    "expected_effect": "Fill final maximum after buffs; preserve free service, 240s buffs through 99 and 3s cooldown",
+    "risk": "Low within tested states; does not cover every buff/equipment interaction",
+    "adopt_if": "Future controlled rollout reproduces complete HP/SP, price, buff-cap and cooldown invariants",
+    "discard_or_rollback_if": "Any incomplete HP/SP, charge, new grant above 99 or changed cooldown/duration"
+  },
+  "warpra": {
+    "candidate_cases": 40,
+    "insufficient_funds_cases": 5,
+    "all_previews_equal_net_debit": true,
+    "expected_effect": "Display shared plus GM base/depth fees once before selection; preserve debit",
+    "risk": "Low for the tested Juperos routes; other route-specific restrictions were not exercised",
+    "adopt_if": "Preview remains equal to debit after controlled rollout; DW_OFF remains 1 unless separately authorized",
+    "discard_or_rollback_if": "Preview/debit divergence, double charge, debit on insufficient balance or unexpected enablement"
+  },
+  "next_round": "Prepare a scoped deployment and rollback plan for the two tested patches; no automatic production change"
+}

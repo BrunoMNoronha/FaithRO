@@ -1,0 +1,20 @@
+{
+  "qa_units_remaining": [],
+  "qa_directories_remaining": [],
+  "production_services": {
+    "rathena-login": "active",
+    "rathena-char": "active",
+    "rathena-map": "active",
+    "rathena-web": "active",
+    "faithro-web": "active"
+  },
+  "production_warpra_config": {
+    "$QW_DW_OFF": "1",
+    "$QW_MapUserShow": "1"
+  },
+  "production_npc_sha256": {
+    "npc/custom/faithro/ptbr/custom/healer.txt": "6848c0f815d0a76a550f4b6915e834b8245a96b41bd59813b5ce52d16b0995d1",
+    "npc/custom/faithro/ptbr/custom/etc/quest_warper.txt": "5279ae4ddc80426297f3bfdef55f8b456eaaa5c307f3f0b08d5896eca8047bb9"
+  },
+  "checked_at_utc": "2026-10-19T06:12:18.495429+00:00"
+}
