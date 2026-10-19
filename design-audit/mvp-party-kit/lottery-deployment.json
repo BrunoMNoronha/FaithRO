@@ -1,0 +1,32 @@
+{
+  "status": "deployed",
+  "backup": "/var/backups/faithro/npc-lottery-time-20261019T071144Z.tar.gz",
+  "backup_sha256": "ce66f9809cd5ab7846b42de49f6db2566f502f6cbc854bb867515d0ecd0e4470",
+  "window_started_utc": "2026-10-19T07:11:44.732632+00:00",
+  "window_seconds": 3.75,
+  "restarted_services": [
+    "rathena-map"
+  ],
+  "other_service_pids_unchanged": true,
+  "runtime_selftest": [
+    "[Debug]: script debug : 0 110013172 : [FaithRO] modo=pre-renewal exp=300x/300x drop_comum=100x carta=10x",
+    "[Debug]: script debug : 0 110013172 : [FaithRO] max_parameter=185 max_trans_parameter=185 max_baby_parameter=150 max_aspd=197 aura_lv=255 multi_level_up_base=99"
+  ],
+  "new_map_errors": 0,
+  "protected_configuration_unchanged": true,
+  "lottery_schedule_preserved": "OnClock2045",
+  "lottery_text_aligned": true,
+  "files": {
+    "/home/rathena/rathena/npc/custom/faithro/ptbr/custom/etc/lottery.txt": {
+      "before_sha256": "4e1114ff73ca4add082087420ba7dbbba7dd9970b7adab9f30260c34d2eff819",
+      "after_sha256": "9dbbb64a8e449fb6765ff246312b5e9491c688e96d4bd1848ca00e9b887b4119"
+    },
+    "/root/faithro/deploy/server/npc/custom/faithro/ptbr/custom/etc/lottery.txt": {
+      "before_sha256": "0efdd9a8c06869fc653711feebed5e27375ab95b33e6b5f1972e9634d046e1cf",
+      "after_sha256": "89ee437f011af781f7e6e2fb71add9ac5e3f648fe3458cbe2287aac8e7689d97"
+    }
+  },
+  "database_writes_by_deployer": false,
+  "combats_executed": 0,
+  "rollback_used": false
+}

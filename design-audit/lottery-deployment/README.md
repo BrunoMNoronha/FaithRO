@@ -1,5 +1,10 @@
 # Horário da Loteria: implantação preparada, pendente de janela
 
+**Atualização posterior:** implantado em 19/10/2026 às 04:11 de São Paulo, quando
+não havia personagens conectados. Registro, backup e verificação nativa em
+[`../mvp-party-kit/README.md`](../mvp-party-kit/README.md). O restante desta seção
+preserva o estado histórico da preparação.
+
 A Loteria ainda anuncia **21h**, enquanto `OnClock2045` e o fuso
 `America/Sao_Paulo`, sem override TZ no map-server, determinam 20h45. O candidato
 textual já passou pelo laboratório nativo na rodada anterior. Preço, prêmio e
@@ -46,6 +51,7 @@ inicia o mapa com nova verificação de prontidão. Uma reversão manual posteri
 usar os dois arquivos desse backup, com mapa parado em nova janela sem jogadores;
 repetir as mesmas verificações de saúde. Backups e payload ficam fora do Git.
 
-Os novos testes exercitam recusas locais, com processos/banco/arquivos da VPS
+Os testes desta preparação exercitaram recusas locais, com processos/banco/arquivos da VPS
 substituídos por mocks. Não demonstram uma implantação ou restauração real desta
-Loteria. O caminho de sucesso e rollback desta variante permanece sem execução.
+Loteria. Naquele momento, sucesso e rollback desta variante permaneciam sem execução;
+a atualização acima registra a execução posterior do caminho de sucesso.

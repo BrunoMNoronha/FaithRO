@@ -1,6 +1,7 @@
-"""Native Red Potion use and lottery time-text candidate in the private QA lab.
+"""Native Red Potion use and validated lottery time text in the private QA lab.
 
-Only the temporary lottery copy receives the text patch. New synthetic characters
+Only an old temporary lottery copy receives the text patch; an exact deployed
+candidate hash is tested unchanged. New synthetic characters
 use one real inventory potion through the item-use packet; no battles or production SQL.
 """
 import hashlib
@@ -52,15 +53,22 @@ def run(folder, source, sql, spawn, wait_for, log, player_password):
         originals[rel]=hashlib.sha256(path.read_bytes()).hexdigest()
     patch=Path(__file__).with_name('lottery-time-candidate.patch')
     text=patch.read_text(encoding='utf-8')
+    assert hashlib.sha256(patch.read_bytes()).hexdigest()=='2173300a3b2204c4d09ef78d0c7713f01fbee3a1ff77239814ed2c12ba047cf8'
     expected='server/'+LOTTERY
     assert text.startswith('--- a/'+expected+'\n+++ b/'+expected+'\n')
     assert text.count('\n--- ')==0 and text.count('\n+++ ')==1
     native=folder/'lottery-time-candidate.patch'
     # Installed NPCs use CP1252. Git must compare patch/context in that same encoding.
     native.write_bytes(text.replace('--- a/server/','--- a/',1).replace('+++ b/server/','+++ b/',1).encode('cp1252'))
-    for args in [['git','apply','--check',str(native)],['git','apply',str(native)]]:
-        p=subprocess.run(args,cwd=folder,text=True,capture_output=True)
-        assert p.returncode==0,p.stderr[:400]
+    old_hash='4e1114ff73ca4add082087420ba7dbbba7dd9970b7adab9f30260c34d2eff819'
+    deployed_hash='9dbbb64a8e449fb6765ff246312b5e9491c688e96d4bd1848ca00e9b887b4119'
+    assert originals[LOTTERY] in (old_hash,deployed_hash),'Unreviewed lottery source drift'
+    patch_applied=originals[LOTTERY]==old_hash
+    if patch_applied:
+        for args in [['git','apply','--check',str(native)],['git','apply',str(native)]]:
+            p=subprocess.run(args,cwd=folder,text=True,capture_output=True)
+            assert p.returncode==0,p.stderr[:400]
+    assert hashlib.sha256((folder/LOTTERY).read_bytes()).hexdigest()==deployed_hash
     candidate=(folder/LOTTERY).read_text(encoding='cp1252')
     assert candidate.count('OnClock2045:')==1 and 'às 20h45 (horário de São Paulo).' in candidate
     assert 'às 21h.' not in candidate
@@ -150,5 +158,7 @@ def run(folder, source, sql, spawn, wait_for, log, player_password):
     return {'status':'passed','onboarding':cases,'saved_red_potion_amounts':[row[1] for row in saved],
             'lottery':lottery,'transcripts':transcripts,'patch_sha256':hashlib.sha256(patch.read_bytes()).hexdigest(),
             'installed_lottery_sha256':originals[LOTTERY],
+            'lottery_source_variant':'old_source_patched_in_private_lab' if patch_applied else 'deployed_candidate_unchanged',
+            'patch_applied_in_private_lab':patch_applied,
             'candidate_lottery_sha256':hashlib.sha256((folder/LOTTERY).read_bytes()).hexdigest(),
             'production_lottery_changed':False,'combats_executed':0,'player_performance_metrics':False}

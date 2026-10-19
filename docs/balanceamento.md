@@ -835,6 +835,56 @@ citados. Rollback desta rodada: remover a preparação local. A Loteria só rece
 alteração quando houver janela sem personagens conectados e backup validado; em
 falha posterior à parada, o executor restaura os originais e confere a prontidão.
 
+## Loteria implantada e MVP em dupla validável (19/10/2026)
+
+Esta rodada concluiu cinco frentes:
+
+1. **Loteria aplicada.** A primeira consulta ainda tinha um personagem conectado.
+   Ao terminar o trabalho local, uma nova consulta encontrou zero; o executor também
+   conferiu zero em dois checkpoints. A implantação ocorreu às 04:11:44 de São Paulo,
+   janela de 3,75 s, reiniciando apenas rathena-map. A única mudança é o anúncio
+   **20h45 (horário de São Paulo)**. Evento `OnClock2045`, preço e premiação foram
+   preservados. Backup dos dois originais e manifesto:
+   `/var/backups/faithro/npc-lottery-time-20261019T071144Z.tar.gz`, SHA-256
+   `ce66f9809cd5ab7846b42de49f6db2566f502f6cbc854bb867515d0ecd0e4470`.
+   O arquivo foi conferido antes da parada e reaberto após o deploy, com três entradas
+   e modo 600. O overlay operacional local corresponde ao espelho UTF-8 da VPS.
+2. **Saúde e regressão nativa.** Cinco serviços ativos, zero reinícios automáticos,
+   quatro PIDs preservados, nenhum erro novo de mapa/SQL e HTTP 200 no site/healthcheck.
+   Quatorze arquivos de referência de MVP/suporte continuam com os hashes da coleta.
+   O laboratório privado executou o hash implantado, sem reaplicar patch: anúncio
+   correto, compra de 4.750 e duplicidade bloqueada sem débito em dois personagens
+   da mesma conta. Ambos receberam 100 poções e salvaram 99 após uso com cura 1→40/40.
+   Nenhuma conta foi copiada da produção; nenhum combate ou sorteio foi executado;
+   laboratório, bundle e unidades temporárias foram removidos.
+3. **Custos conjuntos de MVP.** O novo analisador `tools/analyze_balance_mvp.py`
+   confere os ledgers de atacante e suporte, cancela transferências internas de
+   zeny/itens e recusa entradas externas durante o ensaio. Contador compartilhado
+   inclui chefe e invocações uma vez só e não entra em métrica individual de jogador.
+   Derrota da dupla exige ao menos uma morte, permitindo zero no suporte sobrevivente.
+   Buff recebido exige origem, nível e aplicações compatíveis com os casts declarados.
+   Compras e valor do estoque consumido continuam separados, sem dupla cobrança.
+4. **Painel e fichas pendentes.** O protocolo aceita quatro alvos, solo e uma classe
+   de suporte em 24 tentativas, ou solo/High Priest/Professor separados em 36, com
+   três repetições por condição. Exige builds de controle, níveis inicial/final,
+   flechas reconciliadas, painel real, IDs únicos, sessões sequenciais e combate
+   de até 600 s dentro da janela operacional. Falhas e timeouts entram nos custos
+   por vitória; sem vitória, o quociente fica desconhecido. Três exemplos e matriz
+   permanecem `pending`; o gerador não sobrescreve arquivos e a CLI recusa pendências.
+5. **Validação e limites.** Passaram 128 testes locais; o ensaio nativo posterior
+   também passou. Os cenários fictícios de 24/36 tentativas existem somente nas
+   fixtures de software, sem serem apresentados como observações reais. O protocolo
+   confere coerência declarada, não autentica servidor, não infere reagentes por skill
+   nem mede DPS/uptime individual. O piloto PvM real continua 0/3. EXP 300x, nível 255,
+   atributos 185 e ASPD 197 permanecem; não há recomendação numérica nova de combate.
+
+Objetivo, arquivos, comandos, impacto, confiança, aceite e rollback estão em
+`design-audit/mvp-party-kit/README.md`, junto dos registros de implantação, saúde e
+laboratório. Para reverter ferramentas, retirar os novos arquivos e restaurar o
+analisador anterior; fichas individuais antigas mantêm o comportamento por padrão.
+Rollback do texto implantado usa as duas cópias do backup em nova janela sem jogadores.
+Nenhuma reversão foi necessária nesta aplicação.
+
 ## Riscos deixados para depois
 
 - **Zeny vindo de drops.** Tratado em `docs/drops.md` (tetos por categoria, equipamento 30x,

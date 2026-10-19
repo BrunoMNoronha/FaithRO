@@ -1,0 +1,45 @@
+{
+  "checked_at_utc": "2026-10-19T07:16:23.406539+00:00",
+  "local_tests": {
+    "passed": 128,
+    "failed": 0
+  },
+  "python_ast_valid": true,
+  "json_valid": true,
+  "pending_examples_refused": {
+    "pending-gtb-high_priest.json": {
+      "exit_code": 2,
+      "metrics_stdout_empty": true
+    },
+    "pending-gtb-professor.json": {
+      "exit_code": 2,
+      "metrics_stdout_empty": true
+    },
+    "pending-gtb-solo.json": {
+      "exit_code": 2,
+      "metrics_stdout_empty": true
+    }
+  },
+  "native_post_deploy_check": "passed",
+  "production_change": "lottery_confirmation_text_only",
+  "lottery_deployment_status": "deployed",
+  "real_pvm_pilot_sessions": 0,
+  "real_mvp_attempts": 0,
+  "unit_test_panel_cases_are_not_combat_evidence": true,
+  "reference": {
+    "exp_rate": 300,
+    "max_level": 255,
+    "stat_cap": 185,
+    "aspd_cap": 197
+  },
+  "tool_sha256": {
+    "tools/analyze_balance_mvp.py": "94b93f0d649300dc74c270307106a6ff7b1bb678a9845331f2925ffed73edb83",
+    "tools/analyze_balance_session.py": "bba5902118d1abe79e8b372062dbf0b9e0ca1ee31da3e16802a3fa85fc25c754",
+    "tools/prepare_mvp_party.py": "c45ad77bf64afa754aa46eada68a12a28421d32245b40939a6b4971b0ad06cef",
+    "tools/isolated_char_check.py": "efa2cad72e22db5e6f61612bdbd35c2ae00a8ac5af8f2c4c39a0b0454c770b6e",
+    "tools/isolated_onboarding_checks.py": "e1f79a1e0e3dfdb43da032601f9310a07fab43405610e8602ee59cd7d95ae375",
+    "tools/tests/test_balance_mvp.py": "c0c28f799dcfc28c444811749316663d6475b49efe84a5f0047e0d6d12513de1",
+    ".github/workflows/validate-balance-review.yml": "af2c796bb719f26e749cf43cd0fbbf0770d75db36621b7e8cc9e2c0ff99fb2c2"
+  },
+  "automatic_balance_changes": false
+}

@@ -8,8 +8,8 @@ Default mode does not launch map-server. --npc-checks and --service-checks add
 unchanged NPC dialogs in a world without monster spawns. Never installs packages
 or copies player accounts. --candidate-checks compares the installed NPCs with
 two explicit patches applied only to private temporary copies.
---onboarding-checks exercises real inventory potion use and a lottery text patch
-only on a private temporary copy.
+--onboarding-checks exercises real inventory potion use and the reviewed lottery
+text, patching only an old private copy or testing an exact deployed candidate unchanged.
 """
 from __future__ import annotations
 

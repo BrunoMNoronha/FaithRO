@@ -95,6 +95,9 @@ Não cobrar item de skill que não foi usada nem ignorar estoque inicial consumi
    Registrar transferências internas em ambas as fichas e eliminá-las ao somar a
    party. O analisador de sessão existente confere o ledger de uma ficha; **não**
    valida automaticamente todos os custos/buffs da dupla. Exigir revisão conjunta.
+   A rodada posterior em `../mvp-party-kit/` acrescenta um protocolo e analisador
+   conjunto para transferências, custos e coerência dos buffs declarados. As fichas
+   v2 desta preparação não são automaticamente convertidas nem tratadas como observações.
 6. Registrar vitória, morte, timeout e abandono. Não apagar falhas nem transformar
    invocações mortas em vitória do chefe. Comparar custo total por tentativa e por
    vitória, sobrevivência e uptime do atacante; não chamar efeito da dupla de ganho
