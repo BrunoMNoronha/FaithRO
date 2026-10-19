@@ -625,6 +625,66 @@ Não houve combate, alteração de bancos/personagens/NPCs em produção ou ado�
 balanceamento. EXP 300x, nível 255, atributos 185 e ASPD 197 permanecem como referência;
 o piloto real continua pendente.
 
+## Ensaio dos candidatos após o PR #94 (19/10/2026)
+
+Esta rodada atualiza o estado dos dois patches de referência: foram ensaiados em
+cópias privadas dos NPCs, após uma execução de comparação com os arquivos instalados.
+O overlay operacional e a VPS continuam com os NPCs anteriores. As cinco etapas foram:
+
+1. **Branches e worktrees.** Nova busca em `C:/Development`, worktrees do Codex e
+   temporários encontrou duas cópias Git do FaithRO, ambas limpas antes desta rodada,
+   sem stashes, commits exclusivos nas branches antigas ou worktrees vinculados extras.
+   As branches dos PRs #93/#94 já pertencem ao histórico de `main`; nenhuma foi apagada,
+   resetada ou trocada na cópia antiga. O ensaio foi preparado na branch local
+   `test/candidatos-cura-warpra` do checkout Git.
+2. **Comparação da Curandeira.** O arquivo instalado repetiu 512/563 SP no Sniper 99
+   com INT 1. Com INT 90 e Anel de Morpheus (2648), ficou em 1.018/1.072. A cópia com
+   `percentheal` após os buffs completou 563/563 e 1.072/1.072, respectivamente.
+   A matriz candidata teve nove builds: Aprendiz 1 e Sniper 99/100/255, INT natural
+   1 ou 90, com/sem anel conforme nível. O anel vendido na loja foi conferido na base
+   instalada: nível mínimo 33, INT +1 e SP máximo +5%. Equipamento e atributos foram
+   preparados pelo controle de QA; não representam itens obtidos por um jogador.
+3. **Limites e repetição da cura.** Nas nove builds, HP/SP finais ficaram completos,
+   sem débito. Blessing/Increase AGI nível 10 foram concedidos no 1/99, com duração
+   observada próxima de 240 s; no 100/255 não foram concedidos. Após reduzir HP/SP pelo
+   controle do laboratório, clicar antes do prazo foi bloqueado; após o prazo configurado
+   de 3 s, curou novamente. A renovação dos buffs existentes também deixou SP completo.
+4. **Prévia e cobrança da Warpra.** Os arquivos instalados omitiram 25.000/50.000 do
+   menu no 100/200 e descontaram esses valores. O candidato passou em 40 combinações:
+   níveis 99/100/199/200/255 × usuários no menu ligados/desligados × Juperos andar
+   1/2 (profundidade 0/1) × preços de GM zerados/adicionais. O perfil adicional foi
+   base de 3.000 e 700 por profundidade. Em todos os casos, a prévia coincidiu com o
+   débito líquido, sem taxa compartilhada duplicada. No 200, por exemplo, o andar 2
+   mostrou e cobrou 53.700. Cinco tentativas com uma unidade a menos foram recusadas
+   sem débito ou warp. Com a chave desligada, o menu de calabouços permaneceu ausente
+   nas duas versões; o ensaio não habilitou esse caminho na produção.
+5. **Regressão e encerramento.** Os 83 testes locais passaram. O modo candidato recusou
+   execução no Windows sem realizar ações. As duas instâncias sequenciais de map-server
+   do laboratório carregaram sem erros e com zero spawns. O ambiente temporário foi
+   removido; PIDs dos cinco serviços, configuração de personagens e hashes dos NPCs
+   instalados permaneceram iguais. Consulta final confirmou `$QW_DW_OFF=1` na produção.
+
+Evidências em `design-audit/candidate-runtime/verification.json`,
+`cleanup-verification.json` e `recommendations.json`. O inventário Git com paths locais
+fica apenas na cópia operacional, fora da publicação. Executor:
+`tools/isolated_char_check.py --candidate-checks`, com o helper
+`tools/isolated_candidate_checks.py`, pacote `bot` e os dois arquivos `.patch` ao lado.
+O executor exige `git` já instalado, confere os patches antes de aplicá-los e limita
+o laboratório a CPU 25%, 512 MiB e 600 s. A aplicação acontece somente após encerrar
+a instância de comparação e somente nos arquivos privados temporários.
+
+A confiança é alta no comportamento funcional coberto. Os resultados não cobrem
+todas as combinações de buffs/equipamentos, nem todas as restrições de rotas da Warpra.
+Os patches estão validados para preparar uma futura aplicação controlada. Adotar apenas
+se uma implantação posterior mantiver HP/SP completos, gratuidade, limites/duração de
+buffs, intervalo e igualdade entre prévia e débito; descartar ou reverter se houver
+divergência, cobrança duplicada, débito com saldo insuficiente ou habilitação inesperada.
+A próxima rodada proposta é preparar o pacote de aplicação e rollback dos dois NPCs.
+Para desfazer esta rodada de QA, reverter as ferramentas/documentação; o laboratório
+já foi descartado e não existe migração ou alteração de produção para reverter.
+O piloto real permanece em 0/3 e EXP 300x, nível 255, atributos 185 e ASPD 197 seguem
+como referência.
+
 ## Riscos deixados para depois
 
 - **Zeny vindo de drops.** Tratado em `docs/drops.md` (tetos por categoria, equipamento 30x,
